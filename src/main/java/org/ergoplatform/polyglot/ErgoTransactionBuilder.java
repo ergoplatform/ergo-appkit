@@ -5,7 +5,10 @@ import scala.collection.JavaConverters;
 import scala.collection.IndexedSeq;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ErgoTransactionBuilder {
 
@@ -13,8 +16,11 @@ public class ErgoTransactionBuilder {
   ArrayList<DataInput> _dataInputs = new ArrayList<>();
   ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
 
-  public ErgoTransactionBuilder withInputs(UnsignedInput... inputs) {
-    Collections.addAll(_inputs, inputs);
+  public ErgoTransactionBuilder withInputs(String... inputBoxIds) {
+     List<UnsignedInput> items = Arrays.asList(inputBoxIds).stream()
+        .map(id -> JavaHelpers.createUnsignedInput(id))
+        .collect(Collectors.toList());
+     _inputs.addAll(items);
     return this;
   }
 

@@ -4,9 +4,11 @@ import java.math.BigInteger
 import java.util
 
 import org.bouncycastle.util.BigIntegers
-import org.ergoplatform.ErgoBox
+import org.ergoplatform.{ErgoBox, UnsignedInput}
 import org.ergoplatform.ErgoBox.TokenId
+import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.{Digest32, Blake2b256}
+import scorex.util.encode.Base16
 import sigmastate.Values.ErgoTree
 import sigmastate.basics.DLogProtocol.DLogProverInput
 import sigmastate.{Values, TrivialProp}
@@ -38,6 +40,11 @@ object JavaHelpers {
   def proverInputFromSeed(seedStr: String): DLogProverInput = {
       val secret = BigIntegers.fromUnsignedByteArray(Blake2b256.hash(1 + seedStr))
       DLogProverInput(secret)
+  }
+
+  def createUnsignedInput(boxId: String): UnsignedInput = {
+    val idBytes = Base16.decode(boxId).get
+    new UnsignedInput(ADKey @@ idBytes)
   }
 
 }

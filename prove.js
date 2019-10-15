@@ -27,6 +27,7 @@ printMethods(txB)
 let box = boxB.withValue(10).build()
 
 let tx = txB
+    .withInputs("bb3c8c41611a9e6d469ebbf8f13de43666b2a92d03e14895e066a21fe62910d7")
     .withCandidates(box)
     .build();
 printMethods(tx)
