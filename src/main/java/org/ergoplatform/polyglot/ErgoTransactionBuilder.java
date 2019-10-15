@@ -1,18 +1,27 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.DataInput;
-import org.ergoplatform.ErgoBoxCandidate;
-import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.Input;
+import org.ergoplatform.*;
 import scala.collection.JavaConverters;
-import scala.collection.immutable.IndexedSeq;
+import scala.collection.IndexedSeq;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class ErgoTransactionBuilder {
 
-  ArrayList<ErgoBoxCandidate> _outputCandidates = null;
+  ArrayList<UnsignedInput> _inputs = new ArrayList<>();
+  ArrayList<DataInput> _dataInputs = new ArrayList<>();
+  ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
+
+  public ErgoTransactionBuilder withInputs(UnsignedInput... inputs) {
+    Collections.addAll(_inputs, inputs);
+    return this;
+  }
+
+  public ErgoTransactionBuilder withDataInputs(DataInput... dataInputs) {
+    Collections.addAll(_dataInputs, dataInputs);
+    return this;
+  }
 
   public ErgoTransactionBuilder withCandidates(ErgoBoxCandidate... candidates) {
     _outputCandidates = new ArrayList<>();
@@ -20,10 +29,10 @@ public class ErgoTransactionBuilder {
     return this;
   }
 
-  public ErgoLikeTransaction build() {
-    IndexedSeq<Input> inputs = null;
-    IndexedSeq<DataInput> dataInputs = null;
-    IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaConverters.asScalaIterator(_outputCandidates.iterator()).toIndexedSeq();
-    return new ErgoLikeTransaction(inputs, dataInputs, outputCandidates);
+  public UnsignedErgoLikeTransaction build() {
+    IndexedSeq<UnsignedInput> inputs = JavaHelpers.toIndexedSeq(_inputs);
+    IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
+    IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
+    return new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
   }
 }
