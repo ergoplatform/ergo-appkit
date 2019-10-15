@@ -1,0 +1,40 @@
+*.toc
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.gz
+
+*.log
+docs/spec/out/
+test-out/
+flamegraphs/
+# sbt specific
+.cache
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# IntelliJ Idea 
+.idea/
+
+# file system
+
+**/.DS_Store
+
+# ergo's checkout location for integration testing
+ergo-tests/
+
+# spam test's checkout location
+spam-tests/
