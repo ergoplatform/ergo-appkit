@@ -1,12 +1,10 @@
 package org.ergoplatform.polyglot.ni;
 
+import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
-import org.ergoplatform.polyglot.ErgoBoxBuilder;
-import org.ergoplatform.polyglot.ErgoProver;
-import org.ergoplatform.polyglot.ErgoProverBuilder;
-import org.ergoplatform.polyglot.ErgoTransactionBuilder;
+import org.ergoplatform.polyglot.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
@@ -16,8 +14,13 @@ import org.graalvm.word.UnsignedWord;
 public class Prove {
     static String sign(String boxId) {
         ErgoTransactionBuilder txB = new ErgoTransactionBuilder();
-        ErgoBoxBuilder boxB = new ErgoBoxBuilder();
-        ErgoBox box = boxB.withValue(10).build();
+        ErgoBoxBuilder boxB = new ErgoBoxBuilder(ErgoAddressEncoder.TestnetNetworkPrefix());
+        ErgoBox box = boxB
+            .value(10)
+            .contract(
+                ConstantsBuilder.create().item("deadline", 10).build(),
+                "{ HEIGHT > deadline }")
+            .build();
         UnsignedErgoLikeTransaction tx = txB
                 .withInputs(boxId)
                 .withCandidates(box)

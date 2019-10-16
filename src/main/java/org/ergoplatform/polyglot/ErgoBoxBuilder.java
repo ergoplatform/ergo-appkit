@@ -19,20 +19,34 @@ import java.util.Hashtable;
 
 public class ErgoBoxBuilder {
 
-  long _value = 0;
-  ArrayList<ErgoToken> _tokens = new ArrayList<>();
+  private final byte _networkPrefix;
+  private long _value = 0;
+  private Dictionary<String, Object> _constants;
+  private String _contractText = "";
+  private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
-  public ErgoBoxBuilder withValue(long value) {
+  public ErgoBoxBuilder(byte networkPrefix) {
+    _networkPrefix = networkPrefix;
+  }
+
+  public ErgoBoxBuilder value(long value) {
     _value = value;
     return this;
   }
 
-  public ErgoBoxBuilder withTokens(ErgoToken... tokens) {
+  public ErgoBoxBuilder contract(Dictionary<String, Object> constants, String contractText) {
+    _constants = constants;
+    _contractText = contractText;
+    return this;
+  }
+
+  public ErgoBoxBuilder tokens(ErgoToken... tokens) {
     Collections.addAll(_tokens, tokens);
     return this;
   }
 
   public ErgoBox build() {
-    return JavaHelpers.createBox(_value, _tokens, 0);
+    Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _networkPrefix);
+    return JavaHelpers.createBox(_value, tree, _tokens, 0);
   }
 }
