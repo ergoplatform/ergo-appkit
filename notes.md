@@ -17,10 +17,16 @@ Generate native lib
 
 `otool -L libprove.dylib`
 
+Generate reflection config files
+
+`java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove`
+
 ```
 clang -I. -L. -lprove prove.c -o provesign
 otool -L provesign
 ```
+
+
 
 https://github.com/graalvm/graalvm-demos
 
