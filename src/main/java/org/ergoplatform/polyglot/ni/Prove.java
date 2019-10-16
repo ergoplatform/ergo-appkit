@@ -9,6 +9,9 @@ import org.ergoplatform.polyglot.ErgoProverBuilder;
 import org.ergoplatform.polyglot.ErgoTransactionBuilder;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.UnsignedWord;
 
 public class Prove {
     static String sign(String boxId) {
@@ -31,8 +34,11 @@ public class Prove {
         System.out.println(res);
     }
 
-//    @CEntryPoint(name = "sign")
-//    public static String sign(IsolateThread thread, String boxId) {
-//        return sign(boxId);
-//    }
+    @CEntryPoint(name = "sign")
+    public static void sign(IsolateThread thread, CCharPointer cBoxId, CCharPointer resBuffer, UnsignedWord bufferSize) {
+        /* Convert the C string to the target Java string. */
+        String boxId = CTypeConversion.toJavaString(cBoxId);
+        String res = sign(boxId);
+        CTypeConversion.toCString(res, resBuffer, bufferSize);
+    }
 }
