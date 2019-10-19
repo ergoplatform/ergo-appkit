@@ -14,7 +14,7 @@ public class ErgoProver {
     _secretInput = JavaHelpers.proverInputFromSeed(seed);
   }
 
-  public ErgoLikeTransaction sign(UnsignedErgoLikeTransaction tx) {
-    return _prover.prove(tx, _secretInput);
+  public ErgoLikeTransaction sign(UnsignedTransaction tx) {
+    return _prover.prove(((UnsignedTransactionImpl)tx).getTx(), _secretInput);
   }
 }

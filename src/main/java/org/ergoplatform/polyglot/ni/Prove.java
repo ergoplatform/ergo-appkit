@@ -12,16 +12,17 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.UnsignedWord;
 
 public class Prove {
+
     static String sign(String boxId) {
-        ErgoTransactionBuilder txB = new ErgoTransactionBuilder();
-        ErgoBoxBuilder boxB = new ErgoBoxBuilder(ErgoAddressEncoder.TestnetNetworkPrefix());
-        ErgoBox box = boxB
+        UnsignedTransactionBuilder txB = new UnsignedTransactionBuilderImpl();
+        OutBoxBuilder boxB = new OutBoxBuilderImpl(ErgoAddressEncoder.TestnetNetworkPrefix());
+        OutBox box = boxB
             .value(10)
             .contract(
                 ConstantsBuilder.create().item("deadline", 10).build(),
                 "{ HEIGHT > deadline }")
             .build();
-        UnsignedErgoLikeTransaction tx = txB
+        UnsignedTransaction tx = txB
                 .withInputs(boxId)
                 .withCandidates(box)
                 .build();

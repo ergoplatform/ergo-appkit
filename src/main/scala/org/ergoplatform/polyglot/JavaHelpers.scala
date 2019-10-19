@@ -23,12 +23,12 @@ import scala.collection.JavaConverters
 object JavaHelpers {
 
   def toTokensColl[T](tokens: util.ArrayList[ErgoToken]): Coll[(Array[Byte], Long)] = {
-    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (t.getId(), t.getValue())).toArray
+    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (t.getId().getBytes, t.getValue())).toArray
     Colls.fromArray(ts)
   }
 
   def toTokensSeq[T](tokens: util.ArrayList[ErgoToken]): Seq[(TokenId, Long)] = {
-    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (Digest32 @@ t.getId(), t.getValue())).toSeq
+    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (Digest32 @@ t.getId().getBytes(), t.getValue())).toSeq
     ts
   }
 

@@ -1,23 +1,13 @@
 package org.ergoplatform.polyglot;
 
-import com.google.common.primitives.Ints;
 import org.ergoplatform.*;
-import scala.Tuple2;
-import scala.collection.JavaConverters;
-import scala.collection.Map;
-import scala.collection.immutable.IndexedSeq;
-import sigmastate.SType;
-import sigmastate.TrivialProp;
 import sigmastate.Values;
-import special.collection.Coll;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Hashtable;
 
-
-public class ErgoBoxBuilder {
+public class OutBoxBuilderImpl implements OutBoxBuilder {
 
   private final byte _networkPrefix;
   private long _value = 0;
@@ -25,28 +15,39 @@ public class ErgoBoxBuilder {
   private String _contractText = "";
   private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
-  public ErgoBoxBuilder(byte networkPrefix) {
+  public OutBoxBuilderImpl(byte networkPrefix) {
     _networkPrefix = networkPrefix;
   }
 
-  public ErgoBoxBuilder value(long value) {
+  public OutBoxBuilderImpl value(long value) {
     _value = value;
     return this;
   }
 
-  public ErgoBoxBuilder contract(Dictionary<String, Object> constants, String contractText) {
+  @Override
+  public OutBoxBuilderImpl proposition(Proposition proposition) {
+    return null;
+  }
+
+  @Override
+  public OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText) {
     _constants = constants;
     _contractText = contractText;
     return this;
   }
 
-  public ErgoBoxBuilder tokens(ErgoToken... tokens) {
+  public OutBoxBuilderImpl tokens(ErgoToken... tokens) {
     Collections.addAll(_tokens, tokens);
     return this;
   }
 
-  public ErgoBox build() {
+  @Override
+  public OutBoxBuilderImpl registers(Dictionary<Byte, Object> regs) {
+    return null;
+  }
+
+  public OutBox build() {
     Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _networkPrefix);
-    return JavaHelpers.createBox(_value, tree, _tokens, 0);
+    return new OutBoxImpl(JavaHelpers.createBox(_value, tree, _tokens, 0));
   }
 }
