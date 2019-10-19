@@ -1,11 +1,13 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.UnsignedErgoLikeTransaction;
-
 public interface UnsignedTransactionBuilder {
-    UnsignedTransactionBuilder withInputs(String... inputBoxIds);
+    byte getNetworkPrefix();
 
-    UnsignedTransactionBuilder withCandidates(OutBox... candidates);
+    UnsignedTransactionBuilder inputs(String... inputBoxIds);
+
+    UnsignedTransactionBuilder outputs(OutBox... candidates);
 
     UnsignedTransaction build();
+
+    OutBoxBuilder outBoxBuilder();
 }

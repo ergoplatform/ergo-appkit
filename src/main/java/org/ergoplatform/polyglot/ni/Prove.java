@@ -1,9 +1,6 @@
 package org.ergoplatform.polyglot.ni;
 
 import org.ergoplatform.ErgoAddressEncoder;
-import org.ergoplatform.ErgoBox;
-import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.UnsignedErgoLikeTransaction;
 import org.ergoplatform.polyglot.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
@@ -14,8 +11,8 @@ import org.graalvm.word.UnsignedWord;
 public class Prove {
 
     static String sign(String boxId) {
-        UnsignedTransactionBuilder txB = new UnsignedTransactionBuilderImpl();
-        OutBoxBuilder boxB = new OutBoxBuilderImpl(ErgoAddressEncoder.TestnetNetworkPrefix());
+        UnsignedTransactionBuilder txB = new UnsignedTransactionBuilderImpl(ErgoAddressEncoder.TestnetNetworkPrefix());
+        OutBoxBuilder boxB = txB.outBoxBuilder();
         OutBox box = boxB
             .value(10)
             .contract(
@@ -23,13 +20,13 @@ public class Prove {
                 "{ HEIGHT > deadline }")
             .build();
         UnsignedTransaction tx = txB
-                .withInputs(boxId)
-                .withCandidates(box)
+                .inputs(boxId)
+                .outputs(box)
                 .build();
 
         ErgoProverBuilder proverB = new ErgoProverBuilder();
         ErgoProver prover = proverB.withSeed("abc").build();
-        ErgoLikeTransaction signed = prover.sign(tx);
+        SignedTransaction signed = prover.sign(tx);
         return signed.toString();
     }
     

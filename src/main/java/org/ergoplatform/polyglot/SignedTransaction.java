@@ -1,4 +1,5 @@
 package org.ergoplatform.polyglot;
 
-interface SignedTransaction {
+public interface SignedTransaction {
 }
+

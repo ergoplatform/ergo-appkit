@@ -55,7 +55,11 @@ object JavaHelpers {
 
   def createUnsignedInput(boxId: String): UnsignedInput = {
     val idBytes = Base16.decode(boxId).get
-    new UnsignedInput(ADKey @@ idBytes)
+    createUnsignedInput(idBytes)
+  }
+
+  def createUnsignedInput(boxIdBytes: Array[Byte]): UnsignedInput = {
+    new UnsignedInput(ADKey @@ boxIdBytes)
   }
 
 }

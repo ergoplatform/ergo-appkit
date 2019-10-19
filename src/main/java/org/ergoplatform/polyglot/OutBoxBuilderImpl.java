@@ -9,14 +9,14 @@ import java.util.Dictionary;
 
 public class OutBoxBuilderImpl implements OutBoxBuilder {
 
-  private final byte _networkPrefix;
+  private final UnsignedTransactionBuilderImpl _txB;
   private long _value = 0;
   private Dictionary<String, Object> _constants;
   private String _contractText = "";
   private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
-  public OutBoxBuilderImpl(byte networkPrefix) {
-    _networkPrefix = networkPrefix;
+  public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
+    _txB = txB;
   }
 
   public OutBoxBuilderImpl value(long value) {
@@ -47,7 +47,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
   }
 
   public OutBox build() {
-    Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _networkPrefix);
+    Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _txB.getNetworkPrefix());
     return new OutBoxImpl(JavaHelpers.createBox(_value, tree, _tokens, 0));
   }
 }

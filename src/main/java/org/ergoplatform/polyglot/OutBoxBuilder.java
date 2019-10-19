@@ -6,7 +6,7 @@ public interface OutBoxBuilder {
     OutBoxBuilder value(long value);
     OutBoxBuilder proposition(Proposition proposition);
 
-    OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText);
+    OutBoxBuilder contract(Dictionary<String, Object> constants, String contractText);
 
     OutBoxBuilder tokens(ErgoToken... tokens);
     OutBoxBuilder registers(Dictionary<Byte, Object> regs);
