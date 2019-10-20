@@ -12,7 +12,8 @@ resolvers ++= Seq(
   "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
   "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
   "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
-  Resolver.mavenCentral
+  Resolver.mavenCentral,
+  Resolver.mavenLocal
 )
 
 val sigmaStateVersion = "exact-ops-ff7cc0e2-SNAPSHOT"
@@ -25,7 +26,11 @@ libraryDependencies ++= Seq(
   "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion,
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "org.graalvm" % "graal-sdk" % "0.30"
+  "org.graalvm" % "graal-sdk" % "0.30",
+  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
+  "io.swagger" % "swagger-java-client" % "1.0.0",
+  "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
+  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2"
 )
 
 licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))

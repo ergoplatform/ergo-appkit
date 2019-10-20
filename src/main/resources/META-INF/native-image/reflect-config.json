@@ -15,6 +15,10 @@
   ]
 },
 {
+  "name":"java.lang.Throwable",
+  "methods":[{"name":"addSuppressed","parameterTypes":["java.lang.Throwable"] }]
+},
+{
   "name":"scalan.TypeDescs$FuncElem",
   "allDeclaredConstructors":true
 },
