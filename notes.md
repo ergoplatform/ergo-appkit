@@ -77,6 +77,10 @@ Graal SDK in build.sbt
 - [Assisted Configuration of Native Image Builds](https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md)
 - [Proof-of-concept: Configuration to get native-image to generate a bin](https://github.com/cloudstateio/cloudstate/pull/56)
 - [Dynamic proxies on Substrate VM](https://github.com/oracle/graal/blob/master/substratevm/DYNAMIC_PROXY.md)
+- [Simplifying native-image generation with Maven plugin and embeddable configuration](https://medium.com/graalvm/simplifying-native-image-generation-with-maven-plugin-and-embeddable-configuration-d5b283b92f57)
+- [Updates on Class Initialization in GraalVM Native Image Generation](https://medium.com/graalvm/updates-on-class-initialization-in-graalvm-native-image-generation-c61faca461f7)
+- [graalvm-demos](https://github.com/graalvm/graalvm-demos/tree/master/native-netty-plot)
+- [A simple example language built using the Truffle API](https://github.com/graalvm/simplelanguage)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)

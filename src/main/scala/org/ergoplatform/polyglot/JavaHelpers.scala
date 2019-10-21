@@ -7,6 +7,8 @@ import org.bouncycastle.util.BigIntegers
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef}
 import org.ergoplatform.ErgoBox.TokenId
+import org.ergoplatform.settings.ErgoAlgos
+import scalan.RType
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.{Digest32, Blake2b256}
 import scorex.util.encode.Base16
@@ -15,24 +17,31 @@ import sigmastate.basics.DLogProtocol.DLogProverInput
 import sigmastate.{Values, TrivialProp}
 import sigmastate.lang.Terms.ValueOps
 import special.collection.Coll
-import sigmastate.eval.{Colls, CompiletimeIRContext}
+import sigmastate.eval.{CostingSigmaDslBuilder, CPreHeader, CompiletimeIRContext, Colls}
 import sigmastate.interpreter.Interpreter.ScriptEnv
+import special.sigma.{PreHeader, Header}
 
 import scala.collection.JavaConverters
 
 object JavaHelpers {
+  val HeaderRType: RType[Header] = special.sigma.HeaderRType
+  val PreHeaderRType: RType[PreHeader] = special.sigma.PreHeaderRType
+
+  def Algos: ErgoAlgos =  org.ergoplatform.settings.ErgoAlgos
+  def toHeaders(): Coll[Header] = Colls.emptyColl
+  def toPreHeader(): PreHeader = CPreHeader(9, Colls.emptyColl, 0, 0, 0, null, Colls.emptyColl)
 
   def toTokensColl[T](tokens: util.ArrayList[ErgoToken]): Coll[(Array[Byte], Long)] = {
     val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (t.getId().getBytes, t.getValue())).toArray
     Colls.fromArray(ts)
   }
 
-  def toTokensSeq[T](tokens: util.ArrayList[ErgoToken]): Seq[(TokenId, Long)] = {
+  def toTokensSeq[T](tokens: util.List[ErgoToken]): Seq[(TokenId, Long)] = {
     val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (Digest32 @@ t.getId().getBytes(), t.getValue())).toSeq
     ts
   }
 
-  def toIndexedSeq[T](xs: util.ArrayList[T]): IndexedSeq[T] = {
+  def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
     JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
@@ -43,7 +52,7 @@ object JavaHelpers {
     ErgoTree.fromProposition(prop)
   }
 
-  def createBox(value: Long, tree: ErgoTree, tokens: util.ArrayList[ErgoToken], creationHeight: Int): ErgoBox = {
+  def createBox(value: Long, tree: ErgoTree, tokens: util.List[ErgoToken], creationHeight: Int): ErgoBox = {
     val ts = toTokensSeq(tokens)
     ErgoBox(value, tree, creationHeight, ts)
   }

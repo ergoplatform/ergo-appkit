@@ -1,7 +1,14 @@
 package org.ergoplatform.polyglot;
 
 import org.ergoplatform.*;
+import org.ergoplatform.settings.ErgoAlgos;
+import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import scala.collection.IndexedSeq;
+import sigmastate.eval.CPreHeader;
+import sigmastate.eval.CostingSigmaDslBuilder$;
+import special.collection.Coll;
+import special.sigma.Header;
+import special.sigma.PreHeader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +23,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     ArrayList<UnsignedInput> _inputs = new ArrayList<>();
     ArrayList<DataInput> _dataInputs = new ArrayList<>();
     ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
+    private List<InputBoxImpl> _inputBoxes;
 
     public UnsignedTransactionBuilderImpl(
             BlockchainContextImpl ctx) {
@@ -23,12 +31,15 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public UnsignedTransactionBuilder inputs(InputBox... inputBoxIds) {
-        List<UnsignedInput> items = Arrays.asList(inputBoxIds)
+    public UnsignedTransactionBuilder inputs(InputBox... inputBoxes) {
+        List<UnsignedInput> items = Arrays.asList(inputBoxes)
                 .stream()
                 .map(box -> JavaHelpers.createUnsignedInput(box.getId().getBytes()))
                 .collect(Collectors.toList());
         _inputs.addAll(items);
+        _inputBoxes = Stream.of(inputBoxes)
+          .map(b -> (InputBoxImpl)b)
+          .collect(Collectors.toList());
         return this;
     }
 
@@ -51,8 +62,27 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         IndexedSeq<UnsignedInput> inputs = JavaHelpers.toIndexedSeq(_inputs);
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
+        UnsignedErgoLikeTransaction tx = new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
+        List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
 
-        return new UnsignedTransactionImpl(new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates));
+        ErgoLikeStateContext stateContext = new ErgoLikeStateContext() {
+            @Override
+            public Coll<Header> sigmaLastHeaders() {
+                return JavaHelpers.toHeaders();
+            }
+
+            @Override
+            public byte[] previousStateDigest() {
+                return JavaHelpers.Algos().decode(_ctx.getNodeInfo().getStateRoot()).get();
+            }
+
+            @Override
+            public PreHeader sigmaPreHeader() {
+                return JavaHelpers.toPreHeader();
+            }
+        };
+
+        return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
     }
 
     @Override
@@ -63,5 +93,9 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     @Override
     public byte getNetworkPrefix() {
         return _ctx.getNetworkPrefix();
+    }
+
+    public List<InputBoxImpl> getInputBoxes() {
+        return _inputBoxes;
     }
 }

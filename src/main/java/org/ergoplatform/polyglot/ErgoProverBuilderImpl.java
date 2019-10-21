@@ -2,24 +2,27 @@ package org.ergoplatform.polyglot;
 
 import org.ergoplatform.api.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
+import org.ergoplatform.wallet.mnemonic.Mnemonic;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
+import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import scala.None$;
 import scala.Option;
 import sigmastate.basics.DLogProtocol;
 
 public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
     private final BlockchainContextImpl _ctx;
-    String _seed = "";
 
     private DLogProtocol.DLogProverInput _secretInput;
+    private ExtendedSecretKey _masterKey;
 
     public ErgoProverBuilderImpl(BlockchainContextImpl ctx) {
         _ctx = ctx;
     }
 
-    public ErgoProverBuilder withSeed(String seed) {
-        _seed = seed;
-        _secretInput = JavaHelpers.proverInputFromSeed(seed);
+    public ErgoProverBuilder withSeed(String seedPhrase) {
+        byte[] seed = Mnemonic.toSeed(seedPhrase, Option.apply(null));
+        _masterKey = ExtendedSecretKey.deriveMasterKey(seed);
         return this;
     }
 
@@ -81,7 +84,7 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
                 return _params.getBlockVersion().byteValue();
             }
         };
-        ErgoProvingInterpreter interpreter = null; //ErgoProvingInterpreter.apply(_secretInput, parameters);
+        ErgoProvingInterpreter interpreter = ErgoProvingInterpreter.apply(_masterKey, parameters);
         return new ErgoProverImpl(interpreter);
     }
 }

@@ -9,6 +9,14 @@ public class ErgoToken {
         _value = value;
     }
 
+    public ErgoToken(byte[] idBytes, long value) {
+        this(new ErgoId(idBytes), value);
+    }
+
+    public ErgoToken(String id, long value) {
+        this(JavaHelpers.decodeBase16(id), value);
+    }
+
     public ErgoId getId() {
         return _id;
     }
