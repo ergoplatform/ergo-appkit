@@ -1,16 +1,23 @@
 package org.ergoplatform.polyglot.ni;
 
-//import okhttp3.OkHttpClient;
-//import okhttp3.Request;
-//import okhttp3.Response;
+import okhttp3.Response;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.api.client.ApiClient;
 import org.ergoplatform.api.client.InfoApi;
+import org.ergoplatform.api.client.JSON;
 import org.ergoplatform.api.client.NodeInfo;
 import org.ergoplatform.polyglot.*;
-import retrofit2.Response;
+import retrofit2.Converter;
+import retrofit2.Retrofit;
+import retrofit2.RetrofitUtil;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 public class Runner {
 
@@ -36,18 +43,17 @@ public class Runner {
 
     public void request(String nodeUrl) {
 
-//        OkHttpClient client = new OkHttpClient();
-//        Request request = new Request.Builder().url(nodeUrl + "/info").build();
-//        try {
-//            Response response = client.newCall(request).execute();
-//            System.out.println(response.body().toString());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        InfoApi api = new ApiClient(nodeUrl).createService(InfoApi.class);
+        ApiClient client = new ApiClient(nodeUrl);
+        OkHttpClient ok = client.getOkBuilder().build();
+        Retrofit retrofit = client.getAdapterBuilder()
+                .client(ok)
+                .build();
         try {
-            Response<NodeInfo> response = api.getNodeInfo().execute();
-            System.out.println(response.body().toString());
+            Method method = InfoApi.class.getMethod("getNodeInfo");
+            NodeInfo res = RetrofitUtil.<NodeInfo>invokeServiceMethod(retrofit, method, null).execute().body();
+            System.out.println(res);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

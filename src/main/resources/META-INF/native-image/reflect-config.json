@@ -11,6 +11,10 @@
   "name":"java.util.Optional"
 },
 {
+  "name":"org.ergoplatform.api.client.InfoApi",
+  "methods":[{"name":"getNodeInfo","parameterTypes":[] }]
+},
+{
   "name":"org.ergoplatform.api.client.NodeInfo",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
