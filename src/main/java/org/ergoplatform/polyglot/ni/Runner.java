@@ -1,13 +1,14 @@
 package org.ergoplatform.polyglot.ni;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+//import okhttp3.OkHttpClient;
+//import okhttp3.Request;
+//import okhttp3.Response;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.api.client.ApiClient;
 import org.ergoplatform.api.client.InfoApi;
 import org.ergoplatform.api.client.NodeInfo;
 import org.ergoplatform.polyglot.*;
+import retrofit2.Response;
 
 import java.io.IOException;
 
@@ -35,21 +36,21 @@ public class Runner {
 
     public void request(String nodeUrl) {
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(nodeUrl + "/info").build();
-        try {
-            Response response = client.newCall(request).execute();
-            System.out.println(response.body().toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//        InfoApi api = new ApiClient(nodeUrl).createService(InfoApi.class);
+//        OkHttpClient client = new OkHttpClient();
+//        Request request = new Request.Builder().url(nodeUrl + "/info").build();
 //        try {
-//            Response<NodeInfo> response = api.getNodeInfo().execute();
+//            Response response = client.newCall(request).execute();
 //            System.out.println(response.body().toString());
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+        InfoApi api = new ApiClient(nodeUrl).createService(InfoApi.class);
+        try {
+            Response<NodeInfo> response = api.getNodeInfo().execute();
+            System.out.println(response.body().toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
