@@ -1,88 +1,31 @@
 [
 {
-  "name":"com.google.common.util.concurrent.AbstractFuture",
-  "fields":[
-    {"name":"listeners", "allowUnsafeAccess":true}, 
-    {"name":"value", "allowUnsafeAccess":true}, 
-    {"name":"waiters", "allowUnsafeAccess":true}
-  ]
-},
-{
-  "name":"com.google.common.util.concurrent.AbstractFuture$Waiter",
-  "fields":[
-    {"name":"next", "allowUnsafeAccess":true}, 
-    {"name":"thread", "allowUnsafeAccess":true}
-  ]
-},
-{
   "name":"java.lang.Throwable",
   "methods":[{"name":"addSuppressed","parameterTypes":["java.lang.Throwable"] }]
 },
 {
-  "name":"scalan.TypeDescs$FuncElem",
-  "allDeclaredConstructors":true
+  "name":"java.util.Locale",
+  "methods":[{"name":"getUnicodeLocaleType","parameterTypes":["java.lang.String"] }]
 },
 {
-  "name":"scalan.TypeDescs$PairElem",
-  "allDeclaredConstructors":true
+  "name":"java.util.Optional"
 },
 {
-  "name":"sigmastate.GT",
-  "allPublicConstructors":true
+  "name":"org.ergoplatform.api.client.InfoApi",
+  "methods":[{"name":"getNodeInfo","parameterTypes":[] }]
 },
 {
-  "name":"sigmastate.eval.CostingRules$ContextCoster",
-  "methods":[{"name":"HEIGHT","parameterTypes":[] }]
+  "name":"org.ergoplatform.api.client.NodeInfo",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sigmastate.lang.Terms$Block",
-  "allPublicConstructors":true
+  "name":"org.ergoplatform.api.client.NodeInfo$StateTypeEnum$Adapter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"special.collection.Costs$Costed",
-  "methods":[
-    {"name":"cost","parameterTypes":[] }, 
-    {"name":"value","parameterTypes":[] }
-  ]
-},
-{
-  "name":"special.collection.impl.CollsDefs$Coll$CollElem",
-  "allDeclaredConstructors":true
-},
-{
-  "name":"special.collection.impl.ConcreteCostsDefs$CCostedPrim$CCostedPrimElem",
-  "allDeclaredConstructors":true
-},
-{
-  "name":"special.collection.impl.ConcreteSizesDefs$CSizePrim$CSizePrimElem",
-  "allDeclaredConstructors":true
-},
-{
-  "name":"special.collection.impl.CostsDefs$Costed$CostedElem",
-  "allDeclaredConstructors":true
-},
-{
-  "name":"special.collection.impl.SizesDefs$Size$SizeElem",
-  "allDeclaredConstructors":true
-},
-{
-  "name":"special.sigma.SigmaDsl$Context",
-  "methods":[{"name":"HEIGHT","parameterTypes":[] }]
-},
-{
-  "name":"special.sigma.SigmaDsl$CostModel",
-  "methods":[{"name":"SelectField","parameterTypes":[] }]
-},
-{
-  "name":"special.sigma.SigmaDsl$SigmaDslBuilder",
-  "methods":[{"name":"CostModel","parameterTypes":[] }]
-},
-{
-  "name":"sun.misc.Unsafe",
-  "allDeclaredFields":true
-},
-{
-  "name":"wrappers.scalan.impl.WRTypesDefs$WRType$WRTypeElem",
-  "allDeclaredConstructors":true
+  "name":"org.ergoplatform.api.client.Parameters",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 }
 ]
