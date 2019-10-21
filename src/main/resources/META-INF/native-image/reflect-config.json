@@ -26,6 +26,15 @@
   "name":"java.util.Optional"
 },
 {
+  "name":"org.ergoplatform.api.client.BlockHeader",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.api.client.BlocksApi",
+  "methods":[{"name":"getLastHeaders","parameterTypes":["java.math.BigDecimal"] }]
+},
+{
   "name":"org.ergoplatform.api.client.InfoApi",
   "methods":[{"name":"getNodeInfo","parameterTypes":[] }]
 },
@@ -40,6 +49,11 @@
 },
 {
   "name":"org.ergoplatform.api.client.Parameters",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.api.client.PowSolutions",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },

@@ -2,8 +2,13 @@ package org.ergoplatform.polyglot;
 
 import okhttp3.OkHttpClient;
 import org.ergoplatform.api.client.ApiClient;
+import org.ergoplatform.api.client.BlockHeader;
 import org.ergoplatform.api.client.NodeInfo;
 import retrofit2.Retrofit;
+import scala.math.Ordering;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
     private final ApiClient _client;
@@ -11,6 +16,7 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
     private OkHttpClient _ok;
     private Retrofit _retrofit;
     private NodeInfo _nodeInfo;
+    private List<BlockHeader> _headers;
 
     public BlockchainContextBuilderImpl(ApiClient client, byte networkPrefix) {
         _client = client;
@@ -24,7 +30,8 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
                 .client(_ok)
                 .build();
         _nodeInfo  = ErgoNodeFacade.getNodeInfo(_retrofit);
-        return new BlockchainContextImpl(_networkPrefix, _nodeInfo);
+        _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(10));
+        return new BlockchainContextImpl(_networkPrefix, _nodeInfo, _headers);
     }
 
 
