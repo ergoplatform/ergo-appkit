@@ -6,20 +6,23 @@ import java.util
 import org.bouncycastle.util.BigIntegers
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef}
-import org.ergoplatform.ErgoBox.TokenId
+import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import org.ergoplatform.settings.ErgoAlgos
 import scalan.RType
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.{Digest32, Blake2b256}
+import scorex.util.ModifierId
 import scorex.util.encode.Base16
-import sigmastate.Values.ErgoTree
+import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
 import sigmastate.basics.DLogProtocol.DLogProverInput
-import sigmastate.{Values, TrivialProp}
+import sigmastate.{Values, TrivialProp, SType}
 import sigmastate.lang.Terms.ValueOps
 import special.collection.Coll
-import sigmastate.eval.{CostingSigmaDslBuilder, CPreHeader, CompiletimeIRContext, Colls}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.interpreter.CryptoConstants
 import sigmastate.interpreter.Interpreter.ScriptEnv
-import special.sigma.{PreHeader, Header}
+import sigmastate.serialization.ValueSerializer
+import special.sigma.{AnyValue, PreHeader, Header}
 
 import scala.collection.JavaConverters
 
@@ -28,10 +31,18 @@ object JavaHelpers {
   val PreHeaderRType: RType[PreHeader] = special.sigma.PreHeaderRType
 
   def Algos: ErgoAlgos =  org.ergoplatform.settings.ErgoAlgos
-  def toHeaders(): Coll[Header] = Colls.emptyColl
-  def toPreHeader(): PreHeader = CPreHeader(9, Colls.emptyColl, 0, 0, 0, null, Colls.emptyColl)
 
-  def toTokensColl[T](tokens: util.ArrayList[ErgoToken]): Coll[(Array[Byte], Long)] = {
+  def deserializeValue[T <: SValue](bytes: Array[Byte]): T = {
+    ValueSerializer.deserialize(bytes).asInstanceOf[T]
+  }
+
+  def toHeaders(): Coll[Header] = Colls.emptyColl
+  def toPreHeader(): PreHeader = {
+    CPreHeader(9, Colls.emptyColl, 0, 0, 0,
+      sigmastate.eval.SigmaDsl.groupGenerator, Colls.emptyColl)
+  }
+
+  def toTokensColl[T](tokens: util.List[ErgoToken]): Coll[(Array[Byte], Long)] = {
     val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (t.getId().getBytes, t.getValue())).toArray
     Colls.fromArray(ts)
   }
@@ -52,9 +63,19 @@ object JavaHelpers {
     ErgoTree.fromProposition(prop)
   }
 
-  def createBox(value: Long, tree: ErgoTree, tokens: util.List[ErgoToken], creationHeight: Int): ErgoBox = {
-    val ts = toTokensSeq(tokens)
-    ErgoBox(value, tree, creationHeight, ts)
+  private def anyValueToConstant(v: AnyValue): Constant[_ <: SType] = {
+    val tpe = Evaluation.rtypeToSType(v.tVal)
+    Constant(v.value.asInstanceOf[SType#WrappedType], tpe)
+  }
+
+  def createBox(value: Long, tree: ErgoTree, tokens: util.List[ErgoToken], registers: util.List[scala.Tuple2[String, Object]], txId: String, index: Short, creationHeight: Int): ErgoBox = {
+    val ts = toTokensColl(tokens)
+    val rs = toIndexedSeq(registers).map { r =>
+      val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
+      val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
+      id -> value
+    }.toMap
+    new ErgoBox(value, tree, ts.asInstanceOf[Coll[(TokenId, Long)]], rs, ModifierId @@ txId, index, creationHeight)
   }
 
   def proverInputFromSeed(seedStr: String): DLogProverInput = {

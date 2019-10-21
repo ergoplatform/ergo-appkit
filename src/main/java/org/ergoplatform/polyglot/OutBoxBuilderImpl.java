@@ -1,6 +1,7 @@
 package org.ergoplatform.polyglot;
 
 import org.ergoplatform.*;
+import scala.Tuple2;
 import sigmastate.Values;
 
 import java.util.ArrayList;
@@ -9,45 +10,47 @@ import java.util.Dictionary;
 
 public class OutBoxBuilderImpl implements OutBoxBuilder {
 
-  private final UnsignedTransactionBuilderImpl _txB;
-  private long _value = 0;
-  private Dictionary<String, Object> _constants;
-  private String _contractText = "";
-  private ArrayList<ErgoToken> _tokens = new ArrayList<>();
+    private final UnsignedTransactionBuilderImpl _txB;
+    private long _value = 0;
+    private Dictionary<String, Object> _constants;
+    private String _contractText = "";
+    private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
-  public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
-    _txB = txB;
-  }
+    public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
+        _txB = txB;
+    }
 
-  public OutBoxBuilderImpl value(long value) {
-    _value = value;
-    return this;
-  }
+    public OutBoxBuilderImpl value(long value) {
+        _value = value;
+        return this;
+    }
 
-  @Override
-  public OutBoxBuilderImpl proposition(Proposition proposition) {
-    return null;
-  }
+    @Override
+    public OutBoxBuilderImpl proposition(Proposition proposition) {
+        return null;
+    }
 
-  @Override
-  public OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText) {
-    _constants = constants;
-    _contractText = contractText;
-    return this;
-  }
+    @Override
+    public OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText) {
+        _constants = constants;
+        _contractText = contractText;
+        return this;
+    }
 
-  public OutBoxBuilderImpl tokens(ErgoToken... tokens) {
-    Collections.addAll(_tokens, tokens);
-    return this;
-  }
+    public OutBoxBuilderImpl tokens(ErgoToken... tokens) {
+        Collections.addAll(_tokens, tokens);
+        return this;
+    }
 
-  @Override
-  public OutBoxBuilderImpl registers(Dictionary<Byte, Object> regs) {
-    return null;
-  }
+    @Override
+    public OutBoxBuilderImpl registers(Dictionary<Byte, Object> regs) {
+        return null;
+    }
 
-  public OutBox build() {
-    Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _txB.getNetworkPrefix());
-    return new OutBoxImpl(JavaHelpers.createBox(_value, tree, _tokens, 0));
-  }
+    public OutBox build() {
+        Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _txB.getNetworkPrefix());
+        ErgoBox ergoBox = JavaHelpers.createBox(_value, tree, _tokens,
+                new ArrayList<Tuple2<String, Object>>(), "", (short)0, 0);
+        return new OutBoxImpl(ergoBox);
+    }
 }
