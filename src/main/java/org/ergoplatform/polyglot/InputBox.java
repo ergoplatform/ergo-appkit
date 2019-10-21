@@ -5,7 +5,7 @@ import org.ergoplatform.UnsignedErgoLikeTransaction;
 
 import java.util.Dictionary;
 
-interface InputBox {
+public interface InputBox {
     ErgoId getId();
 }
 

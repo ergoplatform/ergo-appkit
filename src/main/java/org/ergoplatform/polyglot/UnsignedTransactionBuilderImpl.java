@@ -23,10 +23,10 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public UnsignedTransactionBuilder inputs(String... inputBoxIds) {
+    public UnsignedTransactionBuilder inputs(InputBox... inputBoxIds) {
         List<UnsignedInput> items = Arrays.asList(inputBoxIds)
                 .stream()
-                .map(id -> JavaHelpers.createUnsignedInput(id))
+                .map(box -> JavaHelpers.createUnsignedInput(box.getId().getBytes()))
                 .collect(Collectors.toList());
         _inputs.addAll(items);
         return this;
@@ -51,6 +51,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         IndexedSeq<UnsignedInput> inputs = JavaHelpers.toIndexedSeq(_inputs);
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
+
         return new UnsignedTransactionImpl(new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates));
     }
 

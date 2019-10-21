@@ -26,6 +26,11 @@
   "name":"java.util.Optional"
 },
 {
+  "name":"org.ergoplatform.api.client.Asset",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"org.ergoplatform.api.client.BlockHeader",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -33,6 +38,11 @@
 {
   "name":"org.ergoplatform.api.client.BlocksApi",
   "methods":[{"name":"getLastHeaders","parameterTypes":["java.math.BigDecimal"] }]
+},
+{
+  "name":"org.ergoplatform.api.client.ErgoTransactionOutput",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"org.ergoplatform.api.client.InfoApi",
@@ -56,6 +66,14 @@
   "name":"org.ergoplatform.api.client.PowSolutions",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.api.client.Registers",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.api.client.UtxoApi",
+  "methods":[{"name":"getBoxById","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"scalan.TypeDescs$FuncElem",

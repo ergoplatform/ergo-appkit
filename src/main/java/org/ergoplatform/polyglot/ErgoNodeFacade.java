@@ -1,9 +1,6 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.api.client.BlockHeader;
-import org.ergoplatform.api.client.BlocksApi;
-import org.ergoplatform.api.client.InfoApi;
-import org.ergoplatform.api.client.NodeInfo;
+import org.ergoplatform.api.client.*;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
@@ -37,6 +34,15 @@ public class ErgoNodeFacade {
             Method method = BlocksApi.class.getMethod("getLastHeaders", BigDecimal.class);
             List<BlockHeader> res = RetrofitUtil.<List<BlockHeader>>invokeServiceMethod(r, method,
              new Object[]{count}).execute().body();
+            return res;
+        });
+    }
+
+    static public ErgoTransactionOutput getBoxById(Retrofit r, String boxId) throws ErgoClientException {
+        return execute(r, () -> {
+            Method method = UtxoApi.class.getMethod("getBoxById", String.class);
+            ErgoTransactionOutput res = RetrofitUtil.<ErgoTransactionOutput>invokeServiceMethod(r, method,
+                    new Object[]{boxId}).execute().body();
             return res;
         });
     }

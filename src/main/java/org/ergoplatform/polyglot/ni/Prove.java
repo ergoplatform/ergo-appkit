@@ -10,13 +10,14 @@ import kotlin.Unit;
 
 public class Prove {
 
-    static String nodeUrl = "http://209.97.134.210:9052";
+    static String nodeUrl = "http://localhost:9052";
+//    static String nodeUrl = "http://209.97.134.210:9052";
     public static void main(String[] args) {
         Runner r = new Runner();
         r.request(nodeUrl);
         try {
             String res = r.sign(nodeUrl,
-                "bb3c8c41611a9e6d469ebbf8f13de43666b2a92d03e14895e066a21fe62910d7");
+                "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a");
             System.out.println(res);
         } catch (ErgoClientException e) {
             e.printStackTrace();

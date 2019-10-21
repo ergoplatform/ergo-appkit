@@ -18,23 +18,34 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.IntFunction;
+import java.util.stream.Stream;
 
 public class Runner {
 
-    public String sign(String nodeUrl, String boxId) throws ErgoClientException {
+    public String sign(String nodeUrl, String... boxIds) throws ErgoClientException {
         ApiClient client = new ApiClient(nodeUrl);
-        BlockchainContext ctx = new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.TestnetNetworkPrefix()).build();
+        BlockchainContext ctx =
+         new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.TestnetNetworkPrefix()).build();
 
+        List<InputBox> list = new ArrayList<>();
+        for (String id : boxIds) {
+            InputBox box = ctx.getBoxById(id);
+            list.add(box);
+        }
+        InputBox[] inputs = list.toArray(new InputBox[0]);
         UnsignedTransactionBuilder txB = ctx.newUnsignedTransaction();
-        OutBox box = txB.outBoxBuilder()
-                .value(10)
-                .contract(
-                        ConstantsBuilder.create().item("deadline", 10).build(),
-                        "{ HEIGHT > deadline }")
-                .build();
         UnsignedTransaction tx = txB
-                .inputs(boxId)
-                .outputs(box)
+                .inputs(inputs)
+                .outputs(
+                        txB.outBoxBuilder()
+                                .value(10)
+                                .contract(
+                                        ConstantsBuilder.create().item("deadline", 10).build(),
+                                        "{ HEIGHT > deadline }")
+                                .build())
                 .build();
 
         ErgoProverBuilder proverB = new ErgoProverBuilder();

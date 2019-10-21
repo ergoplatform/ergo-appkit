@@ -53,8 +53,10 @@ object JavaHelpers {
       DLogProverInput(secret)
   }
 
+  def decodeBase16(base16: String): Array[Byte] = Base16.decode(base16).get
+
   def createUnsignedInput(boxId: String): UnsignedInput = {
-    val idBytes = Base16.decode(boxId).get
+    val idBytes = decodeBase16(boxId)
     createUnsignedInput(idBytes)
   }
 
