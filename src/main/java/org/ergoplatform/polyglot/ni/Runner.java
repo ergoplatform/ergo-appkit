@@ -21,10 +21,12 @@ import java.lang.reflect.Type;
 
 public class Runner {
 
-    public String sign(String boxId) {
-        UnsignedTransactionBuilder txB = new UnsignedTransactionBuilderImpl(ErgoAddressEncoder.TestnetNetworkPrefix());
-        OutBoxBuilder boxB = txB.outBoxBuilder();
-        OutBox box = boxB
+    public String sign(String nodeUrl, String boxId) throws ErgoClientException {
+        ApiClient client = new ApiClient(nodeUrl);
+        BlockchainContext ctx = new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.TestnetNetworkPrefix()).build();
+
+        UnsignedTransactionBuilder txB = ctx.newUnsignedTransaction();
+        OutBox box = txB.outBoxBuilder()
                 .value(10)
                 .contract(
                         ConstantsBuilder.create().item("deadline", 10).build(),
@@ -49,12 +51,10 @@ public class Runner {
                 .client(ok)
                 .build();
         try {
-            Method method = InfoApi.class.getMethod("getNodeInfo");
-            NodeInfo res = RetrofitUtil.<NodeInfo>invokeServiceMethod(retrofit, method, null).execute().body();
+
+            NodeInfo res = ErgoNodeFacade.getNodeInfo(retrofit);
             System.out.println(res);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ErgoClientException e) {
             e.printStackTrace();
         }
     }

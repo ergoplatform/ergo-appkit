@@ -12,13 +12,14 @@ import java.util.stream.Stream;
 
 public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilder {
 
-    private final byte _networkPrefix;
+    private final BlockchainContextImpl _ctx;
     ArrayList<UnsignedInput> _inputs = new ArrayList<>();
     ArrayList<DataInput> _dataInputs = new ArrayList<>();
     ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
 
-    public UnsignedTransactionBuilderImpl(byte networkPrefix) {
-        _networkPrefix = networkPrefix;
+    public UnsignedTransactionBuilderImpl(
+            BlockchainContextImpl ctx) {
+        _ctx = ctx;
     }
 
     @Override
@@ -60,6 +61,6 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public byte getNetworkPrefix() {
-        return _networkPrefix;
+        return _ctx.getNetworkPrefix();
     }
 }
