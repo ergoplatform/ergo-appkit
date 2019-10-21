@@ -48,7 +48,7 @@ public class Runner {
                                 .build())
                 .build();
 
-        ErgoProverBuilder proverB = new ErgoProverBuilder();
+        ErgoProverBuilder proverB = ctx.newProver();
         ErgoProver prover = proverB.withSeed("abc").build();
         SignedTransaction signed = prover.sign(tx);
         return signed.toString();

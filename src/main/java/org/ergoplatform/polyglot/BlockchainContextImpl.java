@@ -36,6 +36,11 @@ public class BlockchainContextImpl implements BlockchainContext {
         return new InputBoxImpl(boxData);
     }
 
+    @Override
+    public ErgoProverBuilder newProver() {
+        return new ErgoProverBuilderImpl(this);
+    }
+
     public byte getNetworkPrefix() {
         return _networkPrefix;
     }
