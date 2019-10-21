@@ -35,7 +35,7 @@ otool -L provesign
 ```
 
 Use 
---initialize-at-run-time
+--initialize-at-build-time=org.ergoplatform.api.client.InfoApi
 -H:+AddAllCharsets
 
 
@@ -49,6 +49,7 @@ Graal SDK in build.sbt
 
 - [Assisted Configuration of Native Image Builds](https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md)
 - [Proof-of-concept: Configuration to get native-image to generate a bin](https://github.com/cloudstateio/cloudstate/pull/56)
+- [Dynamic proxies on Substrate VM](https://github.com/oracle/graal/blob/master/substratevm/DYNAMIC_PROXY.md)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)
