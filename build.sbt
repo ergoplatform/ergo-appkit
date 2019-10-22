@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
       .exclude("ch.qos.logback", "logback-classic")
       .exclude("org.scorexfoundation", "scrypto"),
   "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion,
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "org.graalvm" % "graal-sdk" % "0.30",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
