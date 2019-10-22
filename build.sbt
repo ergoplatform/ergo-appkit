@@ -1,11 +1,19 @@
 import scala.util.Try
 
-name := "ergo-polyglot"
-
-organization := "org.ergoplatform"
-
-scalaVersion := "2.12.8"
 version := "3.0.0"
+
+lazy val commonSettings = Seq(
+  organization := "org.ergoplatform",
+  scalaVersion := "2.12.8",
+  version := "3.0.0",
+//  resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+//    "SonaType" at "https://oss.sonatype.org/content/groups/public",
+//    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+//    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
+  homepage := Some(url("http://ergoplatform.org/")),
+  licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode"))
+)
+
 
 resolvers ++= Seq(
   "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/",
@@ -28,9 +36,10 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "org.graalvm" % "graal-sdk" % "0.30",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
-  "io.swagger" % "swagger-java-client" % "1.0.0",
   "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
-  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2"
+  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
+  "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
 )
 
 licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))
@@ -70,3 +79,22 @@ assemblyMergeStrategy in assembly := {
   case "module-info.class" => MergeStrategy.discard
   case other => (assemblyMergeStrategy in assembly).value(other)
 }
+
+lazy val javaClientGenerated = (project in file("java-client-generated"))
+    .settings(
+      commonSettings,
+      name := "java-client-generated",
+      libraryDependencies ++= Seq(
+        "io.gsonfire" % "gson-fire" % "1.8.0" % "compile",
+        "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
+        "org.threeten" % "threetenbp" % "1.3.5" % "compile",
+        "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
+        "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
+        "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.2",
+        "junit" % "junit" % "4.12" % "test",
+      )
+    )
+
+lazy val ergoPolyglot = (project in file("."))
+    .settings(commonSettings, name := "ergo-polyglot")
+    .dependsOn(javaClientGenerated % "compile->compile")
