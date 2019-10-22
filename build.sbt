@@ -40,6 +40,7 @@ libraryDependencies ++= Seq(
   "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
+  "com.squareup.okhttp3" % "mockwebserver" % "4.2.1" % "test"
 )
 
 licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))

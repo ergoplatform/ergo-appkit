@@ -30,7 +30,7 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
                 .client(_ok)
                 .build();
         _nodeInfo  = ErgoNodeFacade.getNodeInfo(_retrofit);
-        _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(10));
+        _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(LastHeadersInContext));
         return new BlockchainContextImpl(_retrofit, _networkPrefix, _nodeInfo, _headers);
     }
 

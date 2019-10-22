@@ -96,6 +96,8 @@ libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
 - [A simple example language built using the Truffle API](https://github.com/graalvm/simplelanguage)
 - [graalvm-demos](https://github.com/graalvm/graalvm-demos)
 - [okhttp-client-mock example tests](https://github.com/gmazzo/okhttp-client-mock/blob/master/library/src/test/java/okhttp3/mock/MockInterceptorITTest.java)
+- [Retrofit Mock Web Server](https://github.com/square/retrofit/tree/master/retrofit-mock)
+- [Okhttp Mock Web Server](https://github.com/square/okhttp/tree/master/mockwebserver)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)

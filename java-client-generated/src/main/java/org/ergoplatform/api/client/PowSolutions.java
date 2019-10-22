@@ -12,6 +12,7 @@
 
 package org.ergoplatform.api.client;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class PowSolutions {
   private String n = null;
 
   @SerializedName("d")
-  private BigInteger d = null;
+  private BigDecimal d = null;
 
   public PowSolutions pk(String pk) {
     this.pk = pk;
@@ -94,7 +95,7 @@ public class PowSolutions {
     this.n = n;
   }
 
-  public PowSolutions d(BigInteger d) {
+  public PowSolutions d(BigDecimal d) {
     this.d = d;
     return this;
   }
@@ -104,11 +105,11 @@ public class PowSolutions {
    * @return d
   **/
   @Schema(example = "987654321", required = true, description = "")
-  public BigInteger getD() {
+  public BigDecimal getD() {
     return d;
   }
 
-  public void setD(BigInteger d) {
+  public void setD(BigDecimal d) {
     this.d = d;
   }
 
