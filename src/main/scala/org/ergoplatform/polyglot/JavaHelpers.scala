@@ -3,13 +3,19 @@ package org.ergoplatform.polyglot
 import java.math.BigInteger
 import java.util
 
+import com.google.common.base.Strings
 import org.bouncycastle.util.BigIntegers
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
+import org.ergoplatform.api.client.BlockHeader
 import org.ergoplatform.settings.ErgoAlgos
+import org.ergoplatform.wallet.interpreter.ErgoInterpreter
+import org.ergoplatform.wallet.mnemonic.Mnemonic
+import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.wallet.serialization.JsonCodecsWrapper
 import scalan.RType
-import scorex.crypto.authds.ADKey
+import scorex.crypto.authds.{ADDigest, ADKey}
 import scorex.crypto.hash.{Digest32, Blake2b256}
 import scorex.util.ModifierId
 import scorex.util.encode.Base16
@@ -18,15 +24,22 @@ import sigmastate.basics.DLogProtocol.DLogProverInput
 import sigmastate.{Values, TrivialProp, SType}
 import sigmastate.lang.Terms.ValueOps
 import special.collection.Coll
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CostingSigmaDslBuilder, CPreHeader, CHeader}
 import sigmastate.interpreter.CryptoConstants
 import sigmastate.interpreter.Interpreter.ScriptEnv
-import sigmastate.serialization.ValueSerializer
-import special.sigma.{AnyValue, PreHeader, Header}
+import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
+import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 
 import scala.collection.JavaConverters
 
+
 object JavaHelpers {
+  implicit class StringExtensions(val source: String) extends AnyVal {
+    def toBytes: Array[Byte] = decodeStringToBytes(source)
+    def toColl: Coll[Byte] = decodeStringToColl(source)
+    def toGroupElement: GroupElement = decodeStringToGE(source)
+  }
+
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[PreHeader] = special.sigma.PreHeaderRType
 
@@ -36,10 +49,51 @@ object JavaHelpers {
     ValueSerializer.deserialize(bytes).asInstanceOf[T]
   }
 
-  def toHeaders(): Coll[Header] = Colls.emptyColl
-  def toPreHeader(): PreHeader = {
-    CPreHeader(9, Colls.emptyColl, 0, 0, 0,
-      sigmastate.eval.SigmaDsl.groupGenerator, Colls.emptyColl)
+  def decodeStringToBytes(str: String): Array[Byte] = {
+    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+    bytes
+  }
+
+  def decodeStringToColl(str: String): Coll[Byte] = {
+    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+    Colls.fromArray(bytes)
+  }
+
+  def decodeStringToGE(str: String): GroupElement = {
+    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+    val pe = GroupElementSerializer.parse(SigmaSerializer.startReader(bytes))
+    SigmaDsl.GroupElement(pe)
+  }
+
+  def toHeaders(headers: util.List[BlockHeader]): Coll[Header] = {
+    val hs = headers.toArray(new Array[BlockHeader](0)).map { h =>
+      CHeader(
+        id = h.getId().toColl,
+        version = h.getVersion().toByte,
+        parentId = h.getParentId().toColl,
+        ADProofsRoot = h.getAdProofsRoot.toColl,
+        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(ADDigest @@ h.getStateRoot().toBytes)),
+        transactionsRoot = h.getTransactionsRoot().toColl,
+        timestamp = h.getTimestamp(),
+        nBits = h.getNBits(),
+        height = h.getHeight,
+        extensionRoot = h.getExtensionHash().toColl,
+        minerPk = h.getPowSolutions.getPk().toGroupElement,
+        powOnetimePk = h.getPowSolutions().getW().toGroupElement,
+        powNonce = h.getPowSolutions().getN().toColl,
+        powDistance = SigmaDsl.BigInt(h.getPowSolutions().getD().toBigIntegerExact),
+        votes = h.getVotes().toColl
+      ): Header
+    }
+    Colls.fromArray(hs)
+  }
+
+  def toPreHeader(h: Header): PreHeader = {
+    CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
+  }
+
+  def getStateDigest(tree: AvlTree): Array[Byte] = {
+    tree.digest.toArray
   }
 
   def toTokensColl[T](tokens: util.List[ErgoToken]): Coll[(Array[Byte], Long)] = {
@@ -78,15 +132,15 @@ object JavaHelpers {
     new ErgoBox(value, tree, ts.asInstanceOf[Coll[(TokenId, Long)]], rs, ModifierId @@ txId, index, creationHeight)
   }
 
-  def proverInputFromSeed(seedStr: String): DLogProverInput = {
-      val secret = BigIntegers.fromUnsignedByteArray(Blake2b256.hash(1 + seedStr))
-      DLogProverInput(secret)
+  def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {
+    val passOpt = if (Strings.isNullOrEmpty(pass)) None else Some(pass)
+    val seed = Mnemonic.toSeed(seedPhrase, passOpt)
+    val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
+    masterKey
   }
 
-  def decodeBase16(base16: String): Array[Byte] = Base16.decode(base16).get
-
   def createUnsignedInput(boxId: String): UnsignedInput = {
-    val idBytes = decodeBase16(boxId)
+    val idBytes = decodeStringToBytes(boxId)
     createUnsignedInput(idBytes)
   }
 

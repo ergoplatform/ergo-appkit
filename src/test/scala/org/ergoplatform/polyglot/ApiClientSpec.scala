@@ -8,12 +8,32 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.ergoplatform.ErgoAddressEncoder
 import org.ergoplatform.api.client.ApiClient
 import org.ergoplatform.polyglot.ni.Runner
+import org.ergoplatform.settings.ErgoAlgos
+import org.ergoplatform.validation.ValidationRules
 import scalan.util.FileUtil._
+import sigmastate.Values.SigmaPropConstant
+import sigmastate.serialization.ErgoTreeSerializer
 
 class ApiClientSpec
     extends PropSpec
         with Matchers
         with ScalaCheckDrivenPropertyChecks {
+
+  val seed = "abc"
+  val masterKey = JavaHelpers.seedToMasterKey(seed)
+  implicit val vs = ValidationRules.currentSettings
+
+  property("parse ErgoTree") {
+    val script = "100204a00b08cd02d3a9410ac758ad45dfc85af8626efdacf398439c73977b13064aa8e6c8f2ac88ea02d192a39a8cc7a70173007301"
+    val treeBytes = ErgoAlgos.decode(script).get
+    val tree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(treeBytes)
+    println(tree)
+    val newBytes = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+      treeBytes, positions = Array(1), newVals = Array(SigmaPropConstant(masterKey.key.publicImage)))
+    val newTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+    println(newTree)
+    println(ErgoAlgos.encode(newBytes))
+  }
 
   property("BlockchainContext") {
     // Create a MockWebServer. These are lean enough that you can create a new

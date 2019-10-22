@@ -38,8 +38,8 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
                 .collect(Collectors.toList());
         _inputs.addAll(items);
         _inputBoxes = Stream.of(inputBoxes)
-          .map(b -> (InputBoxImpl)b)
-          .collect(Collectors.toList());
+                .map(b -> (InputBoxImpl)b)
+                .collect(Collectors.toList());
         return this;
     }
 
@@ -66,19 +66,23 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
 
         ErgoLikeStateContext stateContext = new ErgoLikeStateContext() {
+            private Coll<Header> _allHeaders = JavaHelpers.toHeaders(_ctx.getHeaders());
+            private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
+            private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
+
             @Override
             public Coll<Header> sigmaLastHeaders() {
-                return JavaHelpers.toHeaders();
+                return _headers;
             }
 
             @Override
             public byte[] previousStateDigest() {
-                return JavaHelpers.Algos().decode(_ctx.getNodeInfo().getStateRoot()).get();
+                return JavaHelpers.getStateDigest(_headers.apply(0).stateRoot());
             }
 
             @Override
             public PreHeader sigmaPreHeader() {
-                return JavaHelpers.toPreHeader();
+                return _preHeader;
             }
         };
 

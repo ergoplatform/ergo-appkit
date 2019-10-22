@@ -13,7 +13,6 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
     private final BlockchainContextImpl _ctx;
 
-    private DLogProtocol.DLogProverInput _secretInput;
     private ExtendedSecretKey _masterKey;
 
     public ErgoProverBuilderImpl(BlockchainContextImpl ctx) {
@@ -21,8 +20,7 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     }
 
     public ErgoProverBuilder withSeed(String seedPhrase) {
-        byte[] seed = Mnemonic.toSeed(seedPhrase, Option.apply(null));
-        _masterKey = ExtendedSecretKey.deriveMasterKey(seed);
+        _masterKey = JavaHelpers.seedToMasterKey(seedPhrase, null);
         return this;
     }
 

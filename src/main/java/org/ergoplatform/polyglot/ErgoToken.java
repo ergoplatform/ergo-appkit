@@ -14,7 +14,7 @@ public class ErgoToken {
     }
 
     public ErgoToken(String id, long value) {
-        this(JavaHelpers.decodeBase16(id), value);
+        this(JavaHelpers.decodeStringToBytes(id), value);
     }
 
     public ErgoId getId() {

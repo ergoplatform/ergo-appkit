@@ -8,6 +8,7 @@ import retrofit2.Retrofit;
 import scala.math.Ordering;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
@@ -31,6 +32,7 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
                 .build();
         _nodeInfo  = ErgoNodeFacade.getNodeInfo(_retrofit);
         _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(LastHeadersInContext));
+        Collections.reverse(_headers);
         return new BlockchainContextImpl(_retrofit, _networkPrefix, _nodeInfo, _headers);
     }
 

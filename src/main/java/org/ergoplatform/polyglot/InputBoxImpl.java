@@ -20,7 +20,7 @@ public class InputBoxImpl implements InputBox {
 
     public InputBoxImpl(ErgoTransactionOutput boxData) {
         _boxData = boxData;
-        _id = new ErgoId(JavaHelpers.decodeBase16(boxData.getBoxId()));
+        _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
     }
 
     @Override
