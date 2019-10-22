@@ -88,13 +88,14 @@ libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
 
 - [Assisted Configuration of Native Image Builds](https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md)
 - [Proof-of-concept: Configuration to get native-image to generate a bin](https://github.com/cloudstateio/cloudstate/pull/56)
-*-* [Akka HTTP + GraalVM native](https://github.com/vmencik/akka-graal-native/blob/master/README.md#logging)
+- [Akka HTTP + GraalVM native](https://github.com/vmencik/akka-graal-native/blob/master/README.md#logging)
 - [Dynamic proxies on Substrate VM](https://github.com/oracle/graal/blob/master/substratevm/DYNAMIC_PROXY.md)
 - [Simplifying native-image generation with Maven plugin and embeddable configuration](https://medium.com/graalvm/simplifying-native-image-generation-with-maven-plugin-and-embeddable-configuration-d5b283b92f57)
 - [Updates on Class Initialization in GraalVM Native Image Generation](https://medium.com/graalvm/updates-on-class-initialization-in-graalvm-native-image-generation-c61faca461f7)
 - [native-netty-plot](https://github.com/graalvm/graalvm-demos/tree/master/native-netty-plot)
 - [A simple example language built using the Truffle API](https://github.com/graalvm/simplelanguage)
 - [graalvm-demos](https://github.com/graalvm/graalvm-demos)
+- [okhttp-client-mock example tests](https://github.com/gmazzo/okhttp-client-mock/blob/master/library/src/test/java/okhttp3/mock/MockInterceptorITTest.java)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)

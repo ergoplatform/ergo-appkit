@@ -5,6 +5,7 @@ import org.ergoplatform.api.client.ErgoTransactionOutput;
 import org.ergoplatform.api.client.NodeInfo;
 import retrofit2.Retrofit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlockchainContextImpl implements BlockchainContext {
@@ -28,12 +29,17 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public InputBox getBoxById(String boxId) throws ErgoClientException {
-        ErgoTransactionOutput boxData = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-        if (boxData == null) {
-            throw new ErgoClientException("Cannot load UTXO box " + boxId, null);
+    public InputBox[] getBoxesById(String... boxIds) throws ErgoClientException {
+        List<InputBox> list = new ArrayList<>();
+        for (String id : boxIds) {
+            ErgoTransactionOutput boxData = ErgoNodeFacade.getBoxById(_retrofit, id);
+            if (boxData == null) {
+                throw new ErgoClientException("Cannot load UTXO box " + id, null);
+            }
+            list.add(new InputBoxImpl(boxData));
         }
-        return new InputBoxImpl(boxData);
+        InputBox[] inputs = list.toArray(new InputBox[0]);
+        return inputs;
     }
 
     @Override
