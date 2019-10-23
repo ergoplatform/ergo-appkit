@@ -6,10 +6,10 @@ lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
   scalaVersion := "2.12.8",
   version := "3.0.0",
-//  resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
-//    "SonaType" at "https://oss.sonatype.org/content/groups/public",
-//    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
-//    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
+  //  resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+  //    "SonaType" at "https://oss.sonatype.org/content/groups/public",
+  //    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+  //    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
   homepage := Some(url("http://ergoplatform.org/")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode"))
 )
@@ -52,15 +52,15 @@ publishMavenStyle in ThisBuild := true
 publishArtifact in Test := true
 
 publishTo in ThisBuild :=
-  Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
+    Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
 
 pomExtra in ThisBuild :=
-  <developers>
-    <developer>
-      <id>aslesarenko</id>
-      <name>Alexander Slesarenko</name>
-    </developer>
-  </developers>
+    <developers>
+      <developer>
+        <id>aslesarenko</id>
+        <name>Alexander Slesarenko</name>
+      </developer>
+    </developers>
 
 credentials ++= (for {
   username <- Option(System.getenv().get("SONATYPE_USERNAME"))
@@ -72,7 +72,6 @@ credentials ++= (for {
 // these options applied only in "compile" task since scalac crashes on scaladoc compilation with "-release 8"
 // see https://github.com/scala/community-builds/issues/796#issuecomment-423395500
 //scalacOptions in(Compile, compile) ++= Seq("-release", "8")
-
 assemblyJarName in assembly := s"ergo-polyglot-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
@@ -80,6 +79,8 @@ assemblyMergeStrategy in assembly := {
   case "module-info.class" => MergeStrategy.discard
   case other => (assemblyMergeStrategy in assembly).value(other)
 }
+
+lazy val allConfigDependency = "compile->compile;test->test"
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
     .settings(
@@ -96,6 +97,39 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       )
     )
 
+lazy val libApi = (project in file("lib-api"))
+    .settings(
+      commonSettings,
+      name := "lib-api",
+      libraryDependencies ++= Seq(
+      )
+    )
+
+lazy val libImpl = (project in file("lib-impl"))
+    .dependsOn(libApi % allConfigDependency, javaClientGenerated % allConfigDependency)
+    .settings(
+      commonSettings,
+      name := "lib-impl",
+      libraryDependencies ++= Seq(
+      )
+    )
+    
+lazy val examples = (project in file("examples"))
+    .dependsOn(
+      libApi % allConfigDependency, 
+      javaClientGenerated % allConfigDependency,
+      libImpl % allConfigDependency)
+    .settings(
+      commonSettings,
+      name := "examples",
+      libraryDependencies ++= Seq(
+      )
+    )
+
 lazy val ergoPolyglot = (project in file("."))
     .settings(commonSettings, name := "ergo-polyglot")
-    .dependsOn(javaClientGenerated % "compile->compile")
+    .dependsOn(
+      javaClientGenerated % allConfigDependency, 
+      libApi % allConfigDependency, 
+      libImpl % allConfigDependency
+    )
