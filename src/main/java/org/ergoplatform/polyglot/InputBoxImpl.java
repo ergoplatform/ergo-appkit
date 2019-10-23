@@ -41,8 +41,8 @@ public class InputBoxImpl implements InputBox {
         });
 
         ErgoBox ergoBox = JavaHelpers.createBox(
-                _boxData.getValue(), tree, tokens, regs, _boxData.getTransactionId(),
-                 _boxData.getIndex().shortValue(), _boxData.getCreationHeight());
+                _boxData.getValue(), tree, tokens, regs, _boxData.getCreationHeight(), _boxData.getTransactionId(),
+                _boxData.getIndex().shortValue());
         return ergoBox;
     }
 }

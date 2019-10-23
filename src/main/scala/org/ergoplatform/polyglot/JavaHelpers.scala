@@ -6,7 +6,7 @@ import java.util
 import com.google.common.base.Strings
 import org.bouncycastle.util.BigIntegers
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef}
+import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef, ErgoBoxCandidate}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import org.ergoplatform.api.client.BlockHeader
 import org.ergoplatform.settings.ErgoAlgos
@@ -122,7 +122,10 @@ object JavaHelpers {
     Constant(v.value.asInstanceOf[SType#WrappedType], tpe)
   }
 
-  def createBox(value: Long, tree: ErgoTree, tokens: util.List[ErgoToken], registers: util.List[scala.Tuple2[String, Object]], txId: String, index: Short, creationHeight: Int): ErgoBox = {
+  def createBox(
+       value: Long, tree: ErgoTree,
+       tokens: util.List[ErgoToken],
+       registers: util.List[Tuple2[String, Object]], creationHeight: Int, txId: String, index: Short): ErgoBox = {
     val ts = toTokensColl(tokens)
     val rs = toIndexedSeq(registers).map { r =>
       val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
@@ -130,6 +133,19 @@ object JavaHelpers {
       id -> value
     }.toMap
     new ErgoBox(value, tree, ts.asInstanceOf[Coll[(TokenId, Long)]], rs, ModifierId @@ txId, index, creationHeight)
+  }
+
+  def createBoxCandidate(
+       value: Long, tree: ErgoTree,
+       tokens: util.List[ErgoToken],
+       registers: util.List[Tuple2[String, Object]], creationHeight: Int): ErgoBoxCandidate = {
+    val ts = toTokensColl(tokens)
+    val rs = toIndexedSeq(registers).map { r =>
+      val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
+      val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
+      id -> value
+    }.toMap
+    new ErgoBoxCandidate(value, tree, creationHeight, ts.asInstanceOf[Coll[(TokenId, Long)]], rs)
   }
 
   def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {

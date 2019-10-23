@@ -1,11 +1,8 @@
 package org.ergoplatform.polyglot;
 
 import org.ergoplatform.*;
-import org.ergoplatform.settings.ErgoAlgos;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import scala.collection.IndexedSeq;
-import sigmastate.eval.CPreHeader;
-import sigmastate.eval.CostingSigmaDslBuilder$;
 import special.collection.Coll;
 import special.sigma.Header;
 import special.sigma.PreHeader;
@@ -51,8 +48,8 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     @Override
     public UnsignedTransactionBuilder outputs(OutBox... candidates) {
         _outputCandidates = new ArrayList<>();
-        ErgoBox[] boxes =
-                Stream.of(candidates).<ErgoBox>map(c -> ((OutBoxImpl)c).getErgoBox()).toArray(n -> new ErgoBox[n]);
+        ErgoBoxCandidate[] boxes =
+                Stream.of(candidates).map(c -> ((OutBoxImpl)c).getErgoBoxCandidate()).toArray(n -> new ErgoBoxCandidate[n]);
         Collections.addAll(_outputCandidates, boxes);
         return this;
     }
@@ -90,6 +87,11 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
+    public BlockchainContext getCtx() {
+        return _ctx;
+    }
+
+    @Override
     public OutBoxBuilder outBoxBuilder() {
         return new OutBoxBuilderImpl(this);
     }
@@ -99,6 +101,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         return _ctx.getNetworkPrefix();
     }
 
+    @Override
     public List<InputBoxImpl> getInputBoxes() {
         return _inputBoxes;
     }

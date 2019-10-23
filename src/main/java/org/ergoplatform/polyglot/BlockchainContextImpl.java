@@ -47,11 +47,17 @@ public class BlockchainContextImpl implements BlockchainContext {
         return new ErgoProverBuilderImpl(this);
     }
 
+    @Override
     public byte getNetworkPrefix() {
         return _networkPrefix;
     }
 
-    public Retrofit getRetrofit() {
+    @Override
+    public int getHeight() { return _headers.get(0).getHeight(); }
+
+    /*=====  Package-private methods accessible from other Impl classes. =====*/
+
+    Retrofit getRetrofit() {
         return _retrofit;
     }
 

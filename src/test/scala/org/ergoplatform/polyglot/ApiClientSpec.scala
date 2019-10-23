@@ -59,26 +59,21 @@ class ApiClientSpec
     // Ask the server for its URL. You'll need this to make HTTP requests.
     val baseUrl = server.url("/")
     val client = new ApiClient(baseUrl.toString)
-    val ctx = new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.MainnetNetworkPrefix).build()
-    val r = new Runner
-    val res = r.sign(ctx, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-//    val chat = new Nothing(baseUrl)
-//    chat.loadMore
-//    assertEquals("hello, world!", chat.messages)
-//    chat.loadMore
-//    chat.loadMore
-//    assertEquals("" + "hello, world!\n" + "sup, bra?\n" + "yo dog", chat.messages)
-//    // Optional: confirm that your app made the HTTP requests you were expecting.
-//    val request1 = server.takeRequest
-//    assertEquals("/v1/chat/messages/", request1.getPath)
-//    assertNotNull(request1.getHeader("Authorization"))
-//    val request2 = server.takeRequest
-//    assertEquals("/v1/chat/messages/2", request2.getPath)
-//    val request3 = server.takeRequest
-//    assertEquals("/v1/chat/messages/3", request3.getPath)
+    val ctx = new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.MainnetNetworkPrefix).build()
+    val r = new Runner
+    val res = r.sign(ctx, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+    println(res)
+
+    // Optional: confirm that your app made the HTTP requests you were expecting.
+    val request1 = server.takeRequest
+    request1.getRequestLine shouldBe "GET /info HTTP/1.1"
+    val request2 = server.takeRequest
+    request2.getRequestLine shouldBe "GET /blocks/lastHeaders/10 HTTP/1.1"
+    val request3 = server.takeRequest
+    request3.getRequestLine shouldBe "GET /utxo/byId/83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a HTTP/1.1"
 
     // Shut down the server. Instances cannot be reused.
     server.shutdown()

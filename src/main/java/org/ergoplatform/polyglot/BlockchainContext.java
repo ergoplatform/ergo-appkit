@@ -6,5 +6,9 @@ public interface BlockchainContext {
     InputBox[] getBoxesById(String... boxIds) throws ErgoClientException;
 
     ErgoProverBuilder newProver();
+
+    byte getNetworkPrefix();
+
+    int getHeight();
 }
 

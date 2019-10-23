@@ -1,12 +1,12 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.ErgoBox;
+import org.ergoplatform.ErgoBoxCandidate;
 
 public class OutBoxImpl implements OutBox {
-  private final ErgoBox _ergoBox;
+  private final ErgoBoxCandidate _ergoBoxCandidate;
 
-  public OutBoxImpl(ErgoBox ergoBox) {
-    _ergoBox = ergoBox;
+  public OutBoxImpl(ErgoBoxCandidate ergoBoxCandidate) {
+    _ergoBoxCandidate = ergoBoxCandidate;
   }
 
   @Override
@@ -39,7 +39,7 @@ public class OutBoxImpl implements OutBox {
     return null;
   }
 
-  ErgoBox getErgoBox() {
-    return _ergoBox;
+  ErgoBoxCandidate getErgoBoxCandidate() {
+    return _ergoBoxCandidate;
   }
 }

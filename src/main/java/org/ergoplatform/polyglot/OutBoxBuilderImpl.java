@@ -49,8 +49,8 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
 
     public OutBox build() {
         Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _txB.getNetworkPrefix());
-        ErgoBox ergoBox = JavaHelpers.createBox(_value, tree, _tokens,
-                new ArrayList<Tuple2<String, Object>>(), "", (short)0, 0);
-        return new OutBoxImpl(ergoBox);
+        ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
+                new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified creationHeight
+        return new OutBoxImpl(ergoBoxCandidate);
     }
 }
