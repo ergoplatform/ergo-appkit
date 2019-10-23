@@ -1,5 +1,7 @@
 package org.ergoplatform.polyglot;
 
+import org.ergoplatform.polyglot.ErgoId;
+
 public class ErgoToken {
     private final ErgoId _id;
     private final long _value;

@@ -30,11 +30,6 @@ public class OutBoxImpl implements OutBox {
   }
 
   @Override
-  public Proposition getProposition() {
-    return null;
-  }
-
-  @Override
   public ErgoToken token(ErgoId id) {
     return null;
   }

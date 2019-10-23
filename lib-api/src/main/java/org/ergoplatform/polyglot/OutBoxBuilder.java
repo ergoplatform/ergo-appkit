@@ -4,7 +4,6 @@ import java.util.Dictionary;
 
 public interface OutBoxBuilder {
     OutBoxBuilder value(long value);
-    OutBoxBuilder proposition(Proposition proposition);
 
     OutBoxBuilder contract(Dictionary<String, Object> constants, String contractText);
 

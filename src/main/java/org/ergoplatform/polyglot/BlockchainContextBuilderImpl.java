@@ -5,7 +5,6 @@ import org.ergoplatform.api.client.ApiClient;
 import org.ergoplatform.api.client.BlockHeader;
 import org.ergoplatform.api.client.NodeInfo;
 import retrofit2.Retrofit;
-import scala.math.Ordering;
 
 import java.math.BigDecimal;
 import java.util.Collections;

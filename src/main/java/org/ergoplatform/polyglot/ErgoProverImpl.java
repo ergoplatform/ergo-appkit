@@ -2,13 +2,8 @@ package org.ergoplatform.polyglot;
 
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.wallet.interface4j.crypto.ErgoUnsafeProver;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import scala.collection.IndexedSeq;
-import scala.util.Try;
-import sigmastate.basics.DLogProtocol;
-
-import java.util.ArrayList;
 
 public class ErgoProverImpl implements ErgoProver {
   private final ErgoProvingInterpreter _prover;

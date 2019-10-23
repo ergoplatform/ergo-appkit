@@ -25,10 +25,6 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
         return this;
     }
 
-    @Override
-    public OutBoxBuilderImpl proposition(Proposition proposition) {
-        return null;
-    }
 
     @Override
     public OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText) {

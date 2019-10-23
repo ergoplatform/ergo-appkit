@@ -2,12 +2,9 @@ package org.ergoplatform.polyglot;
 
 import org.ergoplatform.api.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
-import org.ergoplatform.wallet.mnemonic.Mnemonic;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
-import scala.None$;
 import scala.Option;
-import sigmastate.basics.DLogProtocol;
 
 public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 

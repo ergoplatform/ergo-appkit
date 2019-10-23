@@ -1,6 +1,7 @@
 package org.ergoplatform.polyglot;
 
 import org.ergoplatform.*;
+import org.ergoplatform.polyglot.rest.impl.ScalaBridge;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import scala.collection.IndexedSeq;
 import special.collection.Coll;
@@ -63,7 +64,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
 
         ErgoLikeStateContext stateContext = new ErgoLikeStateContext() {
-            private Coll<Header> _allHeaders = JavaHelpers.toHeaders(_ctx.getHeaders());
+            private Coll<Header> _allHeaders = ScalaBridge.toHeaders(_ctx.getHeaders());
             private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
             private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
 
@@ -102,7 +103,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public List<InputBoxImpl> getInputBoxes() {
-        return _inputBoxes;
+    public List<InputBox> getInputBoxes() {
+        return _inputBoxes.stream().collect(Collectors.toList());
     }
 }

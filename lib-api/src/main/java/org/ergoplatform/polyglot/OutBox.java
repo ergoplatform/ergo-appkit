@@ -5,6 +5,5 @@ public interface OutBox {
     UnsignedTransaction getTx();
     int getBoxIndex();
     long getValue();
-    Proposition getProposition();
     ErgoToken token(ErgoId id);
 }

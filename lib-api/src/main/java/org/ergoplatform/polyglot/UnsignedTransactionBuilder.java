@@ -15,5 +15,5 @@ public interface UnsignedTransactionBuilder {
 
     OutBoxBuilder outBoxBuilder();
 
-    List<InputBoxImpl> getInputBoxes();
+    List<InputBox> getInputBoxes();
 }

@@ -4,7 +4,6 @@ import org.ergoplatform.ErgoBox;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class UnsignedTransactionImpl implements UnsignedTransaction {

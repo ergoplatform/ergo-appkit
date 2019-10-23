@@ -1,37 +1,26 @@
 package org.ergoplatform.polyglot
 
-import java.math.BigInteger
-import java.util
-
-import com.google.common.base.Strings
-import org.bouncycastle.util.BigIntegers
-import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import org.ergoplatform.{ErgoBox, UnsignedInput, ErgoScriptPredef, ErgoBoxCandidate}
-import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.api.client.BlockHeader
-import org.ergoplatform.settings.ErgoAlgos
-import org.ergoplatform.wallet.interpreter.ErgoInterpreter
-import org.ergoplatform.wallet.mnemonic.Mnemonic
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
-import org.ergoplatform.wallet.serialization.JsonCodecsWrapper
+import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import scalan.RType
-import scorex.crypto.authds.{ADDigest, ADKey}
-import scorex.crypto.hash.{Digest32, Blake2b256}
-import scorex.util.ModifierId
-import scorex.util.encode.Base16
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.basics.DLogProtocol.DLogProverInput
-import sigmastate.{Values, TrivialProp, SType}
-import sigmastate.lang.Terms.ValueOps
 import special.collection.Coll
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CostingSigmaDslBuilder, CPreHeader, CHeader}
-import sigmastate.interpreter.CryptoConstants
-import sigmastate.interpreter.Interpreter.ScriptEnv
-import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
-import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
+import com.google.common.base.Strings
 
 import scala.collection.JavaConverters
-
+import org.ergoplatform.{ErgoBox, ErgoBoxCandidate, UnsignedInput, ErgoScriptPredef}
+import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
+import sigmastate.SType
+import scorex.util.ModifierId
+import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
+import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
+import scorex.crypto.authds.ADKey
+import scorex.crypto.hash.Digest32
+import org.ergoplatform.wallet.mnemonic.Mnemonic
+import org.ergoplatform.settings.ErgoAlgos
+import sigmastate.lang.Terms.ValueOps
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CPreHeader, CHeader}
+import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
+import java.util
 
 object JavaHelpers {
   implicit class StringExtensions(val source: String) extends AnyVal {
@@ -65,28 +54,6 @@ object JavaHelpers {
     SigmaDsl.GroupElement(pe)
   }
 
-  def toHeaders(headers: util.List[BlockHeader]): Coll[Header] = {
-    val hs = headers.toArray(new Array[BlockHeader](0)).map { h =>
-      CHeader(
-        id = h.getId().toColl,
-        version = h.getVersion().toByte,
-        parentId = h.getParentId().toColl,
-        ADProofsRoot = h.getAdProofsRoot.toColl,
-        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(ADDigest @@ h.getStateRoot().toBytes)),
-        transactionsRoot = h.getTransactionsRoot().toColl,
-        timestamp = h.getTimestamp(),
-        nBits = h.getNBits(),
-        height = h.getHeight,
-        extensionRoot = h.getExtensionHash().toColl,
-        minerPk = h.getPowSolutions.getPk().toGroupElement,
-        powOnetimePk = h.getPowSolutions().getW().toGroupElement,
-        powNonce = h.getPowSolutions().getN().toColl,
-        powDistance = SigmaDsl.BigInt(h.getPowSolutions().getD().toBigIntegerExact),
-        votes = h.getVotes().toColl
-      ): Header
-    }
-    Colls.fromArray(hs)
-  }
 
   def toPreHeader(h: Header): PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
