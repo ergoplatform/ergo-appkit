@@ -28,7 +28,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public UnsignedTransactionBuilder inputs(InputBox... inputBoxes) {
+    public UnsignedTransactionBuilder boxesToSpend(InputBox... inputBoxes) {
         List<UnsignedInput> items = Arrays.asList(inputBoxes)
                 .stream()
                 .map(box -> JavaHelpers.createUnsignedInput(box.getId().getBytes()))

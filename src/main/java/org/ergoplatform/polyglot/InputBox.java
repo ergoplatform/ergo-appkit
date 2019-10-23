@@ -1,12 +1,8 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.ErgoBoxCandidate;
-import org.ergoplatform.UnsignedErgoLikeTransaction;
-
-import java.util.Dictionary;
-
 public interface InputBox {
     ErgoId getId();
+    Long getValue();
 }
 
 interface Proposition {

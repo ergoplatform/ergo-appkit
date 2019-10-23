@@ -49,7 +49,7 @@ homepage in ThisBuild := Some(url("https://github.com/aslesarenko/ergo-polyglot"
 
 publishMavenStyle in ThisBuild := true
 
-publishArtifact in Test := false
+publishArtifact in Test := true
 
 publishTo in ThisBuild :=
   Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)

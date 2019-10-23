@@ -6,15 +6,19 @@ import org.ergoplatform.api.client.NodeInfo;
 import org.ergoplatform.polyglot.*;
 import retrofit2.Retrofit;
 
-public class Runner {
+import java.util.Arrays;
 
-    public String sign(BlockchainContext ctx, String... boxIds) throws ErgoClientException {
+public class ExampleScenarios {
+
+    public SignedTransaction spendBoxes(BlockchainContext ctx, String... boxIds) throws ErgoClientException {
         UnsignedTransactionBuilder txB = ctx.newUnsignedTransaction();
+        InputBox[] boxes = ctx.getBoxesById(boxIds);
+        Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
         UnsignedTransaction tx = txB
-                .inputs(ctx.getBoxesById(boxIds))
+                .boxesToSpend(boxes)
                 .outputs(
                         txB.outBoxBuilder()
-                                .value(10)
+                                .value(total)
                                 .contract(
                                         ConstantsBuilder.create().item("deadline", 10).build(),
                                         "{ HEIGHT > deadline }")
@@ -24,7 +28,7 @@ public class Runner {
         ErgoProverBuilder proverB = ctx.newProver();
         ErgoProver prover = proverB.withSeed("abc").build();
         SignedTransaction signed = prover.sign(tx);
-        return signed.toString();
+        return signed;
     }
 
     public void request(String nodeUrl) {

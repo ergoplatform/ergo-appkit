@@ -2,13 +2,9 @@ package org.ergoplatform.polyglot;
 
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.api.client.ErgoTransactionOutput;
-import org.ergoplatform.settings.ErgoAlgos;
-import org.ergoplatform.settings.ErgoAlgos$;
 import scala.Tuple2;
 import sigmastate.Values;
 import sigmastate.serialization.ErgoTreeSerializer;
-import sigmastate.serialization.ValueSerializer;
-import special.sigma.AnyValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +22,11 @@ public class InputBoxImpl implements InputBox {
     @Override
     public ErgoId getId() {
         return _id;
+    }
+
+    @Override
+    public Long getValue() {
+        return _boxData.getValue();
     }
 
     public ErgoBox getErgoBox() {
