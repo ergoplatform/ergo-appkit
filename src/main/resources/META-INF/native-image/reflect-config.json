@@ -26,53 +26,53 @@
   "name":"java.util.Optional"
 },
 {
-  "name":"org.ergoplatform.api.client.Asset",
+  "name":"org.ergoplatform.restapi.client.Asset",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.BlockHeader",
+  "name":"org.ergoplatform.restapi.client.BlockHeader",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.BlocksApi",
+  "name":"org.ergoplatform.restapi.client.BlocksApi",
   "methods":[{"name":"getLastHeaders","parameterTypes":["java.math.BigDecimal"] }]
 },
 {
-  "name":"org.ergoplatform.api.client.ErgoTransactionOutput",
+  "name":"org.ergoplatform.restapi.client.ErgoTransactionOutput",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.InfoApi",
+  "name":"org.ergoplatform.restapi.client.InfoApi",
   "methods":[{"name":"getNodeInfo","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.NodeInfo",
+  "name":"org.ergoplatform.restapi.client.NodeInfo",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.NodeInfo$StateTypeEnum$Adapter",
+  "name":"org.ergoplatform.restapi.client.NodeInfo$StateTypeEnum$Adapter",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.Parameters",
+  "name":"org.ergoplatform.restapi.client.Parameters",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.PowSolutions",
+  "name":"org.ergoplatform.restapi.client.PowSolutions",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.Registers",
+  "name":"org.ergoplatform.restapi.client.Registers",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.api.client.UtxoApi",
+  "name":"org.ergoplatform.restapi.client.UtxoApi",
   "methods":[{"name":"getBoxById","parameterTypes":["java.lang.String"] }]
 },
 {

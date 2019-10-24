@@ -88,7 +88,7 @@ libraryDependencies ++= Seq(
   "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
-  "com.squareup.okhttp3" % "mockwebserver" % "4.2.1" 
+  "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
 )
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
