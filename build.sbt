@@ -144,6 +144,7 @@ lazy val libImpl = (project in file("lib-impl"))
 
 lazy val examples = (project in file("examples"))
     .dependsOn(
+      common % allConfigDependency,
       libApi % allConfigDependency,
       javaClientGenerated % allConfigDependency,
       libImpl % allConfigDependency)
@@ -159,5 +160,6 @@ lazy val ergoPolyglot = (project in file("."))
     .dependsOn(
       javaClientGenerated % allConfigDependency,
       libApi % allConfigDependency,
-      libImpl % allConfigDependency
+      libImpl % allConfigDependency,
+      examples % allConfigDependency
     )

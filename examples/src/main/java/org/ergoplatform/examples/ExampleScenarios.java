@@ -1,4 +1,4 @@
-package org.ergoplatform.polyglot.ni;
+package org.ergoplatform.examples;
 
 import okhttp3.OkHttpClient;
 import org.ergoplatform.polyglot.impl.ErgoNodeFacade;
@@ -32,7 +32,7 @@ public class ExampleScenarios {
         return signed;
     }
 
-    public void request(String nodeUrl) {
+    public void requestNodeInfo(String nodeUrl) {
 
         ApiClient client = new ApiClient(nodeUrl);
         OkHttpClient ok = client.getOkBuilder().build();

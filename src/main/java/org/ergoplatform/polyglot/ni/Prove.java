@@ -1,6 +1,7 @@
 package org.ergoplatform.polyglot.ni;
 
 import org.ergoplatform.ErgoAddressEncoder;
+import org.ergoplatform.examples.ExampleScenarios;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.polyglot.BlockchainContext;
 import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;
@@ -18,7 +19,7 @@ public class Prove {
 //    static String nodeUrl = "http://209.97.134.210:9052";
     public static void main(String[] args) {
         ExampleScenarios r = new ExampleScenarios();
-        r.request(nodeUrl);
+        r.requestNodeInfo(nodeUrl);
         try {
             ApiClient client = new ApiClient(nodeUrl);
             BlockchainContext ctx =
@@ -33,7 +34,7 @@ public class Prove {
     @CEntryPoint(name = "sign")
     public static void sign(IsolateThread thread, CCharPointer cBoxId, CCharPointer resBuffer, UnsignedWord bufferSize) {
         ExampleScenarios r = new ExampleScenarios();
-        r.request(nodeUrl);
+        r.requestNodeInfo(nodeUrl);
 
         /* Convert the C string to the target Java string. */
         String boxId = CTypeConversion.toJavaString(cBoxId);
