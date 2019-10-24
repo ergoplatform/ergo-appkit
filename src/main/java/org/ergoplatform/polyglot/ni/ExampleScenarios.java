@@ -1,8 +1,8 @@
 package org.ergoplatform.polyglot.ni;
 
 import okhttp3.OkHttpClient;
-import org.ergoplatform.api.client.ApiClient;
-import org.ergoplatform.api.client.NodeInfo;
+import org.ergoplatform.restapi.client.ApiClient;
+import org.ergoplatform.restapi.client.NodeInfo;
 import org.ergoplatform.polyglot.*;
 import retrofit2.Retrofit;
 

@@ -1,8 +1,8 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.api.client.BlockHeader;
-import org.ergoplatform.api.client.ErgoTransactionOutput;
-import org.ergoplatform.api.client.NodeInfo;
+import org.ergoplatform.restapi.client.BlockHeader;
+import org.ergoplatform.restapi.client.ErgoTransactionOutput;
+import org.ergoplatform.restapi.client.NodeInfo;
 import retrofit2.Retrofit;
 
 import java.util.ArrayList;

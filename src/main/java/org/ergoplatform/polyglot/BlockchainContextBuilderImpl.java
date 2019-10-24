@@ -1,9 +1,9 @@
 package org.ergoplatform.polyglot;
 
 import okhttp3.OkHttpClient;
-import org.ergoplatform.api.client.ApiClient;
-import org.ergoplatform.api.client.BlockHeader;
-import org.ergoplatform.api.client.NodeInfo;
+import org.ergoplatform.restapi.client.ApiClient;
+import org.ergoplatform.restapi.client.BlockHeader;
+import org.ergoplatform.restapi.client.NodeInfo;
 import retrofit2.Retrofit;
 
 import java.math.BigDecimal;

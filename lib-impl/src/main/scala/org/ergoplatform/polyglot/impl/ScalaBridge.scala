@@ -6,7 +6,7 @@ import special.collection.Coll
 import special.sigma.Header
 import scorex.crypto.authds.ADDigest
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
-import org.ergoplatform.api.client.BlockHeader
+import org.ergoplatform.restapi.client.BlockHeader
 import sigmastate.eval.{CAvlTree, CHeader, Colls, SigmaDsl}
 
 object ScalaBridge {

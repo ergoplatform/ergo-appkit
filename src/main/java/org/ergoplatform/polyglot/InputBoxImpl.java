@@ -1,7 +1,7 @@
 package org.ergoplatform.polyglot;
 
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.api.client.ErgoTransactionOutput;
+import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import scala.Tuple2;
 import sigmastate.Values;
 import sigmastate.serialization.ErgoTreeSerializer;

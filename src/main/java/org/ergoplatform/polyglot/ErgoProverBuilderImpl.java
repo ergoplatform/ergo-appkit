@@ -1,6 +1,6 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.api.client.Parameters;
+import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;

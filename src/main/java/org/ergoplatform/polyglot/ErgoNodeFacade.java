@@ -1,6 +1,6 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.api.client.*;
+import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
