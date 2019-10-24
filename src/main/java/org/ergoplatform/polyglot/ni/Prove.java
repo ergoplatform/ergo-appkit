@@ -3,7 +3,7 @@ package org.ergoplatform.polyglot.ni;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.polyglot.BlockchainContext;
-import org.ergoplatform.polyglot.BlockchainContextBuilderImpl;
+import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.polyglot.ErgoClientException;
 import org.ergoplatform.polyglot.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;

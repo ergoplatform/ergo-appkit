@@ -1,5 +1,6 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
+import org.ergoplatform.polyglot.*;
 import org.ergoplatform.restapi.client.BlockHeader;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.NodeInfo;

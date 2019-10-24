@@ -1,5 +1,6 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
+import org.ergoplatform.polyglot.ErgoClientException;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;

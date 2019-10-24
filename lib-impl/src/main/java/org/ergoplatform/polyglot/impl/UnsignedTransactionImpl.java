@@ -1,7 +1,8 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
+import org.ergoplatform.polyglot.UnsignedTransaction;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.List;

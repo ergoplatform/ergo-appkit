@@ -1,6 +1,10 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.ErgoBoxCandidate;
+import org.ergoplatform.polyglot.ErgoId;
+import org.ergoplatform.polyglot.ErgoToken;
+import org.ergoplatform.polyglot.OutBox;
+import org.ergoplatform.polyglot.UnsignedTransaction;
 
 public class OutBoxImpl implements OutBox {
   private final ErgoBoxCandidate _ergoBoxCandidate;

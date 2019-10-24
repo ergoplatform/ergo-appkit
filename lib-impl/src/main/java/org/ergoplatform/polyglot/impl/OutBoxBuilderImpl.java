@@ -1,6 +1,10 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.*;
+import org.ergoplatform.polyglot.ErgoToken;
+import org.ergoplatform.polyglot.JavaHelpers;
+import org.ergoplatform.polyglot.OutBox;
+import org.ergoplatform.polyglot.OutBoxBuilder;
 import scala.Tuple2;
 import sigmastate.Values;
 

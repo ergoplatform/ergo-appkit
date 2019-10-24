@@ -1,6 +1,7 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.*;
+import org.ergoplatform.polyglot.*;
 import org.ergoplatform.polyglot.impl.ScalaBridge;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import scala.collection.IndexedSeq;

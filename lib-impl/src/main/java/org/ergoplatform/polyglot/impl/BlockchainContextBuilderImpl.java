@@ -1,6 +1,9 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import okhttp3.OkHttpClient;
+import org.ergoplatform.polyglot.BlockchainContext;
+import org.ergoplatform.polyglot.BlockchainContextBuilder;
+import org.ergoplatform.polyglot.ErgoClientException;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.restapi.client.BlockHeader;
 import org.ergoplatform.restapi.client.NodeInfo;

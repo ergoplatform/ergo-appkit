@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.ergoplatform.ErgoAddressEncoder
+import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl
 import org.ergoplatform.restapi.client.ApiClient
 import org.ergoplatform.polyglot.ni.ExampleScenarios
 import org.ergoplatform.settings.ErgoAlgos

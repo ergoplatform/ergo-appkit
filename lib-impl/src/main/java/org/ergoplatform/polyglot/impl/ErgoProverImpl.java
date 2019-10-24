@@ -1,7 +1,11 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.polyglot.ErgoProver;
+import org.ergoplatform.polyglot.JavaHelpers;
+import org.ergoplatform.polyglot.SignedTransaction;
+import org.ergoplatform.polyglot.UnsignedTransaction;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import scala.collection.IndexedSeq;
 

@@ -1,5 +1,8 @@
-package org.ergoplatform.polyglot;
+package org.ergoplatform.polyglot.impl;
 
+import org.ergoplatform.polyglot.ErgoProver;
+import org.ergoplatform.polyglot.ErgoProverBuilder;
+import org.ergoplatform.polyglot.JavaHelpers;
 import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
