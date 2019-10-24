@@ -83,11 +83,11 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "org.graalvm" % "graal-sdk" % "0.30",
-  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
   "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
-  "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
-  "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
+  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
   "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
 )
 
@@ -98,12 +98,12 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
         "com.google.code.findbugs" % "jsr305" % "3.0.2",
-        "io.gsonfire" % "gson-fire" % "1.8.0" % "compile",
+        "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
         "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
         "org.threeten" % "threetenbp" % "1.3.5" % "compile",
         "com.squareup.retrofit2" % "retrofit" % "2.6.2",
-        "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
-        "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
+        "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
+        "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
         "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.2",
         "junit" % "junit" % "4.12" % "test",
       )
