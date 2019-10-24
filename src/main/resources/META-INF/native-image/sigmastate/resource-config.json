@@ -1,0 +1,9 @@
+{
+  "resources":[
+    {"pattern":"META-INF/services/org.slf4j.spi.SLF4JServiceProvider"}, 
+    {"pattern":"library.properties"}, 
+    {"pattern":"org/scalactic/ScalacticBundle.properties"}, 
+    {"pattern":"org/scalatest/ScalaTestBundle.properties"}, 
+    {"pattern":"org/scalatest/Suite.class"}
+  ]
+}
