@@ -6,42 +6,28 @@ lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
   scalaVersion := "2.12.8",
   version := "3.0.0",
+  resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+    "SonaType" at "https://oss.sonatype.org/content/groups/public",
+    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
+    Resolver.mavenCentral),
   homepage := Some(url("http://ergoplatform.org/")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode"))
 )
 
 lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
+lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
+lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 lazy val allResolvers = Seq(
   sonatypePublic,
+  sonatypeReleases,
+  sonatypeSnapshots,
   Resolver.mavenCentral,
 )
 
-resolvers ++= allResolvers
-updateOptions := updateOptions.value.withLatestSnapshots(false)
-
-val sigmaStateVersion = "exact-ops-ff7cc0e2-SNAPSHOT"
-val ergoWalletVersion = "sigma-core-opt-fa221c39-SNAPSHOT"
-
-lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
-    .exclude("ch.qos.logback", "logback-classic")
-    .exclude("org.scorexfoundation", "scrypto")
-
-lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
-
-libraryDependencies ++= Seq(
-  sigmaState,
-  ergoWallet,
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "org.graalvm" % "graal-sdk" % "0.30",
-  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
-  "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
-  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
-  "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
-  "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
-  "com.squareup.okhttp3" % "mockwebserver" % "4.2.1" % "test"
-)
+//resolvers ++= allResolvers
+//updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))
 
@@ -82,12 +68,36 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
+val sigmaStateVersion = "exact-ops-ff7cc0e2-SNAPSHOT"
+val ergoWalletVersion = "sigma-core-opt-fa221c39-SNAPSHOT"
+
+lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
+    .exclude("ch.qos.logback", "logback-classic")
+    .exclude("org.scorexfoundation", "scrypto")
+
+lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
+
+libraryDependencies ++= Seq(
+  sigmaState,
+  ergoWallet,
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.graalvm" % "graal-sdk" % "0.30",
+  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
+  "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
+  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
+  "com.squareup.retrofit2" % "converter-scalars" % "2.6.0",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.0",
+  "com.squareup.okhttp3" % "mockwebserver" % "4.2.1" 
+)
+
 lazy val javaClientGenerated = (project in file("java-client-generated"))
     .settings(
       commonSettings,
       name := "java-client-generated",
-      resolvers ++= Seq(Resolver.mavenCentral),
+      resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
+        "com.google.code.findbugs" % "jsr305" % "3.0.2",
         "io.gsonfire" % "gson-fire" % "1.8.0" % "compile",
         "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
         "org.threeten" % "threetenbp" % "1.3.5" % "compile",
@@ -105,7 +115,7 @@ lazy val common = (project in file("common"))
     .settings(
       commonSettings,
       name := "common",
-      resolvers ++= Seq(sonatypePublic),
+      resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
         sigmaState,
         ergoWallet
@@ -116,8 +126,7 @@ lazy val libApi = (project in file("lib-api"))
     .dependsOn(common % allConfigDependency)
     .settings(
       commonSettings,
-      resolvers ++= Seq(sonatypePublic),
-
+      resolvers ++= allResolvers,
       name := "lib-api",
       libraryDependencies ++= Seq(
       )
@@ -128,7 +137,7 @@ lazy val libImpl = (project in file("lib-impl"))
     .settings(
       commonSettings,
       name := "lib-impl",
-      resolvers ++= Seq(sonatypePublic),
+      resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
       )
     )
