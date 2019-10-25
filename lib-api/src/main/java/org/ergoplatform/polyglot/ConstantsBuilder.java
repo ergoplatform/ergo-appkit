@@ -17,4 +17,6 @@ public class ConstantsBuilder {
   }
 
   public static ConstantsBuilder create() { return new ConstantsBuilder(); }
+
+  public static Dictionary<String, Object> empty() { return create().build(); }
 }

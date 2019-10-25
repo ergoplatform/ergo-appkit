@@ -1,10 +1,7 @@
 package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.ErgoBoxCandidate;
-import org.ergoplatform.polyglot.ErgoId;
-import org.ergoplatform.polyglot.ErgoToken;
-import org.ergoplatform.polyglot.OutBox;
-import org.ergoplatform.polyglot.UnsignedTransaction;
+import org.ergoplatform.polyglot.*;
 
 public class OutBoxImpl implements OutBox {
   private final ErgoBoxCandidate _ergoBoxCandidate;
@@ -40,5 +37,10 @@ public class OutBoxImpl implements OutBox {
 
   ErgoBoxCandidate getErgoBoxCandidate() {
     return _ergoBoxCandidate;
+  }
+
+  @Override
+  public InputBox convertToInputWith(String txId, short boxIndex) {
+    return new InputBoxImpl(_ergoBoxCandidate.toBox(txId, boxIndex));
   }
 }

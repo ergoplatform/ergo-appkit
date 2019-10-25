@@ -54,6 +54,9 @@ object JavaHelpers {
     SigmaDsl.GroupElement(pe)
   }
 
+  def hash(s: String): String = {
+    ErgoAlgos.encode(ErgoAlgos.hash(s))
+  }
 
   def toPreHeader(h: Header): PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)

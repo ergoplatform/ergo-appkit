@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class ExampleScenarios {
 
     public SignedTransaction spendBoxes(BlockchainContext ctx, String... boxIds) throws ErgoClientException {
-        UnsignedTransactionBuilder txB = ctx.newUnsignedTransaction();
+        UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         InputBox[] boxes = ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
         UnsignedTransaction tx = txB

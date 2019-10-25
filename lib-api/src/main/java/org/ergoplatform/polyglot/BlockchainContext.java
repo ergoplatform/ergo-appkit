@@ -1,7 +1,7 @@
 package org.ergoplatform.polyglot;
 
 public interface BlockchainContext {
-    UnsignedTransactionBuilder newUnsignedTransaction();
+    UnsignedTransactionBuilder newTxBuilder();
 
     InputBox[] getBoxesById(String... boxIds) throws ErgoClientException;
 

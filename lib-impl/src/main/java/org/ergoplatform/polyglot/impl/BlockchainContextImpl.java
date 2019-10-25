@@ -25,7 +25,7 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public UnsignedTransactionBuilder newUnsignedTransaction() {
+    public UnsignedTransactionBuilder newTxBuilder() {
         return new UnsignedTransactionBuilderImpl(this);
     }
 

@@ -6,4 +6,5 @@ public interface OutBox {
     int getBoxIndex();
     long getValue();
     ErgoToken token(ErgoId id);
+    InputBox convertToInputWith(String txId, short boxIndex);
 }
