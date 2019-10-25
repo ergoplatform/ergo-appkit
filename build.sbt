@@ -116,6 +116,7 @@ lazy val common = (project in file("common"))
       commonSettings,
       name := "common",
       resolvers ++= allResolvers,
+      compileOrder := CompileOrder.Mixed,
       libraryDependencies ++= Seq(
         sigmaState,
         ergoWallet

@@ -41,17 +41,17 @@ class ApiClientSpec
     // instance for every unit test.
     val server = new MockWebServer
     // Schedule some responses.
-    val nodeInfoJson = read(file("src/test/resources/org/ergoplatform/polyglot/response_NodeInfo.json"))
+    val nodeInfoJson = read(file("src/main/resources/org/ergoplatform/polyglot/response_NodeInfo.json"))
     server.enqueue(new MockResponse()
         .addHeader("Content-Type", "application/json; charset=utf-8")
         .setBody(nodeInfoJson))
 
-    val lastHeadersJson = read(file("src/test/resources/org/ergoplatform/polyglot/response_LastHeaders.json"))
+    val lastHeadersJson = read(file("src/main/resources/org/ergoplatform/polyglot/response_LastHeaders.json"))
     server.enqueue(new MockResponse()
         .addHeader("Content-Type", "application/json; charset=utf-8")
         .setBody(lastHeadersJson))
 
-    val boxJson = read(file("src/test/resources/org/ergoplatform/polyglot/response_Box.json"))
+    val boxJson = read(file("src/main/resources/org/ergoplatform/polyglot/response_Box.json"))
     server.enqueue(new MockResponse()
         .addHeader("Content-Type", "application/json; charset=utf-8")
         .setBody(boxJson))
