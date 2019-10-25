@@ -413,6 +413,10 @@
     "allPublicConstructors":true
   },
   {
+    "name":"special.collection.Coll",
+    "allPublicMethods":true
+  },
+  {
     "name":"special.collection.CollBuilder",
     "allDeclaredMethods":true
   },
