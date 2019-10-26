@@ -91,6 +91,26 @@ libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
 js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
 ```
+Start session for debugging
+```
+js --jvm --inspect --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
+    examples/src/main/java/org/ergoplatform/example/PrepareBox.js
+```
+
+### Creating Idea Project
+
+go to `substratevm` sub-directory and run
+```
+mx ideinit
+```
+if suggested run 
+```
+mx build --dependencies=TRUFFLE_NFI
+```
+and then repeat
+```
+mx ideinit
+```
 
 ### References
 
