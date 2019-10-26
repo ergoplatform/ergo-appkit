@@ -1,5 +1,9 @@
 [
   {
+    "name":"scala.Some",
+    "allPublicConstructors":true
+  },
+  {
     "name":"scala.collection.immutable.$colon$colon",
     "allPublicConstructors":true
   },
@@ -13,6 +17,20 @@
       {"name":"hasNext","parameterTypes":[] },
       {"name":"next","parameterTypes":[] }
     ]
+  },
+  {
+    "name":"scala.reflect.NameTransformer",
+    "methods":[{"name":"decode","parameterTypes":["java.lang.String"] }]
+  },
+  {
+    "name":"scala.util.Failure",
+    "allPublicFields":true,
+    "allPublicMethods":true
+  },
+  {
+    "name":"scala.util.Success",
+    "allPublicFields":true,
+    "allPublicMethods":true
   },
   {
     "name":"scalan.TypeDescs$FuncElem",
@@ -823,5 +841,36 @@
   {
     "name":"special.sigma.SizeContext",
     "allDeclaredMethods":true
+  },
+  {
+    "name":"sun.misc.Unsafe",
+    "allDeclaredFields":true
+  },
+  {
+    "name":"wrappers.scala.WOptions$WOption",
+    "allDeclaredMethods":true,
+    "methods":[
+      {"name":"filter","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"get","parameterTypes":[] },
+      {"name":"getOrElse","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"isDefined","parameterTypes":[] },
+      {"name":"map","parameterTypes":["scalan.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"wrappers.scala.impl.WOptionsDefs$WOption$$anon$1",
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"wrappers.scala.impl.WOptionsDefs$WOption$WOptionElem",
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"wrappers.scalan.impl.WRTypesDefs$WRType$WRTypeElem",
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"wrappers.special.WSpecialPredefs$WSpecialPredefCompanion",
+    "methods":[{"name":"some","parameterTypes":["scalan.Base$Ref"] }]
   }
 ]
