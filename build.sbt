@@ -1,4 +1,3 @@
-import scala.util.Try
 
 version := "3.0.0"
 
@@ -25,9 +24,6 @@ lazy val allResolvers = Seq(
   sonatypeSnapshots,
   Resolver.mavenCentral,
 )
-
-//resolvers ++= allResolvers
-//updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))
 
@@ -136,8 +132,7 @@ lazy val libApi = (project in file("lib-api"))
 lazy val libImpl = (project in file("lib-impl"))
     .dependsOn(libApi % allConfigDependency, javaClientGenerated % allConfigDependency)
     .settings(
-      commonSettings,
-      name := "lib-impl",
+      commonSettings, name := "lib-impl",
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
       )
@@ -150,17 +145,18 @@ lazy val examples = (project in file("examples"))
       javaClientGenerated % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(
-      commonSettings,
-      name := "examples",
+      commonSettings, name := "examples",
       libraryDependencies ++= Seq(
+        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
       )
     )
 
 lazy val ergoPolyglot = (project in file("."))
-    .settings(commonSettings, name := "ergo-polyglot")
     .dependsOn(
+      common % allConfigDependency,
       javaClientGenerated % allConfigDependency,
       libApi % allConfigDependency,
       libImpl % allConfigDependency,
-      examples % allConfigDependency
-    )
+      examples % allConfigDependency)
+    .settings(commonSettings, name := "ergo-polyglot")
+

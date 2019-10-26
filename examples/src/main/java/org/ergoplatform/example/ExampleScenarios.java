@@ -1,4 +1,4 @@
-package org.ergoplatform.examples;
+package org.ergoplatform.example;
 
 import okhttp3.OkHttpClient;
 import org.ergoplatform.polyglot.impl.ErgoNodeFacade;

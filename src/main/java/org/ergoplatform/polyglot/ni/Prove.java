@@ -1,7 +1,7 @@
 package org.ergoplatform.polyglot.ni;
 
 import org.ergoplatform.ErgoAddressEncoder;
-import org.ergoplatform.examples.ExampleScenarios;
+import org.ergoplatform.example.ExampleScenarios;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.polyglot.BlockchainContext;
 import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;

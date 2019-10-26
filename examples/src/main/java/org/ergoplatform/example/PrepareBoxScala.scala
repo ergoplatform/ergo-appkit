@@ -1,11 +1,14 @@
-package org.ergoplatform.polyglot
+package org.ergoplatform.example
 
-object PrepareBox  {
+import org.ergoplatform.example.util.FileMockedRunner
+import org.ergoplatform.polyglot.ConstantsBuilder
+
+object PrepareBoxScala  {
 
   def main(args: Array[String]) = {
-    import MockData._
+    import org.ergoplatform.example.MockData._
 
-    val res = FileMockedRunner(infoFile, lastHeadersFile, boxFile).run { ctx =>
+    val res = new FileMockedRunner(infoFile, lastHeadersFile, boxFile).run { ctx =>
       val mockTxB = ctx.newTxBuilder()
       val out = mockTxB.outBoxBuilder()
           .contract(ConstantsBuilder.empty(), "{ sigmaProp(CONTEXT.headers.size == 9) }")

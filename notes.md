@@ -85,6 +85,13 @@ Graal SDK in build.sbt
 libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
 ```
 
+### GraalVM JS
+
+```
+js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
+    examples/src/main/java/org/ergoplatform/example/PrepareBox.js
+```
+
 ### References
 
 - [Assisted Configuration of Native Image Builds](https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md)
@@ -106,3 +113,5 @@ libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
 - [issue with okhttp with graalvm-ce-19.0.0](https://github.com/oracle/graal/issues/1294)
 - [Micronaut + GraalVM - no compile](https://github.com/flowable/flowable-engine/issues/1974)
 - [com.oracle.graal.pointsto.constraints.UnsupportedFeatureException creating Micronaut native image with Redis Lettuce](https://github.com/oracle/graal/issues/1036)
+- [On security provider and Bouncy Castle with NI](https://github.com/oracle/graal/issues/951)
+
