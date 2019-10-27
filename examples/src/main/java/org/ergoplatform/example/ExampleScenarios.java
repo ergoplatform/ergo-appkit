@@ -1,11 +1,6 @@
 package org.ergoplatform.example;
 
-import okhttp3.OkHttpClient;
-import org.ergoplatform.polyglot.impl.ErgoNodeFacade;
-import org.ergoplatform.restapi.client.ApiClient;
-import org.ergoplatform.restapi.client.NodeInfo;
 import org.ergoplatform.polyglot.*;
-import retrofit2.Retrofit;
 
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -47,7 +42,7 @@ public class ExampleScenarios {
                                 .build())
                 .build();
 
-        ErgoProverBuilder proverB = _ctx.newProver();
+        ErgoProverBuilder proverB = _ctx.newProverBuilder();
         ErgoProver prover = proverB.withSeed(seedPhrase).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;
@@ -79,7 +74,7 @@ public class ExampleScenarios {
                                 .contract(ConstantsBuilder.empty(), "{ true }")
                                 .build())
                 .build();
-        ErgoProverBuilder proverB = _ctx.newProver();
+        ErgoProverBuilder proverB = _ctx.newProverBuilder();
         ErgoProver prover = proverB.withSeed(seedPhrase).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;

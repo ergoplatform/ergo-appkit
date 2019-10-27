@@ -1,5 +1,5 @@
 const MockData = Java.type("org.ergoplatform.example.MockData")
-const FileMockedRunner = Java.type("org.ergoplatform.example.util.FileMockedRunner")
+const FileMockedErgoClient = Java.type("org.ergoplatform.example.util.FileMockedErgoClient")
 const ConstantsBuilder = Java.type("org.ergoplatform.polyglot.ConstantsBuilder")
 
 var ergoScript = process.argv[2]
@@ -11,8 +11,8 @@ if (typeof(ergoScript) == "undefined")
 //     console.log(j + ' -> ' + (process.argv[j]));
 // }
 
-var res = new FileMockedRunner(MockData.infoFile, MockData.lastHeadersFile, MockData.boxFile)
-   .run(function (ctx) {
+var res = new FileMockedErgoClient(MockData.infoFile, MockData.lastHeadersFile, MockData.boxFile)
+   .execute(function (ctx) {
         var mockTxB = ctx.newTxBuilder()
         var out = mockTxB.outBoxBuilder()
             .contract(ConstantsBuilder.empty(), ergoScript)
@@ -25,7 +25,7 @@ var res = new FileMockedRunner(MockData.infoFile, MockData.lastHeadersFile, Mock
                     .contract(ConstantsBuilder.empty(), "{ true }")
                     .build())
             .build()
-        var proverB = ctx.newProver()
+        var proverB = ctx.newProverBuilder()
         var prover = proverB.withSeed("abc").build()
         var signed = prover.sign(tx)
         return signed

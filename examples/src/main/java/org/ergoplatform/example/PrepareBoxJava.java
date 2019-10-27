@@ -1,7 +1,7 @@
 package org.ergoplatform.example;
 
 import com.google.common.base.Strings;
-import org.ergoplatform.example.util.FileMockedRunner;
+import org.ergoplatform.example.util.FileMockedErgoClient;
 import org.ergoplatform.polyglot.*;
 
 import static org.ergoplatform.example.MockData.*;
@@ -16,11 +16,12 @@ public class PrepareBoxJava {
                 ? "{ sigmaProp(CONTEXT.headers.size == 9) }"
                 : args[0];
         SignedTransaction res =
-                new FileMockedRunner(infoFile, lastHeadersFile, boxFile).run((BlockchainContext ctx) -> {
+                new FileMockedErgoClient(infoFile, lastHeadersFile, boxFile).execute((BlockchainContext ctx) -> {
                     ExampleScenarios r = new ExampleScenarios(ctx);
                     SignedTransaction signed = r.prepareBox(
-                            mockTxId, (short)0, ConstantsBuilder.empty(),
-                            ergoScript, seed);
+                            mockTxId, (short)0,
+                            ConstantsBuilder.empty(), ergoScript,
+                            seed);
                     return signed;
                 });
 

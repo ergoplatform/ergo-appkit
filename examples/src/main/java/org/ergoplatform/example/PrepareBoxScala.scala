@@ -1,6 +1,6 @@
 package org.ergoplatform.example
 
-import org.ergoplatform.example.util.FileMockedRunner
+import org.ergoplatform.example.util.FileMockedErgoClient
 import org.ergoplatform.polyglot.ConstantsBuilder
 
 object PrepareBoxScala  {
@@ -8,7 +8,7 @@ object PrepareBoxScala  {
   def main(args: Array[String]) = {
     import org.ergoplatform.example.MockData._
 
-    val res = new FileMockedRunner(infoFile, lastHeadersFile, boxFile).run { ctx =>
+    val res = new FileMockedErgoClient(infoFile, lastHeadersFile, boxFile).execute { ctx =>
       val mockTxB = ctx.newTxBuilder()
       val out = mockTxB.outBoxBuilder()
           .contract(ConstantsBuilder.empty(), "{ sigmaProp(CONTEXT.headers.size == 9) }")
@@ -21,7 +21,7 @@ object PrepareBoxScala  {
                    .contract(ConstantsBuilder.empty(), "{ true }")
                    .build())
           .build()
-      val proverB = ctx.newProver
+      val proverB = ctx.newProverBuilder
       val prover = proverB.withSeed("abc").build()
       val signed = prover.sign(tx)
       signed

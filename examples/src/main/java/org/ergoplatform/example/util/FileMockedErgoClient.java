@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.polyglot.BlockchainContext;
 import org.ergoplatform.polyglot.ErgoClientException;
+import org.ergoplatform.polyglot.NetworkType;
 import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.restapi.client.ApiClient;
 import scalan.util.FileUtil;
@@ -17,12 +18,12 @@ import java.util.function.Function;
 /**
  * MockedRunner using given files to provide BlockchainContext information.
  */
-public class FileMockedRunner implements MockedRunner {
+public class FileMockedErgoClient implements MockedErgoClient {
     private final String _nodeInfoFile;
     private final String _lastHeadersFile;
     private final String _boxFile;
 
-    public FileMockedRunner(String nodeInfoFile, String lastHeadersFile, String boxFile) {
+    public FileMockedErgoClient(String nodeInfoFile, String lastHeadersFile, String boxFile) {
         _nodeInfoFile = nodeInfoFile;
         _lastHeadersFile = lastHeadersFile;
         _boxFile = boxFile;
@@ -44,7 +45,7 @@ public class FileMockedRunner implements MockedRunner {
     }
 
     @Override
-    public <T> T run(Function<BlockchainContext, T> action) {
+    public <T> T execute(Function<BlockchainContext, T> action) {
         MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse()
                 .addHeader("Content-Type", "application/json; charset=utf-8")
@@ -66,7 +67,7 @@ public class FileMockedRunner implements MockedRunner {
         HttpUrl baseUrl = server.url("/");
         ApiClient client = new ApiClient(baseUrl.toString());
         BlockchainContext ctx =
-         new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.MainnetNetworkPrefix()).build();
+         new BlockchainContextBuilderImpl(client, NetworkType.MAINNET).build();
 
         T res = action.apply(ctx);
 

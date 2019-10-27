@@ -99,8 +99,8 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public byte getNetworkPrefix() {
-        return _ctx.getNetworkPrefix();
+    public NetworkType getNetworkType() {
+        return _ctx.getNetworkType();
     }
 
     @Override

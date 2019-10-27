@@ -1,9 +1,11 @@
 package org.ergoplatform.example.util;
 
+import org.ergoplatform.polyglot.ErgoClient;
+
 /**
  *
  */
-public interface MockedRunner extends Runner {
+public interface MockedErgoClient extends ErgoClient {
     /**
      * Response content for `/info` request.
      */

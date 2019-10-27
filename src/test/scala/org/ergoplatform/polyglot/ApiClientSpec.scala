@@ -63,7 +63,7 @@ class ApiClientSpec
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-    val ctx = new BlockchainContextBuilderImpl(client, ErgoAddressEncoder.MainnetNetworkPrefix).build()
+    val ctx = new BlockchainContextBuilderImpl(client, NetworkType.MAINNET).build()
     val r = new ExampleScenarios(ctx)
     val res = r.aggregateUtxoBoxes(seed, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
     println(res)

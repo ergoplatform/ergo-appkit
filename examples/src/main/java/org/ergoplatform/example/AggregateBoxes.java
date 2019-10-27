@@ -1,7 +1,8 @@
 package org.ergoplatform.example;
 
 import org.ergoplatform.ErgoAddressEncoder;
-import org.ergoplatform.example.util.BlockchainRunner;
+import org.ergoplatform.example.util.BlockchainErgoClient;
+import org.ergoplatform.polyglot.NetworkType;
 import org.ergoplatform.polyglot.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
@@ -25,8 +26,8 @@ public class AggregateBoxes {
     }
 
     private static SignedTransaction getSignedTransaction(String[] boxesToSpend) {
-        BlockchainRunner runner = new BlockchainRunner(nodeUrl, ErgoAddressEncoder.TestnetNetworkPrefix());
-        return runner.run(ctx -> {
+        BlockchainErgoClient runner = new BlockchainErgoClient(nodeUrl, NetworkType.TESTNET);
+        return runner.execute(ctx -> {
             ExampleScenarios r = new ExampleScenarios(ctx);
             return r.aggregateUtxoBoxes(seed, deadline, boxesToSpend);
         });

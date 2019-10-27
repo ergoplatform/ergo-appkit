@@ -12,14 +12,14 @@ import java.util.List;
 public class BlockchainContextImpl implements BlockchainContext {
 
     private final Retrofit _retrofit;
-    private final byte _networkPrefix;
+    private final NetworkType _networkType;
     private final NodeInfo _nodeInfo;
     private final List<BlockHeader> _headers;
 
     public BlockchainContextImpl(
-            Retrofit retrofit, byte networkPrefix, NodeInfo nodeInfo, List<BlockHeader> headers) {
+            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers) {
         _retrofit = retrofit;
-        _networkPrefix = networkPrefix;
+        _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
     }
@@ -44,13 +44,13 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public ErgoProverBuilder newProver() {
+    public ErgoProverBuilder newProverBuilder() {
         return new ErgoProverBuilderImpl(this);
     }
 
     @Override
-    public byte getNetworkPrefix() {
-        return _networkPrefix;
+    public NetworkType getNetworkType() {
+        return _networkType;
     }
 
     @Override

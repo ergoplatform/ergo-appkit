@@ -11,7 +11,7 @@ public interface UnsignedTransactionBuilder {
 
     BlockchainContext getCtx();
 
-    byte getNetworkPrefix();
+    NetworkType getNetworkType();
 
     OutBoxBuilder outBoxBuilder();
 

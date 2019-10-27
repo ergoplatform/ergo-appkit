@@ -1,6 +1,6 @@
 package org.ergoplatform.example;
 
-import org.ergoplatform.example.util.FileMockedRunner;
+import org.ergoplatform.example.util.FileMockedErgoClient;
 import org.ergoplatform.polyglot.ConstantsBuilder;
 import org.ergoplatform.polyglot.JavaHelpers;
 import org.ergoplatform.polyglot.SignedTransaction;
@@ -37,7 +37,7 @@ public class PrepareBoxC {
         String ergoScript = CTypeConversion.toJavaString(cErgoScript);
 
         SignedTransaction res =
-                new FileMockedRunner(infoFile, lastHeadersFile, boxFile).run(ctx -> {
+                new FileMockedErgoClient(infoFile, lastHeadersFile, boxFile).execute(ctx -> {
                     ExampleScenarios r = new ExampleScenarios(ctx);
                     SignedTransaction signed = r.prepareBox(
                             mockTxId, (short)0, ConstantsBuilder.empty(),
