@@ -60,7 +60,7 @@ public class ExampleScenarios {
      * @param seedPhrase  seed phrase to use for signature
      */
     public SignedTransaction prepareBox(
-            String mockTxId, short outputIndex, Dictionary<String, Object> constants, String ergoScript,
+            String mockTxId, short outputIndex, Constants constants, String ergoScript,
             String seedPhrase) {
         UnsignedTransactionBuilder mockTxB = _ctx.newTxBuilder();
         OutBox out = mockTxB.outBoxBuilder()

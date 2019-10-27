@@ -1,10 +1,7 @@
 package org.ergoplatform.polyglot.impl;
 
 import org.ergoplatform.*;
-import org.ergoplatform.polyglot.ErgoToken;
-import org.ergoplatform.polyglot.JavaHelpers;
-import org.ergoplatform.polyglot.OutBox;
-import org.ergoplatform.polyglot.OutBoxBuilder;
+import org.ergoplatform.polyglot.*;
 import scala.Tuple2;
 import sigmastate.Values;
 
@@ -16,7 +13,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
 
     private final UnsignedTransactionBuilderImpl _txB;
     private long _value = 0;
-    private Dictionary<String, Object> _constants;
+    private Constants _constants;
     private String _contractText = "";
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
@@ -31,7 +28,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
 
 
     @Override
-    public OutBoxBuilderImpl contract(Dictionary<String, Object> constants, String contractText) {
+    public OutBoxBuilderImpl contract(Constants constants, String contractText) {
         _constants = constants;
         _contractText = contractText;
         return this;

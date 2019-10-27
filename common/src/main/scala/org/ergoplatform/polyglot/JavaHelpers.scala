@@ -80,8 +80,8 @@ object JavaHelpers {
     JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
-  def compile(constants: util.Dictionary[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConverters.dictionaryAsScalaMap(constants).toMap
+  def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
+    val env = JavaConverters.mapAsScalaMap(constants).toMap
     implicit val IR = new CompiletimeIRContext
     val prop = ErgoScriptPredef.compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)

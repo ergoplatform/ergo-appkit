@@ -4,9 +4,7 @@ import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
-import org.ergoplatform.ErgoAddressEncoder
-import org.ergoplatform.example.ExampleScenarios
+import org.ergoplatform.example.{ExampleScenarios, PrepareBoxJava, PrepareBoxScala}
 import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl
 import org.ergoplatform.restapi.client.ApiClient
 import org.ergoplatform.settings.ErgoAlgos
@@ -78,5 +76,13 @@ class ApiClientSpec
 
     // Shut down the server. Instances cannot be reused.
     server.shutdown()
+  }
+
+  property("PrepareBoxJava") {
+    PrepareBoxJava.main(Array())
+  }
+
+  property("PrepareBoxScala") {
+    PrepareBoxScala.main(Array())
   }
 }

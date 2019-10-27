@@ -5,18 +5,19 @@ import java.util.Hashtable;
 
 public class ConstantsBuilder {
 
-   Dictionary<String, Object> _dictionary = new Hashtable<>();
+   Constants _constants = new Constants();
 
   public ConstantsBuilder item(String name, Object value)  {
-    _dictionary.put(name, value);
+    _constants.put(name, value);
     return this;
   }
 
-  public Dictionary<String, Object> build() {
-    return _dictionary;
+  public Constants build() {
+    return _constants;
   }
 
   public static ConstantsBuilder create() { return new ConstantsBuilder(); }
 
-  public static Dictionary<String, Object> empty() { return create().build(); }
+  public static Constants empty() { return create().build(); }
 }
+

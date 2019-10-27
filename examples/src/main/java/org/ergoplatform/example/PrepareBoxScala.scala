@@ -11,14 +11,14 @@ object PrepareBoxScala  {
     val res = new FileMockedErgoClient(infoFile, lastHeadersFile, boxFile).execute { ctx =>
       val mockTxB = ctx.newTxBuilder()
       val out = mockTxB.outBoxBuilder()
-          .contract(ConstantsBuilder.empty(), "{ sigmaProp(CONTEXT.headers.size == 9) }")
+                .contract(ConstantsBuilder.empty(), "{ sigmaProp(CONTEXT.headers.size == 9) }")
           .build()
       val spendingTxB = ctx.newTxBuilder()
       val tx = spendingTxB
           .boxesToSpend(out.convertToInputWith(mockTxId, 0))
           .outputs(
                spendingTxB.outBoxBuilder()
-                   .contract(ConstantsBuilder.empty(), "{ true }")
+                                  .contract(ConstantsBuilder.empty(), "{ true }")
                    .build())
           .build()
       val proverB = ctx.newProverBuilder

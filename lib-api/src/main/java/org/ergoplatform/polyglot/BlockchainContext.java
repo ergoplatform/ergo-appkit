@@ -30,8 +30,17 @@ public interface BlockchainContext {
      */
     ErgoProverBuilder newProverBuilder();
 
+    /**
+     * Returns a network type of this context.
+     */
     NetworkType getNetworkType();
 
+    /**
+     * Return the height of the blockchain at the point of time when this
+     * context was created.
+     * The context is immutable, thus to obtain a new height later in time
+     * a new context should be should be created.
+     */
     int getHeight();
 }
 
