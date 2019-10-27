@@ -6,34 +6,30 @@ export GRAAL_HOME=/Library/Java/JavaVirtualMachines/graalvm-ce-19.1.1/Contents/H
 export PATH=$PATH:${GRAAL_HOME}/bin
 ```
 
+Generate reflection config files
+```
+java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
+```
+
 prepare polyglot jar file
 ```
 sbt assembly
 ```
 
-Running JavaScript file
-```
-js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar prove.js
-```
-
-Generate native image
-```
-native-image --no-server -cp target/scala-2.12/ergo-polyglot-3.0.0.jar --report-unsupported-elements-at-runtime --no-fallback org.ergoplatform.polyglot.ni.Prove prove
-```
+### Using native-image
 
 Generate native image for a class
 ```
-native-image --no-server -cp target/scala-2.12/ergo-polyglot-3.0.0.jar --report-unsupported-elements-at-runtime --no-fallback --shared -H:Name=libprove
-otool -L libprove.dylib
-
 native-image --no-server \
  -cp target/scala-2.12/ergo-polyglot-3.0.0.jar\
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
-    --enable-url-protocols=http,https org.ergoplatform.polyglot.ni.Prove prove
+    --enable-url-protocols=http,https org.ergoplatform.example.PrepareBoxJava preparebox
     
+otool -L preparebox
+DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./preparebox "{ sigmaProp(CONTEXT.headers.size == 9) }"
 ```
     
 Generate shared library
@@ -49,52 +45,14 @@ native-image --no-server \
 otool -L libpreparebox.dylib
 ```
 
-Generate reflection config files
-```
-java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
-```
-
+Compile C application 
 ```
 clang -I. -L. -lpreparebox call_preparebox.c -o call_preparebox
 otool -L call_preparebox
-export DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH:/Users/slesarenko/Applications/graal/graalvm-ce-19.2.0.1/Contents/Home/jre/lib
-./call_preparebox "{ sigmaProp(CONTEXT.headers.size == 9) }"
+DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_preparebox "{ sigmaProp(CONTEXT.headers.size == 9) }"
 ```
 
-#### Retrofit failed
-
-```
-native-image --no-server -cp target/scala-2.12/ergo-polyglot-3.0.0.jar --report-unsupported-elements-at-runtime --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions --enable-url-protocols=http,https --initialize-at-build-time=org.ergoplatform.api.client.InfoApi org.ergoplatform.polyglot.ni.Prove prove
-[prove:1742]    classlist:  32,133.40 ms
-[prove:1742]        (cap):   2,177.66 ms
-[prove:1742]        setup:   4,336.99 ms
-[prove:1742]     analysis:  43,829.21 ms
-Error: Unsupported features in 5 methods
-Detailed message:
-Error: com.oracle.graal.pointsto.constraints.UnsupportedFeatureException: Invoke with MethodHandle argument could not be reduced to at most a single call: java.lang.invoke.MethodHandle.bindTo(Object)
-Trace:
-	at parsing java.lang.invoke.MethodHandleImpl.makePairwiseConvertByEditor(MethodHandleImpl.java:221)
-Call path from entry point to java.lang.invoke.MethodHandleImpl.makePairwiseConvertByEditor(MethodHandle, MethodType, boolean, boolean):
-	at java.lang.invoke.MethodHandleImpl.makePairwiseConvertByEditor(MethodHandleImpl.java:207)
-	at java.lang.invoke.MethodHandleImpl.makePairwiseConvert(MethodHandleImpl.java:194)
-	at java.lang.invoke.MethodHandleImpl.makePairwiseConvert(MethodHandleImpl.java:380)
-	at java.lang.invoke.MethodHandle.asTypeUncached(MethodHandle.java:776)
-	at java.lang.invoke.MethodHandle.asType(MethodHandle.java:761)
-	at java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:627)
-	at retrofit2.Platform$Java8.invokeDefaultMethod(Platform.java:104)
-	at retrofit2.Retrofit$1.invoke(Retrofit.java:147)
-	at com.sun.proxy.$Proxy160.getNodeInfo(Unknown Source)
-	at org.ergoplatform.polyglot.ni.Runner.request(Runner.java:49)
-	at org.ergoplatform.polyglot.ni.Prove.sign(Prove.java:22)
-	at com.oracle.svm.core.code.IsolateEnterStub.Prove_sign_7170c23805bf4c1edd7b2739186087c5f31f1aec(generated:0)
-```
-
-Graal SDK in build.sbt
-```
-libraryDependencies ++= Seq("org.graalvm" % "graal-sdk" % "0.30")
-```
-
-### GraalVM JS
+### Using GraalVM JS
 
 ```
 js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
@@ -105,6 +63,7 @@ Start session for debugging
 js --jvm --inspect --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
 ```
+
 
 ### Creating Idea Project
 
