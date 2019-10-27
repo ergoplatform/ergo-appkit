@@ -78,7 +78,7 @@ libraryDependencies ++= Seq(
   ergoWallet,
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "org.graalvm" % "graal-sdk" % "0.30",
+  "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
   "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
   "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
@@ -147,7 +147,8 @@ lazy val examples = (project in file("examples"))
     .settings(
       commonSettings, name := "examples",
       libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
+        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
+        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
       )
     )
 
