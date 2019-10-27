@@ -3,7 +3,6 @@ package org.ergoplatform.example;
 import org.ergoplatform.polyglot.*;
 
 import java.util.Arrays;
-import java.util.Dictionary;
 
 /**
  * Examples demonstrating usage of blockchain client API.
@@ -37,8 +36,9 @@ public class ExampleScenarios {
                         txB.outBoxBuilder()
                                 .value(total)
                                 .contract(
+                                    ErgoContract.create(
                                         ConstantsBuilder.create().item("deadline", deadline).build(),
-                                        "{ HEIGHT > deadline }")
+                                        "{ HEIGHT > deadline }"))
                                 .build())
                 .build();
 
@@ -64,14 +64,14 @@ public class ExampleScenarios {
             String seedPhrase) {
         UnsignedTransactionBuilder mockTxB = _ctx.newTxBuilder();
         OutBox out = mockTxB.outBoxBuilder()
-                .contract(constants, ergoScript)
+                .contract(ErgoContract.create(constants, ergoScript))
                 .build();
         UnsignedTransactionBuilder spendingTxB = _ctx.newTxBuilder();
         UnsignedTransaction tx = spendingTxB
                 .boxesToSpend(out.convertToInputWith(mockTxId, outputIndex))
                 .outputs(
                         spendingTxB.outBoxBuilder()
-                                .contract(ConstantsBuilder.empty(), "{ true }")
+                                .contract(ErgoContract.create(ConstantsBuilder.empty(), "{ true }"))
                                 .build())
                 .build();
         ErgoProverBuilder proverB = _ctx.newProverBuilder();

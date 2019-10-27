@@ -13,8 +13,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
 
     private final UnsignedTransactionBuilderImpl _txB;
     private long _value = 0;
-    private Constants _constants;
-    private String _contractText = "";
+    private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
 
     public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
@@ -28,9 +27,8 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
 
 
     @Override
-    public OutBoxBuilderImpl contract(Constants constants, String contractText) {
-        _constants = constants;
-        _contractText = contractText;
+    public OutBoxBuilderImpl contract(ErgoContract contract) {
+        _contract = contract;
         return this;
     }
 
@@ -45,7 +43,8 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     }
 
     public OutBox build() {
-        Values.ErgoTree tree = JavaHelpers.compile(_constants, _contractText, _txB.getNetworkType().networkPrefix);
+        Values.ErgoTree tree = JavaHelpers.compile(
+            _contract.getConstants(), _contract.getErgoScript(), _txB.getNetworkType().networkPrefix);
         ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
                 new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified creationHeight
         return new OutBoxImpl(ergoBoxCandidate);
