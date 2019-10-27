@@ -91,7 +91,7 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
     .settings(
       commonSettings,
       name := "java-client-generated",
-      resolvers ++= allResolvers,
+      crossPaths := false,
       libraryDependencies ++= Seq(
         "com.google.code.findbugs" % "jsr305" % "3.0.2",
         "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
@@ -130,9 +130,10 @@ lazy val libApi = (project in file("lib-api"))
     )
 
 lazy val libImpl = (project in file("lib-impl"))
-    .dependsOn(libApi % allConfigDependency, javaClientGenerated % allConfigDependency)
+    .dependsOn(javaClientGenerated % allConfigDependency, libApi % allConfigDependency)
     .settings(
       commonSettings, name := "lib-impl",
+      compileOrder := CompileOrder.ScalaThenJava,
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
       )

@@ -14,26 +14,31 @@ public class AggregateBoxes {
     static String nodeUrl = "http://localhost:9052";
     static String seed = "abc";
     static int deadline = 10;
-    static String[] boxesToSpend = new String[] {"83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a"};
+    static String[] boxesToSpend = new String[]{"83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a"};
 
 //    static String nodeUrl = "http://209.97.134.210:9052"; // testnet
 
+
     public static void main(String[] args) {
-        ExampleScenarios r = new ExampleScenarios();
-        BlockchainRunner runner = new BlockchainRunner(nodeUrl, ErgoAddressEncoder.TestnetNetworkPrefix());
-        SignedTransaction res = runner.run(ctx -> r.aggregateUtxoBoxes(ctx, seed, deadline, boxesToSpend));
+        SignedTransaction res = getSignedTransaction(boxesToSpend);
         System.out.println(res);
     }
 
-    @CEntryPoint(name = "sign")
-    public static void sign(
+    private static SignedTransaction getSignedTransaction(String[] boxesToSpend) {
+        BlockchainRunner runner = new BlockchainRunner(nodeUrl, ErgoAddressEncoder.TestnetNetworkPrefix());
+        return runner.run(ctx -> {
+            ExampleScenarios r = new ExampleScenarios(ctx);
+            return r.aggregateUtxoBoxes(seed, deadline, boxesToSpend);
+        });
+    }
+
+    @CEntryPoint(name = "aggregateBoxes")
+    public static void aggregateBoxes(
             IsolateThread thread, CCharPointer cBoxId, CCharPointer resBuffer, UnsignedWord bufferSize) {
         // Convert the C string to the target Java string.
         String boxId = CTypeConversion.toJavaString(cBoxId);
 
-        ExampleScenarios r = new ExampleScenarios();
-        BlockchainRunner runner = new BlockchainRunner(nodeUrl, ErgoAddressEncoder.TestnetNetworkPrefix());
-        SignedTransaction res = runner.run(ctx -> r.aggregateUtxoBoxes(ctx, seed, deadline, boxId));
+        SignedTransaction res = getSignedTransaction(new String[]{boxId});
 
         // put resulting string into provided buffer
         CTypeConversion.toCString(res.toString(), resBuffer, bufferSize);

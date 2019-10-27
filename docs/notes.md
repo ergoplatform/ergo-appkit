@@ -21,7 +21,7 @@ Generate native image
 native-image --no-server -cp target/scala-2.12/ergo-polyglot-3.0.0.jar --report-unsupported-elements-at-runtime --no-fallback org.ergoplatform.polyglot.ni.Prove prove
 ```
 
-Generate native lib
+Generate native image for a class
 ```
 native-image --no-server -cp target/scala-2.12/ergo-polyglot-3.0.0.jar --report-unsupported-elements-at-runtime --no-fallback --shared -H:Name=libprove
 otool -L libprove.dylib
@@ -31,9 +31,22 @@ native-image --no-server \
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
+   --allow-incomplete-classpath \
     --enable-url-protocols=http,https org.ergoplatform.polyglot.ni.Prove prove
     
-./prove -Djava.library.path=/Users/slesarenko/Applications/graal/graalvm-ce-19.2.0.1/Contents/Home/jre/lib
+```
+    
+Generate shared library
+```
+native-image --no-server \
+ -cp target/scala-2.12/ergo-polyglot-3.0.0.jar\
+ --report-unsupported-elements-at-runtime\
+  --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
+   -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
+   --allow-incomplete-classpath \
+    --enable-url-protocols=http,https --shared -H:Name=libpreparebox
+    
+otool -L libpreparebox.dylib
 ```
 
 Generate reflection config files
@@ -42,14 +55,10 @@ java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/
 ```
 
 ```
-clang -I. -L. -lprove prove.c -o provesign
-otool -L provesign
-```
-
-Usefull options 
-```
---initialize-at-build-time=org.ergoplatform.api.client.InfoApi
--H:+AddAllCharsets
+clang -I. -L. -lpreparebox call_preparebox.c -o call_preparebox
+otool -L call_preparebox
+export DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH:/Users/slesarenko/Applications/graal/graalvm-ce-19.2.0.1/Contents/Home/jre/lib
+./call_preparebox "{ sigmaProp(CONTEXT.headers.size == 9) }"
 ```
 
 #### Retrofit failed
