@@ -11,23 +11,8 @@ public class OutBoxImpl implements OutBox {
   }
 
   @Override
-  public ErgoId getId() {
-    return null;
-  }
-
-  @Override
-  public UnsignedTransaction getTx() {
-    return null;
-  }
-
-  @Override
-  public int getBoxIndex() {
-    return 0;
-  }
-
-  @Override
   public long getValue() {
-    return 0;
+    return _ergoBoxCandidate.value();
   }
 
   @Override

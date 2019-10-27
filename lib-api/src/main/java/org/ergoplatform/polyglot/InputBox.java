@@ -1,9 +1,20 @@
 package org.ergoplatform.polyglot;
 
-import org.ergoplatform.polyglot.ErgoId;
-
+/**
+ * Interface of UTXO boxes which can be accessed in the blockchain node.
+ * Instances of this interface can be {@link BlockchainContext#getBoxesById(String...) obtained}
+ * from {@link BlockchainContext} and {@link UnsignedTransactionBuilder#boxesToSpend(InputBox...) spent}
+ * as part of a new transaction.
+ */
 public interface InputBox {
+    /**
+     * Returns the id of this box.
+     */
     ErgoId getId();
+
+    /**
+     * Returns the ERG value stored in this box, i.e. unspent value in UTXO.
+     */
     Long getValue();
 }
 
