@@ -6,7 +6,7 @@ import java.util
 import special.sigma.Header
 import scorex.crypto.authds.ADDigest
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
-import sigmastate.eval.{CAvlTree, CHeader, Colls, SigmaDsl}
+import sigmastate.eval.{CAvlTree, CHeader, Colls}
 import special.collection.Coll
 
 object ScalaBridge {
