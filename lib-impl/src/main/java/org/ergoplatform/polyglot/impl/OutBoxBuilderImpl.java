@@ -15,6 +15,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     private long _value = 0;
     private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
+    private ArrayList<ErgoValue> _registers = new ArrayList<>();
 
     public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
         _txB = txB;
@@ -38,8 +39,9 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     }
 
     @Override
-    public OutBoxBuilderImpl registers(Dictionary<Byte, Object> regs) {
-        return null;
+    public OutBoxBuilderImpl registers(ErgoValue... registers) {
+        Collections.addAll(_registers, registers);
+        return this;
     }
 
     public OutBox build() {

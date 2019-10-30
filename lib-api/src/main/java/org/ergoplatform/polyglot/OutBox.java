@@ -25,8 +25,9 @@ public interface OutBox {
      * Converts this box candidate into a new instance of {@link InputBox} by
      * associating it with the given transaction and output position.
      * This method can be used to create input boxed from scratch, without
-     * retrieving them from the UTXOs. Thus created can be indistinguishable from those
+     * retrieving them from the UTXOs. Thus created boxes can be indistinguishable from those
      * loaded from blockchain node, and as result can be used to create new transactions.
+     * This method can also be used to create chains of transactions in advance
      *
      * @param txId        the id of the transaction of which the newly created box will be output
      * @param outputIndex zero-based position (index) of the box in the outputs of the transaction.
