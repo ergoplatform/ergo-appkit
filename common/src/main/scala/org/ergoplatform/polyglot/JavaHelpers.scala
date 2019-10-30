@@ -1,5 +1,7 @@
 package org.ergoplatform.polyglot
 
+import java.math.BigInteger
+
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import scalan.RType
@@ -11,16 +13,18 @@ import org.ergoplatform.{ErgoBox, ErgoBoxCandidate, UnsignedInput, ErgoScriptPre
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
 import scorex.util.ModifierId
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
+import sigmastate.Values.{ShortConstant, LongConstant, Constant, EvaluatedValue, SValue, BigIntConstant, IntConstant, ErgoTree, ByteConstant, GroupElementConstant}
 import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.Mnemonic
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CPreHeader, CHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CostingSigmaDslBuilder, CPreHeader, CHeader}
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
+
+import org.bouncycastle.math.ec.ECPoint
 
 object JavaHelpers {
   implicit class StringExtensions(val source: String) extends AnyVal {
@@ -132,6 +136,25 @@ object JavaHelpers {
 
   def createUnsignedInput(boxIdBytes: Array[Byte]): UnsignedInput = {
     new UnsignedInput(ADKey @@ boxIdBytes)
+  }
+
+  def valueOf(n: Byte): EvaluatedValue[_] = { ByteConstant(n) }
+  def valueOf(n: Short): EvaluatedValue[_] = { ShortConstant(n) }
+  def valueOf(n: Int): EvaluatedValue[_] = { IntConstant(n) }
+  def valueOf(n: Long): EvaluatedValue[_] = { LongConstant(n) }
+  def valueOf(n: BigInteger): EvaluatedValue[_] = { BigIntConstant(n) }
+  def valueOf(n: ECPoint): EvaluatedValue[_] = { GroupElementConstant(SigmaDsl.GroupElement(n)) }
+
+  def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
+  def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType
+  def GroupElementRType: RType[special.sigma.GroupElement] = special.sigma.GroupElementRType
+  def SigmaPropRType: RType[special.sigma.SigmaProp] = special.sigma.SigmaPropRType
+  def AvlTreeRType: RType[special.sigma.AvlTree] = special.sigma.AvlTreeRType
+
+  def SigmaDsl: CostingSigmaDslBuilder = sigmastate.eval.SigmaDsl
+
+  def collFrom(arr: Array[Byte]): Coll[Byte] = {
+    Colls.fromArray(arr)
   }
 
 }
