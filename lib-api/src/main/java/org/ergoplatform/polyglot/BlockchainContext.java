@@ -42,5 +42,14 @@ public interface BlockchainContext {
      * a new context should be should be created.
      */
     int getHeight();
+
+    /**
+     * Sends a signed transaction to a blockchain node. On the blockchain node the transaction
+     * is first placed in a pool and then later can be selected by miner and included in the next block.
+     * The new transactions are also replicated all over the network.
+     *
+     * @param tx previously signed {@link SignedTransaction transaction} to be sent to the blockchain node
+     */
+    void sendTransaction(SignedTransaction tx);
 }
 

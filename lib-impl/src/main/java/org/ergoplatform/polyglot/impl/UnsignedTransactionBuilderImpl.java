@@ -48,10 +48,10 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     }
 
     @Override
-    public UnsignedTransactionBuilder outputs(OutBox... candidates) {
+    public UnsignedTransactionBuilder outputs(OutBox... outputs) {
         _outputCandidates = new ArrayList<>();
         ErgoBoxCandidate[] boxes =
-                Stream.of(candidates).map(c -> ((OutBoxImpl)c).getErgoBoxCandidate()).toArray(n -> new ErgoBoxCandidate[n]);
+                Stream.of(outputs).map(c -> ((OutBoxImpl)c).getErgoBoxCandidate()).toArray(n -> new ErgoBoxCandidate[n]);
         Collections.addAll(_outputCandidates, boxes);
         return this;
     }
