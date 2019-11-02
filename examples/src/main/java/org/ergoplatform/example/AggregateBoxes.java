@@ -1,6 +1,7 @@
 package org.ergoplatform.example;
 
 import org.ergoplatform.example.util.RestApiErgoClient;
+import org.ergoplatform.polyglot.ErgoClient;
 import org.ergoplatform.polyglot.NetworkType;
 import org.ergoplatform.polyglot.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;
@@ -25,7 +26,7 @@ public class AggregateBoxes {
     }
 
     private static SignedTransaction getSignedTransaction(String[] boxesToSpend) {
-        RestApiErgoClient ergoClient = new RestApiErgoClient(nodeUrl, NetworkType.TESTNET);
+        ErgoClient ergoClient = RestApiErgoClient.create(nodeUrl, NetworkType.TESTNET);
         return ergoClient.execute(ctx -> {
             ExampleScenarios scenarios = new ExampleScenarios(ctx);
             return scenarios.aggregateUtxoBoxes(seed, deadline, boxesToSpend);

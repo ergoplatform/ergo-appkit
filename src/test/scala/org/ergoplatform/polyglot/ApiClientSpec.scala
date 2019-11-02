@@ -4,7 +4,8 @@ import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.ergoplatform.example.{ExampleScenarios, PrepareBoxJava, PrepareBoxScala}
+import org.ergoplatform.example.util.RestApiErgoClient
+import org.ergoplatform.example.{ExampleScenarios, PrepareBoxScala, PrepareBoxJava}
 import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl
 import org.ergoplatform.restapi.client.ApiClient
 import org.ergoplatform.settings.ErgoAlgos
@@ -34,9 +35,7 @@ class ApiClientSpec
     println(ErgoAlgos.encode(newBytes))
   }
 
-  property("BlockchainContext") {
-    // Create a MockWebServer. These are lean enough that you can create a new
-    // instance for every unit test.
+  def createMockWebServer(): MockWebServer = {
     val server = new MockWebServer
     // Schedule some responses.
     val nodeInfoJson = read(file("examples/src/main/resources/org/ergoplatform/polyglot/response_NodeInfo.json"))
@@ -53,17 +52,28 @@ class ApiClientSpec
     server.enqueue(new MockResponse()
         .addHeader("Content-Type", "application/json; charset=utf-8")
         .setBody(boxJson))
+    server
+  }
+
+
+  property("BlockchainContext") {
+    // Create a MockWebServer. These are lean enough that you can create a new
+    // instance for every unit test.
+    val server = createMockWebServer()
     server.start()
 
     // Ask the server for its URL. You'll need this to make HTTP requests.
-    val baseUrl = server.url("/")
-    val client = new ApiClient(baseUrl.toString)
+    val baseUrl = server.url("/").toString
+    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET)
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-    val ctx = new BlockchainContextBuilderImpl(client, NetworkType.MAINNET).build()
-    val r = new ExampleScenarios(ctx)
-    val res = r.aggregateUtxoBoxes(seed, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+    val res = ergoClient.execute(ctx => {
+      val r = new ExampleScenarios(ctx)
+      val res = r.aggregateUtxoBoxes(seed, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+      res
+    })
+
     println(res)
 
     // Optional: confirm that your app made the HTTP requests you were expecting.

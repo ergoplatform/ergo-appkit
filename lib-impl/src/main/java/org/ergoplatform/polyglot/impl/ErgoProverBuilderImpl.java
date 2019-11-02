@@ -19,8 +19,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         _ctx = ctx;
     }
 
-    public ErgoProverBuilder withSeed(String seedPhrase) {
-        _masterKey = JavaHelpers.seedToMasterKey(seedPhrase, null);
+    public ErgoProverBuilder withMnemonic(String mnemonicPhrase, String mnemonicPass) {
+        _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass);
         return this;
     }
 
@@ -83,6 +83,6 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
             }
         };
         ErgoProvingInterpreter interpreter = ErgoProvingInterpreter.apply(_masterKey, parameters);
-        return new ErgoProverImpl(interpreter);
+        return new ErgoProverImpl(_ctx, interpreter);
     }
 }

@@ -3,13 +3,12 @@ package org.ergoplatform.polyglot
 import java.math.BigInteger
 
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
-import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
 
 import scala.collection.JavaConverters
-import org.ergoplatform.{ErgoBox, ErgoBoxCandidate, UnsignedInput, ErgoScriptPredef}
+import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
 import scorex.util.ModifierId
@@ -25,6 +24,8 @@ import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 
 import org.bouncycastle.math.ec.ECPoint
+import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
+import sigmastate.basics.DLogProtocol.ProveDlog
 
 object JavaHelpers {
   implicit class StringExtensions(val source: String) extends AnyVal {
@@ -56,6 +57,11 @@ object JavaHelpers {
     val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
     val pe = GroupElementSerializer.parse(SigmaSerializer.startReader(bytes))
     SigmaDsl.GroupElement(pe)
+  }
+
+  def encodedP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix) = {
+    implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
+    P2PKAddress(pk).toString()
   }
 
   def hash(s: String): String = {
@@ -137,13 +143,6 @@ object JavaHelpers {
   def createUnsignedInput(boxIdBytes: Array[Byte]): UnsignedInput = {
     new UnsignedInput(ADKey @@ boxIdBytes)
   }
-
-  def valueOf(n: Byte): EvaluatedValue[_] = { ByteConstant(n) }
-  def valueOf(n: Short): EvaluatedValue[_] = { ShortConstant(n) }
-  def valueOf(n: Int): EvaluatedValue[_] = { IntConstant(n) }
-  def valueOf(n: Long): EvaluatedValue[_] = { LongConstant(n) }
-  def valueOf(n: BigInteger): EvaluatedValue[_] = { BigIntConstant(n) }
-  def valueOf(n: ECPoint): EvaluatedValue[_] = { GroupElementConstant(SigmaDsl.GroupElement(n)) }
 
   def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
   def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType

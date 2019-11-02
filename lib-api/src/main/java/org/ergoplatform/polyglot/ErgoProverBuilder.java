@@ -6,9 +6,10 @@ package org.ergoplatform.polyglot;
 public interface ErgoProverBuilder {
     /**
      * Configure this builder to use the given seed when building a new prover.
-     * @param seed secret seed phrase to be used in prover for generating proofs.
+     * @param mnemonicPhrase secret seed phrase to be used in prover for generating proofs.
+     * @param mnemonicPass password to protect secret seed phrase.
      */
-    ErgoProverBuilder withSeed(String seed);
+    ErgoProverBuilder withMnemonic(String mnemonicPhrase, String mnemonicPass);
 
     /**
      * Builds a new prover using provided configuration.

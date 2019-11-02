@@ -43,7 +43,7 @@ public class ExampleScenarios {
                 .build();
 
         ErgoProverBuilder proverB = _ctx.newProverBuilder();
-        ErgoProver prover = proverB.withSeed(seedPhrase).build();
+        ErgoProver prover = proverB.withMnemonic(seedPhrase, null).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;
     }
@@ -76,7 +76,7 @@ public class ExampleScenarios {
                                 .build())
                 .build();
         ErgoProverBuilder proverB = _ctx.newProverBuilder();
-        ErgoProver prover = proverB.withSeed(seedPhrase).build();
+        ErgoProver prover = proverB.withMnemonic(seedPhrase, null).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;
     }

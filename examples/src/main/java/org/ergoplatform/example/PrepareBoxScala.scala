@@ -22,7 +22,7 @@ object PrepareBoxScala {
                 .build())
           .build()
       val proverB = ctx.newProverBuilder
-      val prover = proverB.withSeed("abc").build()
+      val prover = proverB.withMnemonic("abc", null).build()
       val signed = prover.sign(tx)
       signed
     }

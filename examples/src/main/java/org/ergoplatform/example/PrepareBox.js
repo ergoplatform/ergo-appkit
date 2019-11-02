@@ -27,7 +27,7 @@ var res = new FileMockedErgoClient(MockData.infoFile, MockData.lastHeadersFile, 
                     .build())
             .build()
         var proverB = ctx.newProverBuilder()
-        var prover = proverB.withSeed("abc").build()
+        var prover = proverB.withMnemonic("abc", null).build()
         var signed = prover.sign(tx)
         return signed
     })
