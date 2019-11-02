@@ -8,6 +8,7 @@ import org.ergoplatform.polyglot.NetworkType;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.restapi.client.BlockHeader;
 import org.ergoplatform.restapi.client.NodeInfo;
+import org.ergoplatform.restapi.client.WalletBox;
 import retrofit2.Retrofit;
 
 import java.math.BigDecimal;
@@ -36,7 +37,9 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
         _nodeInfo  = ErgoNodeFacade.getNodeInfo(_retrofit);
         _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(NUM_LAST_HEADERS));
         Collections.reverse(_headers);
-        return new BlockchainContextImpl(_retrofit, _networkType, _nodeInfo, _headers);
+        List<WalletBox> unspentBoxes = ErgoNodeFacade.getWalletUnspentBoxes(_retrofit, 0, 0);
+        ErgoWalletImpl wallet = new ErgoWalletImpl(unspentBoxes);
+        return new BlockchainContextImpl(_retrofit, _networkType, _nodeInfo, _headers, wallet);
     }
 
 

@@ -59,4 +59,9 @@ public class InputBoxImpl implements InputBox {
     public ErgoBox getErgoBox() {
         return _ergoBox;
     }
+
+    @Override
+    public String toString() {
+        return String.format("InputBox(%s, %s)", getId(), getValue());
+    }
 }

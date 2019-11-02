@@ -26,7 +26,7 @@ public class AggregateBoxes {
     }
 
     private static SignedTransaction getSignedTransaction(String[] boxesToSpend) {
-        ErgoClient ergoClient = RestApiErgoClient.create(nodeUrl, NetworkType.TESTNET);
+        ErgoClient ergoClient = RestApiErgoClient.create(nodeUrl, NetworkType.TESTNET, "");
         return ergoClient.execute(ctx -> {
             ExampleScenarios scenarios = new ExampleScenarios(ctx);
             return scenarios.aggregateUtxoBoxes(seed, deadline, boxesToSpend);

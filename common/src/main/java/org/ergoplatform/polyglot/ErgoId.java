@@ -34,4 +34,9 @@ public class ErgoId {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return JavaHelpers.Algos().encode(_idBytes);
+    }
 }

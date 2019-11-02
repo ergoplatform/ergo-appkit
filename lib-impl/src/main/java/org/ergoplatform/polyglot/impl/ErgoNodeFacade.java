@@ -34,7 +34,7 @@ public class ErgoNodeFacade {
         return execute(r, () -> {
             Method method = BlocksApi.class.getMethod("getLastHeaders", BigDecimal.class);
             List<BlockHeader> res = RetrofitUtil.<List<BlockHeader>>invokeServiceMethod(r, method,
-             new Object[]{count}).execute().body();
+                    new Object[]{count}).execute().body();
             return res;
         });
     }
@@ -44,6 +44,16 @@ public class ErgoNodeFacade {
             Method method = UtxoApi.class.getMethod("getBoxById", String.class);
             ErgoTransactionOutput res = RetrofitUtil.<ErgoTransactionOutput>invokeServiceMethod(r, method,
                     new Object[]{boxId}).execute().body();
+            return res;
+        });
+    }
+
+    static public List<WalletBox> getWalletUnspentBoxes(
+            Retrofit r, Integer minConfirmations, Integer minInclusionHeight) throws ErgoClientException {
+        return execute(r, () -> {
+            Method method = WalletApi.class.getMethod("walletUnspentBoxes", Integer.class, Integer.class);
+            List<WalletBox> res = RetrofitUtil.<List<WalletBox>>invokeServiceMethod(r, method,
+                    new Object[]{minConfirmations, minInclusionHeight}).execute().body();
             return res;
         });
     }

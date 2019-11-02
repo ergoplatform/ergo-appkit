@@ -64,7 +64,7 @@ class ApiClientSpec
 
     // Ask the server for its URL. You'll need this to make HTTP requests.
     val baseUrl = server.url("/").toString
-    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET)
+    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, "")
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.

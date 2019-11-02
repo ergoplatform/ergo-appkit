@@ -20,11 +20,12 @@ public class RestApiErgoClient implements ErgoClient {
      * Create and initialize a new instance.
      *
      * @param nodeUrl http url to Ergo node REST API endpoint of the form `https://host:port/`.
+     * @param apiKey  api key to authenticate this client
      */
-    RestApiErgoClient(String nodeUrl, NetworkType networkType) {
+    RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey) {
         _nodeUrl = nodeUrl;
         _networkType = networkType;
-        _client = new ApiClient(_nodeUrl);
+        _client = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
     }
 
     @Override
@@ -34,8 +35,8 @@ public class RestApiErgoClient implements ErgoClient {
         return res;
     }
 
-    public static ErgoClient create(String nodeUrl, NetworkType networkType) {
-        return new RestApiErgoClient(nodeUrl, networkType);
+    public static ErgoClient create(String nodeUrl, NetworkType networkType, String apiKey) {
+        return new RestApiErgoClient(nodeUrl, networkType, apiKey);
     }
 
     ApiClient getApiClient() {

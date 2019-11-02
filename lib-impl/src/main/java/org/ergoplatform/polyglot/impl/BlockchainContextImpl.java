@@ -15,13 +15,16 @@ public class BlockchainContextImpl implements BlockchainContext {
     private final NetworkType _networkType;
     private final NodeInfo _nodeInfo;
     private final List<BlockHeader> _headers;
+    private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
-            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers) {
+            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers, ErgoWalletImpl wallet) {
         _retrofit = retrofit;
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
+        _wallet = wallet;
+        _wallet.setContext(this);
     }
 
     @Override
@@ -73,6 +76,11 @@ public class BlockchainContextImpl implements BlockchainContext {
     @Override
     public void sendTransaction(SignedTransaction tx) {
 
+    }
+
+    @Override
+    public ErgoWallet getWallet() {
+        return _wallet;
     }
 }
 
