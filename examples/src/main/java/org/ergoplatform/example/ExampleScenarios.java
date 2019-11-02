@@ -1,6 +1,7 @@
 package org.ergoplatform.example;
 
 import org.ergoplatform.polyglot.*;
+import org.ergoplatform.polyglot.impl.ErgoScriptContract;
 
 import java.util.Arrays;
 
@@ -36,7 +37,7 @@ public class ExampleScenarios {
                         txB.outBoxBuilder()
                                 .value(total)
                                 .contract(
-                                    ErgoContract.create(
+                                    _ctx.compileContract(
                                         ConstantsBuilder.create().item("deadline", deadline).build(),
                                         "{ HEIGHT > deadline }"))
                                 .build())
@@ -64,14 +65,14 @@ public class ExampleScenarios {
             String seedPhrase) {
         UnsignedTransactionBuilder mockTxB = _ctx.newTxBuilder();
         OutBox out = mockTxB.outBoxBuilder()
-                .contract(ErgoContract.create(constants, ergoScript))
+                .contract(_ctx.compileContract(constants, ergoScript))
                 .build();
         UnsignedTransactionBuilder spendingTxB = _ctx.newTxBuilder();
         UnsignedTransaction tx = spendingTxB
                 .boxesToSpend(out.convertToInputWith(mockTxId, outputIndex))
                 .outputs(
                         spendingTxB.outBoxBuilder()
-                                .contract(ErgoContract.create(ConstantsBuilder.empty(), "{ false }"))
+                                .contract(_ctx.compileContract(ConstantsBuilder.empty(), "{ false }"))
                                 .registers(ErgoValue.of(10))
                                 .build())
                 .build();

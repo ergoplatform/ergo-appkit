@@ -12,6 +12,9 @@ import special.sigma.SigmaProp;
 
 import java.math.BigInteger;
 
+/**
+ * This class is used to represent any valid value of ErgoScript language.
+ */
 public class ErgoValue<T> {
     private final T _value;
     private final ErgoType<T> _type;
@@ -32,24 +35,31 @@ public class ErgoValue<T> {
     static public ErgoValue<Byte> of(byte value) {
         return new ErgoValue<>(value, ErgoType.byteType());
     }
+
     static public ErgoValue<Short> of(short value) {
         return new ErgoValue<>(value, ErgoType.shortType());
     }
+
     static public ErgoValue<Integer> of(int value) {
         return new ErgoValue<>(value, ErgoType.integerType());
     }
+
     static public ErgoValue<Long> of(long value) {
         return new ErgoValue<>(value, ErgoType.longType());
     }
+
     static public ErgoValue<BigInt> of(BigInteger value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().BigInt(value), ErgoType.bigIntType());
     }
+
     static public ErgoValue<GroupElement> of(ECPoint value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(value), ErgoType.groupElementType());
     }
+
     static public ErgoValue<SigmaProp> of(Values.SigmaBoolean value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
+
     static public ErgoValue<AvlTree> of(AvlTreeData value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
@@ -64,5 +74,4 @@ public class ErgoValue<T> {
         Coll<T> value = JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
         return new ErgoValue<>(value, ErgoType.collType(tT));
     }
-
 }

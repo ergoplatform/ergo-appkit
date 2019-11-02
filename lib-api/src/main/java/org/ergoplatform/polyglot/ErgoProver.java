@@ -1,5 +1,7 @@
 package org.ergoplatform.polyglot;
 
+import org.ergoplatform.P2PKAddress;
+
 /**
  * Interface of the provers that can be used to sign {@link UnsignedTransaction}s.
  */
@@ -7,7 +9,7 @@ public interface ErgoProver {
     /**
      * Returns Pay-To-Public-Key {@link org.ergoplatform.ErgoAddress Ergo address} of this prover.
      */
-    String getP2PKAddress();
+    P2PKAddress getP2PKAddress();
 
     /**
      * Signs unsigned transaction by using configured secrets.

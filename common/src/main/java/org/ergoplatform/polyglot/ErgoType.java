@@ -56,6 +56,4 @@ public class ErgoType<T> {
     static public <A> ErgoType<Option<A>> optionType(ErgoType<A> tItem) {
         return new ErgoType<>(RType.optionRType(tItem._rtype));
     }
-
-
 }

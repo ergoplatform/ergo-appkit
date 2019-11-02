@@ -5,6 +5,7 @@ import org.ergoplatform.restapi.client.BlockHeader;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.NodeInfo;
 import retrofit2.Retrofit;
+import sigmastate.Values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +82,16 @@ public class BlockchainContextImpl implements BlockchainContext {
     @Override
     public ErgoWallet getWallet() {
         return _wallet;
+    }
+
+    @Override
+    public ErgoContract newContract(Values.ErgoTree ergoTree) {
+        return new ErgoTreeContract(ergoTree);
+    }
+
+    @Override
+    public ErgoContract compileContract(Constants constants, String ergoScript) {
+        return ErgoScriptContract.create(constants, ergoScript, _networkType);
     }
 }
 

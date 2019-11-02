@@ -8,7 +8,8 @@ import sigmastate.Values;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
+
+import static com.google.common.base.Preconditions.checkState;
 
 public class OutBoxBuilderImpl implements OutBoxBuilder {
 
@@ -49,8 +50,8 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     }
 
     public OutBox build() {
-        Values.ErgoTree tree = JavaHelpers.compile(
-                _contract.getConstants(), _contract.getErgoScript(), _txB.getNetworkType().networkPrefix);
+        checkState(_contract != null, "Contract is not defined");
+        Values.ErgoTree tree = _contract.getErgoTree();
         ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
                 new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified
         // creationHeight

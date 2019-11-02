@@ -59,9 +59,9 @@ object JavaHelpers {
     SigmaDsl.GroupElement(pe)
   }
 
-  def encodedP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix) = {
+  def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {
     implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
-    P2PKAddress(pk).toString()
+    P2PKAddress(pk)
   }
 
   def hash(s: String): String = {

@@ -1,5 +1,7 @@
 package org.ergoplatform.polyglot;
 
+import sigmastate.Values;
+
 /**
  * This interface represent a specific context of blockchain for execution
  * of transaction transaction building scenario.
@@ -53,5 +55,9 @@ public interface BlockchainContext {
     void sendTransaction(SignedTransaction tx);
 
     ErgoWallet getWallet();
+
+    ErgoContract newContract(Values.ErgoTree ergoTree);
+
+    ErgoContract compileContract(Constants constants, String ergoScript);
 }
 

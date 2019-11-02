@@ -1,7 +1,9 @@
 package org.ergoplatform.polyglot.impl;
 
+import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.polyglot.ErgoProver;
 import org.ergoplatform.polyglot.JavaHelpers;
 import org.ergoplatform.polyglot.SignedTransaction;
@@ -20,9 +22,9 @@ public class ErgoProverImpl implements ErgoProver {
     }
 
     @Override
-    public String getP2PKAddress() {
+    public P2PKAddress getP2PKAddress() {
         DLogProtocol.ProveDlog pk = _prover.secrets().apply(0).publicImage();
-        return JavaHelpers.encodedP2PKAddress(pk, _ctx.getNetworkType().networkPrefix);
+        return JavaHelpers.createP2PKAddress(pk, _ctx.getNetworkType().networkPrefix);
     }
 
     @Override

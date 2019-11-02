@@ -1,5 +1,7 @@
 package org.ergoplatform.polyglot;
 
+import org.ergoplatform.ErgoAddress;
+
 import java.util.List;
 
 /**
@@ -33,6 +35,19 @@ public interface UnsignedTransactionBuilder {
      * @param outputs output boxes created by the transaction
      */
     UnsignedTransactionBuilder outputs(OutBox... outputs);
+
+
+    /**
+     * Adds transaction fee output.
+     * @param feeAmount transaction fee amount in NanoErgs
+     */
+    UnsignedTransactionBuilder fee(long feeAmount);
+
+    /**
+     * Adds change output to the specified address if needed.
+     * @param address address to send output
+     */
+    UnsignedTransactionBuilder sendChangeTo(ErgoAddress address);
 
     /**
      * Builds a new unsigned transaction in the {@link BlockchainContext context} inherited from this builder.
