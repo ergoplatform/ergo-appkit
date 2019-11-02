@@ -1,7 +1,6 @@
 package org.ergoplatform.example;
 
-import org.ergoplatform.ErgoAddressEncoder;
-import org.ergoplatform.example.util.BlockchainErgoClient;
+import org.ergoplatform.example.util.RestApiErgoClient;
 import org.ergoplatform.polyglot.NetworkType;
 import org.ergoplatform.polyglot.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;
@@ -26,10 +25,10 @@ public class AggregateBoxes {
     }
 
     private static SignedTransaction getSignedTransaction(String[] boxesToSpend) {
-        BlockchainErgoClient runner = new BlockchainErgoClient(nodeUrl, NetworkType.TESTNET);
-        return runner.execute(ctx -> {
-            ExampleScenarios r = new ExampleScenarios(ctx);
-            return r.aggregateUtxoBoxes(seed, deadline, boxesToSpend);
+        RestApiErgoClient ergoClient = new RestApiErgoClient(nodeUrl, NetworkType.TESTNET);
+        return ergoClient.execute(ctx -> {
+            ExampleScenarios scenarios = new ExampleScenarios(ctx);
+            return scenarios.aggregateUtxoBoxes(seed, deadline, boxesToSpend);
         });
     }
 

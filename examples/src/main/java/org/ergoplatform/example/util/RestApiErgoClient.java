@@ -8,11 +8,19 @@ import org.ergoplatform.restapi.client.ApiClient;
 
 import java.util.function.Function;
 
-public class BlockchainErgoClient implements ErgoClient {
+/**
+ * This implementation of {@link ErgoClient} uses REST API of Ergo node for communication.
+ */
+public class RestApiErgoClient implements ErgoClient {
     private final String _nodeUrl;
     private final NetworkType _networkType;
 
-    public BlockchainErgoClient(String nodeUrl, NetworkType networkType) {
+    /**
+     * Create and initialize a new instance.
+     *
+     * @param nodeUrl http url to Ergo node REST API endpoint of the form `https://host:port/`.
+     */
+    public RestApiErgoClient(String nodeUrl, NetworkType networkType) {
         _nodeUrl = nodeUrl;
         _networkType = networkType;
     }

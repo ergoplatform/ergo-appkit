@@ -69,5 +69,10 @@ public class BlockchainContextImpl implements BlockchainContext {
     public List<BlockHeader> getHeaders() {
         return _headers;
     }
+
+    @Override
+    public void sendTransaction(SignedTransaction tx) {
+
+    }
 }
 

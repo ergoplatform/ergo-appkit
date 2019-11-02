@@ -34,7 +34,20 @@ this library applications can communicate with Ergo nodes via unified API and
 programming model provided by Polyglot. Jump to [setup instructions](#setup) if
 you want get started right away.
 
-## Example: Create and Send Transaction 
+## Usage Example 
+
+Among other things, Polyglot library allows to communicate with Ergo nodes via
+REST API. Let's see how we can write a simple Java console application which
+uses Polyglot library. The application will create and send a new transaction
+using Ergo node which is started locally and available at
+`http://localhost:9052/`. Suppose we [set up a full
+node](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and started
+it using the following command.
+```
+java -jar -Xmx4G -Dlogback.stdout.level=WARN target/scala-2.12/ergo-3.1.3.jar --mainnet -c ergo.conf
+```
+
+In order to connect to this node in our Java application 
 
 
 

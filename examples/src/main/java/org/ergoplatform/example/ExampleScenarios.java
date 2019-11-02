@@ -71,7 +71,8 @@ public class ExampleScenarios {
                 .boxesToSpend(out.convertToInputWith(mockTxId, outputIndex))
                 .outputs(
                         spendingTxB.outBoxBuilder()
-                                .contract(ErgoContract.create(ConstantsBuilder.empty(), "{ true }"))
+                                .contract(ErgoContract.create(ConstantsBuilder.empty(), "{ false }"))
+                                .registers(ErgoValue.of(10))
                                 .build())
                 .build();
         ErgoProverBuilder proverB = _ctx.newProverBuilder();
