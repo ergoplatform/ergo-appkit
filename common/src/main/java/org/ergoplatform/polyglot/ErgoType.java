@@ -4,10 +4,7 @@ import scala.Option;
 import scala.Tuple2;
 import scalan.RType;
 import special.collection.Coll;
-import special.sigma.AvlTree;
-import special.sigma.BigInt;
-import special.sigma.GroupElement;
-import special.sigma.SigmaProp;
+import special.sigma.*;
 
 public class ErgoType<T> {
     private static ErgoType<Byte> _byte = new ErgoType<>(RType.ByteType());
@@ -18,6 +15,8 @@ public class ErgoType<T> {
     private static ErgoType<GroupElement> _groupElement = new ErgoType<>(JavaHelpers.GroupElementRType());
     private static ErgoType<SigmaProp> _sigmaProp = new ErgoType<>(JavaHelpers.SigmaPropRType());
     private static ErgoType<AvlTree> _avlTree = new ErgoType<>(JavaHelpers.AvlTreeRType());
+    private static ErgoType<Header> _header = new ErgoType<>(JavaHelpers.HeaderRType());
+    private static ErgoType<PreHeader> _preHeader = new ErgoType<>(JavaHelpers.PreHeaderRType());
 
     public RType<T> getRType() {
         return (RType<T>)_rtype;
@@ -44,6 +43,10 @@ public class ErgoType<T> {
     static public ErgoType<SigmaProp> sigmaPropType() { return _sigmaProp; }
 
     static public ErgoType<AvlTree> avlTreeType() { return _avlTree; }
+
+    static public ErgoType<Header> headerType() { return _header; }
+
+    static public ErgoType<PreHeader> preHeaderType() { return _preHeader; }
 
     static public <A, B> ErgoType<Tuple2<A, B>> pairType(ErgoType<A> tA, ErgoType<B> tB) {
         return new ErgoType<>(RType.pairRType(tA._rtype, tB._rtype));

@@ -1,11 +1,17 @@
 package org.ergoplatform.polyglot.impl;
 
+import org.ergoplatform.DataInput;
+import org.ergoplatform.ErgoBox;
+import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.Input;
 import org.ergoplatform.polyglot.*;
-import org.ergoplatform.restapi.client.BlockHeader;
-import org.ergoplatform.restapi.client.ErgoTransactionOutput;
-import org.ergoplatform.restapi.client.NodeInfo;
+import org.ergoplatform.restapi.client.*;
+import org.ergoplatform.settings.ErgoAlgos;
 import retrofit2.Retrofit;
+import scala.Tuple2;
 import sigmastate.Values;
+import sigmastate.interpreter.ContextExtension;
+import sigmastate.interpreter.ProverResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +25,8 @@ public class BlockchainContextImpl implements BlockchainContext {
     private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
-            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers, ErgoWalletImpl wallet) {
+            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers,
+            ErgoWalletImpl wallet) {
         _retrofit = retrofit;
         _networkType = networkType;
         _nodeInfo = nodeInfo;
@@ -75,8 +82,21 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public void sendTransaction(SignedTransaction tx) {
-
+    public String sendTransaction(SignedTransaction tx) {
+        ErgoLikeTransaction ergoTx = ((SignedTransactionImpl)tx).getTx();
+        List<ErgoTransactionDataInput> dataInputsData =
+                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionDataInput()).from(ergoTx.dataInputs());
+        List<ErgoTransactionInput> inputsData =
+                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionInput()).from(ergoTx.inputs());
+        List<ErgoTransactionOutput> outputsData =
+                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionOutput()).from(ergoTx.outputs());
+        ErgoTransaction txData = new ErgoTransaction()
+                .id(ergoTx.id())
+                .dataInputs(dataInputsData)
+                .inputs(inputsData)
+                .outputs(outputsData);
+        String txId = ErgoNodeFacade.sendTransaction(_retrofit, txData);
+        return txId;
     }
 
     @Override

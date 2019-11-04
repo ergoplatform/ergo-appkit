@@ -20,30 +20,12 @@ public class InputBoxImpl implements InputBox {
 
     public InputBoxImpl(ErgoTransactionOutput boxData) {
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
-        _ergoBox = mkErgoBox(boxData);
+        _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
     }
 
     public InputBoxImpl(ErgoBox ergoBox) {
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
-    }
-
-    private ErgoBox mkErgoBox(ErgoTransactionOutput boxData) {
-        byte[] treeBytes = JavaHelpers.Algos().decode(boxData.getErgoTree()).get();
-        Values.ErgoTree tree = ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(treeBytes);
-        List<ErgoToken> tokens = boxData.getAssets().stream()
-                .map(a -> new ErgoToken(a.getTokenId(), a.getAmount()))
-                .collect(Collectors.toList());
-        List<Tuple2<String, Object>> regs = new ArrayList<>();
-        boxData.getAdditionalRegisters().forEach((regName, value) -> {
-            Values.Value v = JavaHelpers.deserializeValue(JavaHelpers.Algos().decode(value).get());
-            regs.add(new Tuple2(regName, value));
-        });
-
-        ErgoBox ergoBox = JavaHelpers.createBox(
-                boxData.getValue(), tree, tokens, regs, boxData.getCreationHeight(), boxData.getTransactionId(),
-                boxData.getIndex().shortValue());
-        return ergoBox;
     }
 
     @Override

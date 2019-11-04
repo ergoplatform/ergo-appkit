@@ -109,7 +109,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     private ErgoLikeStateContext createErgoLikeStateContext() {
         return new ErgoLikeStateContext() {
-                private Coll<Header> _allHeaders = ScalaBridge.toHeaders(_ctx.getHeaders());
+                private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(), ErgoType.headerType().getRType()).to(_ctx.getHeaders());
                 private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
                 private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
 

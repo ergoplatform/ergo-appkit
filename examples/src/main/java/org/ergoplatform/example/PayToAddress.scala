@@ -1,17 +1,17 @@
 package org.ergoplatform.example
 
 import org.ergoplatform.example.util.RestApiErgoClient
-import org.ergoplatform.polyglot.{Constants, NetworkType, ConstantsBuilder}
+import org.ergoplatform.polyglot.{Constants, NetworkType, ConstantsBuilder, Parameters}
 
 object PayToAddress {
-  val OneErg = 1000 * 1000 * 1000
-  val MinFee = 1000 * 1000
+
+  val baseUrl = "http://localhost:9051/"
 
   def main(args: Array[String]) = {
     val seed = args(0)
     val pass = args(1)
     val apiKey = args(2)
-    val baseUrl = "http://localhost:9051/"
+    val delay = 30  // 1 hour
     val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, apiKey)
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
@@ -27,22 +27,23 @@ object PayToAddress {
       val box = boxes.get(1)
       println(s"Box to spend: ${box}")
       val txB = ctx.newTxBuilder()
+      val newBox = txB.outBoxBuilder()
+          .value(Parameters.OneErg)
+          .contract(ctx.compileContract(
+            ConstantsBuilder.create()
+                .item("deadline", ctx.getHeight + delay)
+                .item("pkOwner", prover.getP2PKAddress.pubkey)
+                .build(),
+            "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
+          .build()
       val tx = txB.boxesToSpend(box)
-          .outputs(txB.outBoxBuilder()
-              .value(OneErg)
-              .contract(ctx.compileContract(
-                ConstantsBuilder.create()
-                    .item("deadline", ctx.getHeight + 2)
-                    .item("pkOwner", prover.getP2PKAddress.pubkey)
-                    .build(),
-                "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
-              .build())
-          .fee(MinFee)
+          .outputs(newBox)
+          .fee(Parameters.MinFee)
           .sendChangeTo(prover.getP2PKAddress)
           .build()
       val signed = prover.sign(tx)
       println(s"Signed transaction: ${signed}")
-      //      ctx.sendTransaction(signed)
+      ctx.sendTransaction(signed)
       true
     })
     println(res)

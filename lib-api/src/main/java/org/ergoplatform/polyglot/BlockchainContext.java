@@ -52,7 +52,7 @@ public interface BlockchainContext {
      *
      * @param tx previously signed {@link SignedTransaction transaction} to be sent to the blockchain node
      */
-    void sendTransaction(SignedTransaction tx);
+    String sendTransaction(SignedTransaction tx);
 
     ErgoWallet getWallet();
 

@@ -1,43 +1,122 @@
 package org.ergoplatform.polyglot
 
-import java.math.BigInteger
-
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
-
 import scala.collection.JavaConverters
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
 import scorex.util.ModifierId
-import sigmastate.Values.{ShortConstant, LongConstant, Constant, EvaluatedValue, SValue, BigIntConstant, IntConstant, ErgoTree, ByteConstant, GroupElementConstant}
+import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
 import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.Mnemonic
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, SigmaDsl, CAvlTree, Colls, CostingSigmaDslBuilder, CPreHeader, CHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
-
-import org.bouncycastle.math.ec.ECPoint
+import java.lang.{Long => JLong}
+import java.util.{Collections, List => JList}
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
+/** Type-class of isomorphisms between types.
+  * Isomorphism between two types `A` and `B` essentially say that both types
+  * represents the same information (entity) but in a different way.
+  * <p>
+  * The information is not lost so that both are true:
+  * 1) a == from(to(a))
+  * 2) b == to(from(b))
+  * <p>
+  * It is used to define type-full conversions:
+  * - different conversions between Java and Scala data types.
+  * - conversion between Ergo representations and generated API representations
+  */
+abstract class Iso[A, B] {
+  def to(a: A): B
+
+  def from(b: B): A
+}
+final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
+  override def to(a: B): A = iso.from(a)
+  override def from(b: A): B = iso.to(b)
+}
+trait LowPriorityIsos {
+  implicit def identityIso[A]: Iso[A, A] = new Iso[A, A] {
+    override def to(a: A): A = a
+
+    override def from(b: A): A = b
+  }
+
+  implicit def inverseIso[A,B](implicit iso: Iso[A,B]): Iso[B,A] = InverseIso(iso)
+}
+
+object Iso extends LowPriorityIsos {
+  implicit val jlongToLong: Iso[JLong, Long] = new Iso[JLong, Long] {
+    override def to(b: JLong): Long = b
+    override def from(a: Long): JLong = a
+  }
+
+  implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
+    override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
+    override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
+  }
+
+  implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
+    new Iso[JList[A], IndexedSeq[B]] {
+      override def to(as: JList[A]): IndexedSeq[B] = {
+        JavaConverters.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+      }
+
+      override def from(bs: IndexedSeq[B]): JList[A] = {
+        val res = new util.ArrayList[A](bs.length)
+        for ( a <- bs.map(itemIso.from) ) res.add(a)
+        res
+      }
+    }
+
+  implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
+    new Iso[JList[A], Coll[B]] {
+      override def to(as: JList[A]): Coll[B] = {
+        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
+          itemIso.to(a)
+        }
+        Colls.fromArray(bsIter.toArray(tB.classTag))
+      }
+
+      override def from(bs: Coll[B]): JList[A] = {
+        val res = new util.ArrayList[A](bs.length)
+        bs.toArray.foreach { b =>
+          res.add(itemIso.from(b))
+        }
+        res
+      }
+    }
+}
+
 object JavaHelpers {
+  implicit class UniversalConverter[A,B](val x: A) extends AnyVal {
+    def convertTo[B](implicit iso: Iso[A,B]): B = iso.to(x)
+  }
+
   implicit class StringExtensions(val source: String) extends AnyVal {
     def toBytes: Array[Byte] = decodeStringToBytes(source)
+
     def toColl: Coll[Byte] = decodeStringToColl(source)
+
     def toGroupElement: GroupElement = decodeStringToGE(source)
   }
+
+  implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[PreHeader] = special.sigma.PreHeaderRType
 
-  def Algos: ErgoAlgos =  org.ergoplatform.settings.ErgoAlgos
+  def Algos: ErgoAlgos = org.ergoplatform.settings.ErgoAlgos
 
   def deserializeValue[T <: SValue](bytes: Array[Byte]): T = {
     ValueSerializer.deserialize(bytes).asInstanceOf[T]
@@ -76,11 +155,6 @@ object JavaHelpers {
     tree.digest.toArray
   }
 
-  def toTokensColl[T](tokens: util.List[ErgoToken]): Coll[(Array[Byte], Long)] = {
-    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (t.getId().getBytes, t.getValue())).toArray
-    Colls.fromArray(ts)
-  }
-
   def toTokensSeq[T](tokens: util.List[ErgoToken]): Seq[(TokenId, Long)] = {
     val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (Digest32 @@ t.getId().getBytes(), t.getValue())).toSeq
     ts
@@ -102,30 +176,17 @@ object JavaHelpers {
     Constant(v.value.asInstanceOf[SType#WrappedType], tpe)
   }
 
-  def createBox(
-       value: Long, tree: ErgoTree,
-       tokens: util.List[ErgoToken],
-       registers: util.List[Tuple2[String, Object]], creationHeight: Int, txId: String, index: Short): ErgoBox = {
-    val ts = toTokensColl(tokens)
-    val rs = toIndexedSeq(registers).map { r =>
-      val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
-      val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
-      id -> value
-    }.toMap
-    new ErgoBox(value, tree, ts.asInstanceOf[Coll[(TokenId, Long)]], rs, ModifierId @@ txId, index, creationHeight)
-  }
-
   def createBoxCandidate(
-       value: Long, tree: ErgoTree,
-       tokens: util.List[ErgoToken],
-       registers: util.List[Tuple2[String, Object]], creationHeight: Int): ErgoBoxCandidate = {
-    val ts = toTokensColl(tokens)
+                            value: Long, tree: ErgoTree,
+                            tokens: util.List[ErgoToken],
+                            registers: util.List[Tuple2[String, Object]], creationHeight: Int): ErgoBoxCandidate = {
+    val ts = tokens.convertTo[Coll[(TokenId, Long)]]
     val rs = toIndexedSeq(registers).map { r =>
       val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
       val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
       id -> value
     }.toMap
-    new ErgoBoxCandidate(value, tree, creationHeight, ts.asInstanceOf[Coll[(TokenId, Long)]], rs)
+    new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)
   }
 
   def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {
@@ -145,9 +206,13 @@ object JavaHelpers {
   }
 
   def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
+
   def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType
+
   def GroupElementRType: RType[special.sigma.GroupElement] = special.sigma.GroupElementRType
+
   def SigmaPropRType: RType[special.sigma.SigmaProp] = special.sigma.SigmaPropRType
+
   def AvlTreeRType: RType[special.sigma.AvlTree] = special.sigma.AvlTreeRType
 
   def SigmaDsl: CostingSigmaDslBuilder = sigmastate.eval.SigmaDsl
@@ -155,5 +220,4 @@ object JavaHelpers {
   def collFrom(arr: Array[Byte]): Coll[Byte] = {
     Colls.fromArray(arr)
   }
-
 }
