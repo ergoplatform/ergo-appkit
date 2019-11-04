@@ -56,7 +56,7 @@ class ApiClientSpec
   }
 
 
-  property("BlockchainContext") {
+  ignore("BlockchainContext") {
     // Create a MockWebServer. These are lean enough that you can create a new
     // instance for every unit test.
     val server = createMockWebServer()
@@ -88,11 +88,11 @@ class ApiClientSpec
     server.shutdown()
   }
 
-  property("PrepareBoxJava") {
+  ignore("PrepareBoxJava") {
     PrepareBoxJava.main(Array())
   }
 
-  property("PrepareBoxScala") {
+  ignore("PrepareBoxScala") {
     PrepareBoxScala.main(Array())
   }
 }

@@ -6,7 +6,7 @@ import java.util.stream.Collectors
 import java.util.{List, ArrayList}
 
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoBox, Input}
+import org.ergoplatform.{DataInput, ErgoBox, Input, ErgoLikeTransaction}
 import org.ergoplatform.polyglot.{Iso, ErgoToken, JavaHelpers}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
@@ -150,5 +150,20 @@ object ScalaBridge {
       )
 
     override def from(a: Header): BlockHeader = ???
+  }
+
+  implicit val isoErgoTransaction: Iso[ErgoTransaction, ErgoLikeTransaction] = new Iso[ErgoTransaction, ErgoLikeTransaction] {
+    override def to(apiTx: ErgoTransaction): ErgoLikeTransaction =
+      new ErgoLikeTransaction(
+        apiTx.getInputs.convertTo[IndexedSeq[Input]],
+        apiTx.getDataInputs.convertTo[IndexedSeq[DataInput]],
+        apiTx.getOutputs.convertTo[IndexedSeq[ErgoBox]]
+      )
+
+    override def from(tx: ErgoLikeTransaction): ErgoTransaction =
+      new ErgoTransaction()
+        .inputs(tx.inputs.convertTo[List[ErgoTransactionInput]])
+        .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
+        .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])
   }
 }

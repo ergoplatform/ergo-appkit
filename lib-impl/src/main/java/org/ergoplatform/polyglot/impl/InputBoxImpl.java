@@ -47,7 +47,10 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public String toJson() {
-        String json = _ctx.getApiClient().getGson().toJson(_boxData);
+        Gson gson = _ctx.getApiClient().getGson();
+        ErgoTransactionOutput cloned = gson.fromJson(gson.toJson(_boxData), _boxData.getClass());
+        cloned.ergoTree(_ergoBox.ergoTree().toString());
+        String json = gson.toJson(cloned);
         return json;
     }
 

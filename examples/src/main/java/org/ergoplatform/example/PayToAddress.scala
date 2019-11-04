@@ -12,31 +12,75 @@ object PayToAddress {
   val CMD_LIST = "list"
   val CMD_PAY = "pay"
 
-  def list(ergoClient: ErgoClient, cmdArgs: CmdArgs) = {
+  def parseCmd(args: Seq[String]): Cmd = {
+    val cmd = args(0)
+    val seed = args(1)
+    val pass = args(2)
+    val apiKey = args(3)
+    cmd match {
+      case CMD_LIST =>
+        val limit = if (args.length > 4) args(4).toInt else 10
+        ListCmd(cmd, seed, pass, apiKey, limit)
+      case CMD_PAY =>
+        val amount = if (args.length > 4) args(4).toLong else sys.error(s"Payment amound is not defined")
+        PayCmd(cmd, seed, pass, apiKey, amount)
+      case _ =>
+        sys.error(s"Unknown command: $cmd")
+    }
+  }
+
+  def printUsage() = {
+    val msg =
+      s"""
+        | Usage:
+        | wallet (list|pay) seed pass apiKey
+     """.stripMargin
+    println(msg)
+  }
+
+  def main(args: Array[String]) = {
+    try {
+      val cmd = parseCmd(args)
+      val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, cmd.apiKey)
+      cmd match {
+        case c: ListCmd =>
+          list(ergoClient, c)
+        case c: PayCmd =>
+          pay(ergoClient, c)
+        case op =>
+          sys.error(s"Unknown operation $op")
+      }
+    }
+    catch { case NonFatal(t) =>
+      println(t.getMessage)
+      printUsage()
+    }
+  }
+
+  def list(ergoClient: ErgoClient, cmd: ListCmd) = {
     val res = ergoClient.execute(ctx => {
       val wallet = ctx.getWallet
-      val boxes = wallet.getUnspentBoxes.convertTo[IndexedSeq[InputBox]]//(Iso.JListToIndexedSeq(Iso.identityIso[InputBox]))
-      val lines = boxes.map(b => b.toJson).mkString("[", ",\n", "]")
+      val boxes = wallet.getUnspentBoxes.convertTo[IndexedSeq[InputBox]]
+      val lines = boxes.take(cmd.limit).map(b => b.toJson).mkString("[", ",\n", "]")
       lines
     })
     println(res)
   }
 
-  def pay(ergoClient: ErgoClient, cmdArgs: CmdArgs) = {
+  def pay(ergoClient: ErgoClient, cmd: PayCmd) = {
     val res = ergoClient.execute(ctx => {
       println(s"Context: ${ctx.getHeight}, ${ctx.getNetworkType}")
       val prover = ctx.newProverBuilder()
-          .withMnemonic(cmdArgs.seed, cmdArgs.password)
+          .withMnemonic(cmd.seed, cmd.password)
           .build()
       println(s"Prover: ${prover.getP2PKAddress}")
       val wallet = ctx.getWallet
       val boxes = wallet.getUnspentBoxes
-      println(s"Unspent Boxes: ${boxes}")
-      val box = boxes.get(1)
-      println(s"Box to spend: ${box}")
+      val box = boxes.get(0)
+      println(s"Box to spend: ${box.toJson}")
       val txB = ctx.newTxBuilder()
       val newBox = txB.outBoxBuilder()
-          .value(Parameters.OneErg)
+          .value(cmd.payAmount)
           .contract(ctx.compileContract(
             ConstantsBuilder.create()
                 .item("deadline", ctx.getHeight + delay)
@@ -50,49 +94,21 @@ object PayToAddress {
           .sendChangeTo(prover.getP2PKAddress)
           .build()
       val signed = prover.sign(tx)
-      println(s"Signed transaction: ${signed}")
-      val txId = ctx.sendTransaction(signed)
-      s"""{ TransactionId: "$txId"}"""
+//      val txId = ctx.sendTransaction(signed)
+      signed.toJson
     })
-    println(res)
+    println(s"Signed transaction: ${res}")
   }
 
-  def parseArgs(args: Seq[String]): CmdArgs = {
-    val cmd = args(0)
-    val seed = args(1)
-    val pass = args(2)
-    val apiKey = args(3)
-    CmdArgs(cmd, seed, pass, apiKey)
-  }
-  
-  def main(args: Array[String]) = {
-    try {
-      val cmdArgs = parseArgs(args)
-      val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, cmdArgs.apiKey)
-      cmdArgs.cmd match {
-        case CMD_LIST =>
-          list(ergoClient, cmdArgs)
-        case CMD_PAY =>
-          pay(ergoClient, cmdArgs)
-        case op =>
-          sys.error(s"Unknown operation $op")
-      }
-    }
-    catch { case NonFatal(t) =>
-      println(t.getMessage)
-      printUsage()
-    }
-  }
-
-  def printUsage() = {
-    val msg =
-    s"""
-      | Usage:
-      | wallet (list|pay) seed pass apiKey
-     """.stripMargin
-    println(msg)
-  }
 
 }
 
-case class CmdArgs(cmd: String, seed: String, password: String, apiKey: String)
+sealed trait Cmd {
+  def name: String
+  def seed: String
+  def password: String
+  def apiKey: String
+}
+
+case class ListCmd(name: String, seed: String, password: String, apiKey: String, limit: Int) extends Cmd
+case class PayCmd(name: String, seed: String, password: String, apiKey: String, payAmount: Long) extends Cmd

@@ -34,6 +34,6 @@ public class ErgoProverImpl implements ErgoProver {
         IndexedSeq<ErgoBox> dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes());
         ErgoLikeTransaction signed =
                 _prover.sign(txImpl.getTx(), boxesToSpend, dataBoxes, txImpl.getStateContext()).get();
-        return new SignedTransactionImpl(signed);
+        return new SignedTransactionImpl(_ctx, signed);
     }
 }
