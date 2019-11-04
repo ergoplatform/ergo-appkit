@@ -13,13 +13,16 @@ import static com.google.common.base.Preconditions.checkState;
 
 public class OutBoxBuilderImpl implements OutBoxBuilder {
 
+    private final BlockchainContextImpl _ctx;
     private final UnsignedTransactionBuilderImpl _txB;
     private long _value = 0;
     private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
     private ArrayList<ErgoValue> _registers = new ArrayList<>();
 
-    public OutBoxBuilderImpl(UnsignedTransactionBuilderImpl txB) {
+    public OutBoxBuilderImpl(
+            BlockchainContextImpl ctx, UnsignedTransactionBuilderImpl txB) {
+        _ctx = ctx;
         _txB = txB;
     }
 
@@ -55,6 +58,6 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
         ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
                 new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified
         // creationHeight
-        return new OutBoxImpl(ergoBoxCandidate);
+        return new OutBoxImpl(_ctx, ergoBoxCandidate);
     }
 }

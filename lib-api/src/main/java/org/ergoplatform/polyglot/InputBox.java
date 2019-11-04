@@ -16,5 +16,7 @@ public interface InputBox {
      * Returns the ERG value stored in this box, i.e. unspent value in UTXO.
      */
     Long getValue();
+
+    String toJson();
 }
 

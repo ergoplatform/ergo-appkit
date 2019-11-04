@@ -18,6 +18,7 @@ import java.util.List;
 
 public class BlockchainContextImpl implements BlockchainContext {
 
+    private final ApiClient _client;
     private final Retrofit _retrofit;
     private final NetworkType _networkType;
     private final NodeInfo _nodeInfo;
@@ -25,8 +26,10 @@ public class BlockchainContextImpl implements BlockchainContext {
     private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
-            Retrofit retrofit, NetworkType networkType, NodeInfo nodeInfo, List<BlockHeader> headers,
+            ApiClient client, Retrofit retrofit, NetworkType networkType,
+            NodeInfo nodeInfo, List<BlockHeader> headers,
             ErgoWalletImpl wallet) {
+        _client = client;
         _retrofit = retrofit;
         _networkType = networkType;
         _nodeInfo = nodeInfo;
@@ -48,7 +51,7 @@ public class BlockchainContextImpl implements BlockchainContext {
             if (boxData == null) {
                 throw new ErgoClientException("Cannot load UTXO box " + id, null);
             }
-            list.add(new InputBoxImpl(boxData));
+            list.add(new InputBoxImpl(this, boxData));
         }
         InputBox[] inputs = list.toArray(new InputBox[0]);
         return inputs;
@@ -71,6 +74,10 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     Retrofit getRetrofit() {
         return _retrofit;
+    }
+
+    ApiClient getApiClient() {
+        return _client;
     }
 
     public NodeInfo getNodeInfo() {
@@ -96,6 +103,7 @@ public class BlockchainContextImpl implements BlockchainContext {
                 .inputs(inputsData)
                 .outputs(outputsData);
         String txId = ErgoNodeFacade.sendTransaction(_retrofit, txData);
+        assert txId.equals(txData.getId());
         return txId;
     }
 

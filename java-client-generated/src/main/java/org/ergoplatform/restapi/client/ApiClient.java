@@ -33,6 +33,8 @@ public class ApiClient {
   private Retrofit.Builder adapterBuilder;
   private JSON json;
 
+  public Gson getGson() { return json.getGson(); }
+
   public ApiClient(String hostUrl) {
     _hostUrl = hostUrl;
     apiAuthorizations = new LinkedHashMap<String, Interceptor>();

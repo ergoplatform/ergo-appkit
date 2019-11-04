@@ -1,5 +1,6 @@
 package org.ergoplatform.polyglot.impl;
 
+import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.polyglot.ErgoId;
 import org.ergoplatform.polyglot.ErgoToken;
@@ -15,17 +16,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InputBoxImpl implements InputBox {
+    private final BlockchainContextImpl _ctx;
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
+    private final ErgoTransactionOutput _boxData;
 
-    public InputBoxImpl(ErgoTransactionOutput boxData) {
+    public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData) {
+        _ctx = ctx;
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
+        _boxData = boxData;
     }
 
-    public InputBoxImpl(ErgoBox ergoBox) {
+    public InputBoxImpl(BlockchainContextImpl ctx, ErgoBox ergoBox) {
+        _ctx = ctx;
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
+        _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
     }
 
     @Override
@@ -36,6 +43,12 @@ public class InputBoxImpl implements InputBox {
     @Override
     public Long getValue() {
         return _ergoBox.value();
+    }
+
+    @Override
+    public String toJson() {
+        String json = _ctx.getApiClient().getGson().toJson(_boxData);
+        return json;
     }
 
     public ErgoBox getErgoBox() {

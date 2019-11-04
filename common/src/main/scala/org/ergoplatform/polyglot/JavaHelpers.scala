@@ -46,16 +46,20 @@ final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def from(b: A): B = iso.to(b)
 }
 trait LowPriorityIsos {
+
+
+
+}
+
+object Iso extends LowPriorityIsos {
   implicit def identityIso[A]: Iso[A, A] = new Iso[A, A] {
     override def to(a: A): A = a
 
     override def from(b: A): A = b
   }
 
-  implicit def inverseIso[A,B](implicit iso: Iso[A,B]): Iso[B,A] = InverseIso(iso)
-}
+  implicit def inverseIso[A,B](implicit iso: Iso[A,B]): Iso[B,A] = InverseIso[A,B](iso)
 
-object Iso extends LowPriorityIsos {
   implicit val jlongToLong: Iso[JLong, Long] = new Iso[JLong, Long] {
     override def to(b: JLong): Long = b
     override def from(a: Long): JLong = a
@@ -99,7 +103,7 @@ object Iso extends LowPriorityIsos {
 }
 
 object JavaHelpers {
-  implicit class UniversalConverter[A,B](val x: A) extends AnyVal {
+  implicit class UniversalConverter[A](val x: A) extends AnyVal {
     def convertTo[B](implicit iso: Iso[A,B]): B = iso.to(x)
   }
 

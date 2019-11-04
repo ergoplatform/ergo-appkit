@@ -27,7 +27,7 @@ public class ErgoWalletImpl implements ErgoWallet {
     public List<InputBox> getUnspentBoxes() {
         if (_unspentBoxes == null) {
             _unspentBoxes = _unspentBoxesData.stream().map(boxInfo -> {
-                return new InputBoxImpl(boxInfo.getBox());
+                return new InputBoxImpl(_ctx, boxInfo.getBox());
             }).collect(Collectors.toList());
         }
         return _unspentBoxes;

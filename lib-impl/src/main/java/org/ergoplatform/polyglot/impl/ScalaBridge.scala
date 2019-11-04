@@ -80,7 +80,7 @@ object ScalaBridge {
     }
   }
 
-  type AdditionalRegisters = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
+  type AdditionalRegisters = Map[NonMandatoryRegisterId, EvaluatedValue[_ <: SType]]
 
   implicit val isoRegistersToMap: Iso[Registers, AdditionalRegisters] = new Iso[Registers, AdditionalRegisters] {
     override def to(regs: Registers): AdditionalRegisters = {
@@ -90,7 +90,15 @@ object ScalaBridge {
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
       }.toMap
     }
-    override def from(b: AdditionalRegisters): Registers = ???
+    override def from(ergoRegs: AdditionalRegisters): Registers = {
+      val res = new Registers()
+      ergoRegs.foreach { case (id, value) =>
+        val name = id.toString()
+        val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
+        res.put(name, v)
+      }
+      res
+    }
   }
 
   implicit val isoErgoTransactionOutput: Iso[ErgoTransactionOutput, ErgoBox] = new Iso[ErgoTransactionOutput, ErgoBox] {

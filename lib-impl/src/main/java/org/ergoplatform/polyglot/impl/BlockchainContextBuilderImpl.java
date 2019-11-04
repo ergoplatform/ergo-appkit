@@ -39,7 +39,7 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
         Collections.reverse(_headers);
         List<WalletBox> unspentBoxes = ErgoNodeFacade.getWalletUnspentBoxes(_retrofit, 0, 0);
         ErgoWalletImpl wallet = new ErgoWalletImpl(unspentBoxes);
-        return new BlockchainContextImpl(_retrofit, _networkType, _nodeInfo, _headers, wallet);
+        return new BlockchainContextImpl(_client, _retrofit, _networkType, _nodeInfo, _headers, wallet);
     }
 
 

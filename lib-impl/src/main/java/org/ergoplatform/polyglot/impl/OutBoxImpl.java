@@ -4,9 +4,11 @@ import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.polyglot.*;
 
 public class OutBoxImpl implements OutBox {
+  private final BlockchainContextImpl _ctx;
   private final ErgoBoxCandidate _ergoBoxCandidate;
 
-  public OutBoxImpl(ErgoBoxCandidate ergoBoxCandidate) {
+  public OutBoxImpl(BlockchainContextImpl ctx, ErgoBoxCandidate ergoBoxCandidate) {
+    _ctx = ctx;
     _ergoBoxCandidate = ergoBoxCandidate;
   }
 
@@ -26,6 +28,6 @@ public class OutBoxImpl implements OutBox {
 
   @Override
   public InputBox convertToInputWith(String txId, short boxIndex) {
-    return new InputBoxImpl(_ergoBoxCandidate.toBox(txId, boxIndex));
+    return new InputBoxImpl(_ctx, _ergoBoxCandidate.toBox(txId, boxIndex));
   }
 }
