@@ -26,6 +26,33 @@
   "name":"java.util.Optional"
 },
 {
+  "name":"org.ergoplatform.ergotool.ApiConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.ergotool.ErgoNodeConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.ergotool.ErgoToolConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.ergotool.WalletConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.polyglot.NetworkType",
+  "fields":[
+    {"name":"MAINNET"}, 
+    {"name":"TESTNET"}
+  ]
+},
+{
   "name":"org.ergoplatform.restapi.client.Asset",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -268,7 +295,8 @@
 },
 {
   "name":"sun.misc.Unsafe",
-  "allDeclaredFields":true
+  "allDeclaredFields":true,
+  "methods":[{"name":"allocateInstance","parameterTypes":["java.lang.Class"] }]
 },
 {
   "name":"wrappers.scalan.impl.WRTypesDefs$WRType$WRTypeElem",

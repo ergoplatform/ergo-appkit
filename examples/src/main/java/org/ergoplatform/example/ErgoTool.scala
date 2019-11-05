@@ -1,27 +1,22 @@
 package org.ergoplatform.example
 
+import java.io.FileReader
+import java.nio.file.Paths
+
 import org.ergoplatform.example.util.RestApiErgoClient
 import org.ergoplatform.polyglot._
 
 import scala.util.control.NonFatal
 import JavaHelpers._
-import com.typesafe.config.ConfigFactory
-import pureconfig.ConfigReader.Result
-import pureconfig.generic.ProductHint
-import pureconfig.{ConfigSource, CamelCase, ConfigFieldMapping}
-import pureconfig.generic.auto._
+import com.google.gson.GsonBuilder
+import org.ergoplatform.ergotool.ErgoToolConfig
 
 object Configurations {
-  implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
-
-  case class ApiConfig(apiUrl: String, apiKey: String)
-  case class WalletConfig(mnemonic: String, password: String, mnemonicPassword: String)
-  case class ErgoNodeConfig(nodeApi: ApiConfig, wallet: WalletConfig, networkType: NetworkType)
-  case class ErgoToolConfig(node: ErgoNodeConfig)
-
-  def load(): Result[ErgoToolConfig] = {
-    val conf = ConfigSource.default.at("ergotool").load[ErgoToolConfig]
-    conf
+  def load(fileName: String): ErgoToolConfig = {
+    val gson = new GsonBuilder().create()
+    val file = Paths.get(fileName).toAbsolutePath.toFile
+    val reader = new FileReader(file)
+    gson.fromJson(reader, classOf[ErgoToolConfig])
   }
 }
 
@@ -33,7 +28,7 @@ object ErgoTool {
   val CMD_PAY = "pay"
 
   def main(args: Array[String]) = {
-    val conf = Configurations.load()
+
 //    val conf = ConfigFactory.load()
     val cmdOpt = try {
       Some(parseCmd(args))
@@ -57,16 +52,14 @@ object ErgoTool {
 
   def parseCmd(args: Seq[String]): Cmd = {
     val cmd = args(0)
-    val seed = args(1)
-    val pass = args(2)
-    val apiKey = args(3)
+    val toolConf = Configurations.load("ergotool.json")
     cmd match {
       case CMD_LIST =>
-        val limit = if (args.length > 4) args(4).toInt else 10
-        ListCmd(cmd, seed, pass, apiKey, limit)
+        val limit = if (args.length > 1) args(1).toInt else 10
+        ListCmd(toolConf, cmd, limit)
       case CMD_PAY =>
-        val amount = if (args.length > 4) args(4).toLong else sys.error(s"Payment amound is not defined")
-        PayCmd(cmd, seed, pass, apiKey, amount)
+        val amount = if (args.length > 1) args(1).toLong else sys.error(s"Payment amound is not defined")
+        PayCmd(toolConf, cmd, amount)
       case _ =>
         sys.error(s"Unknown command: $cmd")
     }
@@ -76,7 +69,11 @@ object ErgoTool {
     val msg =
       s"""
         | Usage:
-        | wallet (list|pay) seed pass apiKey
+        | ergotool action [action parameters]
+        |
+        | Available actions:
+        |   list <limit> - list top <limit> confirmed wallet boxes
+        |   pay  <amount> - amount of NanoErg to put into the new box
      """.stripMargin
     println(msg)
   }
@@ -124,15 +121,15 @@ object ErgoTool {
     println(s"SignedTransaction: ${res}")
   }
 
-
 }
 
 sealed trait Cmd {
+  def toolConf: ErgoToolConfig
   def name: String
-  def seed: String
-  def password: String
-  def apiKey: String
+  def seed: String = toolConf.getNode.getWallet.getMnemonic
+  def password: String = toolConf.getNode.getWallet.getPassword
+  def apiKey: String = toolConf.getNode.getNodeApi.getApiKey
 }
 
-case class ListCmd(name: String, seed: String, password: String, apiKey: String, limit: Int) extends Cmd
-case class PayCmd(name: String, seed: String, password: String, apiKey: String, payAmount: Long) extends Cmd
+case class ListCmd(toolConf: ErgoToolConfig, name: String, limit: Int) extends Cmd
+case class PayCmd(toolConf: ErgoToolConfig, name: String, payAmount: Long) extends Cmd
