@@ -1,6 +1,8 @@
 {
   "resources":[
+    {"pattern":"reference.conf"}, 
     {"pattern":"sun/net/idn/uidna.spp"}, 
-    {"pattern":"sun/text/resources/unorm.icu"}
+    {"pattern":"sun/text/resources/unorm.icu"}, 
+    {"pattern":"version.conf"}
   ]
 }

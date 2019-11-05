@@ -5,24 +5,36 @@ import org.ergoplatform.polyglot._
 
 import scala.util.control.NonFatal
 import JavaHelpers._
-//import pureconfig.ConfigSource
+import com.typesafe.config.ConfigFactory
+import pureconfig.ConfigReader.Result
+import pureconfig.generic.ProductHint
+import pureconfig.{ConfigSource, CamelCase, ConfigFieldMapping}
+import pureconfig.generic.auto._
 
-import scala.util.Try
+object Configurations {
+  implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-//case class ToolConfg(apiUrl: String, apiKey: String, networkType: NetworkType)
-//object ToolConfig {
-//  implicit val configReader: ConfigReader[ApiConfig] =
-//    deriveReader[ApiConfig]
-//}
+  case class ApiConfig(apiUrl: String, apiKey: String)
+  case class WalletConfig(mnemonic: String, password: String, mnemonicPassword: String)
+  case class ErgoNodeConfig(nodeApi: ApiConfig, wallet: WalletConfig, networkType: NetworkType)
+  case class ErgoToolConfig(node: ErgoNodeConfig)
+
+  def load(): Result[ErgoToolConfig] = {
+    val conf = ConfigSource.default.at("ergotool").load[ErgoToolConfig]
+    conf
+  }
+}
 
 object ErgoTool {
+
   val baseUrl = "http://localhost:9051/"
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)
   val CMD_LIST = "list"
   val CMD_PAY = "pay"
 
   def main(args: Array[String]) = {
-//    val conf = ConfigSource.default.load[ToolConfg]
+    val conf = Configurations.load()
+//    val conf = ConfigFactory.load()
     val cmdOpt = try {
       Some(parseCmd(args))
     }
