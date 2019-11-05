@@ -17,6 +17,6 @@ public interface InputBox {
      */
     Long getValue();
 
-    String toJson();
+    String toJson(boolean prettyPrint);
 }
 

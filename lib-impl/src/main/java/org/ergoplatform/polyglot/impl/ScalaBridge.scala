@@ -162,6 +162,7 @@ object ScalaBridge {
 
     override def from(tx: ErgoLikeTransaction): ErgoTransaction =
       new ErgoTransaction()
+        .id(tx.id)
         .inputs(tx.inputs.convertTo[List[ErgoTransactionInput]])
         .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
         .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])

@@ -95,7 +95,7 @@ public class ErgoNodeFacade {
     }
 
     static private ErgoClientException clientError(Retrofit r, Throwable cause) {
-        return new ErgoClientException("ErgoNodeFacade error: " + r.toString(), cause);
+        return new ErgoClientException("Error executing Ergo node API request: " + cause.getMessage(), cause);
     }
 
     private interface Supplier<T> {

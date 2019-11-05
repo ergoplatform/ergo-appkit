@@ -103,7 +103,6 @@ public class BlockchainContextImpl implements BlockchainContext {
                 .inputs(inputsData)
                 .outputs(outputsData);
         String txId = ErgoNodeFacade.sendTransaction(_retrofit, txData);
-        assert txId.equals(txData.getId());
         return txId;
     }
 

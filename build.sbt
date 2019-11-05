@@ -150,6 +150,7 @@ lazy val examples = (project in file("examples"))
       libraryDependencies ++= Seq(
         "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
         "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
+        "com.github.pureconfig" %% "pureconfig" % "0.12.1"
       )
     )
 

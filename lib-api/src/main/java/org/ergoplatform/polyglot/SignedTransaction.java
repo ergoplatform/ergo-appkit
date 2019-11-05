@@ -10,6 +10,7 @@ package org.ergoplatform.polyglot;
  * @see UnsignedTransaction
  */
 public interface SignedTransaction {
-    String toJson();
+    String getId();
+    String toJson(boolean prettyPrint);
 }
 

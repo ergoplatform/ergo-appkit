@@ -5,12 +5,43 @@ import org.ergoplatform.polyglot._
 
 import scala.util.control.NonFatal
 import JavaHelpers._
+//import pureconfig.ConfigSource
+
+import scala.util.Try
+
+//case class ToolConfg(apiUrl: String, apiKey: String, networkType: NetworkType)
+//object ToolConfig {
+//  implicit val configReader: ConfigReader[ApiConfig] =
+//    deriveReader[ApiConfig]
+//}
 
 object PayToAddress {
   val baseUrl = "http://localhost:9051/"
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)
   val CMD_LIST = "list"
   val CMD_PAY = "pay"
+
+  def main(args: Array[String]) = {
+//    val conf = ConfigSource.default.load[ToolConfg]
+    val cmdOpt = try {
+      Some(parseCmd(args))
+    }
+    catch { case NonFatal(t) =>
+      println(t.getMessage)
+      printUsage()
+      None
+    }
+    cmdOpt.foreach { cmd =>
+      val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, cmd.apiKey)
+      cmd match {
+        case c: ListCmd =>
+          list(ergoClient, c)
+        case c: PayCmd =>
+          pay(ergoClient, c)
+      }
+    }
+  }
+
 
   def parseCmd(args: Seq[String]): Cmd = {
     val cmd = args(0)
@@ -38,30 +69,11 @@ object PayToAddress {
     println(msg)
   }
 
-  def main(args: Array[String]) = {
-    try {
-      val cmd = parseCmd(args)
-      val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, cmd.apiKey)
-      cmd match {
-        case c: ListCmd =>
-          list(ergoClient, c)
-        case c: PayCmd =>
-          pay(ergoClient, c)
-        case op =>
-          sys.error(s"Unknown operation $op")
-      }
-    }
-    catch { case NonFatal(t) =>
-      println(t.getMessage)
-      printUsage()
-    }
-  }
-
   def list(ergoClient: ErgoClient, cmd: ListCmd) = {
     val res = ergoClient.execute(ctx => {
       val wallet = ctx.getWallet
       val boxes = wallet.getUnspentBoxes.convertTo[IndexedSeq[InputBox]]
-      val lines = boxes.take(cmd.limit).map(b => b.toJson).mkString("[", ",\n", "]")
+      val lines = boxes.take(cmd.limit).map(b => b.toJson(true)).mkString("[", ",\n", "]")
       lines
     })
     println(res)
@@ -73,11 +85,11 @@ object PayToAddress {
       val prover = ctx.newProverBuilder()
           .withMnemonic(cmd.seed, cmd.password)
           .build()
-      println(s"Prover: ${prover.getP2PKAddress}")
+      println(s"ProverAddress: ${prover.getP2PKAddress}")
       val wallet = ctx.getWallet
       val boxes = wallet.getUnspentBoxes
       val box = boxes.get(0)
-      println(s"Box to spend: ${box.toJson}")
+      println(s"InputBox: ${box.toJson(true)}")
       val txB = ctx.newTxBuilder()
       val newBox = txB.outBoxBuilder()
           .value(cmd.payAmount)
@@ -94,10 +106,10 @@ object PayToAddress {
           .sendChangeTo(prover.getP2PKAddress)
           .build()
       val signed = prover.sign(tx)
-//      val txId = ctx.sendTransaction(signed)
-      signed.toJson
+      val txId = ctx.sendTransaction(signed)
+      (signed.toJson(true), txId)
     })
-    println(s"Signed transaction: ${res}")
+    println(s"SignedTransaction: ${res}")
   }
 
 

@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.polyglot.SignedTransaction;
 import org.ergoplatform.restapi.client.ErgoTransaction;
+import org.ergoplatform.restapi.client.JSON;
+import sigmastate.Values;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
@@ -28,9 +30,20 @@ public class SignedTransactionImpl implements SignedTransaction {
     }
 
     @Override
-    public String toJson() {
+    public String getId() {
+        return _tx.id();
+    }
+
+    @Override
+    public String toJson(boolean prettyPrint) {
         ErgoTransaction tx = ScalaBridge.isoErgoTransaction().from(_tx);
-        Gson gson = _ctx.getApiClient().getGson();
+        if (prettyPrint) {
+            tx.getOutputs().forEach(o -> {
+                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+                o.ergoTree(tree.toString());
+            });
+        }
+        Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
         String json = gson.toJson(tx);
         return json;
     }

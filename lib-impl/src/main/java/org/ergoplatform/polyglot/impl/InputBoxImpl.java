@@ -3,17 +3,10 @@ package org.ergoplatform.polyglot.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.polyglot.ErgoId;
-import org.ergoplatform.polyglot.ErgoToken;
 import org.ergoplatform.polyglot.InputBox;
 import org.ergoplatform.polyglot.JavaHelpers;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
-import scala.Tuple2;
-import sigmastate.Values;
-import sigmastate.serialization.ErgoTreeSerializer;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.ergoplatform.restapi.client.JSON;
 
 public class InputBoxImpl implements InputBox {
     private final BlockchainContextImpl _ctx;
@@ -46,11 +39,14 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
-    public String toJson() {
-        Gson gson = _ctx.getApiClient().getGson();
-        ErgoTransactionOutput cloned = gson.fromJson(gson.toJson(_boxData), _boxData.getClass());
-        cloned.ergoTree(_ergoBox.ergoTree().toString());
-        String json = gson.toJson(cloned);
+    public String toJson(boolean prettyPrint) {
+        Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
+        ErgoTransactionOutput data = _boxData;
+        if (prettyPrint) {
+            data = _ctx.getApiClient().cloneDataObject(_boxData);
+            data.ergoTree(_ergoBox.ergoTree().toString());
+        }
+        String json = gson.toJson(data);
         return json;
     }
 
