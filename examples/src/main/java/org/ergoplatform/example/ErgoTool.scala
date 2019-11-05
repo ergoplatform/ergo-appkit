@@ -15,7 +15,7 @@ import scala.util.Try
 //    deriveReader[ApiConfig]
 //}
 
-object PayToAddress {
+object ErgoTool {
   val baseUrl = "http://localhost:9051/"
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)
   val CMD_LIST = "list"

@@ -40,6 +40,21 @@
   "methods":[{"name":"getLastHeaders","parameterTypes":["java.math.BigDecimal"] }]
 },
 {
+  "name":"org.ergoplatform.restapi.client.ErgoTransaction",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.restapi.client.ErgoTransactionDataInput",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.restapi.client.ErgoTransactionInput",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"org.ergoplatform.restapi.client.ErgoTransactionOutput",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -72,8 +87,26 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"org.ergoplatform.restapi.client.SpendingProof",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.ergoplatform.restapi.client.TransactionsApi",
+  "methods":[{"name":"sendTransaction","parameterTypes":["org.ergoplatform.restapi.client.ErgoTransaction"] }]
+},
+{
   "name":"org.ergoplatform.restapi.client.UtxoApi",
   "methods":[{"name":"getBoxById","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.ergoplatform.restapi.client.WalletApi",
+  "methods":[{"name":"walletUnspentBoxes","parameterTypes":["java.lang.Integer","java.lang.Integer"] }]
+},
+{
+  "name":"org.ergoplatform.restapi.client.WalletBox",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"scalan.TypeDescs$FuncElem",
@@ -115,7 +148,15 @@
   ]
 },
 {
+  "name":"sigmastate.lang.Terms$Apply",
+  "allPublicConstructors":true
+},
+{
   "name":"sigmastate.lang.Terms$Block",
+  "allPublicConstructors":true
+},
+{
+  "name":"sigmastate.lang.Terms$MethodCallLike",
   "allPublicConstructors":true
 },
 {

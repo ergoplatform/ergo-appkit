@@ -11,6 +11,11 @@ Generate reflection config files
 java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
 ```
 
+Update reflection config files
+```
+java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
+```
+
 prepare polyglot jar file
 ```
 sbt assembly
