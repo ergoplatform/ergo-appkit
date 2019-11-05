@@ -2,20 +2,32 @@ package org.ergoplatform.ergotool;
 
 import org.ergoplatform.polyglot.NetworkType;
 
+/**
+ * Parameters of Ergo node used by ErgoTool.
+ */
 public class ErgoNodeConfig {
-  private ApiConfig nodeApi;
-  private WalletConfig wallet;
-  private NetworkType networkType;
+    private ApiConfig nodeApi;
+    private WalletConfig wallet;
+    private NetworkType networkType;
 
-  public ApiConfig getNodeApi() {
-    return nodeApi;
-  }
+    /**
+     * Returns Ergo node API connection parameters
+     */
+    public ApiConfig getNodeApi() {
+        return nodeApi;
+    }
 
-  public WalletConfig getWallet() {
-    return wallet;
-  }
+    /**
+     * Returns parameters for working with the wallet
+     */
+    public WalletConfig getWallet() {
+        return wallet;
+    }
 
-  public NetworkType getNetworkType() {
-    return networkType;
-  }
+    /**
+     * Returns expected network type (Mainnet or Testnet)
+     */
+    public NetworkType getNetworkType() {
+        return networkType;
+    }
 }

@@ -1,17 +1,25 @@
 package org.ergoplatform.ergotool;
 
-import org.ergoplatform.polyglot.NetworkType;
-
+/**
+ * Ergo node API connection parameters
+ */
 public class ApiConfig {
-  private String apiUrl;
-  private String apiKey;
+    private String apiUrl;
+    private String apiKey;
 
-  public String getApiUrl() {
-    return apiUrl;
-  }
+    /**
+     * Url of the Ergo node API end point
+     */
+    public String getApiUrl() {
+        return apiUrl;
+    }
 
-  public String getApiKey() {
-    return apiKey;
-  }
+    /**
+     * ApiKey which is used for Ergo node API authentication.
+     * This is a secrete key whose hash was used in Ergo node config.
+     */
+    public String getApiKey() {
+        return apiKey;
+    }
 }
 
