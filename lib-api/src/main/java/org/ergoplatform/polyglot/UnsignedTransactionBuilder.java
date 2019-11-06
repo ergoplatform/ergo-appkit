@@ -19,12 +19,12 @@ public interface UnsignedTransactionBuilder {
     /**
      * Specifies boxes that will be spent by the transaction when it will be included in a block.
      *
-     * @param boxes array of boxes to be spent by the transaction. The boxes can either be
+     * @param boxes list of boxes to be spent by the transaction. The boxes can either be
      *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from scratch
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
-    UnsignedTransactionBuilder boxesToSpend(InputBox... boxes);
+    UnsignedTransactionBuilder boxesToSpend(List<InputBox> boxes);
 
     /**
      * Specifies output boxes of the transaction. After this transaction is

@@ -1,4 +1,4 @@
-# Polyglot: A Library for Polyglot Development of Ergo Applications 
+# Appkit: A Library for Polyglot Development of Ergo Applications 
 
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
 contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
@@ -18,44 +18,64 @@ to services deployed in cloud servers.
 That said, it is very desirable to provide consistent programming model and APIs
 to facilitate all those application scenarios and platforms.
 
-This library is based on [GraalVM](https://www.graalvm.org) - a novel next
+Appkit library is based on [GraalVM](https://www.graalvm.org) - a novel next
 generation approach to implement software which is reusable across several
-programming languages and execution environment.
+programming languages and execution environments (see [motivation for using
+Graal](#why-graal) below).
 
-Polyglot library is written in Java and is a thin wrapper around core
+Appkit is written in Java and is a thin wrapper around core
 components provided by [ErgoScript
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter) and
 [Ergo protocol](https://github.com/ergoplatform/ergo) implementations which are
 written in Scala.
 
-Using Polyglot Ergo applications can be written in one of the languages
+Using Appkit Ergo applications can be written in one of the languages
 supported by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using
 this library applications can communicate with Ergo nodes via unified API and
-programming model provided by Polyglot. Jump to [setup instructions](#setup) if
+programming model provided by Appkit. Jump to [setup instructions](#setup) if
 you want get started right away.
 
 ## Usage Example 
 
-Among other things, Polyglot library allows to communicate with Ergo nodes via
-REST API. Let's see how we can write a simple Java console application which
-uses Polyglot library. The application will create and send a new transaction
-using Ergo node which is started locally and available at
-`http://localhost:9052/`. Suppose we [set up a full
+Among other things, Appkit library allows to communicate with Ergo nodes via
+REST API. Let's see how we can write a simple Java console application (let's
+call it ErgoTool) which uses Appkit library. ErgoTool will create
+and send a new transaction to an Ergo node which is started locally and
+available at `http://localhost:9052/`. Suppose we [set up a full
 node](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and started
 it using the following command.
 ```
-java -jar -Xmx4G -Dlogback.stdout.level=WARN target/scala-2.12/ergo-3.1.3.jar --mainnet -c ergo.conf
+java -jar -Xmx4G target/scala-2.12/ergo-3.1.3.jar --testnet -c ergo-testnet.conf
 ```
 
-In order to connect to this node in our Java application 
+```
+    val toolConf = ErgoToolConfig.load("ergotool.json")
+```
 
+In order to connect to the running testnet node from our Java application first create
+`ErgoClient` instance.
+```
+String nodeUrl = "http://localhost:9052/";
+String apiKey  = "82444a18c223dc42b78f52c58facfd909c8cc38858a5f22e89070959499076e1"; 
+ErgoClient ergoClient = RestApiErgoClient.create(nodeUrl, NetworkType.TESTNET, cmd.apiKey)
+```
+
+Here `apiKey` is the secrete key required for API authentication which can be
+obtained as described
+[here](https://github.com/ergoplatform/ergo/wiki/Ergo-REST-API#setting-an-api-key).
+Then we can `execute` any block of code in the current blockchain context.
+```
+SignedTransaction res = ergoClient.execute((BlockchainContext ctx) -> {
+    // here we can use ctx to create and sign a new transaction
+});
+```
 
 
 ## Setup
 
-Polyglot require GraalVM (Community or Enterprise edition) to be
-[downloaded](https://www.graalvm.org/downloads/) and installed. 
-Community edition should be enough for Ergo Polyglot library. 
+Appkit require GraalVM (Community or Enterprise edition) to be
+[downloaded](https://www.graalvm.org/downloads/) and installed. Community
+edition should be enough for Ergo Appkit library.
 
 #### Install GraalVM Community Edition on MacOS
 
@@ -91,6 +111,6 @@ $ js --version
 GraalVM JavaScript (GraalVM CE Native 19.2.1)
 ```
 
-
+## Why Graal?
 
 

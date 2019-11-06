@@ -1,5 +1,7 @@
 package org.ergoplatform.example
 
+import java.util.Arrays
+
 import org.ergoplatform.example.util.FileMockedErgoClient
 import org.ergoplatform.polyglot.ConstantsBuilder
 import org.ergoplatform.polyglot.impl.ErgoScriptContract
@@ -16,7 +18,7 @@ object PrepareBoxScala {
           .build()
       val spendingTxB = ctx.newTxBuilder()
       val tx = spendingTxB
-          .boxesToSpend(out.convertToInputWith(mockTxId, 0))
+                .boxesToSpend(Arrays.asList(out.convertToInputWith(mockTxId, 0)))
           .outputs(
             spendingTxB.outBoxBuilder()
                 .contract(ctx.compileContract(ConstantsBuilder.empty(), "{ true }"))

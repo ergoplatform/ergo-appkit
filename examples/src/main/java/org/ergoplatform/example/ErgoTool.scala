@@ -1,35 +1,20 @@
 package org.ergoplatform.example
 
-import java.io.FileReader
-import java.nio.file.Paths
+import java.util.Arrays
 
 import org.ergoplatform.example.util.RestApiErgoClient
 import org.ergoplatform.polyglot._
 
 import scala.util.control.NonFatal
-import JavaHelpers._
-import com.google.gson.GsonBuilder
+import org.ergoplatform.polyglot.JavaHelpers._
 import org.ergoplatform.ergotool.ErgoToolConfig
 
-object Configurations {
-  def load(fileName: String): ErgoToolConfig = {
-    val gson = new GsonBuilder().create()
-    val file = Paths.get(fileName).toAbsolutePath.toFile
-    val reader = new FileReader(file)
-    gson.fromJson(reader, classOf[ErgoToolConfig])
-  }
-}
-
 object ErgoTool {
-
-  val baseUrl = "http://localhost:9051/"
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)
   val CMD_LIST = "list"
   val CMD_PAY = "pay"
 
   def main(args: Array[String]) = {
-
-//    val conf = ConfigFactory.load()
     val cmdOpt = try {
       Some(parseCmd(args))
     }
@@ -39,7 +24,7 @@ object ErgoTool {
       None
     }
     cmdOpt.foreach { cmd =>
-      val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, cmd.apiKey)
+      val ergoClient = RestApiErgoClient.create(cmd.apiUrl, cmd.networkType, cmd.apiKey)
       cmd match {
         case c: ListCmd =>
           list(ergoClient, c)
@@ -52,7 +37,7 @@ object ErgoTool {
 
   def parseCmd(args: Seq[String]): Cmd = {
     val cmd = args(0)
-    val toolConf = Configurations.load("ergotool.json")
+    val toolConf = ErgoToolConfig.load("ergotool.json")
     cmd match {
       case CMD_LIST =>
         val limit = if (args.length > 1) args(1).toInt else 10
@@ -81,7 +66,7 @@ object ErgoTool {
   def list(ergoClient: ErgoClient, cmd: ListCmd) = {
     val res = ergoClient.execute(ctx => {
       val wallet = ctx.getWallet
-      val boxes = wallet.getUnspentBoxes.convertTo[IndexedSeq[InputBox]]
+      val boxes = wallet.getUnspentBoxes(0).get().convertTo[IndexedSeq[InputBox]]
       val lines = boxes.take(cmd.limit).map(b => b.toJson(true)).mkString("[", ",\n", "]")
       lines
     })
@@ -96,7 +81,7 @@ object ErgoTool {
           .build()
       println(s"ProverAddress: ${prover.getP2PKAddress}")
       val wallet = ctx.getWallet
-      val boxes = wallet.getUnspentBoxes
+      val boxes = wallet.getUnspentBoxes(0).get()
       val box = boxes.get(0)
       println(s"InputBox: ${box.toJson(true)}")
       val txB = ctx.newTxBuilder()
@@ -109,7 +94,7 @@ object ErgoTool {
                 .build(),
             "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
           .build()
-      val tx = txB.boxesToSpend(box)
+      val tx = txB.boxesToSpend(Arrays.asList(box))
           .outputs(newBox)
           .fee(Parameters.MinFee)
           .sendChangeTo(prover.getP2PKAddress)
@@ -128,7 +113,9 @@ sealed trait Cmd {
   def name: String
   def seed: String = toolConf.getNode.getWallet.getMnemonic
   def password: String = toolConf.getNode.getWallet.getPassword
+  def apiUrl: String = toolConf.getNode.getNodeApi.getApiUrl
   def apiKey: String = toolConf.getNode.getNodeApi.getApiKey
+  def networkType: NetworkType = toolConf.getNode.getNetworkType
 }
 
 case class ListCmd(toolConf: ErgoToolConfig, name: String, limit: Int) extends Cmd

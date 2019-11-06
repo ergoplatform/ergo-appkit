@@ -32,7 +32,7 @@ public class ExampleScenarios {
         InputBox[] boxes = _ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
         UnsignedTransaction tx = txB
-                .boxesToSpend(boxes)
+                .boxesToSpend(Arrays.asList(boxes))
                 .outputs(
                         txB.outBoxBuilder()
                                 .value(total)
@@ -69,7 +69,7 @@ public class ExampleScenarios {
                 .build();
         UnsignedTransactionBuilder spendingTxB = _ctx.newTxBuilder();
         UnsignedTransaction tx = spendingTxB
-                .boxesToSpend(out.convertToInputWith(mockTxId, outputIndex))
+                .boxesToSpend(Arrays.asList(out.convertToInputWith(mockTxId, outputIndex)))
                 .outputs(
                         spendingTxB.outBoxBuilder()
                                 .contract(_ctx.compileContract(ConstantsBuilder.empty(), "{ false }"))
