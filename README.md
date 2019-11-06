@@ -1,5 +1,11 @@
 # Appkit: A Library for Polyglot Development of Ergo Applications 
 
+## Contents
+- [Introductio](#introduction)
+- [Usage Example](#usage-example)
+- [Setup](#setup)
+
+## Introduction
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
 contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
 blockchain architecture Ergo provides advanced contractual capabilities, which
