@@ -1,7 +1,6 @@
 package org.ergoplatform.example;
 
-import org.ergoplatform.polyglot.*;
-import org.ergoplatform.polyglot.impl.ErgoScriptContract;
+import org.ergoplatform.appkit.*;
 
 import java.util.Arrays;
 

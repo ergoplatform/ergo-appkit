@@ -1,7 +1,7 @@
 const MockData = Java.type("org.ergoplatform.example.MockData")
 const FileMockedErgoClient = Java.type("org.ergoplatform.example.util.FileMockedErgoClient")
-const ConstantsBuilder = Java.type("org.ergoplatform.polyglot.ConstantsBuilder")
-const ErgoContract = Java.type("org.ergoplatform.polyglot.ErgoContract")
+const ConstantsBuilder = Java.type("org.ergoplatform.appkit.ConstantsBuilder")
+const ErgoContract = Java.type("org.ergoplatform.appkit.ErgoContract")
 
 var ergoScript = process.argv[2]
 if (typeof(ergoScript) == "undefined")

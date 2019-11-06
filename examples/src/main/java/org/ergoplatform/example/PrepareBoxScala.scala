@@ -3,8 +3,8 @@ package org.ergoplatform.example
 import java.util.Arrays
 
 import org.ergoplatform.example.util.FileMockedErgoClient
-import org.ergoplatform.polyglot.ConstantsBuilder
-import org.ergoplatform.polyglot.impl.ErgoScriptContract
+import org.ergoplatform.appkit.ConstantsBuilder
+import org.ergoplatform.appkit.impl.ErgoScriptContract
 
 object PrepareBoxScala {
   def main(args: Array[String]) = {

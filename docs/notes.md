@@ -8,15 +8,15 @@ export PATH=$PATH:${GRAAL_HOME}/bin
 
 Generate reflection config files
 ```
-java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
+java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image org.ergoplatform.appkit.ni.Prove
 ```
 
 Update reflection config files
 ```
-java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image org.ergoplatform.polyglot.ni.Prove
+java -agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image org.ergoplatform.appkit.ni.Prove
 ```
 
-prepare polyglot jar file
+prepare appkit jar file
 ```
 sbt assembly
 ```
@@ -26,7 +26,7 @@ sbt assembly
 Generate native image for a class
 ```
 native-image --no-server \
- -cp target/scala-2.12/ergo-polyglot-3.0.0.jar\
+ -cp target/scala-2.12/ergo-appkit-3.0.0.jar\
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
@@ -40,7 +40,7 @@ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./preparebox "{ sigmaProp(CONTEXT.headers.
 Generate shared library
 ```
 native-image --no-server \
- -cp target/scala-2.12/ergo-polyglot-3.0.0.jar\
+ -cp target/scala-2.12/ergo-appkit-3.0.0.jar\
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
@@ -61,16 +61,16 @@ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_preparebox "{ sigmaProp(CONTEXT.hea
 
 Using  `js`
 ```
-js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
+js --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
 ```
 Using `node`
 ```
-node --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
+node --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
 ```
 Start session for debugging
 ```
-js --jvm --inspect --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
+js --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
 ```
 

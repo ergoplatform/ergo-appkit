@@ -1,6 +1,6 @@
 package org.ergoplatform.example.util;
 
-import org.ergoplatform.polyglot.ErgoClient;
+import org.ergoplatform.appkit.ErgoClient;
 
 /**
  * This interface is used to represent {@link ErgoClient} whose communication with

@@ -2,7 +2,7 @@ package org.ergoplatform.example;
 
 import org.ergoplatform.ergotool.*;
 import org.ergoplatform.example.util.RestApiErgoClient;
-import org.ergoplatform.polyglot.*;
+import org.ergoplatform.appkit.*;
 
 import java.io.FileNotFoundException;
 import java.util.*;

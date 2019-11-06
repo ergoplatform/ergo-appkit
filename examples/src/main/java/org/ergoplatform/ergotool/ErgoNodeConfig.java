@@ -1,6 +1,6 @@
 package org.ergoplatform.ergotool;
 
-import org.ergoplatform.polyglot.NetworkType;
+import org.ergoplatform.appkit.NetworkType;
 
 /**
  * Parameters of Ergo node used by ErgoTool.

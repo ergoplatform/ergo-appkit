@@ -46,7 +46,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.polyglot.NetworkType",
+  "name":"org.ergoplatform.appkit.NetworkType",
   "fields":[
     {"name":"MAINNET"}, 
     {"name":"TESTNET"}

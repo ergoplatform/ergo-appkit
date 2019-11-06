@@ -87,9 +87,7 @@ wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
 Our example app also reads the amount of NanoErg to put into a new box from command line arguments
 ```java
-import java.util.*;
-import org.ergoplatform.ergotool.*;
-import org.ergoplatform.polyglot.*;
+
 
 long amountToPay = Long.parseLong(args[0]);
 ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
@@ -103,7 +101,7 @@ ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 
 Using `ErgoClient` we can
-[execute](lib-api/src/main/java/org/ergoplatform/polyglot/ErgoClient.java)
+[execute](lib-api/src/main/java/org/ergoplatform/appkit/ErgoClient.java)
 any block of code in the current blockchain context.
 
 ```java

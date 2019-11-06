@@ -3,10 +3,10 @@ package org.ergoplatform.example
 import java.util.Arrays
 
 import org.ergoplatform.example.util.RestApiErgoClient
-import org.ergoplatform.polyglot._
+import org.ergoplatform.appkit._
 
 import scala.util.control.NonFatal
-import org.ergoplatform.polyglot.JavaHelpers._
+import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.ergotool.ErgoToolConfig
 
 object ErgoTool {

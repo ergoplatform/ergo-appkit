@@ -1,10 +1,10 @@
 package org.ergoplatform.example.util;
 
 import org.ergoplatform.ergotool.ErgoNodeConfig;
-import org.ergoplatform.polyglot.BlockchainContext;
-import org.ergoplatform.polyglot.ErgoClient;
-import org.ergoplatform.polyglot.NetworkType;
-import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;
+import org.ergoplatform.appkit.BlockchainContext;
+import org.ergoplatform.appkit.ErgoClient;
+import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.restapi.client.ApiClient;
 
 import java.util.function.Function;

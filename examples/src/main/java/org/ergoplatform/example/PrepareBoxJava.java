@@ -2,7 +2,7 @@ package org.ergoplatform.example;
 
 import com.google.common.base.Strings;
 import org.ergoplatform.example.util.FileMockedErgoClient;
-import org.ergoplatform.polyglot.*;
+import org.ergoplatform.appkit.*;
 
 import static org.ergoplatform.example.MockData.*;
 

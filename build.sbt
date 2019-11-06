@@ -25,9 +25,7 @@ lazy val allResolvers = Seq(
   Resolver.mavenCentral,
 )
 
-licenses in ThisBuild := Seq("CC0 1.0 Universal" -> url("https://github.com/ergoplatform/ergo-wallet/blob/master/LICENSE"))
-
-homepage in ThisBuild := Some(url("https://github.com/aslesarenko/ergo-polyglot"))
+homepage in ThisBuild := Some(url("https://github.com/aslesarenko/ergo-appkit"))
 
 publishMavenStyle in ThisBuild := true
 
@@ -54,7 +52,7 @@ credentials ++= (for {
 // these options applied only in "compile" task since scalac crashes on scaladoc compilation with "-release 8"
 // see https://github.com/scala/community-builds/issues/796#issuecomment-423395500
 //scalacOptions in(Compile, compile) ++= Seq("-release", "8")
-assemblyJarName in assembly := s"ergo-polyglot-${version.value}.jar"
+assemblyJarName in assembly := s"ergo-appkit-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
   case "logback.xml" => MergeStrategy.first
@@ -154,12 +152,12 @@ lazy val examples = (project in file("examples"))
       )
     )
 
-lazy val ergoPolyglot = (project in file("."))
+lazy val ergoAppkit = (project in file("."))
     .dependsOn(
       common % allConfigDependency,
       javaClientGenerated % allConfigDependency,
       libApi % allConfigDependency,
       libImpl % allConfigDependency,
       examples % allConfigDependency)
-    .settings(commonSettings, name := "ergo-polyglot")
+    .settings(commonSettings, name := "ergo-appkit")
 

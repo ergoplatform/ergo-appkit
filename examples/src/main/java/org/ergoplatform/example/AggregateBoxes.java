@@ -1,9 +1,9 @@
 package org.ergoplatform.example;
 
 import org.ergoplatform.example.util.RestApiErgoClient;
-import org.ergoplatform.polyglot.ErgoClient;
-import org.ergoplatform.polyglot.NetworkType;
-import org.ergoplatform.polyglot.SignedTransaction;
+import org.ergoplatform.appkit.ErgoClient;
+import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;

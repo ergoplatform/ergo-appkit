@@ -1,9 +1,9 @@
 package org.ergoplatform.example;
 
 import org.ergoplatform.example.util.FileMockedErgoClient;
-import org.ergoplatform.polyglot.ConstantsBuilder;
-import org.ergoplatform.polyglot.JavaHelpers;
-import org.ergoplatform.polyglot.SignedTransaction;
+import org.ergoplatform.appkit.ConstantsBuilder;
+import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.appkit.SignedTransaction;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;

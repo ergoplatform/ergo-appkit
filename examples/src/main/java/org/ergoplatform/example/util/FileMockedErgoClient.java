@@ -3,11 +3,10 @@ package org.ergoplatform.example.util;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.ergoplatform.ErgoAddressEncoder;
-import org.ergoplatform.polyglot.BlockchainContext;
-import org.ergoplatform.polyglot.ErgoClientException;
-import org.ergoplatform.polyglot.NetworkType;
-import org.ergoplatform.polyglot.impl.BlockchainContextBuilderImpl;
+import org.ergoplatform.appkit.BlockchainContext;
+import org.ergoplatform.appkit.ErgoClientException;
+import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.restapi.client.ApiClient;
 import scalan.util.FileUtil;
 

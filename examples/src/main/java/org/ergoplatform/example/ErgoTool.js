@@ -1,10 +1,10 @@
 const Long = Java.type("java.lang.Long")
 const RestApiErgoClient = Java.type("org.ergoplatform.example.util.RestApiErgoClient")
-const ErgoClientException = Java.type("org.ergoplatform.polyglot.ErgoClientException")
-const ConstantsBuilder = Java.type("org.ergoplatform.polyglot.ConstantsBuilder")
-const ErgoContract = Java.type("org.ergoplatform.polyglot.ErgoContract")
+const ErgoClientException = Java.type("org.ergoplatform.appkit.ErgoClientException")
+const ConstantsBuilder = Java.type("org.ergoplatform.appkit.ConstantsBuilder")
+const ErgoContract = Java.type("org.ergoplatform.appkit.ErgoContract")
 const ErgoToolConfig = Java.type("org.ergoplatform.ergotool.ErgoToolConfig")
-const Parameters = Java.type("org.ergoplatform.polyglot.Parameters")
+const Parameters = Java.type("org.ergoplatform.appkit.Parameters")
 
 const amountToPay = Long.parseLong(process.argv[2]);
 const conf = ErgoToolConfig.load("ergotool.json");
