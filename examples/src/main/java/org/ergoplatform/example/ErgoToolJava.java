@@ -1,13 +1,11 @@
 package org.ergoplatform.example;
 
-import org.ergoplatform.ergotool.ErgoNodeConfig;
-import org.ergoplatform.ergotool.ErgoToolConfig;
+import org.ergoplatform.ergotool.*;
 import org.ergoplatform.example.util.RestApiErgoClient;
 import org.ergoplatform.polyglot.*;
 
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ErgoToolJava {
     static int newBoxDelay = 30;
@@ -18,10 +16,7 @@ public class ErgoToolJava {
             ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
             ErgoNodeConfig nodeConf = conf.getNode();
 
-            ErgoClient ergoClient = RestApiErgoClient.create(
-                    nodeConf.getNodeApi().getApiUrl(),
-                    nodeConf.getNetworkType(),
-                    nodeConf.getNodeApi().getApiKey());
+            ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 
             String txJson = ergoClient.execute(ctx -> {
                 ErgoWallet wallet = ctx.getWallet();

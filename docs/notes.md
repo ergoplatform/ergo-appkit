@@ -59,9 +59,14 @@ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_preparebox "{ sigmaProp(CONTEXT.hea
 
 ### Using GraalVM JS
 
+Using  `js`
 ```
 js --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
+```
+Using `node`
+```
+node --jvm --vm.cp=target/scala-2.12/ergo-polyglot-3.0.0.jar examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
 ```
 Start session for debugging
 ```

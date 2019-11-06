@@ -1,5 +1,6 @@
 package org.ergoplatform.example.util;
 
+import org.ergoplatform.ergotool.ErgoNodeConfig;
 import org.ergoplatform.polyglot.BlockchainContext;
 import org.ergoplatform.polyglot.ErgoClient;
 import org.ergoplatform.polyglot.NetworkType;
@@ -37,6 +38,13 @@ public class RestApiErgoClient implements ErgoClient {
 
     public static ErgoClient create(String nodeUrl, NetworkType networkType, String apiKey) {
         return new RestApiErgoClient(nodeUrl, networkType, apiKey);
+    }
+
+    public static ErgoClient create(ErgoNodeConfig nodeConf) {
+        return RestApiErgoClient.create(
+                nodeConf.getNodeApi().getApiUrl(),
+                nodeConf.getNetworkType(),
+                nodeConf.getNodeApi().getApiKey());
     }
 
     ApiClient getApiClient() {
