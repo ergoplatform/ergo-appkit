@@ -1,7 +1,7 @@
 # Appkit: A Library for Polyglot Development of Ergo Applications 
 
 ## Contents
-- [Introductio](#introduction)
+- [Introduction](#introduction)
 - [Usage Example](#usage-example)
 - [Setup](#setup)
 
