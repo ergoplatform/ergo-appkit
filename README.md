@@ -39,8 +39,13 @@ written in Scala.
 Using Appkit Ergo applications can be written in one of the languages supported
 by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using this
 library applications can communicate with Ergo nodes via unified API and
-programming model provided by Appkit. Please follow the [setup
-instructions](#setup) to get started.
+programming model provided by Appkit. In addition Appkit based Ergo applications
+can be compiled into native code using [native-image ahead of time
+compiler](https://www.graalvm.org/docs/reference-manual/native-image/) and then
+executed without Java VM with very fast startup time and lower runtime memory
+overhead compared to a Java VM.
+
+Please follow the [setup instructions](#setup) to get started.
 
 ## Usage Example 
 
@@ -231,4 +236,29 @@ GraalVM JavaScript (GraalVM CE Native 19.2.1)
 
 ## Why Graal?
 
+After many years of research and development GraalVM project has matured enough end
+became [production ready](https://medium.com/graalvm/announcing-graalvm-19-4590cf354df8).
 
+From Ergo perspective GraalVM platform opens many unique opportunities in the
+nearest and the distant future. Here is a summary of some GraalVM related facts:
+
+- Ergo node can run on GraalVM without any modifications, in fact GraalVM is
+fully compliant with JDK 1.8 (which is minimal requirement for [Ergo Protocol
+Client](https://github.com/ergoplatform/ergo/releases))
+
+- Graal's
+[native-image](https://www.graalvm.org/docs/reference-manual/native-image/) tool
+can be used to compile JVM applications into native applications which can run
+without JVM. It can also produce shared libraries (`*.so` files on Linux and
+`*.dylib` files on MacOS) that can be used from C/C++ applications (and also
+from JavaScript, Python, etc using FFI).
+
+- All cryptography classes [BouncyCastle Java
+library](https://bouncycastle.org/java.html) which are used in Ergo reference
+implementation can be compiled to shared library and used from non-JVM
+languages.
+
+- All the code from [ErgoScript
+interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter/pulls),
+[ergo-wallet](https://github.com/ergoplatform/ergo-wallet) and this Appkit is compatible with
+`native-image` and can be compiled into either native application or shared library.
