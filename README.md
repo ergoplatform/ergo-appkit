@@ -5,10 +5,17 @@ contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
 blockchain architecture Ergo provides advanced contractual capabilities, which
 are not possible in bitcoin.
 
-Because of these capabilities numerous decentralized [applications]() become
-possible. Ergo applications can avoid centralization of trust and instead rely
-on trust-less truly decentralized protocols which are implemented using Ergo
-contracts deployed on Ergo blockchain.
+Because of these capabilities numerous decentralized applications become
+possible(see [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf),
+[Advanced ErgoScript
+examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf),
+[CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/),
+[Auctions On Ergo](https://www.ergoforum.org/t/auctions-on-ergo/122),
+[Interest-Free Loan
+Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc). Ergo
+applications can avoid centralization of trust and instead rely on trust-less
+truly decentralized protocols which are implemented using Ergo contracts
+deployed on Ergo blockchain.
 
 By its very nature, Ergo applications are both decentralized and cross-platform
 ranging from web applications running in browsers, mobile applications running
@@ -23,27 +30,26 @@ generation approach to implement software which is reusable across several
 programming languages and execution environments (see [motivation for using
 Graal](#why-graal) below).
 
-Appkit is written in Java and is a thin wrapper around core
-components provided by [ErgoScript
+Appkit has idiomatic Java API and is written in Java/Scala. It is a thin wrapper
+around core components provided by [ErgoScript
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter) and
 [Ergo protocol](https://github.com/ergoplatform/ergo) implementations which are
 written in Scala.
 
-Using Appkit Ergo applications can be written in one of the languages
-supported by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using
-this library applications can communicate with Ergo nodes via unified API and
-programming model provided by Appkit. Jump to [setup instructions](#setup) if
-you want get started right away.
+Using Appkit Ergo applications can be written in one of the languages supported
+by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using this
+library applications can communicate with Ergo nodes via unified API and
+programming model provided by Appkit. Please follow the [setup
+instructions](#setup) to get started.
 
 ## Usage Example 
 
 Among other things, Appkit library allows to communicate with Ergo nodes via
-REST API. Let's see how we can write a simple Java console application (let's
-call it
+REST API. Let's see how we can write a simple Java console application ( called
 [ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java))
-which uses Appkit library. ErgoTool will create and send a new transaction to an
-Ergo node which is started locally and available at `http://localhost:9052/`.
-Suppose we [set up a full
+which uses Appkit library. ErgoTool allows to create and send a new transaction
+to an Ergo node which, for example, can be started locally and thus available at
+`http://localhost:9052/`. Suppose we [set up a full
 node](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and started
 it using the following command.
 ```shell
@@ -91,7 +97,9 @@ Next we connect to the running testnet node from our Java application by creatin
 ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 
-Using `ErgoClient` we can `execute` any block of code in the current blockchain context.
+Using `ErgoClient` we can
+[execute](lib-api/src/main/java/org/ergoplatform/polyglot/ErgoClient.java)
+any block of code in the current blockchain context.
 
 ```java
 String txJson = ergoClient.execute((BlockchainContext ctx) -> {
@@ -149,13 +157,13 @@ OutBox newBox = txB.outBoxBuilder()
 ```
 Note, in order to compile `ErgoContract` from source code the `compileContract`
 method requires to provide values for named constants which are used in the script.
-If no such constants are used, then `ConstantsBuilder.empty()` can be used.
+If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
 
 In this specific case we pass public key of the `prover` for `pkOwner` 
-placeholder of the script meaning the box can be spend only be the owner of the
+placeholder of the script meaning the box can be spend only by the owner of the
 Ergo node we are working with. 
 
-We next create an unsigned transaction using data collected so far.
+Next create an unsigned transaction using all the data collected so far.
 ```java
 // tell transaction builder which boxes we are going to spend, which outputs
 // to create, amount of transaction fees and address for change coins.
@@ -176,8 +184,10 @@ SignedTransaction signed = prover.sign(tx);
 String txId = ctx.sendTransaction(signed);
 return signed.toJson(true);
 ```
-As the last step we serialize signed transaction into Json.
-Please see the [full source code]() of the example.
+As the last step we serialize signed transaction into Json with turned on pretty
+printing. Please see the [full source
+code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
+example.
 
 ## Setup
 
