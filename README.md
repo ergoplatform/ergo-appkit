@@ -3,6 +3,7 @@
 ## Contents
 - [Introduction](#introduction)
 - [Usage Example](#usage-example)
+- [Repository organization](#repository-organization)
 - [Setup](#setup)
 
 ## Introduction
@@ -197,6 +198,16 @@ As the last step we serialize signed transaction into Json with turned on pretty
 printing. Please see the [full source
 code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
 example.
+
+## Repository organization
+
+| sub-module  | description |
+|---|-----|
+| common  |  Used in all other submodules and contain basic utility classes |
+| java-client-generated  | Typed REST Java client [generated](https://swagger.io/tools/swagger-codegen/) from [Swagger definition](https://swagger.io/specification/) of [Ergo node API](https://github.com/ergoplatform/ergo/blob/master/src/main/resources/api/openapi.yaml) |
+| lib-api   | All Appkit Java interfaces which can be implemented elsewhere |
+| lib-impl  | Implementation of Appkit interfaces using `java-client-generated` to connect to Ergo API  |
+| examples | collection of simple Appkit example applications   |
 
 ## Setup
 
