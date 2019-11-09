@@ -10,7 +10,7 @@
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
 contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
 blockchain architecture Ergo provides advanced contractual capabilities, which
-are not possible in bitcoin.
+are not possible in Bitcoin.
 
 Because of these capabilities numerous decentralized applications become
 possible(see [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf),

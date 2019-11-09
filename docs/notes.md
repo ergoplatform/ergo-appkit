@@ -74,6 +74,10 @@ js --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
     examples/src/main/java/org/ergoplatform/example/PrepareBox.js
 ```
 
+### Usign GraalVM Python
+```
+graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
+```
 
 ### Creating Idea Project
 
