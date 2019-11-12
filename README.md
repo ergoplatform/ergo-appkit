@@ -1,7 +1,7 @@
 # Appkit: A Library for Polyglot Development of Ergo Applications 
 
-**NOTE: The code in Appkit is experimental. All API may be changes or/and
-removed without notice.**
+**NOTE: The code in Appkit is experimental. All APIs may change and/or
+be removed without notice.**
 
 ## Contents
 - [Introduction](#introduction)
