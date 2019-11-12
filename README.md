@@ -1,10 +1,16 @@
 # Appkit: A Library for Polyglot Development of Ergo Applications 
 
+**NOTE: The code in Appkit is experimental. All API may be changes or/and
+removed without notice.**
+
 ## Contents
 - [Introduction](#introduction)
-- [Usage Example](#usage-example)
+- [Using from Java](#using-from-java)
+- [Using from JavaScript](#using-from-javascript)
+- [Using from Python](#using-from-python)
 - [Repository organization](#repository-organization)
 - [Setup](#setup)
+- [Why Polyglot](#why-polyglot)
 
 ## Introduction
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
@@ -54,10 +60,10 @@ overhead compared to a Java VM.
 
 Please follow the [setup instructions](#setup) to get started.
 
-## Usage Example 
+## Using from Java 
 
 Among other things, Appkit library allows to communicate with Ergo nodes via
-REST API. Let's see how we can write a simple Java console application ( called
+REST API. Let's see how we can write a simple Java console application (called
 [ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java))
 which uses Appkit library. ErgoTool allows to create and send a new transaction
 to an Ergo node which, for example, can be started locally and thus available at
@@ -94,8 +100,6 @@ wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
 Our example app also reads the amount of NanoErg to put into a new box from command line arguments
 ```java
-
-
 long amountToPay = Long.parseLong(args[0]);
 ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
 ErgoNodeConfig nodeConf = conf.getNode();
@@ -199,6 +203,44 @@ printing. Please see the [full source
 code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
 example.
 
+## Using from JavaScript
+
+Before running JavaScript example it my be helpful to run Java example
+first to make sure everything is set up correctly.
+
+GraalVM can [run JavaScript and
+Node.js](https://www.graalvm.org/docs/reference-manual/languages/js/)
+applications out of the box and it is compatible with the [ECMAScript 2019
+specification](http://www.ecma-international.org/ecma-262/10.0/index.html).
+Additionally, `js` and `node` launchers accept special `--jvm` and `--polyglot`
+command line options which allow JS script to access Java objects and classes.
+
+That said, a JS example of ErgoTool can be executed using Node.js
+```shell
+$ node --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+  examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
+```
+
+Start session for debugging
+```shell
+$ node --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+  examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
+```
+
+## Using from Python
+
+Before running Python example it my be helpful to run Java example
+first to make sure everything is set up correctly.
+
+GraalVM can [run Python
+scripts](https://www.graalvm.org/docs/reference-manual/languages/python/)
+
+Python example of ErgoTool can be executed using the following command
+```shell
+$ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+  --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
+```
+
 ## Repository organization
 
 | sub-module  | description |
@@ -222,11 +264,11 @@ release](https://github.com/oracle/graal/releases) of GraalVM (e.g.
 `graalvm-ce-darwin-amd64-19.2.1.tar.gz`) for MacOS and put the programs from it
 onto the `$PATH`.
 
-```
-cd <your/directory/with/downloaded/graal>
-tar -zxf graalvm-ce-darwin-amd64-19.2.1.tar.gz
-export GRAAL_HOME=<your/directory/with/downloaded/graal>/graalvm-ce-19.1.1/Contents/Home
-export PATH=$PATH:${GRAAL_HOME}/bin
+```shell
+$ cd <your/directory/with/downloaded/graal>
+$ tar -zxf graalvm-ce-darwin-amd64-19.2.1.tar.gz
+$ export GRAAL_HOME=<your/directory/with/downloaded/graal>/graalvm-ce-19.1.1/Contents/Home
+$ export PATH=$PATH:${GRAAL_HOME}/bin
 ```
 
 GraalVM comes with a package manager called `gu` that lets you install
@@ -249,7 +291,7 @@ $ js --version
 GraalVM JavaScript (GraalVM CE Native 19.2.1)
 ```
 
-## Why Graal?
+## Why Polyglot?
 
 After many years of research and development GraalVM project has matured enough end
 became [production ready](https://medium.com/graalvm/announcing-graalvm-19-4590cf354df8).
@@ -277,3 +319,15 @@ languages.
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter/pulls),
 [ergo-wallet](https://github.com/ergoplatform/ergo-wallet) and this Appkit is compatible with
 `native-image` and can be compiled into either native application or shared library.
+
+- Appkit API interfaces can be used from JavaScript and Python by design. They
+can also be used from C/C++ (this is work in progress, and corresponding
+examples will be added later).
+
+- Appkit can be pre-compiled to native-image based launchers of both JavaScript
+and Python to enjoy fast startup and lower runtime memory
+overhead when running scripts (work in progress)
+
+- Appkit native shared library can be used from Python and JavaScript through FFI
+(work in progress)
+
