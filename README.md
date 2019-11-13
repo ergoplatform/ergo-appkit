@@ -5,11 +5,15 @@ be removed without notice.**
 
 ## Contents
 - [Introduction](#introduction)
-- [Using from Java](#using-from-java)
-- [Using from JavaScript](#using-from-javascript)
-- [Using from Python](#using-from-python)
+- [Examples](#examples)
+    - [Using from Java](#using-from-java)
+    - [Using from JavaScript](#using-from-javascript)
+    - [Using from Python](#using-from-python)
 - [Repository organization](#repository-organization)
 - [Setup](#setup)
+    - [Prerequisites](#prerequisites)
+        - [Install GraalVM Community Edition on MacOS](#install-graalvm-community-edition-on-macos)
+    - [Building the Appkit jar file](#building-the-appkit-jar-file)
 - [Why Polyglot](#why-polyglot)
 
 ## Introduction
@@ -60,7 +64,9 @@ overhead compared to a Java VM.
 
 Please follow the [setup instructions](#setup) to get started.
 
-## Using from Java 
+## Examples
+
+### Using from Java 
 
 Among other things, Appkit library allows to communicate with Ergo nodes via
 REST API. Let's see how we can write a simple Java console application (called
@@ -203,7 +209,7 @@ printing. Please see the [full source
 code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
 example.
 
-## Using from JavaScript
+### Using from JavaScript
 
 Before running JavaScript example it my be helpful to run Java example
 first to make sure everything is set up correctly.
@@ -217,17 +223,17 @@ command line options which allow JS script to access Java objects and classes.
 
 That said, a JS example of ErgoTool can be executed using Node.js
 ```shell
-$ node --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+$ node --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
   examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
 ```
 
 Start session for debugging
 ```shell
-$ node --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+$ node --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
   examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
 ```
 
-## Using from Python
+### Using from Python
 
 Before running Python example it my be helpful to run Java example
 first to make sure everything is set up correctly.
@@ -237,7 +243,7 @@ scripts](https://www.graalvm.org/docs/reference-manual/languages/python/)
 
 Python example of ErgoTool can be executed using the following command
 ```shell
-$ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
+$ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
   --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
 ```
 
@@ -252,6 +258,8 @@ $ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
 | examples | collection of simple Appkit example applications   |
 
 ## Setup
+
+### Prerequisites
 
 Appkit require GraalVM (Community or Enterprise edition) to be
 [downloaded](https://www.graalvm.org/downloads/) and installed. Community
@@ -289,6 +297,17 @@ OpenJDK 64-Bit GraalVM CE 19.2.1 (build 25.232-b07-jvmci-19.2-b03, mixed mode)
 
 $ js --version
 GraalVM JavaScript (GraalVM CE Native 19.2.1)
+```
+
+### Building the Appkit jar file
+
+At the moment Appkit is not published at public servers, so the whole repository
+needs to be clonned and Appkit jar file assembled.
+
+```shell
+$ git clone git@github.com:aslesarenko/ergo-appkit.git
+$ cd ergo-appkit
+$ sbt assembly
 ```
 
 ## Why Polyglot?

@@ -1,11 +1,11 @@
-import xsbti.compile
 
-version := "3.0.0"
+// first two digits of the version should be in sync with Ergo client
+version := "3.1.0"
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
   scalaVersion := "2.12.8",
-  version := "3.0.0",
+  version := "3.1.0",
   resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
