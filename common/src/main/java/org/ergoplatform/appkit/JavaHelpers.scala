@@ -4,11 +4,11 @@ import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
+
 import scala.collection.JavaConverters
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
-import scorex.util.ModifierId
 import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
 import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
@@ -20,7 +20,8 @@ import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDsl
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 import java.lang.{Long => JLong}
-import java.util.{Collections, List => JList}
+import java.util.{List => JList}
+
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
@@ -157,11 +158,6 @@ object JavaHelpers {
 
   def getStateDigest(tree: AvlTree): Array[Byte] = {
     tree.digest.toArray
-  }
-
-  def toTokensSeq[T](tokens: util.List[ErgoToken]): Seq[(TokenId, Long)] = {
-    val ts = JavaConverters.asScalaIterator(tokens.iterator()).map(t => (Digest32 @@ t.getId().getBytes(), t.getValue())).toSeq
-    ts
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {

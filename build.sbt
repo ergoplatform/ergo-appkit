@@ -1,3 +1,4 @@
+import xsbti.compile
 
 version := "3.0.0"
 
@@ -103,14 +104,11 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       )
     )
 
-
-
 lazy val common = (project in file("common"))
     .settings(
       commonSettings,
       name := "common",
       resolvers ++= allResolvers,
-      compileOrder := CompileOrder.Mixed,
       libraryDependencies ++= Seq(
         sigmaState,
         ergoWallet
@@ -131,7 +129,6 @@ lazy val libImpl = (project in file("lib-impl"))
     .dependsOn(javaClientGenerated % allConfigDependency, libApi % allConfigDependency)
     .settings(
       commonSettings, name := "lib-impl",
-      compileOrder := CompileOrder.ScalaThenJava,
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
       )
