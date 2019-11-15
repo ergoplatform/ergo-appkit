@@ -10,5 +10,8 @@
       "mnemonicPassword": ""
     },
     "networkType": "TESTNET"
+  },
+  "parameters": {
+    "newBoxSpendingDelay": "30"
   }
 }

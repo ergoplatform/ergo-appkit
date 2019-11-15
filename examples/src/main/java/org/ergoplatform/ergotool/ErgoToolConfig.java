@@ -12,14 +12,22 @@ import java.nio.file.Paths;
  * Configuration parameters of ErgoTool utility
  */
 public class ErgoToolConfig {
-
     private ErgoNodeConfig node;
+    private ToolParameters parameters;
 
     /**
      * Returns Ergo node configuration
      */
     public ErgoNodeConfig getNode() {
         return node;
+    }
+
+    /**
+    * Config section with Named parameters
+     * @return {@code HashMap<String,String>} of Name-Value pairs
+     */
+    public ToolParameters getParameters() {
+        return parameters;
     }
 
     public static ErgoToolConfig load(String fileName) throws FileNotFoundException {

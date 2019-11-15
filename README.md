@@ -98,17 +98,21 @@ We will need some configuration parameters which we can load from
   }
 }
 ```
-Here `apiKey` is the secrete key required for API authentication which can be
+Here `apiKey` is the secret key required for API authentication which can be
 obtained as described
 [here](https://github.com/ergoplatform/ergo/wiki/Ergo-REST-API#setting-an-api-key).
-And mnemonic is the secrete phrase obtained during [setup of a new
+And mnemonic is the secret phrase obtained during [setup of a new
 wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
 Our example app also reads the amount of NanoErg to put into a new box from command line arguments
 ```java
-long amountToPay = Long.parseLong(args[0]);
-ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
-ErgoNodeConfig nodeConf = conf.getNode();
+public static void main(String[] args) {
+    long amountToPay = Long.parseLong(args[0]);
+    ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
+    ErgoNodeConfig nodeConf = conf.getNode();
+    // the rest of the code shown below 
+    ...
+}
 ```
 
 Next we connect to the running testnet node from our Java application by creating

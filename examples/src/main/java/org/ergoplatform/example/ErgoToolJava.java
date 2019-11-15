@@ -8,19 +8,18 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 public class ErgoToolJava {
-    static int newBoxDelay = 30;
-
     public static void main(String[] args) {
         try {
-            long amountToPay = Long.parseLong(args[0]);
+            long amountToSend = Long.parseLong(args[0]);
             ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
             ErgoNodeConfig nodeConf = conf.getNode();
+            int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
 
             ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 
             String txJson = ergoClient.execute(ctx -> {
                 ErgoWallet wallet = ctx.getWallet();
-                long totalToSpend = amountToPay + Parameters.MinFee;
+                long totalToSpend = amountToSend + Parameters.MinFee;
                 Optional<List<InputBox>> boxes = wallet.getUnspentBoxes(totalToSpend);
                 if (!boxes.isPresent())
                     throw new ErgoClientException("Not enough coins in the wallet to pay " + totalToSpend, null);
@@ -33,13 +32,13 @@ public class ErgoToolJava {
 
                 UnsignedTransactionBuilder txB = ctx.newTxBuilder();
                 OutBox newBox = txB.outBoxBuilder()
-                        .value(amountToPay)
+                        .value(amountToSend)
                         .contract(ctx.compileContract(
                                 ConstantsBuilder.create()
-                                        .item("deadline", ctx.getHeight() + newBoxDelay)
-                                        .item("pkOwner", prover.getP2PKAddress().pubkey())
+                                        .item("freezeDeadline", ctx.getHeight() + newBoxSpendingDelay)
+                                        .item("walletOwnerPk", prover.getP2PKAddress().pubkey())
                                         .build(),
-                                "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
+                                "{ sigmaProp(HEIGHT > freezeDeadline) && walletOwnerPk }"))
                         .build();
                 UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
                         .outputs(newBox)
