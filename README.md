@@ -109,7 +109,7 @@ Our example app also reads the amount of NanoErg to put into a new box from comm
 public static void main(String[] args) {
     long amountToPay = Long.parseLong(args[0]);
     ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
-    ErgoNodeConfig nodeConf = conf.getNode();
+    int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
     // the rest of the code shown below 
     ...
 }
@@ -118,6 +118,7 @@ public static void main(String[] args) {
 Next we connect to the running testnet node from our Java application by creating
 `ErgoClient` instance.
 ```java
+ErgoNodeConfig nodeConf = conf.getNode();
 ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 

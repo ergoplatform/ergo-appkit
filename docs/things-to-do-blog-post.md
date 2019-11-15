@@ -24,6 +24,7 @@ following Ergo contract written in ErgoScript (see this
 [introduction](https://ergoplatform.org/docs/ErgoScript.pdf) and more [advanced
 examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
 ```
+// Freezer Contract
 { 
   // Parameters
   // freezeDeadline: Int - some future block number after which the box can be spent
@@ -92,22 +93,22 @@ obtained as described
 And mnemonic is the secret phrase obtained during [setup of a new
 wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
-As the first step ErgoTool reads the configuration and the amount of NanoErg to
-transfer into the new box from the file and command line arguments
+In ErgoTool as the first step we reads the configuration and the amount of
+NanoErg to transfer into the new box from the file and command line arguments
 ```java
 public static void main(String[] args) {
-    long amountToPay = Long.parseLong(args[0]);
+    long amountToSend = Long.parseLong(args[0]);  // positive value in NanoErg
     ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
-    ErgoNodeConfig nodeConf = conf.getNode();
     int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
     // the rest of the code discussed below 
     ...
 }
 ```
 
-Next we connect to the running testnet node from our Java application by creating
+Next we connect to the running Ergo node from our Java application by creating
 `ErgoClient` instance.
 ```java
+ErgoNodeConfig nodeConf = conf.getNode();
 ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 
@@ -118,20 +119,21 @@ any block of code can be executed in the current blockchain context.
 ```java
 String txJson = ergoClient.execute((BlockchainContext ctx) -> {
     // use ctx here to create and sign a new transaction
-    // then sent it to the node 
+    // then send it to the node 
 });
 ```
 
-The lambda passed to `execute` is called when the current blockchain context 
-is loaded from the node. This is where we shall put our application logic.
-We start with some auxiliary steps.
+The lambda passed to `execute` is called when the current blockchain context
+with the current blockchain data is loaded from the Ergo node. In this lambda we
+shall put our application logic. We start with some auxiliary steps.
 ```java
-// access the wallet embedded in the Ergo node
+// access the wallet embedded in the Ergo node 
+// (the wallet's mnemonic we put in ergotool.json)
 ErgoWallet wallet = ctx.getWallet();
 
 // calculate total amount of NanoErgs we need to send to the new box 
 // and pay transaction fees
-long totalToSpend = amountToPay + Parameters.MinFee;
+long totalToSpend = amountToSend + Parameters.MinFee;
 
 // request wallet for unspent boxes that cover required amount of NanoErgs
 Optional<List<InputBox>> boxes = wallet.getUnspentBoxes(totalToSpend);
@@ -148,13 +150,13 @@ ErgoProver prover = ctx.newProverBuilder()
     .build();
 ```
 
-Now that we have the input boxes to spend in the transaction, we need to create 
-an output box with the requested `amountToPay` and the specific contract protecting 
+Now we have the input boxes to spend in the transaction and we need to create 
+an output box with the requested `amountToSend` and the contract protecting 
 that box.
 
 ```java
 // the only way to create transaction is using builder obtained from the context
-// the builder keeps relationship with the context to access nessary blockchain data.
+// the builder keeps relationship with the context to access necessary blockchain data.
 UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
 // create new box using new builder obtained from the transaction builder
@@ -163,17 +165,17 @@ OutBox newBox = txB.outBoxBuilder()
         .value(amountToPay)
         .contract(ctx.compileContract(
                 ConstantsBuilder.create()
-                        .item("deadline", ctx.getHeight() + newBoxDelay)
-                        .item("pkOwner", prover.getP2PKAddress().pubkey())
+                        .item("freezeDeadline", ctx.getHeight() + newBoxSpendingDelay)
+                        .item("walletOwnerPk", prover.getP2PKAddress().pubkey())
                         .build(),
-                "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
+                "{ sigmaProp(HEIGHT > freezeDeadline) && walletOwnerPk }"))
         .build();
 ```
 Note, in order to compile `ErgoContract` from source code the `compileContract`
 method requires to provide values for named constants which are used in the script.
 If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
 
-In this specific case we pass public key of the `prover` for `pkOwner` 
+In this specific case we pass public key of the `prover` for `walletOwnerPk` 
 placeholder of the script meaning the box can be spend only by the owner of the
 Ergo node we are working with. 
 
@@ -188,23 +190,59 @@ UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
         .build();
 ```
 
-And finally we use prover to sign the transaction, obtain a new
-`SignedTransaction` instance and use context to send it to the Ergo node.
-The resulting `txId` can be used to refer to this transaction later and
-is not really used here.
-
+And finally we 1) use prover to sign the created transaction; 2) obtain a new
+`SignedTransaction` instance and 3) use context to send the signed transaction to
+the Ergo node. The resulting `txId` can be used to refer to this transaction
+later and is not really used here.
 ```java
 SignedTransaction signed = prover.sign(tx);
 String txId = ctx.sendTransaction(signed);
 return signed.toJson(true);
 ```
-As the last step we serialize signed transaction into Json with turned on pretty
-printing. Please see the [full source
-code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
-example.
 
+As the last step and for demonstration purposes we serialize the signed
+transaction into a Json string with turned on pretty printing. Look at the [full
+source code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java)
+of the example for more details and for using it as a template in your
+application.
+
+We can run the implemented ErgoTool using the following steps, assuming we are 
+at the directory you cloned ergo-tool.
+```shell
+$ pwd
+the/directory/you/cloned/ergo-tool
+$ sbt assembly
+```
+This will assemble the jar file containing ErgoTool application, the step have
+to be done only once after any changes in the source code are made.
+```shell
+$ java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
+      org.ergoplatform.example.ErgoToolJava  1000000000 
+```
 
 ## 2. Low-footprint, fast-startup Ergo Applications
 
 Using Java for short-running processes can suffer from longer startup time and
 relatively high memory usage.
+
+TODO 
+
+## 3. Develop Ergo Applications in JavaScript, Python, Ruby, and R
+TODO 
+
+## 4. Ergo Application as native shared library
+TODO 
+
+## 5. Debug your polyglot Ergo Application
+TODO 
+
+## Conclusions
+
+We see how easy it is to use Appkit from different most popular languages such
+as Java, JavaScript and Python to implement non-standard application scenarios.
+
+The example assumes the Ergo node (and the embedded wallet) is owned by the
+ErgoTool user. However this is not strictly required and the Appkit interfaces
+can be used to create and send new transactions using arbitrary public Ergo
+node.
+
