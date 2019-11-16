@@ -28,22 +28,24 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
 { 
   // Parameters
   // freezeDeadline: Int - some future block number after which the box can be spent
-  // walletOwnerPk: SigmaProp - public key of the new box owner
-  sigmaProp(HEIGHT > freezeDeadline) && walletOwnerPk
+  // userPk: SigmaProp - public key of the new box owner
+  sigmaProp(HEIGHT > freezeDeadline) && userPk
 }
 ```
 This contract checks the following conditions to allow spending of the box: 
 1) current block number in Ergo blockchain (aka blockchain HEIGHT) should be
 greater than the given deadline
-2) the spending transaction should be signed by the owner of the Ergo node
+2) the spending transaction should be signed by the user of ErgoTool using 
+the secret key corresponding to the userPk.
 
 The first condition effectively forbids spending of the box before the Ergo
 blockchain grows to the given height (thus delaying possibility to spend it).
-Because each new block is mined every 2 minutes on average, using height it is
-easy to compute 1 day, 1 week, 1 month or any other delays. The funds become
-frozen in the box for some time. If you want to protect spending of your own
-Ergs even from yourself (for whatever reason :) you can use this Ergo contract
-and the ErgoTool we will develop in this post.
+Because each new block is mined every 2 minutes on average, using the current
+blockchain height it is easy to compute 1 day, 1 week, 1 month or any other
+delays (i.e. 30 * 24 * 7 blocks per week). The funds become frozen in the box
+for some time. If you want to protect spending of your own Ergs even from
+yourself (for whatever reason :) you can use this Ergo contract and the ErgoTool
+we are going to develop in this post.
 
 ## 1. Develop Ergo Applications in Java
 
@@ -93,7 +95,7 @@ obtained as described
 And mnemonic is the secret phrase obtained during [setup of a new
 wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
-In ErgoTool as the first step we reads the configuration and the amount of
+In ErgoTool as the first step we read the configuration and the amount of
 NanoErg to transfer into the new box from the file and command line arguments
 ```java
 public static void main(String[] args) {
@@ -166,16 +168,16 @@ OutBox newBox = txB.outBoxBuilder()
         .contract(ctx.compileContract(
                 ConstantsBuilder.create()
                         .item("freezeDeadline", ctx.getHeight() + newBoxSpendingDelay)
-                        .item("walletOwnerPk", prover.getP2PKAddress().pubkey())
+                        .item("userPk", prover.getP2PKAddress().pubkey())
                         .build(),
-                "{ sigmaProp(HEIGHT > freezeDeadline) && walletOwnerPk }"))
+                "{ sigmaProp(HEIGHT > freezeDeadline) && userPk }"))
         .build();
 ```
 Note, in order to compile `ErgoContract` from source code the `compileContract`
 method requires to provide values for named constants which are used in the script.
 If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
 
-In this specific case we pass public key of the `prover` for `walletOwnerPk` 
+In this specific case we pass public key of the `prover` for `userPk` 
 placeholder of the script meaning the box can be spend only by the owner of the
 Ergo node we are working with. 
 
@@ -215,20 +217,32 @@ $ sbt assembly
 ```
 This will assemble the jar file containing ErgoTool application, the step have
 to be done only once after any changes in the source code are made.
+
+Having ergo-appkit-3.1.0.jar assembled we can run our console application 
 ```shell
 $ java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
       org.ergoplatform.example.ErgoToolJava  1000000000 
 ```
+And get the following output in the console
+<script 
+  src="https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322.js">
+</script>
+
+That is it, the transaction is accepted by the Ergo node, added to the
+unconfirmed transaction pool and broadcasted all over the network. After one of
+the miners picks it up, validates and includes in a new block it becomes part of
+the blockchain history.
 
 ## 2. Low-footprint, fast-startup Ergo Applications
 
 Using Java for short-running processes can suffer from longer startup time and
-relatively high memory usage.
+relatively high memory usage. If we run ErgoToolJava with time 
 
 TODO 
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby, and R
 TODO 
+TruffleRuby aims to be fully compatible with the standard implementation of Ruby, MRI, version 2.6.2
 
 ## 4. Ergo Application as native shared library
 TODO 
