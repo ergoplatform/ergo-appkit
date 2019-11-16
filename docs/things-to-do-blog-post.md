@@ -223,10 +223,7 @@ Having ergo-appkit-3.1.0.jar assembled we can run our console application
 $ java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
       org.ergoplatform.example.ErgoToolJava  1000000000 
 ```
-And get the following output in the console
-<script 
-  src="https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322.js">
-</script>
+And get the following [output](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322) in the console.
 
 That is it, the transaction is accepted by the Ergo node, added to the
 unconfirmed transaction pool and broadcasted all over the network. After one of
