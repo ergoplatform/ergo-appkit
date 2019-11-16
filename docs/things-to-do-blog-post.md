@@ -262,8 +262,10 @@ the background JIT compiler running.
 
 GraalVM gives us a tool that solves this problem by compiling Java code
 ahead-of-time, to a native executable image, instead of compiling just-in-time
-at runtime. This is similar to how a conventional compiler like gcc works.
+at runtime. This is similar to how a conventional compiler like gcc works. Note,
+we may need to run `assembly` first.
 ```
+$ sbt assembly
 $ native-image --no-server \
  -cp target/scala-2.12/ergo-appkit-3.1.0.jar\
  --report-unsupported-elements-at-runtime\
@@ -295,10 +297,38 @@ the JVM in any way. `native-image` compile out ErgoToolJava code, and any
 Java libraries it depends on, all the way down to simple machine code. 
 
 If we look at the libraries which ergotool uses you can see they are only
-standard system libraries. We could also move just this one file to a system
-which has never had a JVM installed and run it there to verify it doesn’t use a
-JVM or any other files. It’s also pretty small - this executable is less than 8
-MB.
+standard system libraries. We can move just this one file to a system
+which don't a JVM installed and it will run there. 
+```
+$ otool -L ergotool    # ldd ergotool on Linux
+ergotool:
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.50.4)
+	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1455.12.0)
+	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
+```
+
+If we run the executable we can see that it starts around 8x faster, and uses
+around 6x less memory, than running the same program on the
+JVM does. You don’t feel that pause you always get when running a
+short-running command with the JVM.
+```
+$ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./ergotool 1800000000
+        0.43 real         0.15 user         0.03 sys
+  81289216  maximum resident set size
+         0  average shared memory size
+         0  average unshared data size
+         0  average unshared stack size
+     20079  page reclaims
+         0  page faults
+         0  swaps
+         0  block input operations
+         0  block output operations
+        13  messages sent
+        86  messages received
+         0  signals received
+        11  voluntary context switches
+       138  involuntary context switches
+```
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby, and R
 TODO 

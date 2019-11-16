@@ -26,6 +26,13 @@
   "name":"java.util.Optional"
 },
 {
+  "name":"org.ergoplatform.appkit.NetworkType",
+  "fields":[
+    {"name":"MAINNET"}, 
+    {"name":"TESTNET"}
+  ]
+},
+{
   "name":"org.ergoplatform.ergotool.ApiConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -41,16 +48,13 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.ergotool.WalletConfig",
-  "allDeclaredFields":true,
+  "name":"org.ergoplatform.ergotool.ToolParameters",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.appkit.NetworkType",
-  "fields":[
-    {"name":"MAINNET"}, 
-    {"name":"TESTNET"}
-  ]
+  "name":"org.ergoplatform.ergotool.WalletConfig",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"org.ergoplatform.restapi.client.Asset",
