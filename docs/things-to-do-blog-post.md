@@ -233,9 +233,72 @@ the blockchain history.
 ## 2. Low-footprint, fast-startup Ergo Applications
 
 Using Java for short-running processes can suffer from longer startup time and
-relatively high memory usage. If we run ErgoToolJava with time 
+relatively high memory usage. Let's run ErgoToolJava using the time command to
+get the real, wall-clock elapsed time it takes to run the entire program from
+start to finish. We use -l to print the memory used as well as time used. 
+```shell
+$ /usr/bin/time -l java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
+    org.ergoplatform.example.ErgoToolJava  1000000000
+...
+        3.85 real         7.28 user         0.44 sys
+ 512761856  maximum resident set size
+         0  average shared memory size
+         0  average unshared data size
+         0  average unshared stack size
+    125736  page reclaims
+         9  page faults
+         0  swaps
+         0  block input operations
+         0  block output operations
+        13  messages sent
+        86  messages received
+         1  signals received
+        12  voluntary context switches
+      9128  involuntary context switches
+```
+Which means this simple operation took 2 parallel threads to run for almost 4
+seconds to do the job. Most of that time can be attributed to JVM startup and
+the background JIT compiler running.
 
-TODO 
+GraalVM gives us a tool that solves this problem by compiling Java code
+ahead-of-time, to a native executable image, instead of compiling just-in-time
+at runtime. This is similar to how a conventional compiler like gcc works.
+```
+$ native-image --no-server \
+ -cp target/scala-2.12/ergo-appkit-3.1.0.jar\
+ --report-unsupported-elements-at-runtime\
+  --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
+   -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
+   --allow-incomplete-classpath \
+    --enable-url-protocols=http,https org.ergoplatform.example.ErgoToolJava ergotool
+[ergotool:3133]    classlist:  35,217.78 ms
+[ergotool:3133]        (cap):   6,063.07 ms
+[ergotool:3133]        setup:   8,268.99 ms
+[ergotool:3133]   (typeflow):  60,238.25 ms
+[ergotool:3133]    (objects):  33,009.06 ms
+[ergotool:3133]   (features):   4,796.86 ms
+[ergotool:3133]     analysis: 102,876.01 ms
+[ergotool:3133]     (clinit):  11,642.43 ms
+[ergotool:3133]     universe:  13,718.96 ms
+[ergotool:3133]      (parse):   5,053.18 ms
+[ergotool:3133]     (inline):  18,317.24 ms
+[ergotool:3133]    (compile):  44,806.82 ms
+[ergotool:3133]      compile:  72,288.24 ms
+[ergotool:3133]        image:   7,955.29 ms
+[ergotool:3133]        write:   2,872.25 ms
+[ergotool:3133]      [total]: 243,813.30 ms
+```
+
+This command produces a native executable called `ergotool`. This executable
+isn’t a launcher for the JVM, it doesn’t link to the JVM, and it doesn’t bundle
+the JVM in any way. `native-image` compile out ErgoToolJava code, and any
+Java libraries it depends on, all the way down to simple machine code. 
+
+If we look at the libraries which ergotool uses you can see they are only
+standard system libraries. We could also move just this one file to a system
+which has never had a JVM installed and run it there to verify it doesn’t use a
+JVM or any other files. It’s also pretty small - this executable is less than 8
+MB.
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby, and R
 TODO 
