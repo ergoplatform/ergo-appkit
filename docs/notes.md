@@ -76,7 +76,12 @@ js --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar \
 
 ### Usign GraalVM Python
 ```
-graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.0.0.jar --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
+graalpython --jvm --polyglot --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
+```
+
+### Usign GraalVM Ruby
+```
+ruby --polyglot --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar examples/src/main/java/org/ergoplatform/example/ErgoTool.rb 1900000000
 ```
 
 ### Creating Idea Project
