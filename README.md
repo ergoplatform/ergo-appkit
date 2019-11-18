@@ -9,6 +9,7 @@ be removed without notice.**
     - [Using from Java](#using-from-java)
     - [Using from JavaScript](#using-from-javascript)
     - [Using from Python](#using-from-python)
+    - [Using from Ruby](#using-from-ruby)
 - [Repository organization](#repository-organization)
 - [Setup](#setup)
     - [Prerequisites](#prerequisites)
@@ -244,12 +245,32 @@ Before running Python example it my be helpful to run Java example
 first to make sure everything is set up correctly.
 
 GraalVM can [run Python
-scripts](https://www.graalvm.org/docs/reference-manual/languages/python/)
+scripts](https://www.graalvm.org/docs/reference-manual/languages/python/), though
+the Python implementation is still experimental (see also
+[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/python/#python-compatibility)
+for details).
 
-Python example of ErgoTool can be executed using the following command
+[Python example of ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoTool.py) can be executed using the following command
 ```shell
 $ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
   --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
+```
+
+### Using from Ruby
+
+Before running Ruby example it my be helpful to run Java example
+first to make sure everything is set up correctly.
+
+GraalVM can [run Ruby
+scripts](https://www.graalvm.org/docs/reference-manual/languages/ruby/), though
+the Ruby implementation is still experimental (see also
+[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/ruby/#compatibility)
+for details).
+
+[Ruby example of ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoTool.rb) can be executed using the following command
+```shell
+$ ruby --polyglot --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar 
+    examples/src/main/java/org/ergoplatform/example/ErgoTool.rb 1900000000
 ```
 
 ## Repository organization
