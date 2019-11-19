@@ -237,24 +237,24 @@ relatively high memory usage. Let's run ErgoToolJava using the time command to
 get the real, wall-clock elapsed time it takes to run the entire program from
 start to finish. We use -l to print the memory used as well as time used. 
 ```shell
-$ /usr/bin/time -l java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
-    org.ergoplatform.example.ErgoToolJava  1000000000
+$ /usr/bin/time -l java -cp build/libs/appkit-examples-3.1.0-all.jar \
+   org.ergoplatform.appkit.examples.ErgoToolJava 1000000000
 ...
-        3.85 real         7.28 user         0.44 sys
- 512761856  maximum resident set size
+       4.97 real         8.41 user         0.69 sys
+ 513703936  maximum resident set size
          0  average shared memory size
          0  average unshared data size
          0  average unshared stack size
-    125736  page reclaims
-         9  page faults
+    125010  page reclaims
+      1216  page faults
          0  swaps
          0  block input operations
          0  block output operations
         13  messages sent
         86  messages received
          1  signals received
-        12  voluntary context switches
-      9128  involuntary context switches
+      2384  voluntary context switches
+     17409  involuntary context switches
 ```
 Which means this simple operation took 2 parallel threads to run for almost 4
 seconds to do the job. Most of that time can be attributed to JVM startup and
@@ -267,12 +267,12 @@ we may need to run `assembly` first.
 ```
 $ sbt assembly
 $ native-image --no-server \
- -cp target/scala-2.12/ergo-appkit-3.1.0.jar\
+ -cp build/libs/appkit-examples-3.1.0-all.jar\
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
-    --enable-url-protocols=http,https org.ergoplatform.example.ErgoToolJava ergotool
+    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.ErgoToolJava ergotool
 [ergotool:3133]    classlist:  35,217.78 ms
 [ergotool:3133]        (cap):   6,063.07 ms
 [ergotool:3133]        setup:   8,268.99 ms
@@ -330,9 +330,65 @@ $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./ergotool 1800000000
        138  involuntary context switches
 ```
 
-## 3. Develop Ergo Applications in JavaScript, Python, Ruby, and R
-TODO 
+## 3. Develop Ergo Applications in JavaScript, Python, Ruby
+
+Before running the examples in JS, Python and Ruby it my be helpful to run Java
+example first to make sure everything is set up correctly.
+
+### JavaScript
+
+GraalVM can [run JavaScript and
+Node.js](https://www.graalvm.org/docs/reference-manual/languages/js/)
+applications out of the box and it is compatible with the [ECMAScript 2019
+specification](http://www.ecma-international.org/ecma-262/10.0/index.html).
+Additionally, `js` and `node` launchers accept special `--jvm` and `--polyglot`
+command line options which allow JS script to access Java objects and classes.
+
+That said, a JS implementation of ErgoTool can be easily written using Appkit
+API interfaces.
+Please see the full source code of [ErgoTool JS
+implementation](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/js-examples/ErgoTool.js)
+for details.
+The following command use `node` launcher to execute ErgoTool.js script.
+```shell
+$ node --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
+  js-examples/ErgoTool.js  1000000000
+```
+Note, the paths in the command are relative to the root of
+`ergo-appkit-examples` project directory.
+
+### Python
+
+GraalVM can [run Python
+scripts](https://www.graalvm.org/docs/reference-manual/languages/python/), though
+the Python implementation is still experimental (see also
+[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/python/#python-compatibility)
+for details).
+
+[Python example of
+ErgoTool](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/python-examples/ErgoTool.py)
+can be executed using the following command
+```shell
+$ graalpython --jvm --polyglot --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
+   python-examples/ErgoTool.py 1900000000
+```
+
+### Ruby
+
+GraalVM can [run Ruby
+scripts](https://www.graalvm.org/docs/reference-manual/languages/ruby/) using
+TruffleRuby implementation, which is however still experimental (see also
+[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/ruby/#compatibility)
+for details).
 TruffleRuby aims to be fully compatible with the standard implementation of Ruby, MRI, version 2.6.2
+
+[Ruby example of
+ErgoTool](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/ruby-examples/ErgoTool.rb)
+can be executed using the following command
+```shell
+$ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
+    ruby-examples/ErgoTool.rb 1900000000
+```
 
 ## 4. Ergo Application as native shared library
 TODO 
