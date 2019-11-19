@@ -1,23 +1,49 @@
-
+import sbt.Keys.publishMavenStyle
 // first two digits of the version should be in sync with Ergo client
 version := "3.1.0"
+
+name := "ergo-appkit"
+
+lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
+lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
+lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
   scalaVersion := "2.12.8",
   version := "3.1.0",
-  resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+  resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
-    "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
+    sonatypeSnapshots,
     Resolver.mavenCentral),
-  homepage := Some(url("http://ergoplatform.org/")),
-  licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode"))
+  homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
+  licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
+  pomExtra :=
+      <developers>
+        <developer>
+          <id>aslesarenko</id>
+          <name>Alexander Slesarenko</name>
+          <url>https://github.com/aslesarenko/</url>
+        </developer>
+      </developers>,
+  publishArtifact in (Compile, packageDoc) := false,
+  publishMavenStyle := true,
+  publishTo := sonatypePublishToBundle.value,
 )
 
-lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
-lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
-lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+val testingDependencies = Seq(
+)
+
+lazy val testSettings = Seq(
+  libraryDependencies ++= testingDependencies,
+  parallelExecution in Test := false,
+  baseDirectory in Test := file("."),
+  publishArtifact in Test := true,
+  publishArtifact in(Test, packageSrc) := true,
+  publishArtifact in(Test, packageDoc) := false,
+  test in assembly := {})
+
 
 lazy val allResolvers = Seq(
   sonatypePublic,
@@ -26,22 +52,11 @@ lazy val allResolvers = Seq(
   Resolver.mavenCentral,
 )
 
-homepage in ThisBuild := Some(url("https://github.com/aslesarenko/ergo-appkit"))
-
-publishMavenStyle in ThisBuild := true
-
+publishArtifact in Compile := true
 publishArtifact in Test := true
 
 publishTo in ThisBuild :=
     Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
-
-pomExtra in ThisBuild :=
-    <developers>
-      <developer>
-        <id>aslesarenko</id>
-        <name>Alexander Slesarenko</name>
-      </developer>
-    </developers>
 
 credentials ++= (for {
   username <- Option(System.getenv().get("SONATYPE_USERNAME"))
@@ -92,6 +107,7 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       name := "java-client-generated",
       crossPaths := false,
       libraryDependencies ++= Seq(
+        "com.squareup.okhttp3" % "okhttp" % "3.12.0",
         "com.google.code.findbugs" % "jsr305" % "3.0.2",
         "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
         "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
@@ -101,37 +117,43 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
         "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
         "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.2",
         "junit" % "junit" % "4.12" % "test",
-      )
+      ),
+      publishArtifact in (Compile, packageDoc) := false,
+      publish / skip := true
     )
 
 lazy val common = (project in file("common"))
     .settings(
-      commonSettings,
+      commonSettings ++ testSettings,
       name := "common",
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
         sigmaState,
         ergoWallet
-      )
+      ),
+      publish / skip := true
     )
 
 lazy val libApi = (project in file("lib-api"))
     .dependsOn(common % allConfigDependency)
     .settings(
-      commonSettings,
+      commonSettings ++ testSettings,
       resolvers ++= allResolvers,
       name := "lib-api",
       libraryDependencies ++= Seq(
-      )
+      ),
+      publish / skip := true
     )
 
 lazy val libImpl = (project in file("lib-impl"))
     .dependsOn(javaClientGenerated % allConfigDependency, libApi % allConfigDependency)
     .settings(
-      commonSettings, name := "lib-impl",
+      commonSettings ++ testSettings,
+      name := "lib-impl",
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
-      )
+      ),
+      publish / skip := true
     )
 
 lazy val examples = (project in file("examples"))
@@ -141,20 +163,41 @@ lazy val examples = (project in file("examples"))
       javaClientGenerated % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(
-      commonSettings, name := "examples",
+      commonSettings ++ testSettings,
+      name := "examples",
       libraryDependencies ++= Seq(
         "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
         "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
         "com.github.pureconfig" %% "pureconfig" % "0.12.1"
-      )
+      ),
+      publish / skip := true
     )
 
-lazy val ergoAppkit = (project in file("."))
+lazy val appkit = (project in file("appkit"))
     .dependsOn(
       common % allConfigDependency,
       javaClientGenerated % allConfigDependency,
       libApi % allConfigDependency,
       libImpl % allConfigDependency,
       examples % allConfigDependency)
-    .settings(commonSettings, name := "ergo-appkit")
+    .settings(commonSettings ++ testSettings)
+    .settings(publish / skip := true)
+
+lazy val aggregateCompile = ScopeFilter(
+  inProjects(common, javaClientGenerated, libApi, libImpl, examples, appkit),
+  inConfigurations(Compile))
+
+lazy val rootSettings = Seq(
+  sources in Compile := sources.all(aggregateCompile).value.flatten,
+  libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
+  mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
+  mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
+  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten,
+)
+
+lazy val root = (project in file("."))
+    .aggregate(appkit, common, javaClientGenerated, libApi, libImpl, examples)
+    .settings(commonSettings ++ testSettings, rootSettings)
+    .settings(publish / aggregate := false)
+    .settings(publishLocal / aggregate := false)
 
