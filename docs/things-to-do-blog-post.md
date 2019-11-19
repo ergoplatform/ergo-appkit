@@ -401,7 +401,29 @@ $ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
 ```
 
 ## 4. Ergo Application as native shared library
-TODO 
+
+Generate shared library 
+```
+native-image --no-server \
+ -cp build/libs/appkit-examples-3.1.0-all.jar\
+ --report-unsupported-elements-at-runtime\
+  --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
+   -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
+   --allow-incomplete-classpath \
+    --enable-url-protocols=http,https 
+    --shared -H:Name=libergotool -H:Path=c-examples
+```
+Check there is no JVM dependencies
+```    
+otool -L libergotool.dylib
+```
+
+Compile C application 
+```
+clang -Ic-examples -Lc-examples -lergotool c-examples/freezecoin.c -o call_freezecoin
+otool -L call_freezecoin
+DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
+```
 
 ## 5. Debug your polyglot Ergo Application
 TODO 
