@@ -332,8 +332,18 @@ $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./ergotool 1800000000
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby
 
-Before running the examples in JS, Python and Ruby it my be helpful to run Java
-example first to make sure everything is set up correctly.
+GraalVM supports so called polyglot programming in which different components of
+an application can be developed using the most suitable language and then
+seamlessly combined at runtime. In this way some unique libraries written in say
+Java can be used for example in a new node.js application written in JavaScript.
+
+To support polyglot programming GraalVM platform has it's own high performance
+implementations of popular languages which we are going to use to implement 
+our example ErgoTool scenario.
+
+Before running the examples in JavaScript, Python and Ruby sections below it my
+be helpful to run Java example first to make sure everything is set up
+correctly.
 
 ### JavaScript
 
