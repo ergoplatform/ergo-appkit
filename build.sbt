@@ -95,13 +95,13 @@ libraryDependencies ++= Seq(
   ergoWallet,
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
-  "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
-  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
+//  "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
+//  "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.50",
+//  "org.jetbrains.kotlinx" % "kotlinx-coroutines-core" % "1.3.2",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-  "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
+//  "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
 )
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
@@ -114,11 +114,11 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
         "com.google.code.findbugs" % "jsr305" % "3.0.2",
         "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
         "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
-        "org.threeten" % "threetenbp" % "1.3.5" % "compile",
+//        "org.threeten" % "threetenbp" % "1.3.5" % "compile",
         "com.squareup.retrofit2" % "retrofit" % "2.6.2",
         "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
         "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-        "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.2",
+//        "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.2",
         "junit" % "junit" % "4.12" % "test",
       ),
       publishArtifact in (Compile, packageDoc) := false,
@@ -167,9 +167,8 @@ lazy val appkit = (project in file("appkit"))
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
       libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
-        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
-        "com.github.pureconfig" %% "pureconfig" % "0.12.1"
+//        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
+//        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
       ))
     .settings(publish / skip := true)
 
@@ -186,8 +185,8 @@ lazy val examples = (project in file("examples"))
       name := "examples",
       libraryDependencies ++= Seq(
         "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
-        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
-        "com.github.pureconfig" %% "pureconfig" % "0.12.1"
+//        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
+//        "com.github.pureconfig" %% "pureconfig" % "0.12.1"
       ),
       publish / skip := true
     )

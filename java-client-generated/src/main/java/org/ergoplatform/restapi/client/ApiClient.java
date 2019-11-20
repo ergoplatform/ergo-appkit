@@ -6,17 +6,13 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import org.apache.oltu.oauth2.client.request.OAuthClientRequest.AuthenticationRequestBuilder;
-import org.apache.oltu.oauth2.client.request.OAuthClientRequest.TokenRequestBuilder;
-import org.threeten.bp.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 import org.ergoplatform.restapi.client.auth.HttpBasicAuth;
 import org.ergoplatform.restapi.client.auth.ApiKeyAuth;
-import org.ergoplatform.restapi.client.auth.OAuth;
-import org.ergoplatform.restapi.client.auth.OAuth.AccessTokenListener;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -94,11 +90,6 @@ public class ApiClient {
    */
   public ApiClient(String hostUrl, String authName, String clientId, String secret, String username, String password) {
     this(hostUrl, authName);
-    this.getTokenEndPoint()
-      .setClientId(clientId)
-      .setClientSecret(secret)
-      .setUsername(username)
-      .setPassword(password);
   }
 
   public void createDefaultAdapter() {
@@ -172,41 +163,8 @@ public class ApiClient {
         basicAuth.setCredentials(username, password);
         return this;
       }
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        oauth.getTokenRequestBuilder().setUsername(username).setPassword(password);
-        return this;
-      }
     }
     return this;
-  }
-
-  /**
-   * Helper method to configure the token endpoint of the first oauth found in the apiAuthorizations (there should be only one)
-   * @return Token request builder
-   */
-  public TokenRequestBuilder getTokenEndPoint() {
-    for(Interceptor apiAuthorization : apiAuthorizations.values()) {
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        return oauth.getTokenRequestBuilder();
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Helper method to configure authorization endpoint of the first oauth found in the apiAuthorizations (there should be only one)
-   * @return Authentication request builder
-   */
-  public AuthenticationRequestBuilder getAuthorizationEndPoint() {
-    for(Interceptor apiAuthorization : apiAuthorizations.values()) {
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        return oauth.getAuthenticationRequestBuilder();
-      }
-    }
-    return null;
   }
 
   /**
@@ -215,53 +173,6 @@ public class ApiClient {
    * @return ApiClient
    */
   public ApiClient setAccessToken(String accessToken) {
-    for(Interceptor apiAuthorization : apiAuthorizations.values()) {
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        oauth.setAccessToken(accessToken);
-        return this;
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Helper method to configure the oauth accessCode/implicit flow parameters
-   * @param clientId Client ID
-   * @param clientSecret Client secret
-   * @param redirectURI Redirect URI
-   * @return ApiClient
-   */
-  public ApiClient configureAuthorizationFlow(String clientId, String clientSecret, String redirectURI) {
-    for(Interceptor apiAuthorization : apiAuthorizations.values()) {
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        oauth.getTokenRequestBuilder()
-          .setClientId(clientId)
-          .setClientSecret(clientSecret)
-          .setRedirectURI(redirectURI);
-        oauth.getAuthenticationRequestBuilder()
-          .setClientId(clientId)
-          .setRedirectURI(redirectURI);
-        return this;
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Configures a listener which is notified when a new access token is received.
-   * @param accessTokenListener Access token listener
-   * @return ApiClient
-   */
-  public ApiClient registerAccessTokenListener(AccessTokenListener accessTokenListener) {
-    for(Interceptor apiAuthorization : apiAuthorizations.values()) {
-      if (apiAuthorization instanceof OAuth) {
-        OAuth oauth = (OAuth) apiAuthorization;
-        oauth.registerAccessTokenListener(accessTokenListener);
-        return this;
-      }
-    }
     return this;
   }
 

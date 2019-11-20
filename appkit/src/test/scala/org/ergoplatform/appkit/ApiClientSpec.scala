@@ -1,6 +1,5 @@
 package org.ergoplatform.appkit
 
-import okhttp3.mockwebserver.{MockWebServer, MockResponse}
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
 import org.scalatest.{PropSpec, Matchers}
@@ -30,25 +29,25 @@ class ApiClientSpec
     println(ErgoAlgos.encode(newBytes))
   }
 
-  def createMockWebServer(): MockWebServer = {
-    val server = new MockWebServer
-    // Schedule some responses.
-    val nodeInfoJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_NodeInfo.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(nodeInfoJson))
-
-    val lastHeadersJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_LastHeaders.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(lastHeadersJson))
-
-    val boxJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_Box.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(boxJson))
-    server
-  }
+//  def createMockWebServer(): MockWebServer = {
+//    val server = new MockWebServer
+//    // Schedule some responses.
+//    val nodeInfoJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_NodeInfo.json"))
+//    server.enqueue(new MockResponse()
+//        .addHeader("Content-Type", "application/json; charset=utf-8")
+//        .setBody(nodeInfoJson))
+//
+//    val lastHeadersJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_LastHeaders.json"))
+//    server.enqueue(new MockResponse()
+//        .addHeader("Content-Type", "application/json; charset=utf-8")
+//        .setBody(lastHeadersJson))
+//
+//    val boxJson = read(file("examples/src/main/resources/org/ergoplatform/appkit/response_Box.json"))
+//    server.enqueue(new MockResponse()
+//        .addHeader("Content-Type", "application/json; charset=utf-8")
+//        .setBody(boxJson))
+//    server
+//  }
 
 
 //  ignore("BlockchainContext") {
