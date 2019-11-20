@@ -2,12 +2,11 @@ package org.ergoplatform.example
 
 import java.util.Arrays
 
-import org.ergoplatform.example.util.RestApiErgoClient
-import org.ergoplatform.appkit._
+import org.ergoplatform.appkit.{RestApiErgoClient, _}
 
 import scala.util.control.NonFatal
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.ergotool.ErgoToolConfig
+import org.ergoplatform.appkit.config.ErgoToolConfig
 
 object ErgoTool {
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)

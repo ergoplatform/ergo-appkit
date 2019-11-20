@@ -1,4 +1,4 @@
-package org.ergoplatform.ergotool;
+package org.ergoplatform.appkit.config;
 
 /**
  * Ergo node API connection parameters

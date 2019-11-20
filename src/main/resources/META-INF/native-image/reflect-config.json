@@ -33,26 +33,26 @@
   ]
 },
 {
-  "name":"org.ergoplatform.ergotool.ApiConfig",
+  "name":"org.ergoplatform.appkit.config.ApiConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.ergotool.ErgoNodeConfig",
+  "name":"org.ergoplatform.appkit.config.ErgoNodeConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.ergotool.ErgoToolConfig",
+  "name":"org.ergoplatform.appkit.config.ErgoToolConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.ergotool.ToolParameters",
+  "name":"org.ergoplatform.appkit.config.ToolParameters",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"org.ergoplatform.ergotool.WalletConfig",
+  "name":"org.ergoplatform.appkit.config.WalletConfig",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },

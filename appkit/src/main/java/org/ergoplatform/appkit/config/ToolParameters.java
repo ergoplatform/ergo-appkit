@@ -1,4 +1,4 @@
-package org.ergoplatform.ergotool;
+package org.ergoplatform.appkit.config;
 
 import java.util.HashMap;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package org.ergoplatform.ergotool;
+package org.ergoplatform.appkit.config;
 
 /**
  * Parameters for working with wallet

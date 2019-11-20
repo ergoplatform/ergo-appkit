@@ -1,4 +1,4 @@
-package org.ergoplatform.ergotool;
+package org.ergoplatform.appkit.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

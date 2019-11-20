@@ -1,9 +1,6 @@
-package org.ergoplatform.example.util;
+package org.ergoplatform.appkit;
 
-import org.ergoplatform.ergotool.ErgoNodeConfig;
-import org.ergoplatform.appkit.BlockchainContext;
-import org.ergoplatform.appkit.ErgoClient;
-import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.restapi.client.ApiClient;
 

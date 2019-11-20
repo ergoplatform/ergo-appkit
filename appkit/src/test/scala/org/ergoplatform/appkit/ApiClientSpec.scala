@@ -1,15 +1,10 @@
 package org.ergoplatform.appkit
 
-import org.scalatest.{PropSpec, Matchers}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.ergoplatform.example.util.RestApiErgoClient
-import org.ergoplatform.example.{ExampleScenarios, PrepareBoxScala, PrepareBoxJava}
-import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl
-import org.ergoplatform.restapi.client.ApiClient
+import okhttp3.mockwebserver.{MockWebServer, MockResponse}
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
+import org.scalatest.{PropSpec, Matchers}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scalan.util.FileUtil._
 import sigmastate.Values.SigmaPropConstant
 import sigmastate.serialization.ErgoTreeSerializer
@@ -56,43 +51,36 @@ class ApiClientSpec
   }
 
 
-  ignore("BlockchainContext") {
-    // Create a MockWebServer. These are lean enough that you can create a new
-    // instance for every unit test.
-    val server = createMockWebServer()
-    server.start()
+//  ignore("BlockchainContext") {
+//    // Create a MockWebServer. These are lean enough that you can create a new
+//    // instance for every unit test.
+//    val server = createMockWebServer()
+//    server.start()
+//
+//    // Ask the server for its URL. You'll need this to make HTTP requests.
+//    val baseUrl = server.url("/").toString
+//    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, "")
+//
+//    // Exercise your application code, which should make those HTTP requests.
+//    // Responses are returned in the same order that they are enqueued.
+//    val res = ergoClient.execute(ctx => {
+//      val r = new ExampleScenarios(ctx)
+//      val res = r.aggregateUtxoBoxes(seed, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+//      res
+//    })
+//
+//    println(res)
+//
+//    // Optional: confirm that your app made the HTTP requests you were expecting.
+//    val request1 = server.takeRequest
+//    request1.getRequestLine shouldBe "GET /info HTTP/1.1"
+//    val request2 = server.takeRequest
+//    request2.getRequestLine shouldBe "GET /blocks/lastHeaders/10 HTTP/1.1"
+//    val request3 = server.takeRequest
+//    request3.getRequestLine shouldBe "GET /utxo/byId/83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a HTTP/1.1"
+//
+//    // Shut down the server. Instances cannot be reused.
+//    server.shutdown()
+//  }
 
-    // Ask the server for its URL. You'll need this to make HTTP requests.
-    val baseUrl = server.url("/").toString
-    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, "")
-
-    // Exercise your application code, which should make those HTTP requests.
-    // Responses are returned in the same order that they are enqueued.
-    val res = ergoClient.execute(ctx => {
-      val r = new ExampleScenarios(ctx)
-      val res = r.aggregateUtxoBoxes(seed, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
-      res
-    })
-
-    println(res)
-
-    // Optional: confirm that your app made the HTTP requests you were expecting.
-    val request1 = server.takeRequest
-    request1.getRequestLine shouldBe "GET /info HTTP/1.1"
-    val request2 = server.takeRequest
-    request2.getRequestLine shouldBe "GET /blocks/lastHeaders/10 HTTP/1.1"
-    val request3 = server.takeRequest
-    request3.getRequestLine shouldBe "GET /utxo/byId/83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a HTTP/1.1"
-
-    // Shut down the server. Instances cannot be reused.
-    server.shutdown()
-  }
-
-  ignore("PrepareBoxJava") {
-    PrepareBoxJava.main(Array())
-  }
-
-  ignore("PrepareBoxScala") {
-    PrepareBoxScala.main(Array())
-  }
 }

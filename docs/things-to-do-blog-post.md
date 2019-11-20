@@ -8,11 +8,11 @@ with GraalVM. Relying on that, in this article we’ll list some of the Appkit
 features inherited from GraalVM and explain how you can use them.
 
 - [0. Example Scenario](#example-scenario)
-- [1. Develop Ergo Applications in Java]()
-- [2. Low-footprint, fast-startup Ergo Applications]()
-- [3. Develop Ergo Applications in JavaScript, Python, Ruby, and R]()
-- [4. Ergo Application as native library]()
-- [5. Debug your polyglot Ergo Application]()
+- [1. Develop Ergo Applications in Java](#1-develop-ergo-applications-in-java)
+- [2. Low-footprint, fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
+- [3. Develop Ergo Applications in JavaScript, Python, Ruby, and R](#3-develop-ergo-applications-in-javascript-python-ruby)
+- [4. Ergo Application as native library](#4-ergo-application-as-native-shared-library)
+- [5. Debug your polyglot Ergo Application](#5-debug-your-polyglot-ergo-application)
 
 ## Example Scenario
 
@@ -426,7 +426,7 @@ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
 ```
 
 ## 5. Debug your polyglot Ergo Application
-TODO 
+
 
 ## Conclusions
 

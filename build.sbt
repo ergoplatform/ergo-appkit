@@ -27,12 +27,15 @@ lazy val commonSettings = Seq(
           <url>https://github.com/aslesarenko/</url>
         </developer>
       </developers>,
+  publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := false,
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
 )
 
 val testingDependencies = Seq(
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
 )
 
 lazy val testSettings = Seq(
@@ -156,11 +159,27 @@ lazy val libImpl = (project in file("lib-impl"))
       publish / skip := true
     )
 
+lazy val appkit = (project in file("appkit"))
+    .dependsOn(
+      common % allConfigDependency,
+      javaClientGenerated % allConfigDependency,
+      libApi % allConfigDependency,
+      libImpl % allConfigDependency)
+    .settings(commonSettings ++ testSettings,
+      libraryDependencies ++= Seq(
+        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
+        "org.graalvm.sdk" % "graal-sdk" % "19.2.0.1",
+        "com.github.pureconfig" %% "pureconfig" % "0.12.1"
+      ))
+    .settings(publish / skip := true)
+
+// examples depend on appkit
 lazy val examples = (project in file("examples"))
     .dependsOn(
       common % allConfigDependency,
       libApi % allConfigDependency,
       javaClientGenerated % allConfigDependency,
+      appkit % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(
       commonSettings ++ testSettings,
@@ -173,18 +192,9 @@ lazy val examples = (project in file("examples"))
       publish / skip := true
     )
 
-lazy val appkit = (project in file("appkit"))
-    .dependsOn(
-      common % allConfigDependency,
-      javaClientGenerated % allConfigDependency,
-      libApi % allConfigDependency,
-      libImpl % allConfigDependency,
-      examples % allConfigDependency)
-    .settings(commonSettings ++ testSettings)
-    .settings(publish / skip := true)
 
 lazy val aggregateCompile = ScopeFilter(
-  inProjects(common, javaClientGenerated, libApi, libImpl, examples, appkit),
+  inProjects(common, javaClientGenerated, libApi, libImpl, appkit),
   inConfigurations(Compile))
 
 lazy val rootSettings = Seq(
@@ -196,7 +206,7 @@ lazy val rootSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-    .aggregate(appkit, common, javaClientGenerated, libApi, libImpl, examples)
+    .aggregate(appkit, common, javaClientGenerated, libApi, libImpl)
     .settings(commonSettings ++ testSettings, rootSettings)
     .settings(publish / aggregate := false)
     .settings(publishLocal / aggregate := false)
