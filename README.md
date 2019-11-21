@@ -175,10 +175,10 @@ OutBox newBox = txB.outBoxBuilder()
         .value(amountToPay)
         .contract(ctx.compileContract(
                 ConstantsBuilder.create()
-                        .item("deadline", ctx.getHeight() + newBoxDelay)
+                        .item("freezeDeadline", ctx.getHeight() + newBoxDelay)
                         .item("pkOwner", prover.getP2PKAddress().pubkey())
                         .build(),
-                "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
+                "{ sigmaProp(HEIGHT > freezeDeadline) && pkOwner }"))
         .build();
 ```
 Note, in order to compile `ErgoContract` from source code the `compileContract`
@@ -328,12 +328,12 @@ GraalVM JavaScript (GraalVM CE Native 19.2.1)
 ### Building the Appkit jar file
 
 At the moment Appkit is not published at public servers, so the whole repository
-needs to be clonned and Appkit jar file assembled.
+needs to be clonned and Appkit jar file published locally in the Ivy repository.
 
 ```shell
 $ git clone git@github.com:aslesarenko/ergo-appkit.git
 $ cd ergo-appkit
-$ sbt assembly
+$ sbt publishLocal 
 ```
 
 ## Why Polyglot?

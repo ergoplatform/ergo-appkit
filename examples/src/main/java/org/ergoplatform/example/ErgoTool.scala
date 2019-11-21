@@ -88,10 +88,10 @@ object ErgoTool {
           .value(cmd.payAmount)
           .contract(ctx.compileContract(
             ConstantsBuilder.create()
-                .item("deadline", ctx.getHeight + delay)
+                .item("freezeDeadline", ctx.getHeight + delay)
                 .item("pkOwner", prover.getP2PKAddress.pubkey)
                 .build(),
-            "{ sigmaProp(HEIGHT > deadline) && pkOwner }"))
+            "{ sigmaProp(HEIGHT > freezeDeadline) && pkOwner }"))
           .build()
       val tx = txB.boxesToSpend(Arrays.asList(box))
           .outputs(newBox)

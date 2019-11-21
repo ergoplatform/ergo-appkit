@@ -17,7 +17,7 @@ features inherited from GraalVM and explain how you can use them.
 ## Example Scenario
 
 We will create a simple Java console application (called
-[ErgoTool](https://github.com/aslesarenko/ergo-appkit/blob/master/examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java))
+[FreezeCoin](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/src/main/java/org/ergoplatform/appkit/examples/FreezeCoin.java))
 which uses Appkit library to send a new transaction to an Ergo node. The
 transaction transfers a given amount of Erg to a new box protected by the
 following Ergo contract written in ErgoScript (see this
@@ -35,7 +35,7 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
 This contract checks the following conditions to allow spending of the box: 
 1) current block number in Ergo blockchain (aka blockchain HEIGHT) should be
 greater than the given deadline
-2) the spending transaction should be signed by the user of ErgoTool using 
+2) the spending transaction should be signed by the user of FreezeCoin using 
 the secret key corresponding to the userPk.
 
 The first condition effectively forbids spending of the box before the Ergo
@@ -44,7 +44,7 @@ Because each new block is mined every 2 minutes on average, using the current
 blockchain height it is easy to compute 1 day, 1 week, 1 month or any other
 delays (i.e. 30 * 24 * 7 blocks per week). The funds become frozen in the box
 for some time. If you want to protect spending of your own Ergs even from
-yourself (for whatever reason :) you can use this Ergo contract and the ErgoTool
+yourself (for whatever reason :) you can use this Ergo contract and the FreezeCoin
 we are going to develop in this post.
 
 ## 1. Develop Ergo Applications in Java
@@ -56,10 +56,21 @@ Please follow the [setup
 instructions](https://github.com/aslesarenko/ergo-appkit#setup) for GraalVM and
 Appkit if you want to reproduce the examples below.
 
-Appkit needs to connect with an Ergo Node via REST API. For example, the node
-can be started locally and made available at `http://localhost:9051/` by
-following [these
-instructions](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node). 
+To use Appkit in our Java implementation of FreezeCoin we configure the
+following dependency in [gradle
+file](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/build.gradle.kts)
+
+```kotlin
+dependencies {
+    implementation("org.ergoplatform", "ergo-appkit_2.12", "3.1.0", "compile")
+    ...
+}
+```
+
+At runtime Appkit needs to connect with an Ergo Node via REST API. For example,
+the node can be started locally and made available at `http://localhost:9051/`
+by following [these
+instructions](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node).
 Assume we did the setup and started an Ergo Node using the following command.
 ```shell
 $ java -jar -Xmx4G target/scala-2.12/ergo-3.1.3.jar --testnet -c ergo-testnet.conf
@@ -67,8 +78,8 @@ $ java -jar -Xmx4G target/scala-2.12/ergo-3.1.3.jar --testnet -c ergo-testnet.co
 
 Our application will need a connection and security parameters along with
 application specific parameters to do its work. We will use a json file with the
-configuration parameters which ErgoTool loads at its startup. See for example
-[ergotool.json](https://github.com/aslesarenko/ergo-appkit/blob/master/ergotool.json)
+configuration parameters which FreezeCoin loads at its startup. See for example
+[freeze_coin_config.json](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/freeze_coin_config.json)
 file which have the following content
 ```json
 {
@@ -95,12 +106,12 @@ obtained as described
 And mnemonic is the secret phrase obtained during [setup of a new
 wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
-In ErgoTool as the first step we read the configuration and the amount of
+In FreezeCoin as the first step we read the configuration and the amount of
 NanoErg to transfer into the new box from the file and command line arguments
 ```java
 public static void main(String[] args) {
     long amountToSend = Long.parseLong(args[0]);  // positive value in NanoErg
-    ErgoToolConfig conf = ErgoToolConfig.load("ergotool.json");
+    ErgoToolConfig conf = ErgoToolConfig.load("freeze_coin_config.json");
     int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
     // the rest of the code discussed below 
     ...
@@ -130,7 +141,7 @@ with the current blockchain data is loaded from the Ergo node. In this lambda we
 shall put our application logic. We start with some auxiliary steps.
 ```java
 // access the wallet embedded in the Ergo node 
-// (the wallet's mnemonic we put in ergotool.json)
+// (the wallet's mnemonic we put in freeze_coin_config.json)
 ErgoWallet wallet = ctx.getWallet();
 
 // calculate total amount of NanoErgs we need to send to the new box 
@@ -204,26 +215,28 @@ return signed.toJson(true);
 
 As the last step and for demonstration purposes we serialize the signed
 transaction into a Json string with turned on pretty printing. Look at the [full
-source code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java)
+source code](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/src/main/java/org/ergoplatform/appkit/examples/FreezeCoin.java)
 of the example for more details and for using it as a template in your
 application.
 
-We can run the implemented ErgoTool using the following steps, assuming we are 
-at the directory you cloned ergo-tool.
+We can run the implemented FreezeCoin using the following steps, assuming we are 
+at the directory where you cloned [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples).
 ```shell
 $ pwd
-the/directory/you/cloned/ergo-tool
-$ sbt assembly
+the/directory/you/cloned/ergo-appkit-examples
+$ ./gradlew clean shadowJar 
 ```
-This will assemble the jar file containing ErgoTool application, the step have
-to be done only once after any changes in the source code are made.
+This will assemble `build/libs/appkit-examples-3.1.0-all.jar` file containing
+FreezeCoin Java application and all its dependencies in a single fat jar. 
+Note, this step have to be done only once after any changes in the Java source code
+of the example are done.
 
-Having ergo-appkit-3.1.0.jar assembled we can run our console application 
+Having Appkit jar assembled we can run our console application 
 ```shell
-$ java -cp target/scala-2.12/ergo-appkit-3.1.0.jar \
-      org.ergoplatform.example.ErgoToolJava  1000000000 
+$ java -cp build/libs/appkit-examples-3.1.0-all.jar \
+      org.ergoplatform.appkit.example.FreezeCoin  1000000000 
 ```
-And get the following [output](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322) in the console.
+And get a similar [output](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322) in the console.
 
 That is it, the transaction is accepted by the Ergo node, added to the
 unconfirmed transaction pool and broadcasted all over the network. After one of
@@ -233,12 +246,12 @@ the blockchain history.
 ## 2. Low-footprint, fast-startup Ergo Applications
 
 Using Java for short-running processes can suffer from longer startup time and
-relatively high memory usage. Let's run ErgoToolJava using the time command to
+relatively high memory usage. Let's run FreezeCoin using the time command to
 get the real, wall-clock elapsed time it takes to run the entire program from
 start to finish. We use -l to print the memory used as well as time used. 
 ```shell
 $ /usr/bin/time -l java -cp build/libs/appkit-examples-3.1.0-all.jar \
-   org.ergoplatform.appkit.examples.ErgoToolJava 1000000000
+   org.ergoplatform.appkit.examples.FreezeCoin 1000000000
 ...
        4.97 real         8.41 user         0.69 sys
  513703936  maximum resident set size
@@ -272,7 +285,7 @@ $ native-image --no-server \
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
-    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.ErgoToolJava ergotool
+    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.FreezeCoin ergotool
 [ergotool:3133]    classlist:  35,217.78 ms
 [ergotool:3133]        (cap):   6,063.07 ms
 [ergotool:3133]        setup:   8,268.99 ms
@@ -293,7 +306,7 @@ $ native-image --no-server \
 
 This command produces a native executable called `ergotool`. This executable
 isn’t a launcher for the JVM, it doesn’t link to the JVM, and it doesn’t bundle
-the JVM in any way. `native-image` compile out ErgoToolJava code, and any
+the JVM in any way. `native-image` compile out FreezeCoin code, and any
 Java libraries it depends on, all the way down to simple machine code. 
 
 If we look at the libraries which ergotool uses you can see they are only
@@ -339,7 +352,7 @@ Java can be used for example in a new node.js application written in JavaScript.
 
 To support polyglot programming GraalVM platform has it's own high performance
 implementations of popular languages which we are going to use to implement 
-our example ErgoTool scenario.
+our example FreezeCoin scenario.
 
 Before running the examples in JavaScript, Python and Ruby sections below it my
 be helpful to run Java example first to make sure everything is set up
@@ -354,15 +367,15 @@ specification](http://www.ecma-international.org/ecma-262/10.0/index.html).
 Additionally, `js` and `node` launchers accept special `--jvm` and `--polyglot`
 command line options which allow JS script to access Java objects and classes.
 
-That said, a JS implementation of ErgoTool can be easily written using Appkit
+That said, a JS implementation of FreezeCoin can be easily written using Appkit
 API interfaces.
-Please see the full source code of [ErgoTool JS
-implementation](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/js-examples/ErgoTool.js)
+Please see the full source code of [FreezeCoin JS
+implementation](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/js-examples/FreezeCoin.js)
 for details.
-The following command use `node` launcher to execute ErgoTool.js script.
+The following command use `node` launcher to execute FreezeCoin.js script.
 ```shell
 $ node --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
-  js-examples/ErgoTool.js  1000000000
+  js-examples/FreezeCoin.js  1000000000
 ```
 Note, the paths in the command are relative to the root of
 `ergo-appkit-examples` project directory.
@@ -376,11 +389,11 @@ the Python implementation is still experimental (see also
 for details).
 
 [Python example of
-ErgoTool](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/python-examples/ErgoTool.py)
+FreezeCoin](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/python-examples/FreezeCoin.py)
 can be executed using the following command
 ```shell
 $ graalpython --jvm --polyglot --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
-   python-examples/ErgoTool.py 1900000000
+   python-examples/FreezeCoin.py 1900000000
 ```
 
 ### Ruby
@@ -393,11 +406,11 @@ for details).
 TruffleRuby aims to be fully compatible with the standard implementation of Ruby, MRI, version 2.6.2
 
 [Ruby example of
-ErgoTool](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/ruby-examples/ErgoTool.rb)
+FreezeCoin](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/ruby-examples/FreezeCoin.rb)
 can be executed using the following command
 ```shell
 $ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
-    ruby-examples/ErgoTool.rb 1900000000
+    ruby-examples/FreezeCoin.rb 1900000000
 ```
 
 ## 4. Ergo Application as native shared library
@@ -406,10 +419,10 @@ We can compile Java class as a native shared library, instead of an executable.
 To do that we declare one or more static methods as `@CEntryPoint`.
 
 ```java
-public class ErgoToolJava {
+public class FreezeCoin {
     ...
      /**
-     * Entry point callable from C which wraps {@link ErgoToolJava#sendTx}
+     * Entry point callable from C which wraps {@link FreezeCoin#sendTx}
      */
     @CEntryPoint(name = "sendTx")
     public static void sendTxEntryPoint(
@@ -450,10 +463,12 @@ c-examples/libergotool.dylib:
 	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
 ```
 
-We can then write a simple C program to use the library. The interface to our
-native library does have a little ceremony — because the VM needs to manage a
-heap, threads, a garbage collector and other services, we need to create an
-instance of the system, and tell it about our main thread.
+We can then write a simple [C
+program](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/c-examples/freezecoin.c)
+to use the library. The interface to our native library does have a little
+ceremony — because the VM needs to manage a heap, threads, a garbage collector
+and other services, we need to create an instance of the system, and tell it
+about our main thread.
 
 ```
 #include <stdlib.h>
@@ -470,7 +485,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  char * configFileName = "ergotool.json";
+  char * configFileName = "freeze_coin_config.json";
 
   // get amountToSend from cmd args and call transaction creation
   long amountToSend = atol(argv[1]);
@@ -510,7 +525,7 @@ open in Chrome and will pause the program in the debugger.
 
 ```
 $ ruby --polyglot --jvm --inspect --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
-    ruby-examples/ErgoTool.rb 1900000000
+    ruby-examples/FreezeCoin.rb 1900000000
 Debugger listening on port 9229.
 To start debugging, open the following URL in Chrome:
     chrome-devtools://devtools/bundled/js_app.html?ws=127.0.0.1:9229/30c7da1e-7558a47d09b
@@ -525,10 +540,18 @@ values of the variables, and can continue again until the next breakpoint.
 ## Conclusions
 
 We see how easy it is to use Appkit from different most popular languages such
-as Java, JavaScript and Python to implement non-standard application scenarios.
+as Java, JavaScript, Python and Ruby to create new coins protected by custom
+user-defined Ergo contract written in ErgoScript.
 
 The example assumes the Ergo node (and the embedded wallet) is owned by the
-ErgoTool user. However this is not strictly required and the Appkit interfaces
+FreezeCoin user. However this is not strictly required and the Appkit interfaces
 can be used to create and send new transactions using arbitrary public Ergo
 node.
 
+## References
+
+1. [Ergo Site](https://ergoplatform.org/en/)
+2. [Ergo Sources](https://github.com/ergoplatform/ergo)
+3. [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit)
+4. [Ergo Appkit Examples](https://github.com/aslesarenko/ergo-appkit-examples)
+5. [GraalVM](https://www.graalvm.org)
