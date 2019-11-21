@@ -402,9 +402,38 @@ $ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
 
 ## 4. Ergo Application as native shared library
 
-Generate shared library 
+We can compile Java class as a native shared library, instead of an executable.
+To do that we declare one or more static methods as `@CEntryPoint`.
+
+```java
+public class ErgoToolJava {
+    ...
+     /**
+     * Entry point callable from C which wraps {@link ErgoToolJava#sendTx}
+     */
+    @CEntryPoint(name = "sendTx")
+    public static void sendTxEntryPoint(
+            IsolateThread thread,
+            SignedWord amountToSendW,
+            CCharPointer configFileNameC,
+            CCharPointer resBuffer, UnsignedWord bufferSize) throws FileNotFoundException {
+        long amountToSend = amountToSendW.rawValue();
+        // Convert the C strings to the target Java strings.
+        String configFileName = CTypeConversion.toJavaString(configFileNameC);
+        String txJson = sendTx(amountToSend, configFileName);
+
+        // put resulting string into provided buffer
+        CTypeConversion.toCString(txJson, resBuffer, bufferSize);
+    }  
+    ...
+}
 ```
-native-image --no-server \
+
+We can then compile to a shared library, and an automatically generated header
+file. Notice the use of `--shared` option.
+
+```
+$ native-image --no-server \
  -cp build/libs/appkit-examples-3.1.0-all.jar\
  --report-unsupported-elements-at-runtime\
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
@@ -412,22 +441,87 @@ native-image --no-server \
    --allow-incomplete-classpath \
     --enable-url-protocols=http,https 
     --shared -H:Name=libergotool -H:Path=c-examples
-```
-Check there is no JVM dependencies
-```    
-otool -L libergotool.dylib
+    
+$ otool -L c-examples/libergotool.dylib 
+c-examples/libergotool.dylib:
+	.../c-examples/libergotool.dylib (compatibility version 0.0.0, current version 0.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.50.4)
+	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1455.12.0)
+	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
 ```
 
-Compile C application 
+We can then write a simple C program to use the library. The interface to our
+native library does have a little ceremony — because the VM needs to manage a
+heap, threads, a garbage collector and other services, we need to create an
+instance of the system, and tell it about our main thread.
+
 ```
-clang -Ic-examples -Lc-examples -lergotool c-examples/freezecoin.c -o call_freezecoin
-otool -L call_freezecoin
-DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <libergotool.h>
+
+int main(int argc, char **argv) {
+  graal_isolate_t *isolate = NULL;
+  graal_isolatethread_t *thread = NULL;
+  
+  if (graal_create_isolate(NULL, &isolate, &thread) != 0) {
+    fprintf(stderr, "graal_create_isolate error\n");
+    return 1;
+  }
+
+  char * configFileName = "ergotool.json";
+
+  // get amountToSend from cmd args and call transaction creation
+  long amountToSend = atol(argv[1]);
+  char result[1024 * 16];
+  sendTx(thread, amountToSend, configFileName, result, sizeof(result));
+
+  // print out serialized result
+  printf("%s\n", result);
+
+  if (graal_detach_thread(thread) != 0) {
+    fprintf(stderr, "graal_detach_thread error\n");
+    return 1;
+  }
+  return 0;
+}
+```
+
+We compile this with our standard system tools and can run our executable (set LD_LIBRARY_PATH=. on Linux).
+```
+$ clang -Ic-examples -Lc-examples -lergotool c-examples/freezecoin.c -o call_freezecoin
+$ otool -L call_freezecoin
+$ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
 ```
 
 ## 5. Debug your polyglot Ergo Application
 
+You can debug JS, Python and Ruby in IntelliJ, but if for some reason this
+doesn't work for you, with GraalVM there is another option.
 
+All the GraalVM languages (except for Java) are implemented using the common
+[Truffle framework](https://github.com/oracle/graal/tree/master/truffle).
+This allows to implement functionality like debuggers once and have it available
+to all languages.
+
+We can run the program with the flag `--inspect`. This will give us a link to
+open in Chrome and will pause the program in the debugger.
+
+```
+$ ruby --polyglot --jvm --inspect --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
+    ruby-examples/ErgoTool.rb 1900000000
+Debugger listening on port 9229.
+To start debugging, open the following URL in Chrome:
+    chrome-devtools://devtools/bundled/js_app.html?ws=127.0.0.1:9229/30c7da1e-7558a47d09b
+...
+```
+
+We can then set a breakpoint and continue execution. When it breaks we’ll see
+values of the variables, and can continue again until the next breakpoint.
+
+![Debugger](debugger.png)
+    
 ## Conclusions
 
 We see how easy it is to use Appkit from different most popular languages such
