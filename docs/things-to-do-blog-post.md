@@ -28,15 +28,15 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
 { 
   // Parameters
   // freezeDeadline: Int - some future block number after which the box can be spent
-  // userPk: SigmaProp - public key of the new box owner
-  sigmaProp(HEIGHT > freezeDeadline) && userPk
+  // ownerPk: SigmaProp - public key of the new box owner
+  sigmaProp(HEIGHT > freezeDeadline) && ownerPk
 }
 ```
 This contract checks the following conditions to allow spending of the box: 
 1) current block number in Ergo blockchain (aka blockchain HEIGHT) should be
 greater than the given deadline
-2) the spending transaction should be signed by the user of FreezeCoin using 
-the secret key corresponding to the userPk.
+2) the spending transaction should be signed by the owner of the secret key
+corresponding to the ownerPk public key.
 
 The first condition effectively forbids spending of the box before the Ergo
 blockchain grows to the given height (thus delaying possibility to spend it).
@@ -96,7 +96,8 @@ file which have the following content
     "networkType": "TESTNET"
   },
   "parameters": {
-    "newBoxSpendingDelay": "30"
+    "newBoxSpendingDelay": "30",
+    "ownerAddress": "3WzR39tWQ5cxxWWX6ys7wNdJKLijPeyaKgx72uqg9FJRBCdZPovL"
   }
 }
 ```
@@ -113,6 +114,7 @@ public static void main(String[] args) {
     long amountToSend = Long.parseLong(args[0]);  // positive value in NanoErg
     ErgoToolConfig conf = ErgoToolConfig.load("freeze_coin_config.json");
     int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
+    Address ownerAddress = Address.create(conf.getParameters().get("ownerAddress"));
     // the rest of the code discussed below 
     ...
 }
@@ -179,18 +181,18 @@ OutBox newBox = txB.outBoxBuilder()
         .contract(ctx.compileContract(
                 ConstantsBuilder.create()
                         .item("freezeDeadline", ctx.getHeight() + newBoxSpendingDelay)
-                        .item("userPk", prover.getP2PKAddress().pubkey())
+                        .item("ownerPk", ownerAddress.getPublicKey())
                         .build(),
-                "{ sigmaProp(HEIGHT > freezeDeadline) && userPk }"))
+                "{ sigmaProp(HEIGHT > freezeDeadline) && ownerPk }"))
         .build();
 ```
 Note, in order to compile `ErgoContract` from source code the `compileContract`
 method requires to provide values for named constants which are used in the script.
 If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
 
-In this specific case we pass public key of the `prover` for `userPk` 
+In this specific case we pass the public key of the new box owner for `ownerPk` 
 placeholder of the script meaning the box can be spend only by the owner of the
-Ergo node we are working with. 
+corresponding secret key. 
 
 Next create an unsigned transaction using all the data collected so far.
 ```java
@@ -206,7 +208,7 @@ UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
 And finally we 1) use prover to sign the created transaction; 2) obtain a new
 `SignedTransaction` instance and 3) use context to send the signed transaction to
 the Ergo node. The resulting `txId` can be used to refer to this transaction
-later and is not really used here.
+later and is not used here.
 ```java
 SignedTransaction signed = prover.sign(tx);
 String txId = ctx.sendTransaction(signed);
@@ -219,8 +221,9 @@ source code](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/jav
 of the example for more details and for using it as a template in your
 application.
 
-We can run the implemented FreezeCoin using the following steps, assuming we are 
-at the directory where you cloned [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples).
+We can run the implemented FreezeCoin application using the following steps,
+assuming we are at the directory where you cloned
+[ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples).
 ```shell
 $ pwd
 the/directory/you/cloned/ergo-appkit-examples
@@ -229,9 +232,9 @@ $ ./gradlew clean shadowJar
 This will assemble `build/libs/appkit-examples-3.1.0-all.jar` file containing
 FreezeCoin Java application and all its dependencies in a single fat jar. 
 Note, this step have to be done only once after any changes in the Java source code
-of the example are done.
+of the example.
 
-Having Appkit jar assembled we can run our console application 
+Having examples jar assembled we can run our console application 
 ```shell
 $ java -cp build/libs/appkit-examples-3.1.0-all.jar \
       org.ergoplatform.appkit.example.FreezeCoin  1000000000 
@@ -285,36 +288,36 @@ $ native-image --no-server \
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
-    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.FreezeCoin ergotool
-[ergotool:3133]    classlist:  35,217.78 ms
-[ergotool:3133]        (cap):   6,063.07 ms
-[ergotool:3133]        setup:   8,268.99 ms
-[ergotool:3133]   (typeflow):  60,238.25 ms
-[ergotool:3133]    (objects):  33,009.06 ms
-[ergotool:3133]   (features):   4,796.86 ms
-[ergotool:3133]     analysis: 102,876.01 ms
-[ergotool:3133]     (clinit):  11,642.43 ms
-[ergotool:3133]     universe:  13,718.96 ms
-[ergotool:3133]      (parse):   5,053.18 ms
-[ergotool:3133]     (inline):  18,317.24 ms
-[ergotool:3133]    (compile):  44,806.82 ms
-[ergotool:3133]      compile:  72,288.24 ms
-[ergotool:3133]        image:   7,955.29 ms
-[ergotool:3133]        write:   2,872.25 ms
-[ergotool:3133]      [total]: 243,813.30 ms
+    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.FreezeCoin 
+[freezecoin:3133]    classlist:  35,217.78 ms
+[freezecoin:3133]        (cap):   6,063.07 ms
+[freezecoin:3133]        setup:   8,268.99 ms
+[freezecoin:3133]   (typeflow):  60,238.25 ms
+[freezecoin:3133]    (objects):  33,009.06 ms
+[freezecoin:3133]   (features):   4,796.86 ms
+[freezecoin:3133]     analysis: 102,876.01 ms
+[freezecoin:3133]     (clinit):  11,642.43 ms
+[freezecoin:3133]     universe:  13,718.96 ms
+[freezecoin:3133]      (parse):   5,053.18 ms
+[freezecoin:3133]     (inline):  18,317.24 ms
+[freezecoin:3133]    (compile):  44,806.82 ms
+[freezecoin:3133]      compile:  72,288.24 ms
+[freezecoin:3133]        image:   7,955.29 ms
+[freezecoin:3133]        write:   2,872.25 ms
+[freezecoin:3133]      [total]: 243,813.30 ms
 ```
 
-This command produces a native executable called `ergotool`. This executable
+This command produces a native executable called `freezecoin`. This executable
 isn’t a launcher for the JVM, it doesn’t link to the JVM, and it doesn’t bundle
 the JVM in any way. `native-image` compile out FreezeCoin code, and any
 Java libraries it depends on, all the way down to simple machine code. 
 
-If we look at the libraries which ergotool uses you can see they are only
+If we look at the libraries which `freezecoin` uses you can see they are only
 standard system libraries. We can move just this one file to a system
-which don't a JVM installed and it will run there. 
+which doesn't have a JVM installed and it will run there. 
 ```
-$ otool -L ergotool    # ldd ergotool on Linux
-ergotool:
+$ otool -L freezecoin    # ldd freezecoin on Linux
+freezecoin:
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.50.4)
 	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1455.12.0)
 	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
@@ -325,7 +328,7 @@ around 6x less memory, than running the same program on the
 JVM does. You don’t feel that pause you always get when running a
 short-running command with the JVM.
 ```
-$ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./ergotool 1800000000
+$ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./freezecoin 1800000000
         0.43 real         0.15 user         0.03 sys
   81289216  maximum resident set size
          0  average shared memory size
@@ -453,11 +456,11 @@ $ native-image --no-server \
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
     --enable-url-protocols=http,https 
-    --shared -H:Name=libergotool -H:Path=c-examples
+    --shared -H:Name=libfreezecoin -H:Path=c-examples
     
-$ otool -L c-examples/libergotool.dylib 
-c-examples/libergotool.dylib:
-	.../c-examples/libergotool.dylib (compatibility version 0.0.0, current version 0.0.0)
+$ otool -L c-examples/libfreezecoin.dylib 
+c-examples/libfreezecoin.dylib:
+	.../c-examples/libfreezecoin.dylib (compatibility version 0.0.0, current version 0.0.0)
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.50.4)
 	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1455.12.0)
 	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
@@ -474,7 +477,7 @@ about our main thread.
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <libergotool.h>
+#include <libfreezecoin.h>
 
 int main(int argc, char **argv) {
   graal_isolate_t *isolate = NULL;
@@ -505,7 +508,7 @@ int main(int argc, char **argv) {
 
 We compile this with our standard system tools and can run our executable (set LD_LIBRARY_PATH=. on Linux).
 ```
-$ clang -Ic-examples -Lc-examples -lergotool c-examples/freezecoin.c -o call_freezecoin
+$ clang -Ic-examples -Lc-examples -lfreezecoin c-examples/freezecoin.c -o call_freezecoin
 $ otool -L call_freezecoin
 $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
 ```
