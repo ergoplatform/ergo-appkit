@@ -68,7 +68,7 @@ dependencies {
 ```
 
 At runtime Appkit needs to connect with an Ergo Node via REST API. For example,
-the node can be started locally and made available at `http://localhost:9051/`
+the node can be started locally and made available at `http://localhost:9052/`
 by following [these
 instructions](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node).
 Assume we did the setup and started an Ergo Node using the following command.
@@ -85,7 +85,7 @@ file which have the following content
 {
   "node": {
     "nodeApi": {
-      "apiUrl": "http://localhost:9051/",
+      "apiUrl": "http://localhost:9052/",
       "apiKey": "put here your secret apiKey generated during node setup"
     },
     "wallet": {
