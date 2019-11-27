@@ -1,0 +1,26 @@
+sudo: required
+dist: trusty
+before_cache:
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+cache:
+  directories:
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
+language: scala
+jdk:
+  - oraclejdk8
+stages:
+  - test
+  - name: release
+    if: tag =~ ^v
+  - name: snapshot
+    if: NOT tag IS present
+jobs:
+  include:
+    - stage: test
+      script: sbt test
+    - stage: release
+      script: sbt publishSigned sonatypeBundleRelease
+    - stage: snapshot
+      script: sbt publish
