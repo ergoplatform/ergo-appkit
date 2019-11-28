@@ -212,7 +212,7 @@ lazy val aggregateCompile = ScopeFilter(
 
 lazy val rootSettings = Seq(
   sources in Compile := sources.all(aggregateCompile).value.flatten,
-  sources in (Compile, doc) := Seq(),
+  sources in (Compile, doc) := Seq(), // generate empty javadoc (required by sonatype)
   libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
   mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
   mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
