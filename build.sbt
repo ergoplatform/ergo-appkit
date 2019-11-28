@@ -24,7 +24,7 @@ lazy val commonSettings = Seq(
         </developer>
       </developers>,
   publishArtifact in (Compile, packageSrc) := true,
-  publishArtifact in (Compile, packageDoc) := false,
+  publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
 )
