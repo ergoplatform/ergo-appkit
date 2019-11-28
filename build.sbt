@@ -1,6 +1,6 @@
 import sbt.Keys.publishMavenStyle
-// first two digits of the version should be in sync with Ergo client
-version := "3.1.0"
+
+import scala.util.Try
 
 name := "ergo-appkit"
 
@@ -11,14 +11,10 @@ lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/c
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
   scalaVersion := "2.12.8",
-  version := "3.1.0",
-  resolvers ++= Seq(sonatypeReleases,
-    "SonaType" at "https://oss.sonatype.org/content/groups/public",
-    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
-    sonatypeSnapshots,
-    Resolver.mavenCentral),
+  resolvers += Resolver.sonatypeRepo("public"),
   homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
+  description := "A Library for Polyglot Development of Ergo Applications",
   pomExtra :=
       <developers>
         <developer>
@@ -28,10 +24,41 @@ lazy val commonSettings = Seq(
         </developer>
       </developers>,
   publishArtifact in (Compile, packageSrc) := true,
-  publishArtifact in (Compile, packageDoc) := false,
+  publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
   publishTo := sonatypePublishToBundle.value,
 )
+
+enablePlugins(GitVersioning)
+
+version in ThisBuild := {
+  if (git.gitCurrentTags.value.nonEmpty) {
+    git.gitDescribedVersion.value.get
+  } else {
+    if (git.gitHeadCommit.value.contains(git.gitCurrentBranch.value)) {
+      // see https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+      if (Try(sys.env("TRAVIS")).getOrElse("false") == "true") {
+        // pull request number, "false" if not a pull request
+        if (Try(sys.env("TRAVIS_PULL_REQUEST")).getOrElse("false") != "false") {
+          // build is triggered by a pull request
+          val prBranchName = Try(sys.env("TRAVIS_PULL_REQUEST_BRANCH")).get
+          val prHeadCommitSha = Try(sys.env("TRAVIS_PULL_REQUEST_SHA")).get
+          prBranchName + "-" + prHeadCommitSha.take(8) + "-SNAPSHOT"
+        } else {
+          // build is triggered by a push
+          val branchName = Try(sys.env("TRAVIS_BRANCH")).get
+          branchName + "-" + git.gitHeadCommit.value.get.take(8) + "-SNAPSHOT"
+        }
+      } else {
+        git.gitHeadCommit.value.get.take(8) + "-SNAPSHOT"
+      }
+    } else {
+      git.gitCurrentBranch.value + "-" + git.gitHeadCommit.value.get.take(8) + "-SNAPSHOT"
+    }
+  }
+}
+
+git.gitUncommittedChanges in ThisBuild := true
 
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
@@ -57,9 +84,6 @@ lazy val allResolvers = Seq(
 
 publishArtifact in Compile := true
 publishArtifact in Test := true
-
-publishTo in ThisBuild :=
-    Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
 
 credentials ++= (for {
   username <- Option(System.getenv().get("SONATYPE_USERNAME"))
@@ -188,6 +212,7 @@ lazy val aggregateCompile = ScopeFilter(
 
 lazy val rootSettings = Seq(
   sources in Compile := sources.all(aggregateCompile).value.flatten,
+  sources in (Compile, doc) := Seq(), // generate empty javadoc (required by sonatype)
   libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
   mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
   mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
@@ -200,3 +225,12 @@ lazy val root = (project in file("."))
     .settings(publish / aggregate := false)
     .settings(publishLocal / aggregate := false)
 
+
+// PGP key for signing a release build published to sonatype
+// signing is done by sbt-pgp plugin
+// how to generate a key - https://central.sonatype.org/pages/working-with-pgp-signatures.html
+// how to export a key and use it with Travis - https://docs.scala-lang.org/overviews/contributors/index.html#export-your-pgp-key-pair
+pgpPublicRing := file("ci/pubring.asc")
+pgpSecretRing := file("ci/secring.asc")
+pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray)
+usePgpKeyHex("C56E488A4B3A9E370275612F55B67E9C7DF9FACE")

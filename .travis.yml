@@ -1,0 +1,34 @@
+sudo: required
+dist: trusty
+before_cache:
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+cache:
+  directories:
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt"
+language: scala
+jdk:
+- oraclejdk8
+stages:
+- test
+- name: release
+  if: tag =~ ^v
+- name: snapshot
+  if: NOT tag IS present
+jobs:
+  include:
+  - stage: test
+    script: sbt test
+  - stage: release
+    script: sbt publishSigned sonatypeBundleRelease
+  - stage: snapshot
+    script: sbt publish
+env:
+  global:
+  - secure: AlMkKVnCnIAFPZNx2oLsZst/J8AH9oZ5k+3ikXLODKSDIUeD1mRxmtSkFbvYX6xzbL910jIgrRwjnRtM5XI3eNA5YcMnHwX8/7MJM1bqktFFnkPS2xjxWS8fzxAsFQrXrgdfMr/sNW9GgYd9J++jA8hAVy/PBfx7Ybg3zQUdyJI0szYkM3HS7Y1DKM+q4QjWec5FH5MjRZYM9fnE1yxDDKsNUyyZaI7lPOvWqilKwe4I4PhOpBOxLcUpjrqPWkJYjCJMhkOvCVNjiqBZ/WJyiqf8sSyMTxf5S6lNPAQMNoAB2310G4+0Cgagdknv2XsEntdLAk8t732fEuXRjqVHxtQYQDNrQi3QQ3pIqqfsJM4lOCRMYYTvo+NWEpao52HAbBiRMIpzx/xFTZD9ETuNUKneJZMmHcoLJlUCN83r+k4JLk1dDFlFrqnb/e7XFNzwdCsNAzbPjWcIkspYD/Puobb9cYAKdjyfARLtL/SCJSgYOrHI7zo9MU2yKBtGDCmuTjPcKIDPFUl3w716r1jWxozlRnH4DZX/gaw7QbuFe0iPfUwa9+RztbVXaMBZMBkqULnU1rw4rUa10hrfsYt2kdi/n4osEhXOOrqEeT2n6T8PF/ZHqhejItrbvW4eN3TU6A2IQoH2fXiBe1Hdxiq1t2HINvAjlJ98XzOgcxf4Xx4=
+  - secure: JH+szQ3hjEiGNBzkU4qTEGsXLSGM6SIwVTVpcLKQtpAR8cX2rXj/epSCuuWO4VJYtxKRqhqI3om/0bL1SZZukYybb+ALl43Ow9J5VbhRUY8dUTHIMN87tAKLSYd/AeF0EgGMGKoUJwFuNMGmiXLIwoBRohAmM/Vkfdb2FFbleaP6SJGNgd3TsqvVJkCEpSZIfFnmRF23w+7APP8ZEtgMKxOF3choPu9jYcr1vbDalv08P/KGyzhkidLPPbkyCgqfnuIoCihZHItSonBM5Qix8cPGSYtmUZQ0TqBNTLTpM2c5gxhtpIgMwtpBeenOiXqRb4Mf9JQ2D09FnjhfBEqKix1CLo/rbZS0Zh0qtQEi7zQ4/rwT0JkF30xV3mWbnogeknaVXsq0umYFmC8hlrfRJXrTyCjvuANpkiy422UbVvv6IE0DPX7D6Gc6mW9yCUJqMPqAnR2Hzf+v1A3BfWDoAV0KAnugERiDYvJ+lp60HCSeatZ16my/Pyj0aK74KfuQWa+cEepdnTPShOrLqo9vvL89QbWF2RMwjTWxqk2XOrbvlodaHZxnjiN0MrSRUe29R6Br78k5zIrU/MqViNM5YPaiOS2H9M+U9/IMLu6if0f9uCpKn2V7L/j7E0DYrAy3cOOPiI1WPoJ0MmwH8cldlxYXLIBmzC0vSNbkYjmI7KQ=
+  - secure: B6tGHZ9F0K7XTGP7AbSj15dyRVyWtzypMz0uWl7Wjr+pwbDoEsWHf0ffja/Xmr2+gi57U6wv+Yy3ORDXn6lF39hIfnQAACfiRMTd1lUSECH63tXu1LNHChxMl0MVRZw1OZO3JqlbLJnSGvvIXI0eoiWjRtSMjKaBtMQSrxZzhfGs6Y0pr4seLQYjBeHrL5X14XvKFX3O6Y5ad/j6fZyoSdB49+8v3Q5hStR5WLbj1TEONRrxmwodziZwr3KclmD6E32s1CTcv6BU30Pm9g4+/G1i8txeU+0TEmdCgNgg/JhMymEfJQvbAxkpxU/CAH0ETuPX5yQ5sIUwtOHGu4Nwhw5IcJMiRep/rZciROmj6anvkbUFi8chQJ7h9Ct6tsAZxn4FLz8d+anUKf5BmaDNt1wwXoq4BskZpPfx7fWyoE/MaqowIEo9Zgeqm9tZgc9WvHJsVLJEKl2xaWHdYpDUqjcOGKMt+2ZTeuMpnZRw3lynq4be8xP/3hw1dLtfgAvI5dAKnf+vlj4phVTJwVDdgTglVD6FTJUuYWWEAd7//KOnXfhIcb6kJ88ONFE++gCKXpjPCz+u6vCGJxLwDmgRqHHBZv19hchql3UoGKjgI3WGnDC+/St/TVlHDYkHkESqIP46edyMz0Gtpz9Dhmf1gcfQNPrOzYvh4QkRDuAwlQs=
+before_install: openssl aes-256-cbc -K $encrypted_0b06728b1ded_key -iv $encrypted_0b06728b1ded_iv
+  -in ci/secring.asc.enc -out ci/secring.asc -d
+before_script: gpg --import ci/secring.asc
