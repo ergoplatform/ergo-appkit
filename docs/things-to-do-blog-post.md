@@ -359,30 +359,29 @@ This is just one of the great benefits of GraalVM which we get to take advantage
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby
 
-GraalVM supports so called polyglot programming in which different components of
+GraalVM supports so called *polyglot programming* in which different components of
 an application can be developed using the most suitable language and then
-seamlessly combined at runtime. In this way some unique libraries written in say
-Java can be used for example in a new node.js application written in JavaScript.
+seamlessly combine together at runtime. In this way a unique library written in say
+Java can be used in a node.js application written in JavaScript for example.
 
 To support polyglot programming GraalVM platform has it's own high performance
-implementations of popular languages which we are going to use to implement 
-our example FreezeCoin scenario.
+implementations of popular languages. We are going to take advantage of this for 
+our FreezeCoin example project to show you how easy this is to use your preferred language.
 
-Before running the examples in JavaScript, Python and Ruby sections below it my
-be helpful to run Java example first to make sure everything is set up
-correctly.
+Before running the examples below (in JavaScript, Python and Ruby) please make sure that you have the
+Java version of FreezeCoin working locally in order to ensure everything is set up correctly.
 
 ### JavaScript
 
 GraalVM can [run JavaScript and
 Node.js](https://www.graalvm.org/docs/reference-manual/languages/js/)
-applications out of the box and it is compatible with the [ECMAScript 2019
+applications out of the box. It is compatible with the [ECMAScript 2019
 specification](http://www.ecma-international.org/ecma-262/10.0/index.html).
 Additionally, `js` and `node` launchers accept special `--jvm` and `--polyglot`
-command line options which allow JS script to access Java objects and classes.
+command line options which allow JS scripts to access Java objects and classes.
 
-That said, a JS implementation of FreezeCoin can be easily written using Appkit
-API interfaces.
+Given that being the case, a JS implementation of FreezeCoin can be easily written using the Appkit
+API interface.
 Please see the full source code of [FreezeCoin JS
 implementation](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/js-examples/FreezeCoin.js)
 for details.
