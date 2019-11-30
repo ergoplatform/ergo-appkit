@@ -2,13 +2,12 @@
 
 [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit) is a library for
 polyglot development of Ergo Applications based on
-[GraalVM](https://www.graalvm.org/). Many [useful
-things](https://medium.com/graalvm/graalvm-ten-things-12d9111f307d) can be done
-with GraalVM. Relying on that, in this article we’ll list some of the Appkit
-features inherited from GraalVM and explain how you can use them.
+[GraalVM](https://www.graalvm.org/). GraalVM has many [great
+use cases](https://medium.com/graalvm/graalvm-ten-things-12d9111f307d). Expanding on that, in this article we will go through some of the Appkit
+features inherited from GraalVM and take you step-by-step in learning how to take advantage of them.
 
 - [0. Example Scenario](#example-scenario)
-- [1. Develop Ergo Applications in Java](#1-develop-ergo-applications-in-java)
+- [1. Develop Ergo Applications in Java](#1-java-ergo-app-development)
 - [2. Low-footprint, fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
 - [3. Develop Ergo Applications in JavaScript, Python, Ruby](#3-develop-ergo-applications-in-javascript-python-ruby)
 - [4. Ergo Application as native library](#4-ergo-application-as-native-shared-library)
@@ -16,13 +15,13 @@ features inherited from GraalVM and explain how you can use them.
 
 ## Example Scenario
 
-We will create a simple Java console application (called
+We will create a simple console application (called
 [FreezeCoin](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/src/main/java/org/ergoplatform/appkit/examples/FreezeCoin.java))
-which uses Appkit library to send a new transaction to an Ergo node. The
-transaction transfers a given amount of Erg to a new box protected by the
+in Java which uses the Appkit library. By using Appkit, we will be able to easily send a new transaction to an Ergo node programatically. The
+transaction will transfer a given amount of Erg into a new box protected by the
 following Ergo contract written in ErgoScript (see this
 [introduction](https://ergoplatform.org/docs/ErgoScript.pdf) and more [advanced
-examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
+examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf) to learn more about ErgoScript).
 ```
 // Freezer Contract
 { 
@@ -32,32 +31,32 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)).
   sigmaProp(HEIGHT > freezeDeadline) && ownerPk
 }
 ```
-This contract checks the following conditions to allow spending of the box: 
-1) current block number in Ergo blockchain (aka blockchain HEIGHT) should be
-greater than the given deadline
-2) the spending transaction should be signed by the owner of the secret key
+In short, a box (and therefore the funds within the box) are locked under a contract (or script) on the Ergo blockchain. In order for the box to be spent, the contract must evaluate to true. Thus the individual who wishes to spend the box must ensure that the contract evaluates to true based off of the encoded logic within it.
+
+Our Freezer contract above checks that the following conditions before allowing the box to be spent:
+1) The current block number of the Ergo blockchain (aka blockchain HEIGHT) is 
+greater than the specified deadline
+2) The spending transaction must be signed by the owner of the secret key
 corresponding to the ownerPk public key.
 
-The first condition effectively forbids spending of the box before the Ergo
-blockchain grows to the given height (thus delaying possibility to spend it).
-Because each new block is mined every 2 minutes on average, using the current
-blockchain height it is easy to compute 1 day, 1 week, 1 month or any other
-delays (i.e. 30 * 24 * 7 blocks per week). The funds become frozen in the box
-for some time. If you want to protect spending of your own Ergs even from
-yourself (for whatever reason :) you can use this Ergo contract and the FreezeCoin
-we are going to develop in this post.
+The first condition forbids anyone from spending the box before the Ergo
+blockchain grows to the given height. Because new blocks on the blockchain are mined approximately every 2 minutes on average, using the current
+blockchain height it is easy to define any duration of delay we wish such as 1 day, 1 week, or 1 month. *(i.e. (60/2) * 24 * 7 = 5040, which is the # of blocks per week)*.
 
-## 1. Develop Ergo Applications in Java
+We will now be going in depth on how we can take this Freezer Contract and integrate it with the Apkit library in order to create the FreezeCoin console application so that anyone and everyone can choose to freeze their coins if they so wish. (Granted, this contract/dApp is not actually useful, however it is an effective simple example for displaying how this technology stack works so that you yourself can build useful dApps down the line.)
 
-Appkit aims to provide a set of Java interfaces which can be used idiomatically
-in Java. If you use Java, you will feel right at home using Appkit.
+
+## 1. Java Ergo App Development
+
+Appkit aims to provide a set of interfaces which can be used idiomatically
+in Java. You will feel right at home using Appkit if you are a Java veteran.
 
 Please follow the [setup
 instructions](https://github.com/aslesarenko/ergo-appkit#setup) for GraalVM and
-Appkit if you want to reproduce the examples below.
+Appkit if you wish to reproduce the examples below.
 
-To use Appkit in our Java implementation of FreezeCoin we configure the
-following dependency in [gradle
+To use Appkit in our Java implementation of FreezeCoin we must add the
+following dependency in the [gradle
 file](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/build.gradle.kts)
 
 ```kotlin
@@ -67,29 +66,26 @@ dependencies {
 }
 ```
 
-At runtime Appkit needs to connect with an Ergo Node via REST API. For example,
-the node can be started locally and made available at `http://localhost:9052/`
-by following [these
-instructions](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node).
-Assume we did the setup and started an Ergo Node using the following command.
-```shell
-$ java -jar -Xmx4G target/scala-2.12/ergo-3.1.3.jar --testnet -c ergo-testnet.conf
-```
+Furthermore at runtime Appkit/our application needs to connect with an Ergo Node via REST API. Often,
+the node will be running locally and made available at `http://localhost:9052/`. This is the standard scenario for anyone who has set up a full-node by following [these
+instructions](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and is using the default configuration.
 
-Our application will need a connection and security parameters along with
-application specific parameters to do its work. We will use a json file with the
-configuration parameters which FreezeCoin loads at its startup. See for example
-[freeze_coin_config.json](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/freeze_coin_config.json)
-file which have the following content
+Henceforth we will assume that you have setup and started your Ergo Node so that it is available for testing of the application.
+
+Next, our application will need to know how to be able to a connect to our local running node, in addition to other various settings in order to function properly. We will use a json file with the following
+configuration parameters which our FreezeCoin app will load at startup. 
+
+[freeze_coin_config.json:](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/freeze_coin_config.json)
+
 ```json
 {
   "node": {
     "nodeApi": {
       "apiUrl": "http://localhost:9052/",
-      "apiKey": "put here your secret apiKey generated during node setup"
+      "apiKey": "put your secret apiKey generated during node setup here"
     },
     "wallet": {
-      "mnemonic": "the mnemonic key used to initialize or restore the wallet on the node",
+      "mnemonic": "the mnemonic key used to initialize or restore the wallet of the node",
       "password": "the password you chose to protect the wallet",
       "mnemonicPassword": "the password you chose to protect the mnemonic"
     },
@@ -102,34 +98,40 @@ file which have the following content
 }
 ```
 Here `apiKey` is the secret key required for API authentication which can be
-obtained as described
+acquired as described
 [here](https://github.com/ergoplatform/ergo/wiki/Ergo-REST-API#setting-an-api-key).
-And mnemonic is the secret phrase obtained during [setup of a new
+Your mnemonic is the secret phrase obtained during [setup of a new
 wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
 
-In FreezeCoin as the first step we read the configuration and the amount of
-NanoErg to transfer into the new box from the file and command line arguments
+----
+How our app will work is that the user will launch it from the command line and provide one argument. This argument is the amount of value (in NanoErgs) which they wish to freeze/lock under the Freezer contract which we wrote above.
+
+Our first step for our FreezeCoin app will be to read the configuration json file we just created and to accept the command line argument from the user:
 ```java
 public static void main(String[] args) {
     long amountToSend = Long.parseLong(args[0]);  // positive value in NanoErg
     ErgoToolConfig conf = ErgoToolConfig.load("freeze_coin_config.json");
-    int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
-    Address ownerAddress = Address.create(conf.getParameters().get("ownerAddress"));
     // the rest of the code discussed below 
     ...
 }
 ```
 
-Next we connect to the running Ergo node from our Java application by creating
-`ErgoClient` instance.
+With these acquired, we can now obtain the spending delay and the owner address which were defined in the json config file.
+
+```java
+  int newBoxSpendingDelay = Integer.parseInt(conf.getParameters().get("newBoxSpendingDelay"));
+  Address ownerAddress = Address.create(conf.getParameters().get("ownerAddress"));
+```
+
+Next we need to connect to the running Ergo node from our Java application so that we can use the data we just parsed and post something on-chain. This is done by creating
+an `ErgoClient` instance which uses our pre-defined values for our node from the json config file as well.
 ```java
 ErgoNodeConfig nodeConf = conf.getNode();
 ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 
-Using
-[ErgoClient](https://github.com/aslesarenko/ergo-appkit/blob/master/lib-api/src/main/java/org/ergoplatform/appkit/ErgoClient.java)
-any block of code can be executed in the current blockchain context.
+Now that we have an instance of [ErgoClient](https://github.com/aslesarenko/ergo-appkit/blob/master/lib-api/src/main/java/org/ergoplatform/appkit/ErgoClient.java),
+we can execute any block of code and have access to the current blockchain context.
 
 ```java
 String txJson = ergoClient.execute((BlockchainContext ctx) -> {
@@ -139,25 +141,27 @@ String txJson = ergoClient.execute((BlockchainContext ctx) -> {
 ```
 
 The lambda passed to `execute` is called when the current blockchain context
-with the current blockchain data is loaded from the Ergo node. In this lambda we
-shall put our application logic. We start with some auxiliary steps.
+is loaded from the Ergo node. In this lambda we
+shall put our application logic. 
+
+First we start with some auxiliary steps.
 ```java
 // access the wallet embedded in the Ergo node 
-// (the wallet's mnemonic we put in freeze_coin_config.json)
+// (using the wallet specified via mnemonic we put in freeze_coin_config.json)
 ErgoWallet wallet = ctx.getWallet();
 
 // calculate total amount of NanoErgs we need to send to the new box 
-// and pay transaction fees
+// including paying for transaction fees
 long totalToSpend = amountToSend + Parameters.MinFee;
 
-// request wallet for unspent boxes that cover required amount of NanoErgs
+// request for unspent boxes that cover the required amount of NanoErgs from the wallet
 Optional<List<InputBox>> boxes = wallet.getUnspentBoxes(totalToSpend);
 if (!boxes.isPresent())
     throw new ErgoClientException(
-        "Not enough coins in the wallet to pay " + totalToSpend, null);
+        "Not enough coins in your specified wallet" + totalToSpend, null);
     
-// create a so called prover, a special object which will be used for signing the transaction
-// the prover should be configured with secrets, which are nessesary to generate signatures (aka proofs)
+// create a "prover", which is a special object that will be used for signing the transaction
+// the prover should be configured with your wallet's secrets, which are necessary to generate signatures (aka proofs)
 ErgoProver prover = ctx.newProverBuilder()
     .withMnemonic(
             nodeConf.getWallet().getMnemonic(),
@@ -165,17 +169,15 @@ ErgoProver prover = ctx.newProverBuilder()
     .build();
 ```
 
-Now we have the input boxes to spend in the transaction and we need to create 
-an output box with the requested `amountToSend` and the contract protecting 
-that box.
+At this point we have the input boxes chosen for our spending transaction, but we now need to create an output box with the specified `amountToSend` and locked under the Freezer contract.
 
 ```java
-// the only way to create transaction is using builder obtained from the context
-// the builder keeps relationship with the context to access necessary blockchain data.
+// the only way to create a transaction is using the tx builder obtained from the context
+// the builder uses the context to access necessary blockchain data.
 UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
 // create new box using new builder obtained from the transaction builder
-// in this case we compile new ErgoContract from source ErgoScript code
+// in this case we compile a new ErgoContract from the Freezer ErgoScript code
 OutBox newBox = txB.outBoxBuilder()
         .value(amountToPay)
         .contract(ctx.compileContract(
@@ -186,18 +188,18 @@ OutBox newBox = txB.outBoxBuilder()
                 "{ sigmaProp(HEIGHT > freezeDeadline) && ownerPk }"))
         .build();
 ```
-Note, in order to compile `ErgoContract` from source code the `compileContract`
-method requires to provide values for named constants which are used in the script.
-If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
+Note, in order to compile `ErgoContract` from the Freezer script source code the `compileContract`
+method requires that we provide values for named constants which are used within the script.
+If no such constants are used, then `ConstantsBuilder.empty()` can be passed to it.
 
-In this specific case we pass the public key of the new box owner for `ownerPk` 
-placeholder of the script meaning the box can be spend only by the owner of the
+In this case we pass the public key of the new box owner into the `ownerPk` 
+placeholder in the script. To repeat from earlier, this means that the box can only be spent by the owner of the
 corresponding secret key. 
 
-Next create an unsigned transaction using all the data collected so far.
+Next, we create an unsigned transaction using all the data we've put together thus far.
 ```java
-// tell transaction builder which boxes we are going to spend, which outputs
-// to create, amount of transaction fees and address for change coins.
+// provide the transaction builder with which boxes we are going to spend, which outputs
+// should be created, the total transaction fees, and the address for change to be sent to
 UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
         .outputs(newBox)
         .fee(Parameters.MinFee)
@@ -205,46 +207,49 @@ UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
         .build();
 ```
 
-And finally we 1) use prover to sign the created transaction; 2) obtain a new
-`SignedTransaction` instance and 3) use context to send the signed transaction to
-the Ergo node. The resulting `txId` can be used to refer to this transaction
-later and is not used here.
+And finally we:
+1) Use the prover to sign the built transaction
+2) Thus obtain a
+`SignedTransaction` instance
+3) Use the blockchain context to send the signed transaction to
+the Ergo node. 
+
+The resulting `txId` can be used to refer to this transaction
+later however we do not use it here.
 ```java
 SignedTransaction signed = prover.sign(tx);
 String txId = ctx.sendTransaction(signed);
 return signed.toJson(true);
 ```
 
-As the last step and for demonstration purposes we serialize the signed
-transaction into a Json string with turned on pretty printing. Look at the [full
+As you may have noticed, for our final step we show off that it is possible to serialize the signed
+transaction into a Json string with pretty printing turned on. Look at the [full
 source code](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/src/main/java/org/ergoplatform/appkit/examples/FreezeCoin.java)
-of the example for more details and for using it as a template in your
+of the example for more details and for using it as a template in your own
 application.
 
-We can run the implemented FreezeCoin application using the following steps,
-assuming we are at the directory where you cloned
-[ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples).
+---
+
+Now with all of the code set in stone, we can run our FreezeCoin application using the following steps
+(assuming your are in the directory where you cloned
+[ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples)).
 ```shell
 $ pwd
 the/directory/you/cloned/ergo-appkit-examples
 $ ./gradlew clean shadowJar 
 ```
-This will assemble `build/libs/appkit-examples-3.1.0-all.jar` file containing
-FreezeCoin Java application and all its dependencies in a single fat jar. 
-Note, this step have to be done only once after any changes in the Java source code
-of the example.
+This will assemble the `build/libs/appkit-examples-3.1.0-all.jar` file containing
+our FreezeCoin Java application and all of its dependencies in a single fat jar. 
+Note, this step has to be repeated after any changes are made to the Java source code of our application.
 
-Having examples jar assembled we can run our console application 
+Having created out application, we can now use our FreezeCoin app:
 ```shell
 $ java -cp build/libs/appkit-examples-3.1.0-all.jar \
       org.ergoplatform.appkit.example.FreezeCoin  1000000000 
 ```
-And get a similar [output](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322) in the console.
+You will get something along the lines of this [output in the console](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322).
 
-That is it, the transaction is accepted by the Ergo node, added to the
-unconfirmed transaction pool and broadcasted all over the network. After one of
-the miners picks it up, validates and includes in a new block it becomes part of
-the blockchain history.
+And with that your transaction was accepted by the Ergo node and broadcast into the network where it shall lay await in the transaction pool to be added to a block. Once a miner selects and adds it to a block, your coins will be officially "frozen" within the newly created box based off of the values you provided to the FreezeCoin application.
 
 ## 2. Low-footprint, fast-startup Ergo Applications
 
