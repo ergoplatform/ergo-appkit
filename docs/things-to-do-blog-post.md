@@ -251,12 +251,14 @@ You will get something along the lines of this [output in the console](https://g
 
 And with that your transaction was accepted by the Ergo node and broadcast into the network where it shall lay await in the transaction pool to be added to a block. Once a miner selects and adds it to a block, your coins will be officially "frozen" within the newly created box based off of the values you provided to the FreezeCoin application.
 
-## 2. Low-footprint, fast-startup Ergo Applications
+## 2. Low-footprint, Fast-startup Ergo Applications
 
-Using Java for short-running processes can suffer from longer startup time and
-relatively high memory usage. Let's run FreezeCoin using the time command to
-get the real, wall-clock elapsed time it takes to run the entire program from
-start to finish. We use -l to print the memory used as well as time used. 
+As you may know, using Java for short-running processes has a lot of drawbacks.
+Applications tend to suffer from long startup times and relatively high memory usage.
+
+Let's run FreezeCoin using the time command to
+get the real (wall-clock elapsed time) it takes the entire program to run from
+start to finish. We use the `-l` flag to print the memory usage as well.
 ```shell
 $ /usr/bin/time -l java -cp build/libs/appkit-examples-3.1.0-all.jar \
    org.ergoplatform.appkit.examples.FreezeCoin 1000000000
@@ -277,13 +279,17 @@ $ /usr/bin/time -l java -cp build/libs/appkit-examples-3.1.0-all.jar \
       2384  voluntary context switches
      17409  involuntary context switches
 ```
-Which means this simple operation took 2 parallel threads to run for almost 4
-seconds to do the job. Most of that time can be attributed to JVM startup and
-the background JIT compiler running.
+As seen above, this tiny application took 2 parallel threads almost 4
+seconds to run. Most of that time can be attributed to the JVM startup and
+the background JIT compiler running. This is quite sub-par performance, and we know we can do a lot better.
 
-GraalVM gives us a tool that solves this problem by compiling Java code
-ahead-of-time, to a native executable image, instead of compiling just-in-time
-at runtime. This is similar to how a conventional compiler like gcc works. Note,
+Luckily, GraalVM provides us with the perfect solution.
+
+We can solve this inherent issue with the JVM by compiling the Java code
+ahead-of-time into a native executable image via GraalVM. This skips over the need to use the Java just-in-time compiler
+at runtime. 
+
+The experience for us (the developer using GraalVM) is quite similar to a conventional compiler like gcc. Note,
 we may need to run `assembly` first.
 ```
 $ sbt assembly
@@ -312,14 +318,14 @@ $ native-image --no-server \
 [freezecoin:3133]      [total]: 243,813.30 ms
 ```
 
-This command produces a native executable called `freezecoin`. This executable
-isn’t a launcher for the JVM, it doesn’t link to the JVM, and it doesn’t bundle
-the JVM in any way. `native-image` compile out FreezeCoin code, and any
+The simple command above produces a complete native executable called `freezecoin`. 
+
+To emphasize, this executable isn’t a mere launcher for the JVM. In fact it doesn’t link to the JVM or bundle
+the JVM in any way. `native-image` compiles the FreezeCoin code, as well as any
 Java libraries it depends on, all the way down to simple machine code. 
 
-If we look at the libraries which `freezecoin` uses you can see they are only
-standard system libraries. We can move just this one file to a system
-which doesn't have a JVM installed and it will run there. 
+If we look at the libraries which `freezecoin` uses you can see that it only uses standard system libraries. Thus, we can move just this one executable to another system
+which doesn't have a JVM installed and it will run there without issue.
 ```
 $ otool -L freezecoin    # ldd freezecoin on Linux
 freezecoin:
@@ -328,10 +334,9 @@ freezecoin:
 	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
 ```
 
-If we run the executable we can see that it starts around 8x faster, and uses
-around 6x less memory, than running the same program on the
-JVM does. You don’t feel that pause you always get when running a
-short-running command with the JVM.
+If we time this new `freezecoin` executable, we can see that it starts approximately 8x faster, and uses
+around 6x less memory. What this means is that you don’t feel that palpable pause you always get when running a
+short-running program with the JVM.
 ```
 $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./freezecoin 1800000000
         0.43 real         0.15 user         0.03 sys
@@ -350,6 +355,7 @@ $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib /usr/bin/time -l ./freezecoin 1800000000
         11  voluntary context switches
        138  involuntary context switches
 ```
+This is just one of the great benefits of GraalVM which we get to take advantage of with Appkit.
 
 ## 3. Develop Ergo Applications in JavaScript, Python, Ruby
 
