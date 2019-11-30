@@ -10,7 +10,7 @@ features inherited from GraalVM and explain how you can use them.
 - [0. Example Scenario](#example-scenario)
 - [1. Develop Ergo Applications in Java](#1-develop-ergo-applications-in-java)
 - [2. Low-footprint, fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
-- [3. Develop Ergo Applications in JavaScript, Python, Ruby, and R](#3-develop-ergo-applications-in-javascript-python-ruby)
+- [3. Develop Ergo Applications in JavaScript, Python, Ruby](#3-develop-ergo-applications-in-javascript-python-ruby)
 - [4. Ergo Application as native library](#4-ergo-application-as-native-shared-library)
 - [5. Debug your polyglot Ergo Application](#5-debug-your-polyglot-ergo-application)
 
