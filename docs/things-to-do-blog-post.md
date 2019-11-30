@@ -10,7 +10,7 @@ features inherited from GraalVM and take you step-by-step in learning how to tak
 - [1. Develop Ergo Applications in Java](#1-java-ergo-app-development)
 - [2. Low-footprint, fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
 - [3. Develop Ergo Applications in JavaScript, Python, Ruby](#3-develop-ergo-applications-in-javascript-python-ruby)
-- [4. Ergo Application as native library](#4-ergo-application-as-native-shared-library)
+- [4. Ergo Application as native library](#4-ergo-native-shared-libraries)
 - [5. Debug your polyglot Ergo Application](#5-debug-your-polyglot-ergo-application)
 
 ## Example Scenario
@@ -426,10 +426,14 @@ $ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
     ruby-examples/FreezeCoin.rb 1900000000
 ```
 
-## 4. Ergo Application as native shared library
 
-We can compile Java class as a native shared library, instead of an executable.
-To do that we declare one or more static methods as `@CEntryPoint`.
+
+
+## 4. Ergo Native Shared Libraries
+
+Another great benefit of GraalVM is that we can compile Java classes down into a native shared library instead of an executable.
+
+To do this we declare one or more static methods as the `@CEntryPoint`.
 
 ```java
 public class FreezeCoin {
@@ -455,8 +459,8 @@ public class FreezeCoin {
 }
 ```
 
-We can then compile to a shared library, and an automatically generated header
-file. Notice the use of `--shared` option.
+We can then compile down to a shared library and an automatically generated header
+file. Notice the use of the `--shared` option.
 
 ```
 $ native-image --no-server \
@@ -476,12 +480,13 @@ c-examples/libfreezecoin.dylib:
 	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.11)
 ```
 
-We can then write a simple [C
+Now we have the ability to write a [C
 program](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/c-examples/freezecoin.c)
-to use the library. The interface to our native library does have a little
-ceremony — because the VM needs to manage a heap, threads, a garbage collector
-and other services, we need to create an instance of the system, and tell it
-about our main thread.
+which uses the library.
+ The interface to our native library does have a bit of 
+boilerplate (because the VM needs to manage a heap, threads, a garbage collector
+and more), and thus we need to create an instance and provide it
+our main thread.
 
 ```
 #include <stdlib.h>
@@ -516,7 +521,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-We compile this with our standard system tools and can run our executable (set LD_LIBRARY_PATH=. on Linux).
+We can compile this with our standard system tools and easily run our executable (set `LD_LIBRARY_PATH=.` on Linux).
 ```
 $ clang -Ic-examples -Lc-examples -lfreezecoin c-examples/freezecoin.c -o call_freezecoin
 $ otool -L call_freezecoin
