@@ -1,4 +1,4 @@
-# Top 5 Things To Do With Ergo Appkit
+# 5 Ways Ergo Application Development Is Changed Forever Thanks To Appkit
 
 [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit) is a library for
 polyglot development of Ergo Applications based on
