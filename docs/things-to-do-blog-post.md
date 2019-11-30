@@ -7,11 +7,11 @@ use cases](https://medium.com/graalvm/graalvm-ten-things-12d9111f307d). Expandin
 features inherited from GraalVM and take you step-by-step in learning how to take advantage of them.
 
 - [0. Example Scenario](#example-scenario)
-- [1. Develop Ergo Applications in Java](#1-java-ergo-app-development)
-- [2. Low-footprint, fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
+- [1. Java Ergo App Development](#1-java-ergo-app-development)
+- [2. Low-footprint, Fast-startup Ergo Applications](#2-low-footprint-fast-startup-ergo-applications)
 - [3. Develop Ergo Applications in JavaScript, Python, Ruby](#3-develop-ergo-applications-in-javascript-python-ruby)
-- [4. Ergo Application as native library](#4-ergo-native-shared-libraries)
-- [5. Debug your polyglot Ergo Application](#5-debug-your-polyglot-ergo-application)
+- [4. Ergo Native Shared Libraries](#4-ergo-native-shared-libraries)
+- [5. Debug Your Polyglot Ergo Application](#5-debugging-your-polyglot-ergo-application)
 
 ## Example Scenario
 
@@ -250,6 +250,11 @@ $ java -cp build/libs/appkit-examples-3.1.0-all.jar \
 You will get something along the lines of this [output in the console](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322).
 
 And with that your transaction was accepted by the Ergo node and broadcast into the network where it shall lay await in the transaction pool to be added to a block. Once a miner selects and adds it to a block, your coins will be officially "frozen" within the newly created box based off of the values you provided to the FreezeCoin application.
+
+The example assumes the Ergo node (and the embedded wallet) is owned by the
+FreezeCoin user. However this is not strictly required and the Appkit interfaces
+can be used to create and send new transactions using arbitrary public Ergo
+nodes.
 
 ## 2. Low-footprint, Fast-startup Ergo Applications
 
@@ -528,17 +533,20 @@ $ otool -L call_freezecoin
 $ DYLD_LIBRARY_PATH=$GRAAL_HOME/jre/lib ./call_freezecoin 1000000000
 ```
 
-## 5. Debug your polyglot Ergo Application
+
+
+
+## 5. Debugging Your Polyglot Ergo Application
 
 You can debug JS, Python and Ruby in IntelliJ, but if for some reason this
-doesn't work for you, with GraalVM there is another option.
+doesn't work for you or fit with your preferred editor, GraalVM offers another option.
 
-All the GraalVM languages (except for Java) are implemented using the common
+All of the GraalVM languages (except for Java) are implemented using the common
 [Truffle framework](https://github.com/oracle/graal/tree/master/truffle).
-This allows to implement functionality like debuggers once and have it available
-to all languages.
+Truffle allows for tooling like debuggers to be implemented once and be available
+for all supported languages.
 
-We can run the program with the flag `--inspect`. This will give us a link to
+As such we can run our program with the flag `--inspect` which will give us a link to
 open in Chrome and will pause the program in the debugger.
 
 ```
@@ -550,21 +558,15 @@ To start debugging, open the following URL in Chrome:
 ...
 ```
 
-We can then set a breakpoint and continue execution. When it breaks we’ll see
-values of the variables, and can continue again until the next breakpoint.
+From here we can set breakpoints and continue execution. When it breaks we’ll see
+values of the variables, can continue again until the next breakpoint, and do everything we've come to expect from debuggers.
 
 ![Debugger](debugger.png)
     
 ## Conclusions
 
-We see how easy it is to use Appkit from different most popular languages such
-as Java, JavaScript, Python and Ruby to create new coins protected by custom
-user-defined Ergo contract written in ErgoScript.
+And with all of that said and done, we see just how easy it is to use Appkit to develop Ergo Application. No matter if you are using Java, JavaScript, Python or Ruby, you can take advantage of Appkit with GraalVM to drastically simplify the process of interacting with the Ergo blockchain while creating native-running (d)Apps.
 
-The example assumes the Ergo node (and the embedded wallet) is owned by the
-FreezeCoin user. However this is not strictly required and the Appkit interfaces
-can be used to create and send new transactions using arbitrary public Ergo
-node.
 
 ## References
 
