@@ -8,9 +8,16 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+scalaVersion := "2.11.12"
+
+javacOptions ++=
+    "-source" :: "1.7" ::
+    "-target" :: "1.7" ::
+    Nil
+
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.11.12",
   version := "3.1.0",
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
@@ -30,12 +37,12 @@ lazy val commonSettings = Seq(
   publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := false,
   publishMavenStyle := true,
-  publishTo := sonatypePublishToBundle.value,
+  publishTo := sonatypePublishToBundle.value
 )
 
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
 )
 
 lazy val testSettings = Seq(
@@ -52,7 +59,7 @@ lazy val allResolvers = Seq(
   sonatypePublic,
   sonatypeReleases,
   sonatypeSnapshots,
-  Resolver.mavenCentral,
+  Resolver.mavenCentral
 )
 
 publishArtifact in Compile := true
@@ -81,8 +88,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "3.1.0"
-val ergoWalletVersion = "master-7921c215-SNAPSHOT"
+val sigmaStateVersion = "scala-2.11-e776b816-SNAPSHOT"
+val ergoWalletVersion = "scala-2.11-0bbf9970-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
@@ -97,7 +104,7 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
-  "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.2"
 )
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
@@ -113,7 +120,7 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
         "com.squareup.retrofit2" % "retrofit" % "2.6.2",
         "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
         "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-        "junit" % "junit" % "4.12" % "test",
+        "junit" % "junit" % "4.12" % "test"
       ),
       publishArtifact in (Compile, packageDoc) := false,
       publish / skip := true
@@ -176,7 +183,7 @@ lazy val examples = (project in file("examples"))
       commonSettings ++ testSettings,
       name := "examples",
       libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
+        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0"
       ),
       publish / skip := true
     )
@@ -191,7 +198,7 @@ lazy val rootSettings = Seq(
   libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
   mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
   mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
-  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten,
+  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten
 )
 
 lazy val root = (project in file("."))
