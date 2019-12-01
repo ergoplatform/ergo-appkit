@@ -1,5 +1,7 @@
 # 5 Ways Ergo Application Development Is Changed Forever Thanks To Appkit
 
+> With thanks to [Robert Kornacki](https://github.com/robkorn) and [Denys Zadorozhnyi](https://github.com/greenhat).
+
 [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit) is a library for
 polyglot development of Ergo Applications based on
 [GraalVM](https://www.graalvm.org/). GraalVM has many [great
