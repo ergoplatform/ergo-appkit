@@ -567,11 +567,20 @@ values of the variables, can continue again until the next breakpoint, and do ev
     
 ## Conclusions
 
-And with all of that said and done, we see just how easy it is to use Appkit to develop Ergo Application. Appkit relies on the same exact core libraries which were used in implementing the Ergo consensus protocol. These libraries include the ErgoScript compiler, cryptography, byte code interpreter, data serialisers and the other core components. Using GraalVM we are able to reuse these tried and tested components in different application contexts without any modification or rewriting them ourselves.
+And with all of that said and done, we see just how easy it is to use Appkit to
+develop Ergo Applications. Appkit relies on the same exact core libraries which
+were used in implementing the Ergo consensus protocol. These libraries include
+the ErgoScript compiler, cryptography, byte code interpreter, data serialisers
+and the other core components. Using GraalVM we are able to reuse these tried
+and tested components in different application contexts without any modification
+or rewriting them ourselves.
 
-No matter if you are using Java, JavaScript, Python or Ruby, you can take advantage of Appkit with GraalVM to drastically simplify the process of interacting with the Ergo blockchain while creating native-running (d)Apps.
+No matter if you are using Java, JavaScript, Python or Ruby, you can take
+advantage of Appkit with GraalVM to drastically simplify the process of
+interacting with the Ergo blockchain while creating native-running (d)Apps.
 
-Stay tuned. In future posts we will introduce you to other interesting potential applications powered by Appkit.
+Stay tuned. In future posts we will introduce you to other interesting potential
+applications powered by Appkit.
 
 
 
