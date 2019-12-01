@@ -158,7 +158,7 @@ long totalToSpend = amountToSend + Parameters.MinFee;
 Optional<List<InputBox>> boxes = wallet.getUnspentBoxes(totalToSpend);
 if (!boxes.isPresent())
     throw new ErgoClientException(
-        "Not enough coins in your specified wallet" + totalToSpend, null);
+        "Not enough coins in your specified wallet to pay " + totalToSpend, null);
     
 // create a "prover", which is a special object that will be used for signing the transaction
 // the prover should be configured with your wallet's secrets, which are necessary to generate signatures (aka proofs)
@@ -231,7 +231,7 @@ application.
 ---
 
 Now with all of the code set in stone, we can run our FreezeCoin application using the following steps
-(assuming your are in the directory where you cloned
+(assuming you are in the directory where you cloned
 [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples)).
 ```shell
 $ pwd
@@ -242,7 +242,7 @@ This will assemble the `build/libs/appkit-examples-3.1.0-all.jar` file containin
 our FreezeCoin Java application and all of its dependencies in a single fat jar. 
 Note, this step has to be repeated after any changes are made to the Java source code of our application.
 
-Having created out application, we can now use our FreezeCoin app:
+Having created our application, we can now use our FreezeCoin app:
 ```shell
 $ java -cp build/libs/appkit-examples-3.1.0-all.jar \
       org.ergoplatform.appkit.example.FreezeCoin  1000000000 
@@ -295,7 +295,7 @@ ahead-of-time into a native executable image via GraalVM. This skips over the ne
 at runtime. 
 
 The experience for us (the developer using GraalVM) is quite similar to a conventional compiler like gcc. Note,
-we may need to run `assembly` first.
+we may need to run `./gradlew clean shadowJar` first.
 ```
 $ sbt assembly
 $ native-image --no-server \
