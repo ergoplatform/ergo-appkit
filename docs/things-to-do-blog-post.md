@@ -33,7 +33,7 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf) to learn
 ```
 In short, a box (and therefore the funds within the box) are locked under a contract (or script) on the Ergo blockchain. In order for the box to be spent, the contract must evaluate to true. Thus the individual who wishes to spend the box must ensure that the contract evaluates to true based off of the encoded logic within it.
 
-Our Freezer contract above checks that the following conditions before allowing the box to be spent:
+Our Freezer contract above checks the following conditions before allowing the box to be spent:
 1) The current block number of the Ergo blockchain (aka blockchain HEIGHT) is 
 greater than the specified deadline
 2) The spending transaction must be signed by the owner of the secret key
