@@ -121,8 +121,9 @@ mx ideinit
 - [Micronaut + GraalVM - no compile](https://github.com/flowable/flowable-engine/issues/1974)
 - [com.oracle.graal.pointsto.constraints.UnsupportedFeatureException creating Micronaut native image with Redis Lettuce](https://github.com/oracle/graal/issues/1036)
 - [On security provider and Bouncy Castle with NI](https://github.com/oracle/graal/issues/951)
+- [Error:java: javacTask: source release 8 requires target release 1.8](https://stackoverflow.com/questions/29888592/errorjava-javactask-source-release-8-requires-target-release-1-8?noredirect=1)
 
-## Ruby notes
+## Ruby notes after `brew install ruby`
 By default, binaries installed by gem will be placed into:
   /usr/local/lib/ruby/gems/2.6.0/bin
 

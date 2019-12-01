@@ -7,6 +7,7 @@ import org.ergoplatform.appkit.{RestApiErgoClient, _}
 import scala.util.control.NonFatal
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.config.ErgoToolConfig
+import org.ergoplatform.example.util.JFunction
 
 object ErgoTool {
   val delay = 30  // 1 hour (when 1 block is mined every 2 minutes)
@@ -63,17 +64,17 @@ object ErgoTool {
   }
 
   def list(ergoClient: ErgoClient, cmd: ListCmd) = {
-    val res = ergoClient.execute(ctx => {
+    val res = ergoClient.execute(JFunction.instance(ctx => {
       val wallet = ctx.getWallet
       val boxes = wallet.getUnspentBoxes(0).get().convertTo[IndexedSeq[InputBox]]
       val lines = boxes.take(cmd.limit).map(b => b.toJson(true)).mkString("[", ",\n", "]")
       lines
-    })
+    }))
     println(res)
   }
 
   def pay(ergoClient: ErgoClient, cmd: PayCmd) = {
-    val res = ergoClient.execute(ctx => {
+    val res = ergoClient.execute(JFunction.instance(ctx => {
       println(s"Context: ${ctx.getHeight}, ${ctx.getNetworkType}")
       val prover = ctx.newProverBuilder()
           .withMnemonic(cmd.seed, cmd.password)
@@ -101,7 +102,7 @@ object ErgoTool {
       val signed = prover.sign(tx)
       val txId = ctx.sendTransaction(signed)
       (signed.toJson(true), txId)
-    })
+    }))
     println(s"SignedTransaction: ${res}")
   }
 

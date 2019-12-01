@@ -10,10 +10,10 @@ lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/c
 
 scalaVersion := "2.11.12"
 
-javacOptions ++=
-    "-source" :: "1.7" ::
-    "-target" :: "1.7" ::
-    Nil
+//javacOptions ++=
+//    "-source" :: "1.7" ::
+//    "-target" :: "1.7" ::
+//    Nil
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
@@ -94,6 +94,8 @@ val ergoWalletVersion = "scala-2.11-0bbf9970-SNAPSHOT"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
+    .exclude("org.typelevel", "machinist")
+    .exclude("org.typelevel", "cats-kernel")
 
 lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
 
