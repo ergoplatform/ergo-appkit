@@ -101,6 +101,24 @@ object Iso extends LowPriorityIsos {
         res
       }
     }
+
+//  implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
+//    new Iso[JList[A], Coll[B]] {
+//      override def to(as: JList[A]): Coll[B] = {
+//        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
+//          itemIso.to(a)
+//        }
+//        Colls.fromArray(bsIter.toArray(tB.classTag))
+//      }
+//
+//      override def from(bs: Coll[B]): JList[A] = {
+//        val res = new util.ArrayList[A](bs.length)
+//        bs.toArray.foreach { b =>
+//          res.add(itemIso.from(b))
+//        }
+//        res
+//      }
+//    }
 }
 
 object JavaHelpers {
