@@ -15,7 +15,7 @@ stages:
 - name: release
   if: tag =~ ^v
 - name: snapshot
-  if: NOT tag IS present
+  if: (NOT tag IS present) AND (type = push)
 jobs:
   include:
   - stage: test
