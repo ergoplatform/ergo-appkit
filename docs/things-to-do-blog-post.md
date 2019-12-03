@@ -299,7 +299,7 @@ at runtime.
 The experience for us (the developer using GraalVM) is quite similar to a conventional compiler like gcc. Note,
 we may need to run `./gradlew clean shadowJar` first.
 ```
-$ sbt assembly
+$ ./gradlew clean shadowJar
 $ native-image --no-server \
  -cp build/libs/appkit-examples-3.1.0-all.jar\
  --report-unsupported-elements-at-runtime\
