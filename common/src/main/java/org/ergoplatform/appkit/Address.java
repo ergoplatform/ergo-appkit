@@ -3,6 +3,7 @@ package org.ergoplatform.appkit;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.basics.DLogProtocol;
@@ -13,6 +14,13 @@ public class Address {
     private final String _base58String;
     private final byte[] _addrBytes;
     ErgoAddress _address;
+
+    public Address(P2PKAddress p2pkAddress) {
+       _address = p2pkAddress;
+       ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(p2pkAddress.encoder().networkPrefix());
+       _base58String = encoder.toString(_address);
+       _addrBytes = Base58.decode(_base58String).get();
+    }
 
     /**
      * First byte is used to encode network type and address type.
@@ -68,6 +76,13 @@ public class Address {
      * @return Address instance decoded from string
      */
     public static Address create(String base58Str) { return new Address(base58Str); }
+
+    public static Address fromMnemonic(NetworkType networkType, String mnemonic, String mnemonicPass) {
+        ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
+        DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
+        return new Address(p2pkAddress);
+    }
 
     @Override
     public String toString() {
