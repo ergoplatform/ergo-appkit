@@ -8,7 +8,10 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-scalaVersion := "2.11.12"
+lazy val scala212 = "2.12.10"
+lazy val scala211 = "2.11.12"
+crossScalaVersions := Seq(scala212, scala211)
+scalaVersion := scala212
 
 //javacOptions ++=
 //    "-source" :: "1.7" ::
@@ -17,7 +20,6 @@ scalaVersion := "2.11.12"
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  scalaVersion := "2.11.12",
   version := "3.1.0",
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
@@ -88,8 +90,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "scala-2.11-e776b816-SNAPSHOT"
-val ergoWalletVersion = "scala-2.11-0bbf9970-SNAPSHOT"
+val sigmaStateVersion = "3.1.1-RC1"
+val ergoWalletVersion = "3.1.4-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
