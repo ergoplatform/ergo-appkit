@@ -145,16 +145,6 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       publish / skip := true
     )
 
-lazy val explorerClientGenerated = (project in file("explorer-client-generated"))
-    .settings(
-      commonSettings,
-      name := "explorer-client-generated",
-      crossPaths := false,
-      libraryDependencies ++= apiClientDeps,
-      publishArtifact in (Compile, packageDoc) := false,
-      publish / skip := true
-    )
-
 lazy val common = (project in file("common"))
     .settings(
       commonSettings ++ testSettings,
@@ -219,7 +209,7 @@ lazy val examples = (project in file("examples"))
 
 
 lazy val aggregateCompile = ScopeFilter(
-  inProjects(common, javaClientGenerated, explorerClientGenerated, libApi, libImpl, appkit),
+  inProjects(common, javaClientGenerated, libApi, libImpl, appkit),
   inConfigurations(Compile))
 
 lazy val rootSettings = Seq(
@@ -232,7 +222,7 @@ lazy val rootSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-    .aggregate(appkit, common, javaClientGenerated, explorerClientGenerated, libApi, libImpl)
+    .aggregate(appkit, common, javaClientGenerated, libApi, libImpl)
     .settings(commonSettings ++ testSettings, rootSettings)
     .settings(publish / aggregate := false)
     .settings(publishLocal / aggregate := false)
