@@ -12,6 +12,7 @@
 
 package org.ergoplatform.explorer.client.model;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Arrays;
 import com.google.gson.TypeAdapter;
@@ -35,7 +36,7 @@ public class SearchBlock {
   private Integer height = null;
 
   @SerializedName("timestamp")
-  private Integer timestamp = null;
+  private Long timestamp = null;
 
   @SerializedName("transactionsCount")
   private Integer transactionsCount = null;
@@ -44,10 +45,10 @@ public class SearchBlock {
   private Miner miner = null;
 
   @SerializedName("minerReward")
-  private Integer minerReward = null;
+  private Long minerReward = null;
 
   @SerializedName("difficulty")
-  private Integer difficulty = null;
+  private BigInteger difficulty = null;
 
   @SerializedName("size")
   private Integer size = null;
@@ -89,7 +90,7 @@ public class SearchBlock {
     this.height = height;
   }
 
-  public SearchBlock timestamp(Integer timestamp) {
+  public SearchBlock timestamp(Long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
@@ -99,11 +100,11 @@ public class SearchBlock {
    * @return timestamp
   **/
   @Schema(required = true, description = "")
-  public Integer getTimestamp() {
+  public Long getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Integer timestamp) {
+  public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
   }
 
@@ -144,7 +145,7 @@ public class SearchBlock {
     this.miner = miner;
   }
 
-  public SearchBlock minerReward(Integer minerReward) {
+  public SearchBlock minerReward(Long minerReward) {
     this.minerReward = minerReward;
     return this;
   }
@@ -155,15 +156,15 @@ public class SearchBlock {
    * @return minerReward
   **/
   @Schema(example = "12045", required = true, description = "Miner Reward")
-  public Integer getMinerReward() {
+  public Long getMinerReward() {
     return minerReward;
   }
 
-  public void setMinerReward(Integer minerReward) {
+  public void setMinerReward(Long minerReward) {
     this.minerReward = minerReward;
   }
 
-  public SearchBlock difficulty(Integer difficulty) {
+  public SearchBlock difficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
     return this;
   }
@@ -174,11 +175,11 @@ public class SearchBlock {
    * @return difficulty
   **/
   @Schema(example = "123", description = "")
-  public Integer getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
 
-  public void setDifficulty(Integer difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
 

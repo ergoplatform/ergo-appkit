@@ -5,7 +5,9 @@ import org.ergoplatform.explorer.client.model.InlineResponse200;
 import org.ergoplatform.explorer.client.model.InlineResponse2001;
 import org.junit.Before;
 import org.junit.Test;
+import retrofit2.Call;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +22,7 @@ public class BlocksApiTest {
 
     @Before
     public void setup() {
-        api = new ApiClient("http://localhost:9052").createService(BlocksApi.class);
+        api = new ApiClient("https://api.ergoplatform.com").createService(BlocksApi.class);
     }
 
 
@@ -57,14 +59,19 @@ public class BlocksApiTest {
      */
     @Test
     public void listBlocksTest() {
-        Integer offset = null;
-        Integer limit = null;
+        Integer offset = 0;
+        Integer limit = 10;
         String sortBy = null;
         String sortDirection = null;
         Integer startDate = null;
         Integer endDate = null;
-        // InlineResponse200 response = api.listBlocks(offset, limit, sortBy, sortDirection, startDate, endDate);
-
+        Call<InlineResponse200> response = api.listBlocks(offset, limit, sortBy, sortDirection, startDate, endDate);
+        try {
+            InlineResponse200 res = response.execute().body();
+            System.out.println(res);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // TODO: test validations
     }
 }

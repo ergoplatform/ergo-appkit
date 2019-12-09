@@ -219,7 +219,7 @@ lazy val examples = (project in file("examples"))
 
 
 lazy val aggregateCompile = ScopeFilter(
-  inProjects(common, javaClientGenerated, libApi, libImpl, appkit),
+  inProjects(common, javaClientGenerated, explorerClientGenerated, libApi, libImpl, appkit),
   inConfigurations(Compile))
 
 lazy val rootSettings = Seq(
@@ -232,7 +232,7 @@ lazy val rootSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-    .aggregate(appkit, common, javaClientGenerated, libApi, libImpl)
+    .aggregate(appkit, common, javaClientGenerated, explorerClientGenerated, libApi, libImpl)
     .settings(commonSettings ++ testSettings, rootSettings)
     .settings(publish / aggregate := false)
     .settings(publishLocal / aggregate := false)

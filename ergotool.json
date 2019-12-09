@@ -1,7 +1,7 @@
 {
   "node": {
     "nodeApi": {
-      "apiUrl": "http://localhost:9051/",
+      "apiUrl": "http://138.68.98.248:9053/",
       "apiKey": "82344a18c24adc42b78f52c58facfdf19c8cc38858a5f22e68070959499076e1"
     },
     "wallet": {
@@ -9,7 +9,7 @@
       "password": "",
       "mnemonicPassword": ""
     },
-    "networkType": "TESTNET"
+    "networkType": "MAINNET"
   },
   "parameters": {
     "newBoxSpendingDelay": "30"

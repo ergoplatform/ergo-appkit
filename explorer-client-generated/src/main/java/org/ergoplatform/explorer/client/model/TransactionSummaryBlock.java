@@ -28,7 +28,7 @@ import java.io.IOException;
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
 public class TransactionSummaryBlock {
   @SerializedName("timestamp")
-  private Integer timestamp = null;
+  private Long timestamp = null;
 
   @SerializedName("headerId")
   private String headerId = null;
@@ -36,7 +36,7 @@ public class TransactionSummaryBlock {
   @SerializedName("height")
   private Integer height = null;
 
-  public TransactionSummaryBlock timestamp(Integer timestamp) {
+  public TransactionSummaryBlock timestamp(Long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
@@ -46,11 +46,11 @@ public class TransactionSummaryBlock {
    * @return timestamp
   **/
   @Schema(description = "")
-  public Integer getTimestamp() {
+  public Long getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Integer timestamp) {
+  public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
   }
 

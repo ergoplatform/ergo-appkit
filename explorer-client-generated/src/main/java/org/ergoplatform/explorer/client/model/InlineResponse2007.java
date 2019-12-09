@@ -28,12 +28,12 @@ import java.io.IOException;
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
 public class InlineResponse2007 {
   @SerializedName("timestamp")
-  private Integer timestamp = null;
+  private Long timestamp = null;
 
   @SerializedName("value")
   private Integer value = null;
 
-  public InlineResponse2007 timestamp(Integer timestamp) {
+  public InlineResponse2007 timestamp(Long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
@@ -43,11 +43,11 @@ public class InlineResponse2007 {
    * @return timestamp
   **/
   @Schema(description = "")
-  public Integer getTimestamp() {
+  public Long getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Integer timestamp) {
+  public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
   }
 
