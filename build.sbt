@@ -124,21 +124,33 @@ libraryDependencies ++= Seq(
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
 )
 
+val apiClientDeps = Seq(
+  "com.squareup.okhttp3" % "okhttp" % "3.12.0",
+  "com.google.code.findbugs" % "jsr305" % "3.0.2",
+  "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
+  "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
+  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
+  "junit" % "junit" % "4.12" % "test",
+)
+
 lazy val javaClientGenerated = (project in file("java-client-generated"))
     .settings(
       commonSettings,
       name := "java-client-generated",
       crossPaths := false,
-      libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "okhttp" % "3.12.0",
-        "com.google.code.findbugs" % "jsr305" % "3.0.2",
-        "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
-        "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
-        "com.squareup.retrofit2" % "retrofit" % "2.6.2",
-        "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
-        "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-        "junit" % "junit" % "4.12" % "test",
-      ),
+      libraryDependencies ++= apiClientDeps,
+      publishArtifact in (Compile, packageDoc) := false,
+      publish / skip := true
+    )
+
+lazy val explorerClientGenerated = (project in file("explorer-client-generated"))
+    .settings(
+      commonSettings,
+      name := "explorer-client-generated",
+      crossPaths := false,
+      libraryDependencies ++= apiClientDeps,
       publishArtifact in (Compile, packageDoc) := false,
       publish / skip := true
     )
