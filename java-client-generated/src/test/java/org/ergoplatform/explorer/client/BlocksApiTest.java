@@ -1,17 +1,11 @@
 package org.ergoplatform.explorer.client;
 
-import org.ergoplatform.explorer.client.ApiClient;
 import org.ergoplatform.explorer.client.model.InlineResponse200;
-import org.ergoplatform.explorer.client.model.InlineResponse2001;
 import org.junit.Before;
 import org.junit.Test;
 import retrofit2.Call;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * API tests for BlocksApi
@@ -22,7 +16,7 @@ public class BlocksApiTest {
 
     @Before
     public void setup() {
-        api = new ApiClient("https://api.ergoplatform.com").createService(BlocksApi.class);
+        api = new ExplorerApiClient("https://api.ergoplatform.com").createService(BlocksApi.class);
     }
 
 

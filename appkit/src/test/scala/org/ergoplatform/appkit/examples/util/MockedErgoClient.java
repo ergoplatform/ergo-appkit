@@ -1,4 +1,4 @@
-package org.ergoplatform.example.util;
+package org.ergoplatform.appkit.examples.util;
 
 import org.ergoplatform.appkit.ErgoClient;
 

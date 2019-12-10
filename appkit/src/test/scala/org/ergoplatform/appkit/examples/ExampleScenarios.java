@@ -1,8 +1,10 @@
-package org.ergoplatform.example;
+package org.ergoplatform.appkit.examples;
 
 import org.ergoplatform.appkit.*;
 
 import java.util.Arrays;
+
+import static org.ergoplatform.appkit.Parameters.MinFee;
 
 /**
  * Examples demonstrating usage of blockchain client API.
@@ -26,7 +28,7 @@ public class ExampleScenarios {
      * @param deadline   deadline (blockchain height) after which the newly created box can be spent
      * @param boxIds     string encoded (base16) ids of the boxes to be spent and agregated into the new box.
      */
-    public SignedTransaction aggregateUtxoBoxes(String seedPhrase, int deadline, String... boxIds) {
+    public SignedTransaction aggregateUtxoBoxes(String seedPhrase, String changeAddr, int deadline, String... boxIds) {
         UnsignedTransactionBuilder txB = _ctx.newTxBuilder();
         InputBox[] boxes = _ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
@@ -40,6 +42,8 @@ public class ExampleScenarios {
                                         ConstantsBuilder.create().item("deadline", deadline).build(),
                                         "{ HEIGHT > deadline }"))
                                 .build())
+                .fee(MinFee)
+                .sendChangeTo(Address.create(changeAddr).getErgoAddress())
                 .build();
 
         ErgoProverBuilder proverB = _ctx.newProverBuilder();

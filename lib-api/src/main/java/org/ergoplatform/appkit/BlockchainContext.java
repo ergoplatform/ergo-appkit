@@ -2,6 +2,8 @@ package org.ergoplatform.appkit;
 
 import sigmastate.Values;
 
+import java.util.List;
+
 /**
  * This interface represent a specific context of blockchain for execution
  * of transaction transaction building scenario.
@@ -59,5 +61,8 @@ public interface BlockchainContext {
     ErgoContract newContract(Values.ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
+
+    /** Get unspent boxes containing given address */
+    List<InputBox> getUnspentBoxesFor(Address address);
 }
 

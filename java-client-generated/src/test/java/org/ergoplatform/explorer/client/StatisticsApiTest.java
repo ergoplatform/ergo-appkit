@@ -1,17 +1,7 @@
 package org.ergoplatform.explorer.client;
 
-import org.ergoplatform.explorer.client.ApiClient;
-import java.math.BigDecimal;
-import org.ergoplatform.explorer.client.model.BlockchainInfo;
-import org.ergoplatform.explorer.client.model.BlockchainStats;
-import org.ergoplatform.explorer.client.model.ForksInfo;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * API tests for StatisticsApi
@@ -22,7 +12,7 @@ public class StatisticsApiTest {
 
     @Before
     public void setup() {
-        api = new ApiClient("http://localhost:9052").createService(StatisticsApi.class);
+        api = new ExplorerApiClient("http://localhost:9052").createService(StatisticsApi.class);
     }
 
 

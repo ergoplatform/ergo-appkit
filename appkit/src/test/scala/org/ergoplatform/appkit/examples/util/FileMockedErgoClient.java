@@ -1,4 +1,4 @@
-package org.ergoplatform.example.util;
+package org.ergoplatform.appkit.examples.util;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;

@@ -20,15 +20,12 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     public BlockchainContextImpl(
             ApiClient client, Retrofit retrofit, NetworkType networkType,
-            NodeInfo nodeInfo, List<BlockHeader> headers,
-            ErgoWalletImpl wallet) {
+            NodeInfo nodeInfo, List<BlockHeader> headers) {
         _client = client;
         _retrofit = retrofit;
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
-        _wallet = wallet;
-        _wallet.setContext(this);
     }
 
     @Override
@@ -101,6 +98,11 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public ErgoWallet getWallet() {
+        if (_wallet == null) {
+            List<WalletBox> unspentBoxes = ErgoNodeFacade.getWalletUnspentBoxes(_retrofit, 0, 0);
+            _wallet = new ErgoWalletImpl(unspentBoxes);
+            _wallet.setContext(this);
+        }
         return _wallet;
     }
 
@@ -112,6 +114,12 @@ public class BlockchainContextImpl implements BlockchainContext {
     @Override
     public ErgoContract compileContract(Constants constants, String ergoScript) {
         return ErgoScriptContract.create(constants, ergoScript, _networkType);
+    }
+
+    @Override
+    public List<InputBox> getUnspentBoxesFor(Address address) {
+
+        return null;
     }
 }
 

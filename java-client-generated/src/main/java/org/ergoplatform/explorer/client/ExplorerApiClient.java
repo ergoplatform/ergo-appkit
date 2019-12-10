@@ -2,7 +2,6 @@ package org.ergoplatform.explorer.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonElement;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -21,9 +20,8 @@ import java.text.DateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.HashMap;
 
-public class ApiClient {
+public class ExplorerApiClient {
 
   private String _hostUrl;
   private Map<String, Interceptor> apiAuthorizations;
@@ -31,13 +29,13 @@ public class ApiClient {
   private Retrofit.Builder adapterBuilder;
   private JSON json;
 
-  public ApiClient(String hostUrl) {
+  public ExplorerApiClient(String hostUrl) {
     _hostUrl = hostUrl;
     apiAuthorizations = new LinkedHashMap<String, Interceptor>();
     createDefaultAdapter();
   }
 
-  public ApiClient(String hostUrl, String[] authNames) {
+  public ExplorerApiClient(String hostUrl, String[] authNames) {
     this(hostUrl);
     for(String authName : authNames) {
       throw new RuntimeException("auth name \"" + authName + "\" not found in available auth names");
@@ -48,7 +46,7 @@ public class ApiClient {
    * Basic constructor for single auth name
    * @param authName Authentication name
    */
-  public ApiClient(String hostUrl, String authName) {
+  public ExplorerApiClient(String hostUrl, String authName) {
     this(hostUrl, new String[]{authName});
   }
 
@@ -57,7 +55,7 @@ public class ApiClient {
    * @param authName Authentication name
    * @param apiKey API key
    */
-  public ApiClient(String hostUrl, String authName, String apiKey) {
+  public ExplorerApiClient(String hostUrl, String authName, String apiKey) {
     this(hostUrl, authName);
     this.setApiKey(apiKey);
   }
@@ -68,7 +66,7 @@ public class ApiClient {
    * @param username Username
    * @param password Password
    */
-  public ApiClient(String hostUrl, String authName, String username, String password) {
+  public ExplorerApiClient(String hostUrl, String authName, String username, String password) {
     this(hostUrl, authName);
     this.setCredentials(username,  password);
   }
@@ -94,22 +92,22 @@ public class ApiClient {
       .create(serviceClass);
   }
 
-  public ApiClient setDateFormat(DateFormat dateFormat) {
+  public ExplorerApiClient setDateFormat(DateFormat dateFormat) {
     this.json.setDateFormat(dateFormat);
     return this;
   }
 
-  public ApiClient setSqlDateFormat(DateFormat dateFormat) {
+  public ExplorerApiClient setSqlDateFormat(DateFormat dateFormat) {
     this.json.setSqlDateFormat(dateFormat);
     return this;
   }
 
-  public ApiClient setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
+  public ExplorerApiClient setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
     this.json.setOffsetDateTimeFormat(dateFormat);
     return this;
   }
 
-  public ApiClient setLocalDateFormat(DateTimeFormatter dateFormat) {
+  public ExplorerApiClient setLocalDateFormat(DateTimeFormatter dateFormat) {
     this.json.setLocalDateFormat(dateFormat);
     return this;
   }
@@ -120,7 +118,7 @@ public class ApiClient {
    * @param apiKey API key
    * @return ApiClient
    */
-  public ApiClient setApiKey(String apiKey) {
+  public ExplorerApiClient setApiKey(String apiKey) {
     for(Interceptor apiAuthorization : apiAuthorizations.values()) {
       if (apiAuthorization instanceof ApiKeyAuth) {
         ApiKeyAuth keyAuth = (ApiKeyAuth) apiAuthorization;
@@ -137,7 +135,7 @@ public class ApiClient {
    * @param password Password
    * @return ApiClient
    */
-  public ApiClient setCredentials(String username, String password) {
+  public ExplorerApiClient setCredentials(String username, String password) {
     for(Interceptor apiAuthorization : apiAuthorizations.values()) {
       if (apiAuthorization instanceof HttpBasicAuth) {
         HttpBasicAuth basicAuth = (HttpBasicAuth) apiAuthorization;
@@ -153,7 +151,7 @@ public class ApiClient {
    * @param accessToken Access token
    * @return ApiClient
    */
-  public ApiClient setAccessToken(String accessToken) {
+  public ExplorerApiClient setAccessToken(String accessToken) {
     return this;
   }
 
@@ -163,7 +161,7 @@ public class ApiClient {
    * @param authorization Authorization interceptor
    * @return ApiClient
    */
-  public ApiClient addAuthorization(String authName, Interceptor authorization) {
+  public ExplorerApiClient addAuthorization(String authName, Interceptor authorization) {
     if (apiAuthorizations.containsKey(authName)) {
       throw new RuntimeException("auth name \"" + authName + "\" already in api authorizations");
     }
@@ -176,7 +174,7 @@ public class ApiClient {
     return apiAuthorizations;
   }
 
-  public ApiClient setApiAuthorizations(Map<String, Interceptor> apiAuthorizations) {
+  public ExplorerApiClient setApiAuthorizations(Map<String, Interceptor> apiAuthorizations) {
     this.apiAuthorizations = apiAuthorizations;
     return this;
   }
@@ -185,7 +183,7 @@ public class ApiClient {
     return adapterBuilder;
   }
 
-  public ApiClient setAdapterBuilder(Retrofit.Builder adapterBuilder) {
+  public ExplorerApiClient setAdapterBuilder(Retrofit.Builder adapterBuilder) {
     this.adapterBuilder = adapterBuilder;
     return this;
   }

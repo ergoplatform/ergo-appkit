@@ -13,13 +13,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class Address {
     private final String _base58String;
     private final byte[] _addrBytes;
+
     ErgoAddress _address;
 
     public Address(P2PKAddress p2pkAddress) {
-       _address = p2pkAddress;
-       ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(p2pkAddress.encoder().networkPrefix());
-       _base58String = encoder.toString(_address);
-       _addrBytes = Base58.decode(_base58String).get();
+        _address = p2pkAddress;
+        ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(p2pkAddress.encoder().networkPrefix());
+        _base58String = encoder.toString(_address);
+        _addrBytes = Base58.decode(_base58String).get();
     }
 
     /**
@@ -54,12 +55,19 @@ public class Address {
     /**
      * @return true if this address from Ergo mainnet.
      */
-    public boolean isMainnet() { return headByte() < NetworkType.MAINNET.networkPrefix; }
+    public boolean isMainnet() { return headByte() < NetworkType.TESTNET.networkPrefix; }
 
     /**
      * @return true if this address has Pay-To-Public-Key type.
      */
     public boolean isP2PK() { return _address instanceof P2PKAddress; }
+
+    /** Obtain an instance of {@link ErgoAddress} related to this Address instance.
+     * @return {@link ErgoAddress} instance associated with this address
+     */
+    public ErgoAddress getErgoAddress() {
+        return _address;
+    }
 
     /**
      * Extract public key from P2PKAddress.

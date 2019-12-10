@@ -1,22 +1,8 @@
 package org.ergoplatform.explorer.client;
 
-import org.ergoplatform.explorer.client.ApiClient;
-import org.ergoplatform.explorer.client.model.InlineResponse20010;
-import org.ergoplatform.explorer.client.model.InlineResponse2003;
-import org.ergoplatform.explorer.client.model.InlineResponse2004;
-import org.ergoplatform.explorer.client.model.InlineResponse2005;
-import org.ergoplatform.explorer.client.model.InlineResponse2006;
-import org.ergoplatform.explorer.client.model.InlineResponse2007;
-import org.ergoplatform.explorer.client.model.InlineResponse2008;
-import org.ergoplatform.explorer.client.model.InlineResponse2009;
 import org.ergoplatform.explorer.client.model.Timespan;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * API tests for ChartsApi
@@ -27,7 +13,7 @@ public class ChartsApiTest {
 
     @Before
     public void setup() {
-        api = new ApiClient("http://localhost:9052").createService(ChartsApi.class);
+        api = new ExplorerApiClient("http://localhost:9052").createService(ChartsApi.class);
     }
 
 

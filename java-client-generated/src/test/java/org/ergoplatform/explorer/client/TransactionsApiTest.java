@@ -1,18 +1,8 @@
 package org.ergoplatform.explorer.client;
 
-import org.ergoplatform.explorer.client.ApiClient;
 import org.ergoplatform.explorer.client.model.FullTransaction;
-import org.ergoplatform.explorer.client.model.Transaction;
-import org.ergoplatform.explorer.client.model.TransactionIdResponse;
-import org.ergoplatform.explorer.client.model.TransactionOutput;
-import org.ergoplatform.explorer.client.model.UnconfirmedTransaction;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * API tests for TransactionsApi
@@ -23,7 +13,7 @@ public class TransactionsApiTest {
 
     @Before
     public void setup() {
-        api = new ApiClient("http://localhost:9052").createService(TransactionsApi.class);
+        api = new ExplorerApiClient("http://localhost:9052").createService(TransactionsApi.class);
     }
 
 
