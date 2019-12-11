@@ -122,3 +122,14 @@ mx ideinit
 - [com.oracle.graal.pointsto.constraints.UnsupportedFeatureException creating Micronaut native image with Redis Lettuce](https://github.com/oracle/graal/issues/1036)
 - [On security provider and Bouncy Castle with NI](https://github.com/oracle/graal/issues/951)
 
+It is necessary to understand what is the problem in the first place, and this requires to collect information.
+
+I propose to add a fix to the node so that when the node encounters a block from its miner and the block is invalid, 
+the whole block (in serialized form) is sent to the random seed node?
+
+Still it would be useful to send all facts of invalidity of blocks to seed nodes on which it is possible to manage them in a special way. For example log or analyze.
+It seems about such a situation as now no one thought
+Do we need a Protocol, collecting statistics from the network nodes. I as the proposed this kushti in conversation, but he as the not imbued with problem, can now imbued with. :slightly_smiling_face:
+Collecting statistics is not part of the consensus, but it is very useful when the consensus is broken.  In this sense, it is part of the Protocol to restore consensus.
+
+

@@ -7,6 +7,7 @@ import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
+import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 import scalan.util.FileUtil;
 
@@ -46,6 +47,7 @@ public class FileMockedErgoClient implements MockedErgoClient {
     @Override
     public <T> T execute(Function<BlockchainContext, T> action) {
         MockWebServer server = new MockWebServer();
+        MockWebServer explorer = new MockWebServer();
         server.enqueue(new MockResponse()
                 .addHeader("Content-Type", "application/json; charset=utf-8")
                 .setBody(getNodeInfoResp()));
@@ -59,14 +61,18 @@ public class FileMockedErgoClient implements MockedErgoClient {
                 .setBody(getBoxResp()));
         try {
             server.start();
+            explorer.start();
         } catch (IOException e) {
             throw new ErgoClientException("Cannot start server " + server.toString(), e);
         }
 
         HttpUrl baseUrl = server.url("/");
         ApiClient client = new ApiClient(baseUrl.toString());
+        HttpUrl explorerBaseUrl = explorer.url("/");
+        ExplorerApiClient explorerClient = new ExplorerApiClient(explorerBaseUrl.toString());
+
         BlockchainContext ctx =
-         new BlockchainContextBuilderImpl(client, NetworkType.MAINNET).build();
+         new BlockchainContextBuilderImpl(client, explorerClient, NetworkType.MAINNET).build();
 
         T res = action.apply(ctx);
 

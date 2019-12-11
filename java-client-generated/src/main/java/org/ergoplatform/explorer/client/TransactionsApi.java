@@ -52,7 +52,7 @@ public interface TransactionsApi {
    * @return Call&lt;TransactionOutput&gt;
    */
   @GET("transactions/boxes/byAddress/unspent/{id}")
-  Call<TransactionOutput> transactionsBoxesByAddressUnspentIdGet(
+  Call<List<TransactionOutput>> transactionsBoxesByAddressUnspentIdGet(
             @retrofit2.http.Path("id") String id            
   );
 

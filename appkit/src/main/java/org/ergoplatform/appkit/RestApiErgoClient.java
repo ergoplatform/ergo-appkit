@@ -38,7 +38,7 @@ public class RestApiErgoClient implements ErgoClient {
 
     @Override
     public <T> T execute(Function<BlockchainContext, T> action) {
-        BlockchainContext ctx = new BlockchainContextBuilderImpl(_client, _networkType).build();
+        BlockchainContext ctx = new BlockchainContextBuilderImpl(_client, _explorer, _networkType).build();
         T res = action.apply(ctx);
         return res;
     }

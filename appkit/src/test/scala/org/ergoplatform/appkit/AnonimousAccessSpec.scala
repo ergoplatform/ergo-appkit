@@ -13,9 +13,13 @@ class AnonimousAccessSpec extends PropSpec with Matchers
 
 
   property("Get unspent boxes containing given address") {
-    ergoClient.execute { ctx =>
+    val boxes: java.util.List[InputBox] = ergoClient.execute { ctx =>
       ctx.getUnspentBoxesFor(Address.create("9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v"))
     }
+
+    boxes.forEach(b => {
+      println(b.toJson(true))
+    })
   }
 
 }

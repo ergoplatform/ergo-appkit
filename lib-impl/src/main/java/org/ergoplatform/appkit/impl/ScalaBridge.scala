@@ -1,13 +1,16 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
+import org.ergoplatform.explorer.client.model.{Asset => EAsset, Registers => ERegisters}
+
 import java.util
 import java.util.stream.Collectors
 import java.util.{List, ArrayList}
 
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoBox, Input, ErgoLikeTransaction}
+import org.ergoplatform.{DataInput, ErgoLikeTransaction, ErgoBox, Input}
 import org.ergoplatform.appkit.{Iso, ErgoToken, JavaHelpers}
+import org.ergoplatform.explorer.client.model.TransactionOutput
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
 import scorex.crypto.authds.{ADDigest, ADKey}
@@ -69,6 +72,11 @@ object ScalaBridge {
     override def from(t: (TokenId, Long)): Asset = new Asset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
   }
 
+  implicit val isoExplorerAssetToPair: Iso[EAsset, (TokenId, Long)] = new Iso[EAsset, (TokenId, Long)] {
+    override def to(a: EAsset) = (Digest32 @@ a.getTokenId.toBytes, a.getAmount)
+    override def from(t: (TokenId, Long)): EAsset = new EAsset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
+  }
+
 
   implicit val isoStringToErgoTree: Iso[String, ErgoTree] = new Iso[String, ErgoTree] {
     override def to(treeStr: String): ErgoTree = {
@@ -92,6 +100,25 @@ object ScalaBridge {
     }
     override def from(ergoRegs: AdditionalRegisters): Registers = {
       val res = new Registers()
+      ergoRegs.foreach { case (id, value) =>
+        val name = id.toString()
+        val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
+        res.put(name, v)
+      }
+      res
+    }
+  }
+
+  implicit val isoExplRegistersToMap: Iso[ERegisters, AdditionalRegisters] = new Iso[ERegisters, AdditionalRegisters] {
+    override def to(regs: ERegisters): AdditionalRegisters = {
+      JavaConverters.mapAsScalaMap(regs).map { r =>
+        val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
+        val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
+        (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
+      }.toMap
+    }
+    override def from(ergoRegs: AdditionalRegisters): ERegisters = {
+      val res = new ERegisters()
       ergoRegs.foreach { case (id, value) =>
         val name = id.toString()
         val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
@@ -128,6 +155,34 @@ object ScalaBridge {
       out
     }
   }
+
+//  implicit val isoExplTransactionOutput: Iso[TransactionOutput, ErgoBox] = new Iso[TransactionOutput, ErgoBox] {
+//    override def to(boxData: TransactionOutput): ErgoBox = {
+//      val tree = boxData.getErgoTree.convertTo[ErgoTree]
+//      val tokens = boxData.getAssets.convertTo[Coll[(TokenId, Long)]]
+//      val regs = boxData.getAdditionalRegisters().convertTo[AdditionalRegisters]
+//      new ErgoBox(boxData.getValue, tree,
+//        tokens, regs,
+//        ModifierId @@ boxData.getTransactionId,
+//        boxData.getIndex.shortValue,
+//        boxData.getCreationHeight)
+//    }
+//
+//    override def from(box: ErgoBox): ErgoTransactionOutput = {
+//      val assets = box.additionalTokens.convertTo[List[Asset]]
+//      val regs = isoRegistersToMap.from(box.additionalRegisters)
+//      val out = new ErgoTransactionOutput()
+//          .boxId(ErgoAlgos.encode(box.id))
+//          .value(box.value)
+//          .ergoTree(ErgoAlgos.encode(TreeSerializer.serializeErgoTree(box.ergoTree)))
+//          .assets(assets)
+//          .additionalRegisters(regs)
+//          .creationHeight(box.creationHeight)
+//          .transactionId(box.transactionId)
+//          .index(box.index)
+//      out
+//    }
+//  }
 
   implicit val isoBlockHeader: Iso[BlockHeader, Header] = new Iso[BlockHeader, Header] {
     override def to(h: BlockHeader): Header =

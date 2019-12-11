@@ -7,6 +7,7 @@ import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * This class implements typed facade with Ergo Explorer API invocation methods.
@@ -20,12 +21,12 @@ public class ExplorerFacade extends ApiFacade {
      * @param id  (required)
      * @return TransactionOutput
      */
-    static public TransactionOutput transactionsBoxesByAddressUnspentIdGet(
+    static public List<TransactionOutput> transactionsBoxesByAddressUnspentIdGet(
             Retrofit r, String id) throws ErgoClientException {
         return execute(r, () -> {
-            Method method = TransactionsApi.class.getMethod("transactionsBoxesByAddressUnspentIdGet");
-            TransactionOutput res =
-                    RetrofitUtil.<TransactionOutput>invokeServiceMethod(r, method, new Object[]{id})
+            Method method = TransactionsApi.class.getMethod("transactionsBoxesByAddressUnspentIdGet", String.class);
+            List<TransactionOutput> res =
+                    RetrofitUtil.<List<TransactionOutput>>invokeServiceMethod(r, method, new Object[]{id})
                             .execute().body();
             return res;
         });
