@@ -3,6 +3,7 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.appkit.ErgoProver;
 import org.ergoplatform.appkit.ErgoProverBuilder;
 import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.appkit.SecretStorage;
 import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
@@ -21,6 +22,11 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
     public ErgoProverBuilder withMnemonic(String mnemonicPhrase, String mnemonicPass) {
         _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass);
+        return this;
+    }
+
+    public ErgoProverBuilder withStorage(SecretStorage storage) {
+        _masterKey = storage.getSecret();
         return this;
     }
 

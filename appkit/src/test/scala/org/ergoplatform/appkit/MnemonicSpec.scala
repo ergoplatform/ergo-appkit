@@ -1,7 +1,6 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.sandbox.Mnemonic
-import org.ergoplatform.appkit.sandbox.Mnemonic._
+import org.ergoplatform.appkit.Mnemonic._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
 

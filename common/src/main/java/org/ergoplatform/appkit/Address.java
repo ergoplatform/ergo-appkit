@@ -85,6 +85,10 @@ public class Address {
      */
     public static Address create(String base58Str) { return new Address(base58Str); }
 
+    public static Address fromMnemonic(NetworkType networkType, Mnemonic mnemonic) {
+        return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
+    }
+
     public static Address fromMnemonic(NetworkType networkType, String mnemonic, String mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
         DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
@@ -95,5 +99,18 @@ public class Address {
     @Override
     public String toString() {
         return _address.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return _address.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Address) {
+            return _address.equals(((Address)obj)._address);
+        }
+        return false;
     }
 }

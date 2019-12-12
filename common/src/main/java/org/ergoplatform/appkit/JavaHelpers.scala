@@ -13,13 +13,13 @@ import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
 import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
-import org.ergoplatform.wallet.mnemonic.Mnemonic
+import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
-import java.lang.{Long => JLong}
+import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
 
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
@@ -71,6 +71,11 @@ object Iso extends LowPriorityIsos {
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
   }
 
+  implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
+    override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
+    override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
+  }
+
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
       override def to(as: JList[A]): IndexedSeq[B] = {
@@ -102,23 +107,6 @@ object Iso extends LowPriorityIsos {
       }
     }
 
-//  implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
-//    new Iso[JList[A], Coll[B]] {
-//      override def to(as: JList[A]): Coll[B] = {
-//        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
-//          itemIso.to(a)
-//        }
-//        Colls.fromArray(bsIter.toArray(tB.classTag))
-//      }
-//
-//      override def from(bs: Coll[B]): JList[A] = {
-//        val res = new util.ArrayList[A](bs.length)
-//        bs.toArray.foreach { b =>
-//          res.add(itemIso.from(b))
-//        }
-//        res
-//      }
-//    }
 }
 
 object JavaHelpers {
@@ -209,7 +197,7 @@ object JavaHelpers {
 
   def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {
     val passOpt = if (Strings.isNullOrEmpty(pass)) None else Some(pass)
-    val seed = Mnemonic.toSeed(seedPhrase, passOpt)
+    val seed = WMnemonic.toSeed(seedPhrase, passOpt)
     val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
     masterKey
   }

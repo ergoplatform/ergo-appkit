@@ -1,18 +1,18 @@
-package org.ergoplatform.appkit.sandbox;
+package org.ergoplatform.appkit;
 
-import scala.collection.Seq;
 import scala.util.Try;
-import scorex.utils.Random;
 
 /**
  * BIP39 mnemonic sentence (see: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
  */
 public class Mnemonic {
-//    public static int[] getAllowedStrengths() {
-//        Seq<Object> strengthsSeq = org.ergoplatform.wallet.mnemonic.Mnemonic.AllowedStrengths();
-//        strengthsSeq.toArray()
-//        return strengthsSeq;
-//    }
+    private final String _phrase;
+    private final String _password;
+
+    Mnemonic(String phrase, String password) {
+        _phrase = phrase;
+        _password = password;
+    }
 
     /**
      * Default strength of mnemonic security (number of bits)
@@ -44,5 +44,17 @@ public class Mnemonic {
     public static String generateEnglishMnemonic() {
         byte[] entropy = getEntropy(DEFAULT_STRENGTH);
         return Mnemonic.generate("english", DEFAULT_STRENGTH, entropy);
+    }
+
+    public static Mnemonic create(String phrase, String password) {
+      return new Mnemonic(phrase, password);
+    }
+
+    public String getPhrase() {
+        return _phrase;
+    }
+
+    public String getPassword() {
+        return _password;
     }
 }
