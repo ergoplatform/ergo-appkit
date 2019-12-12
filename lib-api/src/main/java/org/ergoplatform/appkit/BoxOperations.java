@@ -26,16 +26,27 @@ public class BoxOperations {
         return res;
     }
 
+    public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
+        ErgoProver prover = ctx.newProverBuilder()
+                .withMnemonic( mnemonic.getPhrase(), mnemonic.getPassword())
+                .build();
+        return prover;
+    }
+
+    public static ErgoProver createProver(BlockchainContext ctx, String storageFile, String storagePass) {
+        SecretStorage storage = SecretStorage.loadFrom(storageFile);
+        storage.unlock(storagePass);
+        ErgoProver prover = ctx.newProverBuilder()
+                .withSecretStorage(storage)
+                .build();
+        return prover;
+    }
+
     public static String send(
-            BlockchainContext ctx, Mnemonic senderMnemonic, Address recipient, long amountToSend) {
-        Address sender = Address.fromMnemonic(ctx.getNetworkType(), senderMnemonic);
+            BlockchainContext ctx, ErgoProver senderProver, Address recipient, long amountToSend) {
+        Address sender = senderProver.getAddress();
         List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
         List<InputBox> boxesToSpend = selectTop(unspent, amountToSend + MinFee);
-        ErgoProver prover = ctx.newProverBuilder()
-                .withMnemonic(
-                        senderMnemonic.getPhrase(),
-                        senderMnemonic.getPassword())
-                .build();
 
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         OutBox newBox = txB.outBoxBuilder()
@@ -49,10 +60,10 @@ public class BoxOperations {
         UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
                 .outputs(newBox)
                 .fee(Parameters.MinFee)
-                .sendChangeTo(prover.getP2PKAddress())
+                .sendChangeTo(senderProver.getP2PKAddress())
                 .build();
 
-        SignedTransaction signed = prover.sign(tx);
+        SignedTransaction signed = senderProver.sign(tx);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }

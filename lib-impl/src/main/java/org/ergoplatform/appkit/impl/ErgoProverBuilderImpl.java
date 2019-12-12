@@ -1,9 +1,6 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.appkit.ErgoProver;
-import org.ergoplatform.appkit.ErgoProverBuilder;
-import org.ergoplatform.appkit.JavaHelpers;
-import org.ergoplatform.appkit.SecretStorage;
+import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
@@ -25,14 +22,23 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         return this;
     }
 
-    public ErgoProverBuilder withStorage(SecretStorage storage) {
+    @Override
+    public ErgoProverBuilder withMnemonic(Mnemonic mnemonic) {
+        return withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword());
+    }
+
+    @Override
+    public ErgoProverBuilder withSecretStorage(SecretStorage storage) {
+        if (storage.isLocked())
+            throw new IllegalStateException("SecretStorage is locked, call unlock(password) method");
         _masterKey = storage.getSecret();
-        return this;
+        return null;
     }
 
     public ErgoProver build() {
         ErgoLikeParameters parameters = new ErgoLikeParameters() {
             Parameters _params = _ctx.getNodeInfo().getParameters();
+
             @Override
             public int storageFeeFactor() {
                 return _params.getStorageFeeFactor();

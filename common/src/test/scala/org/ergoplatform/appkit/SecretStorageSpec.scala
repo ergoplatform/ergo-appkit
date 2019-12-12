@@ -12,6 +12,7 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
 
   property("create from mnemonic") {
     withNewStorageFor(mnemonic, encryptionPass) { storage =>
+      storage.isLocked shouldBe true
       storage.getFile().exists() shouldBe true
     }
   }
@@ -19,6 +20,7 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
   property("unlocked by password with ") {
     withNewStorageFor(mnemonic, encryptionPass) { storage =>
       storage.unlock(encryptionPass)
+      storage.isLocked shouldBe false
       val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic)
       val secret = storage.getSecret()
       secret should not be(null)
@@ -32,10 +34,22 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
     a[RuntimeException] shouldBe thrownBy {
       withNewStorageFor(mnemonic, encryptionPass) { storage =>
         storage.unlock("wrong password")
-        val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic)
-        storage.getSecret() should not be(null)
-        storage.getAddressFor(NetworkType.TESTNET) shouldBe addr
       }
+    }
+  }
+
+  property("load from file") {
+    withNewStorageFor(mnemonic, encryptionPass) { storage =>
+      val fileName = storage.getFile.getPath
+      val loaded = SecretStorage.loadFrom(fileName)
+      loaded.isLocked shouldBe true
+      loaded.unlock(encryptionPass)
+      loaded.isLocked shouldBe false
+
+      // compare created and loaded storages
+      storage.unlock(encryptionPass)
+      storage.getSecret shouldBe loaded.getSecret
+      storage.getAddressFor(NetworkType.TESTNET) shouldBe loaded.getAddressFor(NetworkType.TESTNET)
     }
   }
 

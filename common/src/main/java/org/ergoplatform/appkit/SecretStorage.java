@@ -26,6 +26,11 @@ public class SecretStorage {
     }
 
     /**
+     * @return true if this storage is locked (call {@link #unlock(String pass)} to unlock this storage).
+     */
+    public boolean isLocked() { return _jsonStorage.isLocked(); }
+
+    /**
      * @return underlying storage file
      */
     public File getFile() { return _jsonStorage.secretFile(); }
@@ -61,4 +66,10 @@ public class SecretStorage {
         return new SecretStorage(jsonStorage);
     }
 
+    public static SecretStorage loadFrom(String storageFile) {
+        File file = new File(storageFile);
+        if (!file.exists())
+            throw new RuntimeException("SecreteStorage file not found: " + storageFile);
+        return new SecretStorage(new JsonSecretStorage(file, DEFAULT_SETTINGS));
+    }
 }
