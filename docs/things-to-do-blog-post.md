@@ -247,7 +247,7 @@ Note, this step has to be repeated after any changes are made to the Java source
 Having created our application, we can now use our FreezeCoin app:
 ```shell
 $ java -cp build/libs/appkit-examples-3.1.0-all.jar \
-      org.ergoplatform.appkit.example.FreezeCoin  1000000000 
+      org.ergoplatform.appkit.examples.FreezeCoin  1000000000 
 ```
 You will get something along the lines of this [output in the console](https://gist.github.com/aslesarenko/cacee372350458ac31bd5c73e957e322).
 
@@ -306,7 +306,7 @@ $ native-image --no-server \
   --no-fallback -H:+TraceClassInitialization -H:+ReportExceptionStackTraces\
    -H:+AddAllCharsets -H:+AllowVMInspection -H:-RuntimeAssertions\
    --allow-incomplete-classpath \
-    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.FreezeCoin 
+    --enable-url-protocols=http,https org.ergoplatform.appkit.examples.FreezeCoin freezecoin
 [freezecoin:3133]    classlist:  35,217.78 ms
 [freezecoin:3133]        (cap):   6,063.07 ms
 [freezecoin:3133]        setup:   8,268.99 ms
@@ -429,7 +429,7 @@ TruffleRuby aims to be fully compatible with the standard implementation of Ruby
 FreezeCoin](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/ruby-examples/FreezeCoin.rb)
 can be executed using the following command
 ```shell
-$ ruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
+$ truffleruby --polyglot --jvm --vm.cp=build/libs/appkit-examples-3.1.0-all.jar \
     ruby-examples/FreezeCoin.rb 1900000000
 ```
 
