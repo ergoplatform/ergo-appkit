@@ -7,7 +7,7 @@ import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.basics.DLogProtocol;
-
+import sigmastate.utils.Helpers;
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
@@ -36,14 +36,14 @@ public class Address {
         if (res.isFailure())
             throw new RuntimeException(
                     "Invalid address encoding, expected base58 string: " + base58String,
-                    res.toEither().left().get());
+                    (Throwable)new Helpers.TryOps(res).toEither().left().get());
         _addrBytes = res.get();
         ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(getNetworkType().networkPrefix);
         Try<ErgoAddress> addrTry = encoder.fromString(base58String);
         if (addrTry.isFailure())
             throw new RuntimeException(
                     "Invalid address encoding, expected base58 string: " + base58String,
-                    addrTry.toEither().left().get());
+                    (Throwable)new Helpers.TryOps(addrTry).toEither().left().get());
         _address = addrTry.get();
     }
 

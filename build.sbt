@@ -8,10 +8,24 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val scala212 = "2.12.10"
+lazy val scala211 = "2.11.12"
+crossScalaVersions := Seq(scala212, scala211)
+scalaVersion := scala212
+
+//javacOptions ++=
+//    "-source" :: "1.7" ::
+//    "-target" :: "1.7" ::
+//    Nil
+
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  scalaVersion := "2.12.8",
-  resolvers += Resolver.sonatypeRepo("public"),
+  version := "3.1.0",
+  resolvers ++= Seq(sonatypeReleases,
+    "SonaType" at "https://oss.sonatype.org/content/groups/public",
+    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+    sonatypeSnapshots,
+    Resolver.mavenCentral),
   homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
   description := "A Library for Polyglot Development of Ergo Applications",
@@ -26,7 +40,7 @@ lazy val commonSettings = Seq(
   publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
-  publishTo := sonatypePublishToBundle.value,
+  publishTo := sonatypePublishToBundle.value
 )
 
 enablePlugins(GitVersioning)
@@ -62,7 +76,7 @@ git.gitUncommittedChanges in ThisBuild := true
 
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
 )
 
 lazy val testSettings = Seq(
@@ -79,7 +93,7 @@ lazy val allResolvers = Seq(
   sonatypePublic,
   sonatypeReleases,
   sonatypeSnapshots,
-  Resolver.mavenCentral,
+  Resolver.mavenCentral
 )
 
 publishArtifact in Compile := true
@@ -111,6 +125,8 @@ val ergoWalletVersion = "3.1.4-RC5"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
+    .exclude("org.typelevel", "machinist")
+    .exclude("org.typelevel", "cats-kernel")
 
 lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
 
@@ -123,7 +139,7 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
-  "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.2"
 )
 
 val apiClientDeps = Seq(
@@ -217,7 +233,7 @@ lazy val rootSettings = Seq(
   libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
   mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
   mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
-  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten,
+  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten
 )
 
 lazy val root = (project in file("."))

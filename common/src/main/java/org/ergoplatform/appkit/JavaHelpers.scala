@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
 
-import scala.collection.JavaConverters
+import scala.collection.{JavaConverters, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
@@ -21,7 +21,7 @@ import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
-
+import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
@@ -79,7 +79,7 @@ object Iso extends LowPriorityIsos {
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
       override def to(as: JList[A]): IndexedSeq[B] = {
-        JavaConverters.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+        JavaConversions.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
       }
 
       override def from(bs: IndexedSeq[B]): JList[A] = {
@@ -92,7 +92,7 @@ object Iso extends LowPriorityIsos {
   implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
     new Iso[JList[A], Coll[B]] {
       override def to(as: JList[A]): Coll[B] = {
-        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
+        val bsIter = JavaConversions.asScalaIterator(as.iterator).map { a =>
           itemIso.to(a)
         }
         Colls.fromArray(bsIter.toArray(tB.classTag))
@@ -167,11 +167,11 @@ object JavaHelpers {
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
-    JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
+    JavaConversions.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConverters.mapAsScalaMap(constants).toMap
+    val env = JavaConversions.mapAsScalaMap(constants).toMap
     implicit val IR = new CompiletimeIRContext
     val prop = ErgoScriptPredef.compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
