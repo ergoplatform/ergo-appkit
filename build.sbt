@@ -20,7 +20,6 @@ scalaVersion := scala212
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  version := "3.1.0",
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
