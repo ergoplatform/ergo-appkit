@@ -66,10 +66,14 @@ public class SecretStorage {
         return new SecretStorage(jsonStorage);
     }
 
-    public static SecretStorage loadFrom(String storageFile) {
-        File file = new File(storageFile);
-        if (!file.exists())
-            throw new RuntimeException("SecreteStorage file not found: " + storageFile);
-        return new SecretStorage(new JsonSecretStorage(file, DEFAULT_SETTINGS));
+    public static SecretStorage loadFrom(String storageFileName) {
+        File file = new File(storageFileName);
+        return loadFrom(file);
+    }
+
+    public static SecretStorage loadFrom(File storageFile) {
+        if (!storageFile.exists())
+            throw new RuntimeException("SecreteStorage file not found: " + storageFile.getPath());
+        return new SecretStorage(new JsonSecretStorage(storageFile, DEFAULT_SETTINGS));
     }
 }

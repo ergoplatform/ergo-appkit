@@ -32,7 +32,7 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         if (storage.isLocked())
             throw new IllegalStateException("SecretStorage is locked, call unlock(password) method");
         _masterKey = storage.getSecret();
-        return null;
+        return this;
     }
 
     public ErgoProver build() {
