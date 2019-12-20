@@ -83,7 +83,9 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
 
         Long inputTotal = _inputBoxes.stream().map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
-        Long outputTotal = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
+        Long outputSum = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
+        long outputTotal = outputSum + _feeAmount;
+
         long changeAmt = inputTotal - outputTotal;
         boolean noChange = changeAmt < MinChangeValue;
 

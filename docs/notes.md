@@ -113,6 +113,7 @@ mx ideinit
 - [okhttp-client-mock example tests](https://github.com/gmazzo/okhttp-client-mock/blob/master/library/src/test/java/okhttp3/mock/MockInterceptorITTest.java)
 - [Retrofit Mock Web Server](https://github.com/square/retrofit/tree/master/retrofit-mock)
 - [Okhttp Mock Web Server](https://github.com/square/okhttp/tree/master/mockwebserver)
+- [Using Mock Web Server](https://tech.okcupid.com/ui-tests-with-mockwebserver/)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)
