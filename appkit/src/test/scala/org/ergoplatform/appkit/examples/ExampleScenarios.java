@@ -36,7 +36,7 @@ public class ExampleScenarios {
                 .boxesToSpend(Arrays.asList(boxes))
                 .outputs(
                         txB.outBoxBuilder()
-                                .value(total)
+                                .value(total - MinFee)
                                 .contract(
                                     _ctx.compileContract(
                                         ConstantsBuilder.create().item("deadline", deadline).build(),
