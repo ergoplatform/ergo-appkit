@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.ergoplatform.appkit.Parameters.MinChangeValue;
+import static org.ergoplatform.appkit.Parameters.MinFee;
 
 public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilder {
 
@@ -80,27 +82,38 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
 
+        Long inputTotal = _inputBoxes.stream().map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
+        Long outputTotal = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
+        long changeAmt = inputTotal - outputTotal;
+        boolean noChange = changeAmt < MinChangeValue;
+
+        // if computed changeAmt is too small give it to miner as tips
+        long actualFee = noChange ? _feeAmount + changeAmt : _feeAmount;
+
+        checkState(actualFee >= MinFee,
+                String.format("Fee must be greater then minimum amount (%d NanoErg)", MinFee));
+
         OutBox feeOut = outBoxBuilder()
-                .value(_feeAmount)
+                .value(actualFee)
                 .contract(_ctx.newContract(ErgoScriptPredef.feeProposition(Parameters.MinerRewardDelay)))
                 .build();
         appendOutputs(feeOut);
 
-        checkState(_changeAddress != null, "Change address is not defined");
+        if (!noChange) {
+            checkState(_changeAddress != null, "Change address is not defined");
 
-        Long inputTotal = _inputBoxes.stream().map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
-        Long outputTotal = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
-
-        long changeAmt = inputTotal - outputTotal;
-        OutBox changeOut = outBoxBuilder()
-                .value(changeAmt)
-                .contract(_ctx.newContract(_changeAddress.script()))
-                .build();
-        appendOutputs(changeOut);
+            OutBox changeOut = outBoxBuilder()
+                    .value(changeAmt)
+                    .contract(_ctx.newContract(_changeAddress.script()))
+                    .build();
+            appendOutputs(changeOut);
+        }
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
-        UnsignedErgoLikeTransaction tx = new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
-        List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
+        UnsignedErgoLikeTransaction tx =
+                new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
+        List<ErgoBox> boxesToSpend =
+                _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
         return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
@@ -108,25 +121,26 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     private ErgoLikeStateContext createErgoLikeStateContext() {
         return new ErgoLikeStateContext() {
-                private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(), ErgoType.headerType().getRType()).to(_ctx.getHeaders());
-                private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
-                private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
+            private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(),
+                    ErgoType.headerType().getRType()).to(_ctx.getHeaders());
+            private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
+            private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
 
-                @Override
-                public Coll<Header> sigmaLastHeaders() {
-                    return _headers;
-                }
+            @Override
+            public Coll<Header> sigmaLastHeaders() {
+                return _headers;
+            }
 
-                @Override
-                public byte[] previousStateDigest() {
-                    return JavaHelpers.getStateDigest(_headers.apply(0).stateRoot());
-                }
+            @Override
+            public byte[] previousStateDigest() {
+                return JavaHelpers.getStateDigest(_headers.apply(0).stateRoot());
+            }
 
-                @Override
-                public PreHeader sigmaPreHeader() {
-                    return _preHeader;
-                }
-            };
+            @Override
+            public PreHeader sigmaPreHeader() {
+                return _preHeader;
+            }
+        };
     }
 
     @Override
