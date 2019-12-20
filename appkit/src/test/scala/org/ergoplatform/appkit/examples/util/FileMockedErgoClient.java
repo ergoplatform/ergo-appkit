@@ -9,77 +9,72 @@ import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
-import scalan.util.FileUtil;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Function;
 
 /**
  * MockedRunner using given files to provide BlockchainContext information.
  */
 public class FileMockedErgoClient implements MockedErgoClient {
-    private final String _nodeInfoFile;
-    private final String _lastHeadersFile;
-    private final String _boxFile;
 
-    public FileMockedErgoClient(String nodeInfoFile, String lastHeadersFile, String boxFile) {
-        _nodeInfoFile = nodeInfoFile;
-        _lastHeadersFile = lastHeadersFile;
-        _boxFile = boxFile;
+    private final List<String> _nodeResponses;
+    private final List<String> _explorerResponses;
+
+    public FileMockedErgoClient(List<String> nodeResponses, List<String> explorerResponses) {
+        _nodeResponses = nodeResponses;
+        _explorerResponses = explorerResponses;
     }
 
     @Override
-    public String getNodeInfoResp() {
-        return FileUtil.read(new File(_nodeInfoFile));
+    public List<String> getNodeResponses() {
+        return _nodeResponses;
     }
 
     @Override
-    public String getLastHeadersResp() {
-        return FileUtil.read(new File(_lastHeadersFile));
+    public List<String> getExplorerResponses() {
+        return _explorerResponses;
     }
 
-    @Override
-    public String getBoxResp() {
-        return FileUtil.read(new File(_boxFile));
+    void enqueueResponses(MockWebServer server, List<String> rs) {
+        for (String r : rs) {
+            server.enqueue(new MockResponse()
+                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                    .setBody(r));
+        }
     }
 
     @Override
     public <T> T execute(Function<BlockchainContext, T> action) {
-        MockWebServer server = new MockWebServer();
+        MockWebServer node = new MockWebServer();
+        enqueueResponses(node, _nodeResponses);
+
         MockWebServer explorer = new MockWebServer();
-        server.enqueue(new MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setBody(getNodeInfoResp()));
+        enqueueResponses(explorer, _explorerResponses);
 
-        server.enqueue(new MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setBody(getLastHeadersResp()));
-
-        server.enqueue(new MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setBody(getBoxResp()));
         try {
-            server.start();
+            node.start();
             explorer.start();
         } catch (IOException e) {
-            throw new ErgoClientException("Cannot start server " + server.toString(), e);
+            throw new ErgoClientException("Cannot start server " + node.toString(), e);
         }
 
-        HttpUrl baseUrl = server.url("/");
+        HttpUrl baseUrl = node.url("/");
         ApiClient client = new ApiClient(baseUrl.toString());
         HttpUrl explorerBaseUrl = explorer.url("/");
         ExplorerApiClient explorerClient = new ExplorerApiClient(explorerBaseUrl.toString());
 
         BlockchainContext ctx =
-         new BlockchainContextBuilderImpl(client, explorerClient, NetworkType.MAINNET).build();
+                new BlockchainContextBuilderImpl(client, explorerClient, NetworkType.MAINNET).build();
 
         T res = action.apply(ctx);
 
         try {
-            server.shutdown();
+            explorer.shutdown();
+            node.shutdown();
         } catch (IOException e) {
-            throw new ErgoClientException("Cannot shutdown server " + server.toString(), e);
+            throw new ErgoClientException("Cannot shutdown server " + node.toString(), e);
         }
         return res;
     }
