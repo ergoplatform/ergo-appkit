@@ -7,6 +7,7 @@ import org.ergoplatform.wallet.settings.EncryptionSettings;
 import org.ergoplatform.wallet.settings.SecretStorageSettings;
 import scala.Option;
 import scala.runtime.BoxedUnit;
+import scala.util.Failure;
 import scala.util.Try;
 import sigmastate.basics.DLogProtocol;
 
@@ -50,7 +51,7 @@ public class SecretStorage {
     public void unlock(String encryptionPass) {
         Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass);
         if (resTry.isFailure()) {
-            Throwable cause = resTry.toEither().left().get();
+            Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
         }
     }
