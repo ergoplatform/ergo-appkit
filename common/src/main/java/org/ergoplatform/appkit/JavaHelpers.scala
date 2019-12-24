@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
 
-import scala.collection.{JavaConverters, JavaConversions}
+import scala.collection.JavaConversions
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType

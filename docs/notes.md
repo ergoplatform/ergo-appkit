@@ -114,6 +114,7 @@ mx ideinit
 - [Retrofit Mock Web Server](https://github.com/square/retrofit/tree/master/retrofit-mock)
 - [Okhttp Mock Web Server](https://github.com/square/okhttp/tree/master/mockwebserver)
 - [Using Mock Web Server](https://tech.okcupid.com/ui-tests-with-mockwebserver/)
+- [GraalVM with native-image compilation in Travis CI](https://stackoverflow.com/questions/58465833/graalvm-with-native-image-compilation-in-travis-ci)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)

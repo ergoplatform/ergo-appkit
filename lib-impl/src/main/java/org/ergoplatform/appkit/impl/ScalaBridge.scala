@@ -25,7 +25,7 @@ import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSer
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
 
-import scala.collection.{JavaConverters, JavaConversions}
+import scala.collection.JavaConversions
 
 object ScalaBridge {
   import org.ergoplatform.appkit.JavaHelpers._
@@ -111,7 +111,7 @@ object ScalaBridge {
 
   implicit val isoExplRegistersToMap: Iso[ERegisters, AdditionalRegisters] = new Iso[ERegisters, AdditionalRegisters] {
     override def to(regs: ERegisters): AdditionalRegisters = {
-      JavaConverters.mapAsScalaMap(regs).map { r =>
+      JavaConversions.mapAsScalaMap(regs).map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
         val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
