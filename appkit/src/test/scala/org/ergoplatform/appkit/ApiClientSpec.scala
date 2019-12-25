@@ -1,14 +1,18 @@
 package org.ergoplatform.appkit
 
-import okhttp3.mockwebserver.{MockWebServer, MockResponse}
+import okhttp3.mockwebserver.{MockResponse, MockWebServer}
+import org.ergoplatform.Height
 import org.ergoplatform.appkit.examples.ExampleScenarios
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scalan.util.FileUtil._
-import sigmastate.Values.SigmaPropConstant
+import sigmastate.{BoolToSigmaProp, LT, SInt}
+import sigmastate.Values.{ConstantPlaceholder, IntConstant, SigmaPropConstant}
 import sigmastate.serialization.ErgoTreeSerializer
+import sigmastate.verification.contract.DummyContractCompilation
 
 class ApiClientSpec
     extends PropSpec
@@ -83,4 +87,12 @@ class ApiClientSpec
     server.shutdown()
   }
 
+  property("get ErgoTree from verified contract") {
+    val verifiedContract = DummyContractCompilation.contractInstance(1000)
+    println(verifiedContract.ergoTree)
+    verifiedContract.ergoTree.constants.length shouldBe 1
+    verifiedContract.ergoTree.constants.head shouldEqual IntConstant(1000)
+    verifiedContract.ergoTree.root.right.get shouldEqual
+      BoolToSigmaProp(LT(Height, ConstantPlaceholder(0, SInt)))
+  }
 }

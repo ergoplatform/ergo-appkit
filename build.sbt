@@ -118,7 +118,7 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "3.1.1"
+val sigmaStateVersion = "i609-formal-verification-48b024d3-SNAPSHOT"
 val ergoWalletVersion = "appkit-wallet-f7f7d673-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
@@ -126,6 +126,12 @@ lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersi
     .exclude("org.scorexfoundation", "scrypto")
     .exclude("org.typelevel", "machinist")
     .exclude("org.typelevel", "cats-kernel")
+
+lazy val verifiedContracts = ("org.scorexfoundation" %% "verified-contracts" % sigmaStateVersion).force()
+  .exclude("ch.qos.logback","logback-classic")
+  .exclude("org.scorexfoundation", "scrypto")
+  .exclude("org.typelevel", "machinist")
+  .exclude("org.typelevel", "cats-kernel")
 
 lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
 
@@ -203,7 +209,7 @@ lazy val appkit = (project in file("appkit"))
       libApi % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
-      libraryDependencies ++= Seq( mockWebServer ))
+      libraryDependencies ++= Seq( mockWebServer, verifiedContracts ))
     .settings(publish / skip := true)
 
 lazy val aggregateCompile = ScopeFilter(
