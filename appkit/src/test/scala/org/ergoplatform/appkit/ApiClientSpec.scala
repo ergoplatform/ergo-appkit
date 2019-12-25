@@ -12,7 +12,6 @@ import scalan.util.FileUtil._
 import sigmastate.{BoolToSigmaProp, LT, SInt}
 import sigmastate.Values.{ConstantPlaceholder, IntConstant, SigmaPropConstant}
 import sigmastate.serialization.ErgoTreeSerializer
-import sigmastate.verification.contract.DummyContractCompilation
 
 class ApiClientSpec
     extends PropSpec
@@ -69,11 +68,11 @@ class ApiClientSpec
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-    val res = ergoClient.execute(ctx => {
+    val res = ergoClient.execute{ ctx: BlockchainContext => {
       val r = new ExampleScenarios(ctx)
       val res = r.aggregateUtxoBoxes(seed, addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
       res
-    })
+    } }
 
     println(res)
 
@@ -85,14 +84,5 @@ class ApiClientSpec
 
     // Shut down the server. Instances cannot be reused.
     server.shutdown()
-  }
-
-  property("get ErgoTree from verified contract") {
-    val verifiedContract = DummyContractCompilation.contractInstance(1000)
-    println(verifiedContract.ergoTree)
-    verifiedContract.ergoTree.constants.length shouldBe 1
-    verifiedContract.ergoTree.constants.head shouldEqual IntConstant(1000)
-    verifiedContract.ergoTree.root.right.get shouldEqual
-      BoolToSigmaProp(LT(Height, ConstantPlaceholder(0, SInt)))
   }
 }

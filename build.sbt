@@ -1,4 +1,4 @@
-import sbt.Keys.publishMavenStyle
+import sbt.Keys.{publishMavenStyle, scalaVersion}
 
 import scala.util.Try
 
@@ -10,8 +10,6 @@ lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/c
 
 lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
-crossScalaVersions := Seq(scala212, scala211)
-scalaVersion := scala212
 
 //javacOptions ++=
 //    "-source" :: "1.7" ::
@@ -20,6 +18,8 @@ scalaVersion := scala212
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
+  crossScalaVersions := Seq(scala212, scala211),
+  scalaVersion := scala212,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
@@ -127,12 +127,6 @@ lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersi
     .exclude("org.typelevel", "machinist")
     .exclude("org.typelevel", "cats-kernel")
 
-lazy val verifiedContracts = ("org.scorexfoundation" %% "verified-contracts" % sigmaStateVersion).force()
-  .exclude("ch.qos.logback","logback-classic")
-  .exclude("org.scorexfoundation", "scrypto")
-  .exclude("org.typelevel", "machinist")
-  .exclude("org.typelevel", "cats-kernel")
-
 lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
 
 lazy val mockWebServer = "com.squareup.okhttp3" % "mockwebserver" % "3.12.0" % "test"
@@ -209,7 +203,17 @@ lazy val appkit = (project in file("appkit"))
       libApi % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
-      libraryDependencies ++= Seq( mockWebServer, verifiedContracts ))
+      libraryDependencies ++= Seq(mockWebServer))
+    .settings(
+      libraryDependencies ++= (if (scalaBinaryVersion.value == "2.12")
+        Seq(("org.scorexfoundation" %% "verified-contracts" % sigmaStateVersion).force()
+          .exclude("ch.qos.logback", "logback-classic")
+          .exclude("org.scorexfoundation", "scrypto")
+          .exclude("org.typelevel", "machinist")
+          .exclude("org.typelevel", "cats-kernel"))
+      else
+        Seq.empty)
+    )
     .settings(publish / skip := true)
 
 lazy val aggregateCompile = ScopeFilter(
