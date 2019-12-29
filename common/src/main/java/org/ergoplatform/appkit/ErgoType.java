@@ -11,6 +11,7 @@ import special.sigma.*;
  * wrapper around {@link RType} type descriptor.
  */
 public class ErgoType<T> {
+    private static ErgoType<Object> _object = new ErgoType<>(RType.AnyRefType());
     private static ErgoType<Byte> _byte = new ErgoType<>(RType.ByteType());
     private static ErgoType<Short> _short = new ErgoType<>(RType.ShortType());
     private static ErgoType<Integer> _integer = new ErgoType<>(RType.IntType());
@@ -32,6 +33,8 @@ public class ErgoType<T> {
     ErgoType(RType<?> rtype) {
         _rtype = rtype;
     }
+
+    static public ErgoType<Object> objectType() { return _object; }
 
     static public ErgoType<Byte> byteType() { return _byte; }
 
@@ -59,6 +62,14 @@ public class ErgoType<T> {
 
     static public <A> ErgoType<Coll<A>> collType(ErgoType<A> tItem) {
         return new ErgoType<>(JavaHelpers.collRType(tItem._rtype));
+    }
+
+    static public <A> ErgoType<A[]> arrayType(ErgoType<A> tItem) {
+        return new ErgoType<>(JavaHelpers.arrayRType(tItem._rtype));
+    }
+
+    static public <A> ErgoType<byte[]> byteArrayType() {
+        return new ErgoType<>(JavaHelpers.arrayRType(RType.ByteType()));
     }
 
     static public <A> ErgoType<Option<A>> optionType(ErgoType<A> tItem) {

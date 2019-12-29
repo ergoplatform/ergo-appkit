@@ -7,8 +7,15 @@ import static org.ergoplatform.appkit.Parameters.MinFee;
 
 public class BoxOperations {
 
-    public static List<InputBox> selectTop(List<InputBox> unspentBoxes, long amountToSpend) {
-        if (amountToSpend == 0) {
+    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
+                                           long amountToSpend) {
+        return selectTop(unspentBoxes, amountToSpend, new ArrayList<>());
+    }
+
+    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
+                                           long amountToSpend,
+                                           List<ErgoToken> tokenAmounts) {
+        if (amountToSpend == 0 && tokenAmounts.isEmpty()) {
             // all unspent boxes are requested
             return unspentBoxes;
         }
@@ -16,6 +23,7 @@ public class BoxOperations {
         // collect boxes to cover requested amount
         ArrayList<InputBox> res = new ArrayList<InputBox>();
         long collected = 0;
+        // TODO: check and collect tokens
         for (int i = 0; i < unspentBoxes.size() && collected < amountToSpend; ++i) {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();

@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import java.util.List;
+
 /**
  * Interface of UTXO boxes which can be accessed in the blockchain node.
  * Instances of this interface can be {@link BlockchainContext#getBoxesById(String...) obtained}
@@ -16,6 +18,11 @@ public interface InputBox {
      * Returns the ERG value stored in this box, i.e. unspent value in UTXO.
      */
     Long getValue();
+
+    /**
+     * Returns the tokens stored in this box.
+     */
+     List<ErgoToken> getTokens();
 
     String toJson(boolean prettyPrint);
 }

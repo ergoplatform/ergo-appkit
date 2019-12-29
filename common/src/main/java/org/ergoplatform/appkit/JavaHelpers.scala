@@ -213,6 +213,8 @@ object JavaHelpers {
 
   def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
 
+  def arrayRType[T](tItem: RType[T]): RType[Array[T]] = RType.arrayRType(tItem)
+
   def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType
 
   def GroupElementRType: RType[special.sigma.GroupElement] = special.sigma.GroupElementRType
