@@ -19,4 +19,11 @@ public class Parameters {
      * Minimum transaction fee in NanoErgs as it is defined in Ergo protocol.
      */
     public static final long MinFee = 1000 * 1000;
+
+    /**
+     * Minimum value for a change. It can be used to compute change output value.
+     * If computed change is less than this value, it is added to the fee
+     * and `change` output in not added to the transaction.
+     */
+    public static final long MinChangeValue = 1000 * 1000;
 }

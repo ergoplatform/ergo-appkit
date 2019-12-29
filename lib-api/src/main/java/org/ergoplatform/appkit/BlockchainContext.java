@@ -2,6 +2,8 @@ package org.ergoplatform.appkit;
 
 import sigmastate.Values;
 
+import java.util.List;
+
 /**
  * This interface represent a specific context of blockchain for execution
  * of transaction transaction building scenario.
@@ -50,7 +52,7 @@ public interface BlockchainContext {
      * is first placed in a pool and then later can be selected by miner and included in the next block.
      * The new transactions are also replicated all over the network.
      *
-     * @param tx previously signed {@link SignedTransaction transaction} to be sent to the blockchain node
+     * @param tx a signed {@link SignedTransaction transaction} to be sent to the blockchain node
      */
     String sendTransaction(SignedTransaction tx);
 
@@ -59,5 +61,8 @@ public interface BlockchainContext {
     ErgoContract newContract(Values.ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
+
+    /** Get unspent boxes containing given address */
+    List<InputBox> getUnspentBoxesFor(Address address);
 }
 

@@ -2,33 +2,39 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
+import org.ergoplatform.explorer.client.ExplorerApiClient;
+import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
 import sigmastate.Values;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BlockchainContextImpl implements BlockchainContext {
 
     private final ApiClient _client;
     private final Retrofit _retrofit;
+    private ExplorerApiClient _explorer;
+    private Retrofit _retrofitExplorer;
     private final NetworkType _networkType;
     private final NodeInfo _nodeInfo;
     private final List<BlockHeader> _headers;
     private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
-            ApiClient client, Retrofit retrofit, NetworkType networkType,
-            NodeInfo nodeInfo, List<BlockHeader> headers,
-            ErgoWalletImpl wallet) {
+            ApiClient client, Retrofit retrofit,
+            ExplorerApiClient explorer, Retrofit retrofitExplorer,
+            NetworkType networkType,
+            NodeInfo nodeInfo, List<BlockHeader> headers) {
         _client = client;
         _retrofit = retrofit;
+        _explorer = explorer;
+        _retrofitExplorer = retrofitExplorer;
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
-        _wallet = wallet;
-        _wallet.setContext(this);
     }
 
     @Override
@@ -101,6 +107,11 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public ErgoWallet getWallet() {
+        if (_wallet == null) {
+            List<WalletBox> unspentBoxes = ErgoNodeFacade.getWalletUnspentBoxes(_retrofit, 0, 0);
+            _wallet = new ErgoWalletImpl(unspentBoxes);
+            _wallet.setContext(this);
+        }
         return _wallet;
     }
 
@@ -112,6 +123,17 @@ public class BlockchainContextImpl implements BlockchainContext {
     @Override
     public ErgoContract compileContract(Constants constants, String ergoScript) {
         return ErgoScriptContract.create(constants, ergoScript, _networkType);
+    }
+
+    @Override
+    public List<InputBox> getUnspentBoxesFor(Address address) {
+        List<TransactionOutput> boxes = ExplorerFacade.transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
+        List<InputBox> unspentBoxes = boxes.stream().map(box -> {
+            String boxId = box.getId();
+            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
+            return new InputBoxImpl(this, boxInfo);
+        }).collect(Collectors.toList());
+        return unspentBoxes;
     }
 }
 

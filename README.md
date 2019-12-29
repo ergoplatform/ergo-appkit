@@ -301,7 +301,7 @@ onto the `$PATH`.
 ```shell
 $ cd <your/directory/with/downloaded/graal>
 $ tar -zxf graalvm-ce-darwin-amd64-19.2.1.tar.gz
-$ export GRAAL_HOME=<your/directory/with/downloaded/graal>/graalvm-ce-19.1.1/Contents/Home
+$ export GRAAL_HOME=<your/directory/with/downloaded/graal>/graalvm-ce-19.2.1/Contents/Home
 $ export PATH=$PATH:${GRAAL_HOME}/bin
 ```
 

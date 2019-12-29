@@ -5,6 +5,7 @@ import org.ergoplatform.ErgoBox;
 import org.ergoplatform.appkit.ErgoId;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 

@@ -19,11 +19,11 @@ stages:
 jobs:
   include:
   - stage: test
-    script: sbt test
+    script: sbt +test
   - stage: release
-    script: openssl aes-256-cbc -K $encrypted_0b06728b1ded_key -iv $encrypted_0b06728b1ded_iv -in ci/secring.asc.enc -out ci/secring.asc -d && gpg --import ci/secring.asc && sbt publishSigned sonatypeBundleRelease
+    script: openssl aes-256-cbc -K $encrypted_0b06728b1ded_key -iv $encrypted_0b06728b1ded_iv -in ci/secring.asc.enc -out ci/secring.asc -d && gpg --import ci/secring.asc && sbt +publishSigned sonatypeBundleRelease
   - stage: snapshot
-    script: sbt publish
+    script: sbt +publish
 env:
   global:
   - secure: AlMkKVnCnIAFPZNx2oLsZst/J8AH9oZ5k+3ikXLODKSDIUeD1mRxmtSkFbvYX6xzbL910jIgrRwjnRtM5XI3eNA5YcMnHwX8/7MJM1bqktFFnkPS2xjxWS8fzxAsFQrXrgdfMr/sNW9GgYd9J++jA8hAVy/PBfx7Ybg3zQUdyJI0szYkM3HS7Y1DKM+q4QjWec5FH5MjRZYM9fnE1yxDDKsNUyyZaI7lPOvWqilKwe4I4PhOpBOxLcUpjrqPWkJYjCJMhkOvCVNjiqBZ/WJyiqf8sSyMTxf5S6lNPAQMNoAB2310G4+0Cgagdknv2XsEntdLAk8t732fEuXRjqVHxtQYQDNrQi3QQ3pIqqfsJM4lOCRMYYTvo+NWEpao52HAbBiRMIpzx/xFTZD9ETuNUKneJZMmHcoLJlUCN83r+k4JLk1dDFlFrqnb/e7XFNzwdCsNAzbPjWcIkspYD/Puobb9cYAKdjyfARLtL/SCJSgYOrHI7zo9MU2yKBtGDCmuTjPcKIDPFUl3w716r1jWxozlRnH4DZX/gaw7QbuFe0iPfUwa9+RztbVXaMBZMBkqULnU1rw4rUa10hrfsYt2kdi/n4osEhXOOrqEeT2n6T8PF/ZHqhejItrbvW4eN3TU6A2IQoH2fXiBe1Hdxiq1t2HINvAjlJ98XzOgcxf4Xx4=

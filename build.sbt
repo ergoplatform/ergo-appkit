@@ -8,10 +8,23 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val scala212 = "2.12.10"
+lazy val scala211 = "2.11.12"
+crossScalaVersions := Seq(scala212, scala211)
+scalaVersion := scala212
+
+//javacOptions ++=
+//    "-source" :: "1.7" ::
+//    "-target" :: "1.7" ::
+//    Nil
+
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  scalaVersion := "2.12.8",
-  resolvers += Resolver.sonatypeRepo("public"),
+  resolvers ++= Seq(sonatypeReleases,
+    "SonaType" at "https://oss.sonatype.org/content/groups/public",
+    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+    sonatypeSnapshots,
+    Resolver.mavenCentral),
   homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
   description := "A Library for Polyglot Development of Ergo Applications",
@@ -26,7 +39,7 @@ lazy val commonSettings = Seq(
   publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
-  publishTo := sonatypePublishToBundle.value,
+  publishTo := sonatypePublishToBundle.value
 )
 
 enablePlugins(GitVersioning)
@@ -62,7 +75,7 @@ git.gitUncommittedChanges in ThisBuild := true
 
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
 )
 
 lazy val testSettings = Seq(
@@ -79,7 +92,7 @@ lazy val allResolvers = Seq(
   sonatypePublic,
   sonatypeReleases,
   sonatypeSnapshots,
-  Resolver.mavenCentral,
+  Resolver.mavenCentral
 )
 
 publishArtifact in Compile := true
@@ -105,14 +118,18 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "3.1.0"
-val ergoWalletVersion = "master-7921c215-SNAPSHOT"
+val sigmaStateVersion = "3.1.1"
+val ergoWalletVersion = "appkit-wallet-f7f7d673-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
+    .exclude("org.typelevel", "machinist")
+    .exclude("org.typelevel", "cats-kernel")
 
 lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
+
+lazy val mockWebServer = "com.squareup.okhttp3" % "mockwebserver" % "3.12.0" % "test"
 
 libraryDependencies ++= Seq(
   sigmaState,
@@ -121,7 +138,18 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-gson" % "2.6.2"
+)
+
+val apiClientDeps = Seq(
+  "com.squareup.okhttp3" % "okhttp" % "3.12.0",
+  "com.google.code.findbugs" % "jsr305" % "3.0.2",
+  "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
+  "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
+  "com.squareup.retrofit2" % "retrofit" % "2.6.2",
+  "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
+  "junit" % "junit" % "4.12" % "test",
 )
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
@@ -129,16 +157,7 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       commonSettings,
       name := "java-client-generated",
       crossPaths := false,
-      libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "okhttp" % "3.12.0",
-        "com.google.code.findbugs" % "jsr305" % "3.0.2",
-        "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
-        "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
-        "com.squareup.retrofit2" % "retrofit" % "2.6.2",
-        "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
-        "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-        "junit" % "junit" % "4.12" % "test",
-      ),
+      libraryDependencies ++= apiClientDeps,
       publishArtifact in (Compile, packageDoc) := false,
       publish / skip := true
     )
@@ -184,27 +203,8 @@ lazy val appkit = (project in file("appkit"))
       libApi % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
-      libraryDependencies ++= Seq(
-      ))
+      libraryDependencies ++= Seq( mockWebServer ))
     .settings(publish / skip := true)
-
-// examples depend on appkit
-lazy val examples = (project in file("examples"))
-    .dependsOn(
-      common % allConfigDependency,
-      libApi % allConfigDependency,
-      javaClientGenerated % allConfigDependency,
-      appkit % allConfigDependency,
-      libImpl % allConfigDependency)
-    .settings(
-      commonSettings ++ testSettings,
-      name := "examples",
-      libraryDependencies ++= Seq(
-        "com.squareup.okhttp3" % "mockwebserver" % "3.12.0",
-      ),
-      publish / skip := true
-    )
-
 
 lazy val aggregateCompile = ScopeFilter(
   inProjects(common, javaClientGenerated, libApi, libImpl, appkit),
@@ -216,7 +216,7 @@ lazy val rootSettings = Seq(
   libraryDependencies := libraryDependencies.all(aggregateCompile).value.flatten,
   mappings in (Compile, packageSrc) ++= (mappings in(Compile, packageSrc)).all(aggregateCompile).value.flatten,
   mappings in (Test, packageBin) ++= (mappings in(Test, packageBin)).all(aggregateCompile).value.flatten,
-  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten,
+  mappings in(Test, packageSrc) ++= (mappings in(Test, packageSrc)).all(aggregateCompile).value.flatten
 )
 
 lazy val root = (project in file("."))

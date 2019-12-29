@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.Strings
 
-import scala.collection.JavaConverters
+import scala.collection.JavaConversions
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
@@ -13,15 +13,15 @@ import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
 import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
-import org.ergoplatform.wallet.mnemonic.Mnemonic
+import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
-import java.lang.{Long => JLong}
+import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
-
+import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
@@ -71,10 +71,15 @@ object Iso extends LowPriorityIsos {
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
   }
 
+  implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
+    override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
+    override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
+  }
+
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
       override def to(as: JList[A]): IndexedSeq[B] = {
-        JavaConverters.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+        JavaConversions.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
       }
 
       override def from(bs: IndexedSeq[B]): JList[A] = {
@@ -87,7 +92,7 @@ object Iso extends LowPriorityIsos {
   implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
     new Iso[JList[A], Coll[B]] {
       override def to(as: JList[A]): Coll[B] = {
-        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
+        val bsIter = JavaConversions.asScalaIterator(as.iterator).map { a =>
           itemIso.to(a)
         }
         Colls.fromArray(bsIter.toArray(tB.classTag))
@@ -101,6 +106,7 @@ object Iso extends LowPriorityIsos {
         res
       }
     }
+
 }
 
 object JavaHelpers {
@@ -161,11 +167,11 @@ object JavaHelpers {
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
-    JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
+    JavaConversions.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConverters.mapAsScalaMap(constants).toMap
+    val env = JavaConversions.mapAsScalaMap(constants).toMap
     implicit val IR = new CompiletimeIRContext
     val prop = ErgoScriptPredef.compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
@@ -191,7 +197,7 @@ object JavaHelpers {
 
   def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {
     val passOpt = if (Strings.isNullOrEmpty(pass)) None else Some(pass)
-    val seed = Mnemonic.toSeed(seedPhrase, passOpt)
+    val seed = WMnemonic.toSeed(seedPhrase, passOpt)
     val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
     masterKey
   }

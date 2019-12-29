@@ -15,7 +15,7 @@ import java.util.List;
  * It allows to bypass dynamic {@link java.lang.reflect.Proxy } generation which doesn't work under
  * Graal native-image.
  */
-public class ErgoNodeFacade {
+public class ErgoNodeFacade extends ApiFacade {
     /**
      * Get the information about the Node
      *
@@ -92,24 +92,6 @@ public class ErgoNodeFacade {
                     new Object[]{tx}).execute().body();
             return txId;
         });
-    }
-
-    static private ErgoClientException clientError(Retrofit r, Throwable cause) {
-        return new ErgoClientException("Error executing Ergo node API request: " + cause.getMessage(), cause);
-    }
-
-    private interface Supplier<T> {
-        T get() throws NoSuchMethodException, IOException;
-    }
-
-    static private <T> T execute(Retrofit r, Supplier<T> block) throws ErgoClientException {
-        try {
-            return block.get();
-        } catch (NoSuchMethodException e) {
-            throw clientError(r, e);
-        } catch (IOException e) {
-            throw clientError(r, e);
-        }
     }
 
 }

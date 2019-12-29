@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit.impl;
 
 import com.google.common.base.Preconditions;
+import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.ErgoWallet;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.restapi.client.WalletBox;
@@ -33,20 +34,8 @@ public class ErgoWalletImpl implements ErgoWallet {
             }).collect(Collectors.toList());
         }
 
-        if (amountToSpend == 0) {
-            // all unspent boxes are requested
-            return Optional.of(_unspentBoxes);
-        }
-
-        // collect boxes to cover requested amount
-        ArrayList<InputBox> res = new ArrayList<InputBox>();
-        long collected = 0;
-        for (int i = 0; i < _unspentBoxes.size() && collected < amountToSpend; ++i) {
-            InputBox box = _unspentBoxes.get(i);
-            collected += box.getValue();
-            res.add(box);
-        }
-        if (collected < amountToSpend) return Optional.empty();
-        return Optional.of(res);
+        List<InputBox> selected = BoxOperations.selectTop(_unspentBoxes, amountToSpend);
+        if (selected == null) return Optional.empty();
+        return Optional.of(selected);
     }
 }
