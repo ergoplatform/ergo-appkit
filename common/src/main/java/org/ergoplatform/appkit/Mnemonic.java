@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import scala.Option;
 import scala.util.Try;
 
 /**
@@ -56,5 +57,10 @@ public class Mnemonic {
 
     public String getPassword() {
         return _password;
+    }
+
+    public byte[] toSeed() {
+        Option<String> passOpt = Iso.jstringToOptionString().to(_password);
+        return org.ergoplatform.wallet.mnemonic.Mnemonic.toSeed(_phrase, passOpt);
     }
 }
