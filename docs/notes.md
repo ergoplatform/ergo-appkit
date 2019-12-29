@@ -115,6 +115,7 @@ mx ideinit
 - [Okhttp Mock Web Server](https://github.com/square/okhttp/tree/master/mockwebserver)
 - [Using Mock Web Server](https://tech.okcupid.com/ui-tests-with-mockwebserver/)
 - [GraalVM with native-image compilation in Travis CI](https://stackoverflow.com/questions/58465833/graalvm-with-native-image-compilation-in-travis-ci)
+- [Quarkus and GraalVM: Booting Hibernate at Supersonic Speed, Subatomic Size](https://www.infoq.com/presentations/quarkus-graalvm-sao-paulo-2019/)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)
