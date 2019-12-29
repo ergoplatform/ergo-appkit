@@ -206,22 +206,6 @@ lazy val appkit = (project in file("appkit"))
       libraryDependencies ++= Seq( mockWebServer ))
     .settings(publish / skip := true)
 
-// examples depend on appkit
-//lazy val examples = (project in file("examples"))
-//    .dependsOn(
-//      common % allConfigDependency,
-//      libApi % allConfigDependency,
-//      javaClientGenerated % allConfigDependency,
-//      appkit % allConfigDependency,
-//      libImpl % allConfigDependency)
-//    .settings(
-//      commonSettings ++ testSettings,
-//      name := "examples",
-//      libraryDependencies ++= Seq( mockWebServer ),
-//      publish / skip := true
-//    )
-
-
 lazy val aggregateCompile = ScopeFilter(
   inProjects(common, javaClientGenerated, libApi, libImpl, appkit),
   inConfigurations(Compile))
