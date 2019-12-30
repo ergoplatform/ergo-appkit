@@ -41,9 +41,8 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public List<ErgoToken> getTokens() {
-        return Iso.JListToColl(Iso.isoErgoTokenToPair(),
-                ErgoType.pairType(ErgoType.byteArrayType(), ErgoType.objectType()).getRType()
-        ).from(_ergoBox.additionalTokens());
+        List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
+        return tokens;
     }
 
     @Override

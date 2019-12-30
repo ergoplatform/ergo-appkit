@@ -71,6 +71,12 @@ object Iso extends LowPriorityIsos {
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
   }
 
+  val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
+    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+    JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
+  }
+
+
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
     override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
     override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
