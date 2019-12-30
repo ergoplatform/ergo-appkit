@@ -64,11 +64,7 @@ public class ErgoType<T> {
         return new ErgoType<>(JavaHelpers.collRType(tItem._rtype));
     }
 
-    static public <A> ErgoType<A[]> arrayType(ErgoType<A> tItem) {
-        return new ErgoType<>(JavaHelpers.arrayRType(tItem._rtype));
-    }
-
-    static public <A> ErgoType<byte[]> byteArrayType() {
+static public <A> ErgoType<byte[]> byteArrayType() {
         return new ErgoType<>(JavaHelpers.arrayRType(RType.ByteType()));
     }
 
