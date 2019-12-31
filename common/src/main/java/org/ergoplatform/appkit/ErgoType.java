@@ -11,7 +11,6 @@ import special.sigma.*;
  * wrapper around {@link RType} type descriptor.
  */
 public class ErgoType<T> {
-    private static ErgoType<Object> _object = new ErgoType<>(RType.AnyRefType());
     private static ErgoType<Byte> _byte = new ErgoType<>(RType.ByteType());
     private static ErgoType<Short> _short = new ErgoType<>(RType.ShortType());
     private static ErgoType<Integer> _integer = new ErgoType<>(RType.IntType());
@@ -33,8 +32,6 @@ public class ErgoType<T> {
     ErgoType(RType<?> rtype) {
         _rtype = rtype;
     }
-
-    static public ErgoType<Object> objectType() { return _object; }
 
     static public ErgoType<Byte> byteType() { return _byte; }
 
