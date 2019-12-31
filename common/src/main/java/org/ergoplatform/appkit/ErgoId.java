@@ -40,4 +40,8 @@ public class ErgoId {
     public String toString() {
         return JavaHelpers.Algos().encode(_idBytes);
     }
+
+    public static ErgoId create(String base16Str) {
+        return new ErgoId(JavaHelpers.decodeStringToBytes(base16Str));
+    }
 }
