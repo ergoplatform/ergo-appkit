@@ -29,7 +29,7 @@ public class BoxOperations {
         for (int i = 0;
              i < unspentBoxes.size()
                      && collected < amountToSpend
-                     && collectedToken < tokenAmount;
+                     && (!tokenOpt.isPresent() || collectedToken < tokenAmount);
              ++i) {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();
