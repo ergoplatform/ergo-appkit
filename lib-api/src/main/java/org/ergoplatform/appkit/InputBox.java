@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import sigmastate.Values;
+
 import java.util.List;
 
 /**
@@ -23,6 +25,11 @@ public interface InputBox {
      * Returns the tokens stored in this box.
      */
      List<ErgoToken> getTokens();
+
+    /**
+     * Returns the ErgoTree of the script guarding the box
+     */
+    Values.ErgoTree getErgoTree();
 
     String toJson(boolean prettyPrint);
 }

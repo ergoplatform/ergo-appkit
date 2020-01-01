@@ -6,6 +6,7 @@ import org.ergoplatform.appkit.*;
 import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
+import sigmastate.Values;
 
 import java.util.List;
 
@@ -43,6 +44,11 @@ public class InputBoxImpl implements InputBox {
     public List<ErgoToken> getTokens() {
         List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
         return tokens;
+    }
+
+    @Override
+    public Values.ErgoTree getErgoTree() {
+        return _ergoBox.ergoTree();
     }
 
     @Override
