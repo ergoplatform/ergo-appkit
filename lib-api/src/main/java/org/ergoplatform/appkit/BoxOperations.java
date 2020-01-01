@@ -33,7 +33,7 @@ public class BoxOperations {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();
             long tokenAmountInBox = box.getTokens().stream()
-                    .filter(t -> tokenOpt.isPresent() && t.getId() == tokenOpt.get().getId())
+                    .filter(t -> tokenOpt.isPresent() && t.getId().equals(tokenOpt.get().getId()))
                     .map(ErgoToken::getValue)
                     .reduce(0L, Long::sum);
             collectedTokens += tokenAmountInBox;
