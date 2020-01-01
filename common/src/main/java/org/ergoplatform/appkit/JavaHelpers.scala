@@ -9,18 +9,19 @@ import scala.collection.JavaConversions
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
+import sigmastate.Values.{ByteArrayConstant, Constant, ErgoTree, EvaluatedValue, SValue}
+import sigmastate.serialization.{GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
-import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
+import sigmastate.eval.{CPreHeader, Colls, CompiletimeIRContext, CostingSigmaDslBuilder, Evaluation}
+import special.sigma.{AnyValue, AvlTree, GroupElement, Header, PreHeader}
 import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
+
 import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
@@ -191,11 +192,15 @@ object JavaHelpers {
   def createBoxCandidate(
                             value: Long, tree: ErgoTree,
                             tokens: util.List[ErgoToken],
-                            registers: util.List[Tuple2[String, Object]], creationHeight: Int): ErgoBoxCandidate = {
+                            registers: util.List[Object], creationHeight: Int): ErgoBoxCandidate = {
     val ts = tokens.convertTo[Coll[(TokenId, Long)]]
-    val rs = toIndexedSeq(registers).map { r =>
-      val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
-      val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
+    val rs = toIndexedSeq(registers).zipWithIndex.map { case (ergoValue: ErgoValue[_], i) =>
+
+      val id = ErgoBox.registerByIndex(i + 4).asInstanceOf[NonMandatoryRegisterId]
+      val value = ergoValue.getValue match {
+        case c: Coll[Byte] => ByteArrayConstant(c)
+        // TODO: add the rest
+      }
       id -> value
     }.toMap
     new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)

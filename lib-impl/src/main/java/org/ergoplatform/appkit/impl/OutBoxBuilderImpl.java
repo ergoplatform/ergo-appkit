@@ -18,7 +18,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     private long _value = 0;
     private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
-    private ArrayList<ErgoValue> _registers = new ArrayList<>();
+    private ArrayList<Object> _registers = new ArrayList<>();
 
     public OutBoxBuilderImpl(
             BlockchainContextImpl ctx, UnsignedTransactionBuilderImpl txB) {
@@ -56,7 +56,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
         checkState(_contract != null, "Contract is not defined");
         Values.ErgoTree tree = _contract.getErgoTree();
         ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
-                new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified
+                _registers, _txB.getCtx().getHeight());  // TODO pass user specified
         // creationHeight
         return new OutBoxImpl(_ctx, ergoBoxCandidate);
     }
