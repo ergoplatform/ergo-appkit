@@ -21,15 +21,14 @@ public class BoxOperations {
             return unspentBoxes;
         }
 
-        // collect boxes to cover requested amount
+        // collect boxes to cover requested amount of coins and tokens
         ArrayList<InputBox> res = new ArrayList<InputBox>();
         long collected = 0;
-        long collectedToken = 0;
+        long collectedTokens = 0;
         long tokenAmount = tokenOpt.map(ErgoToken::getValue).orElse(0L);
         for (int i = 0;
              i < unspentBoxes.size()
-                     && collected < amountToSpend
-                     && (!tokenOpt.isPresent() || collectedToken < tokenAmount);
+                     && (collected < amountToSpend || (!tokenOpt.isPresent() || collectedTokens < tokenAmount));
              ++i) {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();
@@ -37,13 +36,13 @@ public class BoxOperations {
                     .filter(t -> tokenOpt.isPresent() && t.getId() == tokenOpt.get().getId())
                     .map(ErgoToken::getValue)
                     .reduce(0L, Long::sum);
-            collectedToken += tokenAmountInBox;
+            collectedTokens += tokenAmountInBox;
             res.add(box);
         }
         if (collected < amountToSpend)
             throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
-        if (tokenOpt.isPresent() && collectedToken < tokenAmount)
-            throw new RuntimeException("Not enough tokens (id "+ tokenOpt.get().getId().toString() +") in boxes to pay " + tokenAmount);
+        if (tokenOpt.isPresent() && collectedTokens < tokenAmount)
+            throw new RuntimeException("Not enough tokens (id "+ tokenOpt.get().getId().toString() +") in boxes to pay " + tokenAmount + ", found only " + collectedTokens);
         return res;
     }
 
