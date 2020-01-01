@@ -2,6 +2,7 @@ package org.ergoplatform.appkit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
@@ -9,28 +10,39 @@ public class BoxOperations {
 
     public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
                                            long amountToSpend) {
-        return selectTop(unspentBoxes, amountToSpend, new ArrayList<>());
+        return selectTop(unspentBoxes, amountToSpend, Optional.empty());
     }
 
     public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
                                            long amountToSpend,
-                                           List<ErgoToken> tokenAmounts) {
-        if (amountToSpend == 0 && tokenAmounts.isEmpty()) {
+                                           Optional<ErgoToken> tokenOptional) {
+        if (amountToSpend == 0 && !tokenOptional.isPresent()) {
             // all unspent boxes are requested
             return unspentBoxes;
         }
 
+        ErgoToken token = tokenOptional.get();
+
         // collect boxes to cover requested amount
         ArrayList<InputBox> res = new ArrayList<InputBox>();
         long collected = 0;
-        // TODO: check and collect tokens
-        for (int i = 0; i < unspentBoxes.size() && collected < amountToSpend; ++i) {
+        long collectedToken = 0;
+        for (int i = 0;
+             i < unspentBoxes.size() && collected < amountToSpend && collectedToken < token.getValue();
+             ++i) {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();
+            long tokenAmount = box.getTokens().stream()
+                    .filter(t -> t.getId() == token.getId())
+                    .map(ErgoToken::getValue)
+                    .reduce(0L, Long::sum);
+            collectedToken += tokenAmount;
             res.add(box);
         }
         if (collected < amountToSpend)
-            throw new RuntimeException("Not enough boxes to pay " + amountToSpend);
+            throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
+        if (collectedToken < token.getValue())
+            throw new RuntimeException("Not enough tokens (id "+ token.getId().toString() +") in boxes to pay " + token.getValue());
         return res;
     }
 
