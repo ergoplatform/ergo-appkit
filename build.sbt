@@ -118,7 +118,7 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "i609-formal-verification-48b024d3-SNAPSHOT"
+val sigmaStateVersion = "i609-formal-verification-633efcfd-SNAPSHOT"
 val ergoWalletVersion = "appkit-wallet-f7f7d673-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
