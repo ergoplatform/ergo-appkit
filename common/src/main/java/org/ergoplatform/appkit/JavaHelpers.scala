@@ -22,6 +22,7 @@ import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
 
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
@@ -232,8 +233,6 @@ object JavaHelpers {
   }
 
   def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
-
-  def arrayRType[T](tItem: RType[T]): RType[Array[T]] = RType.arrayRType(tItem)
 
   def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType
 
