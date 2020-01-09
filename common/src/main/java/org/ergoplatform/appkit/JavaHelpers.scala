@@ -10,7 +10,7 @@ import org.ergoplatform._
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import sigmastate.SType
 import sigmastate.Values.{ByteArrayConstant, Constant, ErgoTree, EvaluatedValue, SValue}
-import sigmastate.serialization.{GroupElementSerializer, SigmaSerializer, ValueSerializer}
+import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
@@ -238,5 +238,9 @@ object JavaHelpers {
 
   def collFrom(arr: Array[Byte]): Coll[Byte] = {
     Colls.fromArray(arr)
+  }
+
+  def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
+    (new ErgoTreeSerializer).deserializeHeaderWithTreeBytes(SigmaSerializer.startReader(ergoTree.bytes))._4
   }
 }

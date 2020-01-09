@@ -79,6 +79,17 @@ public interface TransactionsApi {
   );
 
   /**
+   * Get unspent boxes protected by given ergoTreeTemplate
+   *
+   * @param ergoTreeTemplate  (required)
+   * @return Call&lt;TransactionOutput&gt;
+   */
+  @GET("transactions/boxes/byErgoTreeTemplate/unspent/{ergoTreeTemplate}")
+  Call<TransactionOutput> transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(
+          @retrofit2.http.Path("ergoTreeTemplate") String ergoTreeTemplate
+  );
+
+  /**
    * Get box by id
    * 
    * @param id  (required)
