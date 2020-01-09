@@ -48,7 +48,7 @@ public interface OutBoxBuilder {
      * @see ErgoValue
      * @see org.ergoplatform.ErgoBox.NonMandatoryRegisterId
      */
-    OutBoxBuilder registers(ErgoValue... registers);
+    OutBoxBuilder registers(ErgoValue<?>... registers);
 
     /**
      * Creates {@link OutBox} instance using specified parameters.

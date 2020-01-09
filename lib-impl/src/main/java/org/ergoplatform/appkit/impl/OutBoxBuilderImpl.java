@@ -18,7 +18,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     private long _value = 0;
     private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
-    private ArrayList<Object> _registers = new ArrayList<>();
+    private ArrayList<ErgoValue<?>> _registers = new ArrayList<>();
 
     public OutBoxBuilderImpl(
             BlockchainContextImpl ctx, UnsignedTransactionBuilderImpl txB) {
@@ -45,7 +45,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     }
 
     @Override
-    public OutBoxBuilderImpl registers(ErgoValue... registers) {
+    public OutBoxBuilderImpl registers(ErgoValue<?>... registers) {
         Preconditions.checkArgument(registers.length > 0,
                 "At least one register should be specified");
         Collections.addAll(_registers, registers);
