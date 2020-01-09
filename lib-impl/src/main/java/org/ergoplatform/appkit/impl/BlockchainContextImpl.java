@@ -80,7 +80,8 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _client;
     }
 
-    List<InputBox> getInputBoxes(List<TransactionOutput> boxes) {
+    /** This method should be private. No classes of HTTP client should ever leak into interfaces. */
+    private List<InputBox> getInputBoxes(List<TransactionOutput> boxes) {
         return boxes.stream().map(box -> {
             String boxId = box.getId();
             ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
