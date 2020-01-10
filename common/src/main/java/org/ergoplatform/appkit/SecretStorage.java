@@ -58,11 +58,11 @@ public class SecretStorage {
 
     public static SecretStorage createFromMnemonicIn(
             String secretDir, Mnemonic mnemonic, String encryptionPassword) {
-        Option<String> passOpt = Iso.jstringToOptionString().to(mnemonic.getPassword());
+        Option<String> passOpt = Iso.arrayCharToOptionString().to(mnemonic.getPassword());
         SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
 
         JsonSecretStorage jsonStorage = JsonSecretStorage
-                .restore(mnemonic.getPhrase(), passOpt, encryptionPassword, settings);
+                .restore(mnemonic.getPhrase().toStringUnsecure(), passOpt, encryptionPassword, settings);
 
         return new SecretStorage(jsonStorage);
     }

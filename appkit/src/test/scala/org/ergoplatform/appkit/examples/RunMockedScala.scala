@@ -2,7 +2,7 @@ package org.ergoplatform.appkit.examples
 
 import java.io.File
 
-import org.ergoplatform.appkit.{AppkitTesting, BlockchainContext, JavaHelpers}
+import org.ergoplatform.appkit.{BlockchainContext, AppkitTesting, JavaHelpers, SecretString}
 import org.ergoplatform.appkit.examples.util.FileMockedErgoClient
 import scalan.util.FileUtil
 import JavaHelpers._
@@ -19,7 +19,7 @@ object RunMockedScala extends App with AppkitTesting {
     nodeResponses,
     java.util.Arrays.asList()).execute { ctx: BlockchainContext =>
     val r = new ExampleScenarios(ctx)
-    val res = r.aggregateUtxoBoxes("abc", addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+    val res = r.aggregateUtxoBoxes(SecretString.create("abc"), addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
     res
   }
   println(res)

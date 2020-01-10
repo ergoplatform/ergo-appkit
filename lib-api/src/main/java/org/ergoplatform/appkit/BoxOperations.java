@@ -50,7 +50,7 @@ public class BoxOperations {
 
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()
-                .withMnemonic( mnemonic.getPhrase(), mnemonic.getPassword())
+                .withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword())
                 .build();
         return prover;
     }

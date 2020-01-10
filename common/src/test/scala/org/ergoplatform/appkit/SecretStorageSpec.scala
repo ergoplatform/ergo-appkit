@@ -7,7 +7,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
     with AppkitTesting {
-  val mnemonic = Mnemonic.create("phrase", "mnemonic pass")
+  val mnemonic = Mnemonic.create("phrase".toCharArray, "mnemonic pass".toCharArray)
   val encryptionPass = "encryption pass"
 
   property("create from mnemonic") {

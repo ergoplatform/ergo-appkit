@@ -28,7 +28,7 @@ public class ExampleScenarios {
      * @param deadline   deadline (blockchain height) after which the newly created box can be spent
      * @param boxIds     string encoded (base16) ids of the boxes to be spent and agregated into the new box.
      */
-    public SignedTransaction aggregateUtxoBoxes(String seedPhrase, String changeAddr, int deadline, String... boxIds) {
+    public SignedTransaction aggregateUtxoBoxes(SecretString seedPhrase, String changeAddr, int deadline, String... boxIds) {
         UnsignedTransactionBuilder txB = _ctx.newTxBuilder();
         InputBox[] boxes = _ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
@@ -65,7 +65,7 @@ public class ExampleScenarios {
      */
     public SignedTransaction prepareBox(
             String mockTxId, short outputIndex, Constants constants, String ergoScript,
-            String seedPhrase) {
+            SecretString seedPhrase) {
         UnsignedTransactionBuilder mockTxB = _ctx.newTxBuilder();
         OutBox out = mockTxB.outBoxBuilder()
                 .contract(_ctx.compileContract(constants, ergoScript))

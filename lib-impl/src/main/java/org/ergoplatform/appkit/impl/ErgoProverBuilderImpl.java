@@ -17,7 +17,7 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         _ctx = ctx;
     }
 
-    public ErgoProverBuilder withMnemonic(String mnemonicPhrase, String mnemonicPass) {
+    public ErgoProverBuilder withMnemonic(SecretString mnemonicPhrase, SecretString mnemonicPass) {
         _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass);
         return this;
     }

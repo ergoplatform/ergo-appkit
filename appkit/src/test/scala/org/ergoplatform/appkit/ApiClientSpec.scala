@@ -19,7 +19,7 @@ class ApiClientSpec
         with ScalaCheckDrivenPropertyChecks
         with AppkitTesting {
 
-  val seed = "abc"
+  val seed = SecretString.create("abc")
   val masterKey = JavaHelpers.seedToMasterKey(seed)
   implicit val vs = ValidationRules.currentSettings
 

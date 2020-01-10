@@ -8,6 +8,7 @@ import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.basics.DLogProtocol;
 import sigmastate.utils.Helpers;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
@@ -62,7 +63,9 @@ public class Address {
      */
     public boolean isP2PK() { return _address instanceof P2PKAddress; }
 
-    /** Obtain an instance of {@link ErgoAddress} related to this Address instance.
+    /**
+     * Obtain an instance of {@link ErgoAddress} related to this Address instance.
+     *
      * @return {@link ErgoAddress} instance associated with this address
      */
     public ErgoAddress getErgoAddress() {
@@ -89,7 +92,7 @@ public class Address {
         return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
     }
 
-    public static Address fromMnemonic(NetworkType networkType, String mnemonic, String mnemonicPass) {
+    public static Address fromMnemonic(NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
         DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
