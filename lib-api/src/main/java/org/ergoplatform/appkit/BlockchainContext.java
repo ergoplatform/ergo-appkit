@@ -66,6 +66,6 @@ public interface BlockchainContext {
     List<InputBox> getUnspentBoxesFor(Address address);
 
     /** Get unspent boxes protected by given ergo tree template */
-    List<InputBox> getUnspentBoxesForErgoTreeTemplate(Values.ErgoTree ergoTree);
+    List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template);
 }
 

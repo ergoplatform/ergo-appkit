@@ -40,17 +40,19 @@ import sigmastate.basics.DLogProtocol.ProveDlog
   */
 abstract class Iso[A, B] {
   def to(a: A): B
-
   def from(b: B): A
+  def andThen[C](iso: Iso[B,C]): Iso[A,C] = ComposeIso(iso, this)
 }
 final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def to(a: B): A = iso.from(a)
   override def from(b: A): B = iso.to(b)
 }
+final case class ComposeIso[A, B, C](iso2: Iso[B, C], iso1: Iso[A, B]) extends Iso[A, C] {
+  def from(c: C) = iso1.from(iso2.from(c))
+  def to(a: A) = iso2.to(iso1.to(a))
+}
+
 trait LowPriorityIsos {
-
-
-
 }
 
 object Iso extends LowPriorityIsos {
@@ -72,6 +74,11 @@ object Iso extends LowPriorityIsos {
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
   }
 
+  implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
+    override def to(et: ErgoType[_]): SType = Evaluation.rtypeToSType(et.getRType)
+    override def from(st: SType): ErgoType[_] = new ErgoType(Evaluation.stypeToRType(st))
+  }
+
   implicit val isoErgoValueToSValue: Iso[ErgoValue[_], EvaluatedValue[SType]] = new Iso[ErgoValue[_], EvaluatedValue[SType]] {
     override def to(x: ErgoValue[_]): EvaluatedValue[SType] =
       Constant(x.getValue.asInstanceOf[SType#WrappedType], Evaluation.rtypeToSType(x.getType.getRType))
@@ -81,11 +88,15 @@ object Iso extends LowPriorityIsos {
     }
   }
 
+  val isoEvaluatedValueToSConstant: Iso[EvaluatedValue[SType], Constant[SType]] = new Iso[EvaluatedValue[SType], Constant[SType]] {
+    override def to(x: EvaluatedValue[SType]): Constant[SType] = x.asInstanceOf[Constant[SType]]
+    override def from(x: Constant[SType]): EvaluatedValue[SType] = x
+  }
+
   val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
     implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
   }
-
 
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
     override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
@@ -249,6 +260,7 @@ object JavaHelpers {
   }
 
   def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
-    (new ErgoTreeSerializer).deserializeHeaderWithTreeBytes(SigmaSerializer.startReader(ergoTree.bytes))._4
+    val r = SigmaSerializer.startReader(ergoTree.bytes)
+    ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
 }

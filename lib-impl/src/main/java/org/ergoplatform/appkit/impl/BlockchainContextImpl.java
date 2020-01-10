@@ -143,11 +143,10 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public List<InputBox> getUnspentBoxesForErgoTreeTemplate(Values.ErgoTree ergoTree) {
-        String ergoTreeTemplateBytes = Base16.encode(JavaHelpers.ergoTreeTemplateBytes(ergoTree));
+    public List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template) {
         List<TransactionOutput> boxes = ExplorerFacade
                 .transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(_retrofitExplorer,
-                        ergoTreeTemplateBytes);
+                        template.getEncodedBytes());
         return getInputBoxes(boxes);
     }
 }
