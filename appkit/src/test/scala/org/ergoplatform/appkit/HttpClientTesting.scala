@@ -23,10 +23,12 @@ trait HttpClientTesting {
   }
 
   def createMockedErgoClient(data: MockData): FileMockedErgoClient = {
-    val nrs = IndexedSeq(
+    val nodeResponses = IndexedSeq(
       loadNodeResponse("response_NodeInfo.json"),
       loadNodeResponse("response_LastHeaders.json")) ++ data.nodeResponses
-    val ers: IndexedSeq[String] = data.explorerResponses.toIndexedSeq
-    new FileMockedErgoClient(nrs.convertTo[JList[JString]], ers.convertTo[JList[JString]])
+    val explorerResponses: IndexedSeq[String] = data.explorerResponses.toIndexedSeq
+    new FileMockedErgoClient(
+      nodeResponses.convertTo[JList[JString]],
+      explorerResponses.convertTo[JList[JString]])
   }
 }

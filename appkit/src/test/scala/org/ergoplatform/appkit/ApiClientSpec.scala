@@ -36,27 +36,6 @@ class ApiClientSpec
     println(ErgoAlgos.encode(newBytes))
   }
 
-  def createMockWebServer(): MockWebServer = {
-    val server = new MockWebServer
-    // Schedule some responses.
-    val nodeInfoJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_NodeInfo.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(nodeInfoJson))
-
-    val lastHeadersJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_LastHeaders.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(lastHeadersJson))
-
-    val boxJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_Box.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(boxJson))
-    server
-  }
-
-
   property("BlockchainContext") {
     val data = MockData(
       nodeResponses = Seq(loadNodeResponse("response_Box1.json")),
