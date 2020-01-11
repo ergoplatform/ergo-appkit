@@ -4,7 +4,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{Matchers, PropSpec}
 
 object Mainnet {
-  val baseUrl = "http://138.68.98.248:9053"
+  val baseUrl = "http://159.65.11.55:9053"
   val addr1 = "9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v"
 }
 
