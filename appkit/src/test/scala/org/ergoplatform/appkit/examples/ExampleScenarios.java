@@ -24,11 +24,13 @@ public class ExampleScenarios {
      * Example scenario creating and signing transaction that spends given boxes and aggregate
      * their ERGs into single new box protected with simple deadline based contract.
      *
-     * @param seedPhrase secrete phrase used to generate secrets required to spend the boxes.
-     * @param deadline   deadline (blockchain height) after which the newly created box can be spent
-     * @param boxIds     string encoded (base16) ids of the boxes to be spent and agregated into the new box.
+     * @param storageFile storage with secret key of the sender
+     * @param storagePass password to access sender secret key in the storage
+     * @param deadline    deadline (blockchain height) after which the newly created box can be spent
+     * @param boxIds      string encoded (base16) ids of the boxes to be spent and agregated into the new box.
      */
-    public SignedTransaction aggregateUtxoBoxes(SecretString seedPhrase, String changeAddr, int deadline, String... boxIds) {
+    public SignedTransaction aggregateUtxoBoxes(
+            String storageFile, SecretString storagePass, String changeAddr, int deadline, String... boxIds) {
         UnsignedTransactionBuilder txB = _ctx.newTxBuilder();
         InputBox[] boxes = _ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
@@ -38,16 +40,15 @@ public class ExampleScenarios {
                         txB.outBoxBuilder()
                                 .value(total - MinFee)
                                 .contract(
-                                    _ctx.compileContract(
-                                        ConstantsBuilder.create().item("deadline", deadline).build(),
-                                        "{ HEIGHT > deadline }"))
+                                        _ctx.compileContract(
+                                                ConstantsBuilder.create().item("deadline", deadline).build(),
+                                                "{ HEIGHT > deadline }"))
                                 .build())
                 .fee(MinFee)
                 .sendChangeTo(Address.create(changeAddr).getErgoAddress())
                 .build();
 
-        ErgoProverBuilder proverB = _ctx.newProverBuilder();
-        ErgoProver prover = proverB.withMnemonic(seedPhrase, null).build();
+        ErgoProver prover = BoxOperations.createProver(_ctx, storageFile, storagePass.toStringUnsecure());
         SignedTransaction signed = prover.sign(tx);
         return signed;
     }
