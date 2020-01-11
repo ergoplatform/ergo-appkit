@@ -1,39 +1,31 @@
 package org.ergoplatform.appkit
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
-
-object Mainnet {
-  val baseUrl = "http://159.65.11.55:9053"
-  val addr1 = "9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v"
-}
+import org.scalatest.{PropSpec, Matchers}
 
 class AnonimousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
-    with AppkitTesting {
-  import Mainnet._
+    with AppkitTesting
+    with HttpClientTesting {
 
-  val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.MAINNET, "")
   property("Get unspent boxes containing given address") {
+    val data = MockData(
+      Seq(
+        loadNodeResponse("response_Box1.json"),
+        loadNodeResponse("response_Box2.json"),
+        loadNodeResponse("response_Box3.json")),
+      Seq(
+        loadExplorerResponse("response_boxesByAddressUnspent.json")))
+
+    val ergoClient = createMockedErgoClient(data)
+
     val boxes: java.util.List[InputBox] = ergoClient.execute { ctx: BlockchainContext =>
       ctx.getUnspentBoxesFor(Address.create(addr1))
     }
-    boxes.forEach{ b: InputBox => {
+    boxes.forEach { b: InputBox =>
       println(b.toJson(true))
-    } }
-  }
-
-  property("Send to address") {
-    //    SendApp.main()
-  }
-}
-
-object SendApp {
-  import Mainnet._
-
-  def main(args: Array[String]) = {
-    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.MAINNET, "")
-    val tx = ergoClient.execute { ctx: BlockchainContext =>
     }
   }
+
 }
+
