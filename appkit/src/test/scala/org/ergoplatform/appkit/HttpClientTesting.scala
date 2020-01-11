@@ -1,6 +1,5 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.examples.util.FileMockedErgoClient
 import scalan.util.FileUtil
 import JavaHelpers._
 import java.util.{List => JList}

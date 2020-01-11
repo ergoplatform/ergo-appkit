@@ -2,8 +2,7 @@ package org.ergoplatform.appkit.examples
 
 import java.io.File
 
-import org.ergoplatform.appkit.{BlockchainContext, AppkitTesting, JavaHelpers, SecretString}
-import org.ergoplatform.appkit.examples.util.FileMockedErgoClient
+import org.ergoplatform.appkit.{AppkitTesting, FileMockedErgoClient, SecretString, JavaHelpers, BlockchainContext}
 import scalan.util.FileUtil
 import JavaHelpers._
 import java.lang.{String => JString}
