@@ -48,8 +48,8 @@ final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def from(b: A): B = iso.to(b)
 }
 final case class ComposeIso[A, B, C](iso2: Iso[B, C], iso1: Iso[A, B]) extends Iso[A, C] {
-  def from(c: C) = iso1.from(iso2.from(c))
-  def to(a: A) = iso2.to(iso1.to(a))
+  def from(c: C): A = iso1.from(iso2.from(c))
+  def to(a: A): C = iso2.to(iso1.to(a))
 }
 
 trait LowPriorityIsos {

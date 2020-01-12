@@ -27,8 +27,10 @@ public class BoxOperations {
         long collectedTokens = 0;
         long tokenAmount = tokenOpt.map(ErgoToken::getValue).orElse(0L);
         for (int i = 0;
-             i < unspentBoxes.size()
-                     && (collected < amountToSpend || (!tokenOpt.isPresent() || collectedTokens < tokenAmount));
+             i < unspentBoxes.size() &&
+                     (collected < amountToSpend ||
+                             (!tokenOpt.isPresent() || collectedTokens < tokenAmount)
+                     );
              ++i) {
             InputBox box = unspentBoxes.get(i);
             collected += box.getValue();
