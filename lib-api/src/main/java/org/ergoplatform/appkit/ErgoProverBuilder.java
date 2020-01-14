@@ -6,11 +6,9 @@ package org.ergoplatform.appkit;
 public interface ErgoProverBuilder {
     /**
      * Configure this builder to use the given seed when building a new prover.
-     *
-     * @param mnemonicPhrase secret seed phrase to be used in prover for generating proofs.
-     * @param mnemonicPass   password to protect secret seed phrase.
-     */
-    ErgoProverBuilder withMnemonic(String mnemonicPhrase, String mnemonicPass);
+     *  @param mnemonicPhrase secret seed phrase to be used in prover for generating proofs.
+     * @param mnemonicPass   password to protect secret seed phrase.*/
+    ErgoProverBuilder withMnemonic(SecretString mnemonicPhrase, SecretString mnemonicPass);
 
     /**
      * Configure this builder to use the given mnemonic when building a new prover.

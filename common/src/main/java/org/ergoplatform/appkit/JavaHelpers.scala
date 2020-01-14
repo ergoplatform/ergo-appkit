@@ -103,6 +103,14 @@ object Iso extends LowPriorityIsos {
     override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
   }
 
+  implicit val arrayCharToOptionString: Iso[SecretString, Option[String]] = new Iso[SecretString, Option[String]] {
+    override def to(ss: SecretString): Option[String] = {
+      if (ss == null || ss.isEmpty) None else Some(ss.toStringUnsecure)
+    }
+    override def from(b: Option[String]): SecretString =
+      if (b.isEmpty) SecretString.empty() else SecretString.create(b.get)
+  }
+
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
       override def to(as: JList[A]): IndexedSeq[B] = {
@@ -227,9 +235,9 @@ object JavaHelpers {
     new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)
   }
 
-  def seedToMasterKey(seedPhrase: String, pass: String = ""): ExtendedSecretKey = {
-    val passOpt = if (Strings.isNullOrEmpty(pass)) None else Some(pass)
-    val seed = WMnemonic.toSeed(seedPhrase, passOpt)
+  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
+    val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
+    val seed = WMnemonic.toSeed(seedPhrase.toStringUnsecure, passOpt)
     val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
     masterKey
   }

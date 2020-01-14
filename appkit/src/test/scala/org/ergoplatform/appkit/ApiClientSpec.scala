@@ -17,9 +17,10 @@ class ApiClientSpec
     extends PropSpec
         with Matchers
         with ScalaCheckDrivenPropertyChecks
-        with AppkitTesting {
+        with AppkitTesting
+        with HttpClientTesting {
 
-  val seed = "abc"
+  val seed = SecretString.create("abc")
   val masterKey = JavaHelpers.seedToMasterKey(seed)
   implicit val vs = ValidationRules.currentSettings
 
@@ -35,54 +36,24 @@ class ApiClientSpec
     println(ErgoAlgos.encode(newBytes))
   }
 
-  def createMockWebServer(): MockWebServer = {
-    val server = new MockWebServer
-    // Schedule some responses.
-    val nodeInfoJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_NodeInfo.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(nodeInfoJson))
-
-    val lastHeadersJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_LastHeaders.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(lastHeadersJson))
-
-    val boxJson = read(file("appkit/src/test/resources/org/ergoplatform/appkit/response_Box.json"))
-    server.enqueue(new MockResponse()
-        .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(boxJson))
-    server
-  }
-
-
   property("BlockchainContext") {
-    // Create a MockWebServer. These are lean enough that you can create a new
-    // instance for every unit test.
-    val server = createMockWebServer()
-    server.start()
+    val data = MockData(
+      nodeResponses = Seq(loadNodeResponse("response_Box1.json")),
+      explorerResponses = Seq())
 
-    // Ask the server for its URL. You'll need this to make HTTP requests.
-    val baseUrl = server.url("/").toString
-    val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.TESTNET, "")
+    val ergoClient = createMockedErgoClient(data)
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-    val res = ergoClient.execute{ ctx: BlockchainContext => {
+    val res = ergoClient.execute { ctx: BlockchainContext =>
       val r = new ExampleScenarios(ctx)
-      val res = r.aggregateUtxoBoxes(seed, addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+      val res = r.aggregateUtxoBoxes(
+        "storage/E2.json", SecretString.create("abc"),
+        addrStr, 10, "d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328"
+      )
       res
-    } }
+    }
 
     println(res)
-
-    // Optional: confirm that your app made the HTTP requests you were expecting.
-    val request1 = server.takeRequest
-    request1.getRequestLine shouldBe "GET /info HTTP/1.1"
-    val request2 = server.takeRequest
-    request2.getRequestLine shouldBe "GET /blocks/lastHeaders/10 HTTP/1.1"
-
-    // Shut down the server. Instances cannot be reused.
-    server.shutdown()
   }
 }

@@ -1,0 +1,1 @@
+{"cipherText":"ad20c1fd013247d3ca065be6a5d1e1067a7cf0d670df3f4b374ac161908243cad5fd66dc15a1be93abe31898237a5638e5e434c8c252fdf92783ca664be91bf8","salt":"e5e6508bdd98aa17e68e837f33a6aaed53bcbb9dfb87c83e5ceeb21538cd17fd","iv":"343da5d766a521e7e1a1643a","authTag":"5bf1552ffab15a0d41f24d1161cc4b58","cipherParams":{"prf":"HmacSHA256","c":128000,"dkLen":256}}

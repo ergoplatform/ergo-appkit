@@ -16,10 +16,10 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
   }
 
   property("Address fromMnemonic") {
-    val mnemonic = "slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet"
-    val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic, "")
+    val mnemonic = SecretString.create("slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet")
+    val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic, SecretString.empty())
     addr.toString shouldBe addrStr
-    val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, "")
+    val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
     addr2.toString shouldNot be (addrStr)
   }
 

@@ -1,25 +1,16 @@
 package org.ergoplatform.appkit.examples
 
-import java.io.File
+import org.ergoplatform.appkit.{AppkitTesting, HttpClientTesting, SecretString, BlockchainContext}
 
-import org.ergoplatform.appkit.{AppkitTesting, BlockchainContext, JavaHelpers}
-import org.ergoplatform.appkit.examples.util.FileMockedErgoClient
-import scalan.util.FileUtil
-import JavaHelpers._
-import java.lang.{String => JString}
-import java.util.{List => JList}
+object RunMockedScala extends App with AppkitTesting with HttpClientTesting {
+  val data = MockData(
+    nodeResponses = Seq(loadNodeResponse("response_Box1.json")),
+    explorerResponses = Seq())
 
-object RunMockedScala extends App with AppkitTesting {
-  import org.ergoplatform.appkit.examples.MockData._
-  val nodeResponses = IndexedSeq(infoFile, lastHeadersFile, boxFile)
-    .map(fn => FileUtil.read(new File(fn)))
-    .convertTo[JList[JString]]
-
-  val res = new FileMockedErgoClient(
-    nodeResponses,
-    java.util.Arrays.asList()).execute { ctx: BlockchainContext =>
+  val ergoClient = createMockedErgoClient(data)
+  val res = ergoClient.execute { ctx: BlockchainContext =>
     val r = new ExampleScenarios(ctx)
-    val res = r.aggregateUtxoBoxes("abc", addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
+    val res = r.aggregateUtxoBoxes("storage/E2.json", SecretString.create("abc"), addrStr, 10, "d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328")
     res
   }
   println(res)
