@@ -1,13 +1,16 @@
 package org.ergoplatform.appkit
 
-import okhttp3.mockwebserver.{MockWebServer, MockResponse}
+import okhttp3.mockwebserver.{MockResponse, MockWebServer}
+import org.ergoplatform.Height
 import org.ergoplatform.appkit.examples.ExampleScenarios
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scalan.util.FileUtil._
-import sigmastate.Values.SigmaPropConstant
+import sigmastate.{BoolToSigmaProp, LT, SInt}
+import sigmastate.Values.{ConstantPlaceholder, IntConstant, SigmaPropConstant}
 import sigmastate.serialization.ErgoTreeSerializer
 
 class ApiClientSpec
@@ -65,11 +68,11 @@ class ApiClientSpec
 
     // Exercise your application code, which should make those HTTP requests.
     // Responses are returned in the same order that they are enqueued.
-    val res = ergoClient.execute(ctx => {
+    val res = ergoClient.execute{ ctx: BlockchainContext => {
       val r = new ExampleScenarios(ctx)
       val res = r.aggregateUtxoBoxes(seed, addrStr, 10, "83b94f2df7e97586a9fe8fe43fa84d252aa74ecee5fe0871f85a45663927cd9a")
       res
-    })
+    } }
 
     println(res)
 
@@ -82,5 +85,4 @@ class ApiClientSpec
     // Shut down the server. Instances cannot be reused.
     server.shutdown()
   }
-
 }

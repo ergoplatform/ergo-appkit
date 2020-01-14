@@ -15,12 +15,12 @@ class AnonimousAccessSpec extends PropSpec with Matchers
 
   val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.MAINNET, "")
   property("Get unspent boxes containing given address") {
-    val boxes: java.util.List[InputBox] = ergoClient.execute { ctx =>
+    val boxes: java.util.List[InputBox] = ergoClient.execute { ctx: BlockchainContext =>
       ctx.getUnspentBoxesFor(Address.create(addr1))
     }
-    boxes.forEach(b => {
+    boxes.forEach{ b: InputBox => {
       println(b.toJson(true))
-    })
+    } }
   }
 
   property("Send to address") {
@@ -33,7 +33,7 @@ object SendApp {
 
   def main(args: Array[String]) = {
     val ergoClient = RestApiErgoClient.create(baseUrl, NetworkType.MAINNET, "")
-    val tx = ergoClient.execute { ctx =>
+    val tx = ergoClient.execute { ctx: BlockchainContext =>
     }
   }
 }

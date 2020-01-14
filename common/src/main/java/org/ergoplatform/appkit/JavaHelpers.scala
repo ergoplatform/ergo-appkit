@@ -3,14 +3,14 @@ package org.ergoplatform.appkit
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import scalan.RType
 import special.collection.Coll
-import com.google.common.base.Strings
+import com.google.common.base.{Preconditions, Strings}
 
 import scala.collection.JavaConversions
 import org.ergoplatform._
-import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
+import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
 import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.serialization.{ValueSerializer, SigmaSerializer, GroupElementSerializer}
+import sigmastate.serialization.{ValueSerializer, ErgoTreeSerializer, SigmaSerializer, GroupElementSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
@@ -21,7 +21,8 @@ import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.util.{List => JList}
-import sigmastate.utils.Helpers._
+
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 
@@ -39,17 +40,19 @@ import sigmastate.basics.DLogProtocol.ProveDlog
   */
 abstract class Iso[A, B] {
   def to(a: A): B
-
   def from(b: B): A
+  def andThen[C](iso: Iso[B,C]): Iso[A,C] = ComposeIso(iso, this)
 }
 final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def to(a: B): A = iso.from(a)
   override def from(b: A): B = iso.to(b)
 }
+final case class ComposeIso[A, B, C](iso2: Iso[B, C], iso1: Iso[A, B]) extends Iso[A, C] {
+  def from(c: C): A = iso1.from(iso2.from(c))
+  def to(a: A): C = iso2.to(iso1.to(a))
+}
+
 trait LowPriorityIsos {
-
-
-
 }
 
 object Iso extends LowPriorityIsos {
@@ -69,6 +72,30 @@ object Iso extends LowPriorityIsos {
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
     override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
+  }
+
+  implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
+    override def to(et: ErgoType[_]): SType = Evaluation.rtypeToSType(et.getRType)
+    override def from(st: SType): ErgoType[_] = new ErgoType(Evaluation.stypeToRType(st))
+  }
+
+  implicit val isoErgoValueToSValue: Iso[ErgoValue[_], EvaluatedValue[SType]] = new Iso[ErgoValue[_], EvaluatedValue[SType]] {
+    override def to(x: ErgoValue[_]): EvaluatedValue[SType] =
+      Constant(x.getValue.asInstanceOf[SType#WrappedType], Evaluation.rtypeToSType(x.getType.getRType))
+      
+    override def from(x: EvaluatedValue[SType]): ErgoValue[_] = {
+      new ErgoValue(x.value, new ErgoType(Evaluation.stypeToRType(x.tpe)))
+    }
+  }
+
+  val isoEvaluatedValueToSConstant: Iso[EvaluatedValue[SType], Constant[SType]] = new Iso[EvaluatedValue[SType], Constant[SType]] {
+    override def to(x: EvaluatedValue[SType]): Constant[SType] = x.asInstanceOf[Constant[SType]]
+    override def from(x: Constant[SType]): EvaluatedValue[SType] = x
+  }
+
+  val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
+    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+    JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
   }
 
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
@@ -183,15 +210,20 @@ object JavaHelpers {
   }
 
   def createBoxCandidate(
-                            value: Long, tree: ErgoTree,
-                            tokens: util.List[ErgoToken],
-                            registers: util.List[Tuple2[String, Object]], creationHeight: Int): ErgoBoxCandidate = {
+        value: Long, tree: ErgoTree,
+        tokens: util.List[ErgoToken],
+        registers: util.List[ErgoValue[_]], creationHeight: Int): ErgoBoxCandidate = {
+    import ErgoBox.nonMandatoryRegisters
+    val nRegs = registers.size()
+    Preconditions.checkArgument(nRegs <= nonMandatoryRegisters.length,
+       "Too many additional registers %d. Max allowed %d", nRegs, nonMandatoryRegisters.length)
     val ts = tokens.convertTo[Coll[(TokenId, Long)]]
-    val rs = toIndexedSeq(registers).map { r =>
-      val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
-      val value = r._2.asInstanceOf[EvaluatedValue[_ <: SType]]
+    val rs = toIndexedSeq(registers).zipWithIndex.map { case (ergoValue, i) =>
+      val id = ErgoBox.nonMandatoryRegisters(i)
+      val value = Iso.isoErgoValueToSValue.to(ergoValue)
       id -> value
     }.toMap
+
     new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)
   }
 
@@ -225,5 +257,10 @@ object JavaHelpers {
 
   def collFrom(arr: Array[Byte]): Coll[Byte] = {
     Colls.fromArray(arr)
+  }
+
+  def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
+    val r = SigmaSerializer.startReader(ergoTree.bytes)
+    ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
 }

@@ -6,6 +6,7 @@ import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
+import scorex.util.encode.Base16;
 import sigmastate.Values;
 
 import java.util.ArrayList;
@@ -79,6 +80,15 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _client;
     }
 
+    /** This method should be private. No classes of HTTP client should ever leak into interfaces. */
+    private List<InputBox> getInputBoxes(List<TransactionOutput> boxes) {
+        return boxes.stream().map(box -> {
+            String boxId = box.getId();
+            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
+            return new InputBoxImpl(this, boxInfo);
+        }).collect(Collectors.toList());
+    }
+
     public NodeInfo getNodeInfo() {
         return _nodeInfo;
     }
@@ -127,13 +137,17 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public List<InputBox> getUnspentBoxesFor(Address address) {
-        List<TransactionOutput> boxes = ExplorerFacade.transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
-        List<InputBox> unspentBoxes = boxes.stream().map(box -> {
-            String boxId = box.getId();
-            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            return new InputBoxImpl(this, boxInfo);
-        }).collect(Collectors.toList());
-        return unspentBoxes;
+        List<TransactionOutput> boxes = ExplorerFacade
+                .transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
+        return getInputBoxes(boxes);
+    }
+
+    @Override
+    public List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template) {
+        List<TransactionOutput> boxes = ExplorerFacade
+                .transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(_retrofitExplorer,
+                        template.getEncodedBytes());
+        return getInputBoxes(boxes);
     }
 }
 
