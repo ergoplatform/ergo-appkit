@@ -20,11 +20,14 @@ import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDsl
 import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 import java.lang.{Long => JLong, String => JString}
+import java.math.BigInteger
 import java.util.{List => JList}
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import sigmastate.basics.DLogProtocol.ProveDlog
+import sigmastate.basics.DLogProtocol.{ProveDlog}
+import sigmastate.basics.{DiffieHellmanTupleProverInput, ProveDHTuple}
+import sigmastate.interpreter.CryptoConstants.{EcPointType, dlogGroup}
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -271,4 +274,16 @@ object JavaHelpers {
     val r = SigmaSerializer.startReader(ergoTree.bytes)
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
+
+  def createDHTProverInput(
+      firstPk: EcPointType, secondPk: EcPointType, secondSk: BigInteger,
+      additionalSecret: EcPointType): DiffieHellmanTupleProverInput = {
+    val g = dlogGroup.generator
+    val dht = ProveDHTuple(g, firstPk, secondPk, additionalSecret)
+    DiffieHellmanTupleProverInput(secondSk, dht)
+  }
+
 }
+
+
+
