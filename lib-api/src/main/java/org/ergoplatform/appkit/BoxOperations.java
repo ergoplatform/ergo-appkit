@@ -55,6 +55,10 @@ public class BoxOperations {
         return prover;
     }
 
+    public static ErgoProver createProver(BlockchainContext ctx, String storageFile, SecretString storagePass) {
+        return createProver(ctx, storageFile, storagePass.toStringUnsecure());
+    }
+
     public static ErgoProver createProver(BlockchainContext ctx, String storageFile, String storagePass) {
         SecretStorage storage = SecretStorage.loadFrom(storageFile);
         storage.unlock(storagePass);

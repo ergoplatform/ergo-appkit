@@ -58,6 +58,13 @@ public class Mnemonic {
     }
 
     /**
+     * Creates {@link Mnemonic} instance with the given phrase and password.
+     */
+    public static Mnemonic create(SecretString phrase, SecretString password) {
+        return new Mnemonic(phrase.getData(), password.getData());
+    }
+
+    /**
      * Returns secret mnemonic phrase stored in this {@link Mnemonic} instance.
      */
     public SecretString getPhrase() {
