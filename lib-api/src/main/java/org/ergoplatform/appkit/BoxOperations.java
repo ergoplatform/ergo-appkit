@@ -8,14 +8,16 @@ import static org.ergoplatform.appkit.Parameters.MinFee;
 
 public class BoxOperations {
 
-    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
-                                           long amountToSpend) {
+    public static List<InputBox> selectTop(
+            List<InputBox> unspentBoxes,
+            long amountToSpend) {
         return selectTop(unspentBoxes, amountToSpend, Optional.empty());
     }
 
-    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
-                                           long amountToSpend,
-                                           Optional<ErgoToken> tokenOpt) {
+    public static List<InputBox> selectTop(
+            List<InputBox> unspentBoxes,
+            long amountToSpend,
+            Optional<ErgoToken> tokenOpt) {
         if (amountToSpend == 0 && !tokenOpt.isPresent()) {
             // all unspent boxes are requested
             return unspentBoxes;
@@ -44,7 +46,8 @@ public class BoxOperations {
         if (collected < amountToSpend)
             throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
         if (tokenOpt.isPresent() && collectedTokens < tokenAmount)
-            throw new RuntimeException("Not enough tokens (id "+ tokenOpt.get().getId().toString() +") in boxes to pay " + tokenAmount + ", found only " + collectedTokens);
+            throw new RuntimeException("Not enough tokens (id " + tokenOpt.get().getId().toString() + ") in" +
+             " boxes to pay " + tokenAmount + ", found only " + collectedTokens);
         return res;
     }
 
@@ -55,13 +58,13 @@ public class BoxOperations {
         return prover;
     }
 
-    public static ErgoProver createProver(BlockchainContext ctx, String storageFile, String storagePass) {
+    public static ErgoProverBuilder createProver(
+            BlockchainContext ctx, String storageFile, String storagePass) {
         SecretStorage storage = SecretStorage.loadFrom(storageFile);
         storage.unlock(storagePass);
-        ErgoProver prover = ctx.newProverBuilder()
-                .withSecretStorage(storage)
-                .build();
-        return prover;
+        ErgoProverBuilder proverB = ctx.newProverBuilder()
+                .withSecretStorage(storage);
+        return proverB;
     }
 
     public static String send(

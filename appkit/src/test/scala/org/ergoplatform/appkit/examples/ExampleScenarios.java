@@ -48,7 +48,7 @@ public class ExampleScenarios {
                 .sendChangeTo(Address.create(changeAddr).getErgoAddress())
                 .build();
 
-        ErgoProver prover = BoxOperations.createProver(_ctx, storageFile, storagePass.toStringUnsecure());
+        ErgoProver prover = BoxOperations.createProver(_ctx, storageFile, storagePass.toStringUnsecure()).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;
     }

@@ -10,16 +10,16 @@ import sigmastate.basics.DLogProtocol;
 
 public class ErgoProverImpl implements ErgoProver {
     private final BlockchainContextImpl _ctx;
-    private final ErgoProvingInterpreter _prover;
+    private final AppkitProvingInterpreter _prover;
 
-    public ErgoProverImpl(BlockchainContextImpl ctx, ErgoProvingInterpreter prover) {
+    public ErgoProverImpl(BlockchainContextImpl ctx, AppkitProvingInterpreter prover) {
         _ctx = ctx;
         _prover = prover;
     }
 
     @Override
     public P2PKAddress getP2PKAddress() {
-        DLogProtocol.ProveDlog pk = _prover.secrets().apply(0).publicImage();
+        DLogProtocol.ProveDlog pk = _prover.pubKeys().apply(0);
         return JavaHelpers.createP2PKAddress(pk, _ctx.getNetworkType().networkPrefix);
     }
 
