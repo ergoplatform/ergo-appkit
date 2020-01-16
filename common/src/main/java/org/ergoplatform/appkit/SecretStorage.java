@@ -48,12 +48,21 @@ public class SecretStorage {
         return new Address(p2pk);
     }
 
+    public void unlock(SecretString encryptionPass) {
+        unlock(encryptionPass.toStringUnsecure());
+    }
+
     public void unlock(String encryptionPass) {
         Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass);
         if (resTry.isFailure()) {
             Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
         }
+    }
+
+    public static SecretStorage createFromMnemonicIn(
+            String secretDir, Mnemonic mnemonic, SecretString encryptionPassword) {
+        return createFromMnemonicIn(secretDir, mnemonic, encryptionPassword.toStringUnsecure());
     }
 
     public static SecretStorage createFromMnemonicIn(
