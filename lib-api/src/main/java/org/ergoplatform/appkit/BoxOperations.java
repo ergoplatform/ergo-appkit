@@ -74,16 +74,21 @@ public class BoxOperations {
             BlockchainContext ctx, ErgoProver senderProver, Address recipient, long amountToSend) {
 
         ErgoContract pkContract = ErgoContracts.sendToPK(ctx, recipient);
-        SignedTransaction signed = sendToContractTx(ctx, senderProver, pkContract, amountToSend);
+        SignedTransaction signed = putToContractTx(ctx, senderProver, pkContract, amountToSend);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }
 
-    public static SignedTransaction sendToContractTx(
+    public static List<InputBox> loadTop(BlockchainContext ctx, Address sender, long amount) {
+        List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
+        List<InputBox> selected = selectTop(unspent, amount);
+        return selected;
+    }
+
+    public static SignedTransaction putToContractTx(
             BlockchainContext ctx, ErgoProver senderProver, ErgoContract contract, long amountToSend) {
         Address sender = senderProver.getAddress();
-        List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-        List<InputBox> boxesToSpend = selectTop(unspent, amountToSend + MinFee);
+        List<InputBox> boxesToSpend = loadTop(ctx, sender, amountToSend + MinFee);
 
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         OutBox newBox = txB.outBoxBuilder()
