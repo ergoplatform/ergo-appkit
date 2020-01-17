@@ -40,9 +40,12 @@ class AnonimousAccessSpec extends PropSpec with Matchers
     val g_y = bobDlog.value
 
     val res = ergoClient.execute { ctx: BlockchainContext =>
+      val aliceProver = BoxOperations.createProver(ctx, "storage/E1.json", "abc").build
       val bobProver = BoxOperations.createProver(ctx, "storage/E2.json", "abc")
-
-      ctx.getUnspentBoxesFor(Address.create(addr1))
+              .withSecondDHTSecret(alice)
+              .build
+//      val signed = BoxOperations.sendToContractTx(ctx, aliceProver, contract, Parameters.MinFee)
+//      println(signed.toJson(true))
     }
 
   }

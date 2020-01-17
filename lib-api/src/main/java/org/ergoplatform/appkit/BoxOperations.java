@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
+/**
+ * A collection of utility operations implemented in terms of abstract Appkit interfaces.
+ */
 public class BoxOperations {
 
     public static List<InputBox> selectTop(
@@ -47,7 +50,7 @@ public class BoxOperations {
             throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
         if (tokenOpt.isPresent() && collectedTokens < tokenAmount)
             throw new RuntimeException("Not enough tokens (id " + tokenOpt.get().getId().toString() + ") in" +
-             " boxes to pay " + tokenAmount + ", found only " + collectedTokens);
+                    " boxes to pay " + tokenAmount + ", found only " + collectedTokens);
         return res;
     }
 
@@ -69,6 +72,15 @@ public class BoxOperations {
 
     public static String send(
             BlockchainContext ctx, ErgoProver senderProver, Address recipient, long amountToSend) {
+
+        ErgoContract pkContract = ErgoContracts.sendToPK(ctx, recipient);
+        SignedTransaction signed = sendToContractTx(ctx, senderProver, pkContract, amountToSend);
+        ctx.sendTransaction(signed);
+        return signed.toJson(true);
+    }
+
+    public static SignedTransaction sendToContractTx(
+            BlockchainContext ctx, ErgoProver senderProver, ErgoContract contract, long amountToSend) {
         Address sender = senderProver.getAddress();
         List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
         List<InputBox> boxesToSpend = selectTop(unspent, amountToSend + MinFee);
@@ -76,11 +88,7 @@ public class BoxOperations {
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         OutBox newBox = txB.outBoxBuilder()
                 .value(amountToSend)
-                .contract(ctx.compileContract(
-                        ConstantsBuilder.create()
-                                .item("recipientPk", recipient.getPublicKey())
-                                .build(),
-                        "{ recipientPk }"))
+                .contract(contract)
                 .build();
         UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
                 .outputs(newBox)
@@ -89,7 +97,7 @@ public class BoxOperations {
                 .build();
 
         SignedTransaction signed = senderProver.sign(tx);
-        ctx.sendTransaction(signed);
-        return signed.toJson(true);
+        return signed;
     }
+
 }
