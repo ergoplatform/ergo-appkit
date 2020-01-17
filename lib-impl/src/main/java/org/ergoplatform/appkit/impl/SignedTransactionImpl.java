@@ -1,11 +1,17 @@
 package org.ergoplatform.appkit.impl;
 
 import com.google.gson.Gson;
+import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.Iso;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
@@ -46,5 +52,13 @@ public class SignedTransactionImpl implements SignedTransaction {
         Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
         String json = gson.toJson(tx);
         return json;
+    }
+
+    @Override
+    public List<InputBox> getOutputsToSpend() {
+        List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
+        List<InputBox> res = outputs.stream()
+          .map(ergoBox -> (InputBox)new InputBoxImpl(_ctx, ergoBox)).collect(Collectors.toList());
+        return res;
     }
 }
