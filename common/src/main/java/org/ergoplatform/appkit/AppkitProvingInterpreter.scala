@@ -18,6 +18,7 @@ import sigmastate.interpreter.{ContextExtension, ProverInterpreter}
 import scala.collection.mutable
 
 object Helpers {
+  import sigmastate.utils.Helpers.TryOps  // don't remove, required for Scala 2.11
   implicit class TryOps[A](val source: Try[A]) extends AnyVal {
     def mapOrThrow[B](f: A => B): B = source.fold(t => throw t, f)
   }
