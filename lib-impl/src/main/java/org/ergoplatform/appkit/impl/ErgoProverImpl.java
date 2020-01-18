@@ -4,9 +4,10 @@ import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.appkit.*;
-import org.ergoplatform.wallet.interpreter.ErgoProvingInterpreter;
 import scala.collection.IndexedSeq;
 import sigmastate.basics.DLogProtocol;
+import sigmastate.eval.CostingSigmaDslBuilder$;
+import special.sigma.BigInt;
 
 public class ErgoProverImpl implements ErgoProver {
     private final BlockchainContextImpl _ctx;
@@ -25,7 +26,12 @@ public class ErgoProverImpl implements ErgoProver {
 
     @Override
     public Address getAddress() {
-       return new Address(getP2PKAddress());
+        return new Address(getP2PKAddress());
+    }
+
+    @Override
+    public BigInt getSecretKey() {
+        return CostingSigmaDslBuilder$.MODULE$.BigInt(_prover.secretKeys().get(0).key().w());
     }
 
     @Override
