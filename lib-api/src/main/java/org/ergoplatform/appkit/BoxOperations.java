@@ -34,7 +34,7 @@ public class BoxOperations {
         for (int i = 0;
              i < unspentBoxes.size() &&
                      (collected < amountToSpend ||
-                             (!tokenOpt.isPresent() || collectedTokens < tokenAmount)
+                             (tokenOpt.isPresent() && collectedTokens < tokenAmount)
                      );
              ++i) {
             InputBox box = unspentBoxes.get(i);
