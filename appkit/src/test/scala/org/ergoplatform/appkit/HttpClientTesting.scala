@@ -17,7 +17,15 @@ trait HttpClientTesting {
     FileUtil.read(FileUtil.file(s"$responsesDir/explorer_responses/$name"))
   }
 
-  case class MockData(nodeResponses: Seq[String] = Nil, explorerResponses: Seq[String] = Nil)
+  case class MockData(nodeResponses: Seq[String] = Nil, explorerResponses: Seq[String] = Nil) {
+    def appendNodeResponses(moreResponses: Seq[String]): MockData = {
+      this.copy(nodeResponses = this.nodeResponses ++ moreResponses)
+    }
+    def appendExplorerResponses(moreResponses: Seq[String]): MockData = {
+      this.copy(explorerResponses = this.explorerResponses ++ moreResponses)
+    }
+  }
+
   object MockData {
     def empty = MockData()
   }

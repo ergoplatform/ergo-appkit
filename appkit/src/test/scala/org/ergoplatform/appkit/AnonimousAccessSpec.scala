@@ -2,12 +2,11 @@ package org.ergoplatform.appkit
 
 import java.util
 
-import org.ergoplatform.appkit.BoxOperations.{createProver, putToContractTx}
+import org.ergoplatform.appkit.BoxOperations.{createProver, putToContractTx, loadTop}
 import org.ergoplatform.appkit.ErgoContracts.sendToPK
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
-import sigmastate.basics.DLogProtocol.ProveDlog
 
 class AnonimousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -35,15 +34,15 @@ class AnonimousAccessSpec extends PropSpec with Matchers
 
   // see original example in sigma https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28
   property("ProveDHTuple") {
-    val ergoClient = createMockedErgoClient(data)
-    val alice = Address.create("9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v")
-    val aliceStorage = "storage/E1.json"
-    val aliceDlog = alice.getPublicKey
+    val ergoClient = createMockedErgoClient(
+      data.appendExplorerResponses(Array(loadExplorerResponse("E1/response_boxesByAddressUnspent.json")))
+          .appendNodeResponses(Array(loadNodeResponse("E1/response_Box1.json")))
+    )
+//    val alice = Address.create("9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v")
+    val aliceStorage = "storage/E2.json"
 
-    val bob = Address.create("9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K")
-    val bobStorage = "storage/E2.json"
-    val bobDlog = bob.getPublicKey
-    val g_y = bobDlog.value
+//    val bob = Address.create("9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K")
+    val bobStorage = "storage/E1.json"
 
     val res = ergoClient.execute { ctx: BlockchainContext =>
 
@@ -51,8 +50,10 @@ class AnonimousAccessSpec extends PropSpec with Matchers
       val g_x = aliceProver.getAddress.getPublicKeyGE
 
       val bobProver = createProver(ctx, bobStorage, "abc")
-              .withSecondDHTSecret(alice)
+              .withSecondDHTSecret(aliceProver.getAddress)
               .build
+      val g_y = bobProver.getAddress.getPublicKeyGE
+      val g_xy = g_x.exp(bobProver.getSecretKey)
 
       val contract = ctx.compileContract(
         ConstantsBuilder.create().item("g_x", g_x).build(),
@@ -60,8 +61,8 @@ class AnonimousAccessSpec extends PropSpec with Matchers
          |  val g_y = OUTPUTS(0).R4[GroupElement].get
          |  val g_xy = OUTPUTS(0).R5[GroupElement].get
          |
-         |  proveDHTuple(g, g_x, g_y, g_xy) || // for bob
-         |  proveDHTuple(g, g_y, g_x, g_xy)    // for alice
+         |  proveDHTuple(groupGenerator, g_x, g_y, g_xy) || // for bob
+         |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
          |}""".stripMargin);
       val aliceTx = putToContractTx(ctx, aliceProver, contract, MinFee)
       val contractBox = aliceTx.getOutputsToSpend().get(0)
@@ -70,9 +71,11 @@ class AnonimousAccessSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder
       val aliceBox = txB.outBoxBuilder
         .value(amountOnContract)
-        .contract(sendToPK(ctx, aliceProver.getAddress)).build
+        .contract(sendToPK(ctx, aliceProver.getAddress))
+        .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
+        .build
 
-      val boxesToPayFee = BoxOperations.loadTop(ctx, bobProver.getAddress, MinFee)
+      val boxesToPayFee = loadTop(ctx, bobProver.getAddress, MinFee)
 
       val inputs = new util.ArrayList[InputBox]()
       inputs.add(contractBox)
