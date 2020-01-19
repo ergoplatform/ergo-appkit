@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
@@ -7,7 +8,9 @@ import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.basics.DLogProtocol;
+import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.utils.Helpers;
+import special.sigma.GroupElement;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -78,6 +81,14 @@ public class Address {
     public DLogProtocol.ProveDlog getPublicKey() {
         checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
         return ((P2PKAddress)_address).pubkey();
+    }
+
+    /**
+     * Extract public key from P2PKAddress and return its group element
+     */
+    public GroupElement getPublicKeyGE() {
+        SecP256K1Point point = getPublicKey().value();
+        return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
     }
 
     /**

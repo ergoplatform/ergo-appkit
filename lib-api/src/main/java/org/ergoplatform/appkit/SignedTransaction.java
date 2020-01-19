@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import java.util.List;
+
 /**
  * This interface represents a transaction which is signed by a prover
  * and can be sent to blockchain.
@@ -12,5 +14,6 @@ package org.ergoplatform.appkit;
 public interface SignedTransaction {
     String getId();
     String toJson(boolean prettyPrint);
+    List<InputBox> getOutputsToSpend();
 }
 

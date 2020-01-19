@@ -6,16 +6,21 @@ import java.util.Optional;
 
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
+/**
+ * A collection of utility operations implemented in terms of abstract Appkit interfaces.
+ */
 public class BoxOperations {
 
-    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
-                                           long amountToSpend) {
+    public static List<InputBox> selectTop(
+            List<InputBox> unspentBoxes,
+            long amountToSpend) {
         return selectTop(unspentBoxes, amountToSpend, Optional.empty());
     }
 
-    public static List<InputBox> selectTop(List<InputBox> unspentBoxes,
-                                           long amountToSpend,
-                                           Optional<ErgoToken> tokenOpt) {
+    public static List<InputBox> selectTop(
+            List<InputBox> unspentBoxes,
+            long amountToSpend,
+            Optional<ErgoToken> tokenOpt) {
         if (amountToSpend == 0 && !tokenOpt.isPresent()) {
             // all unspent boxes are requested
             return unspentBoxes;
@@ -29,7 +34,7 @@ public class BoxOperations {
         for (int i = 0;
              i < unspentBoxes.size() &&
                      (collected < amountToSpend ||
-                             (!tokenOpt.isPresent() || collectedTokens < tokenAmount)
+                             (tokenOpt.isPresent() && collectedTokens < tokenAmount)
                      );
              ++i) {
             InputBox box = unspentBoxes.get(i);
@@ -44,7 +49,8 @@ public class BoxOperations {
         if (collected < amountToSpend)
             throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
         if (tokenOpt.isPresent() && collectedTokens < tokenAmount)
-            throw new RuntimeException("Not enough tokens (id "+ tokenOpt.get().getId().toString() +") in boxes to pay " + tokenAmount + ", found only " + collectedTokens);
+            throw new RuntimeException("Not enough tokens (id " + tokenOpt.get().getId().toString() + ") in" +
+                    " boxes to pay " + tokenAmount + ", found only " + collectedTokens);
         return res;
     }
 
@@ -55,33 +61,43 @@ public class BoxOperations {
         return prover;
     }
 
-    public static ErgoProver createProver(BlockchainContext ctx, String storageFile, SecretString storagePass) {
+    public static ErgoProverBuilder createProver(BlockchainContext ctx, String storageFile, SecretString storagePass) {
         return createProver(ctx, storageFile, storagePass.toStringUnsecure());
     }
 
-    public static ErgoProver createProver(BlockchainContext ctx, String storageFile, String storagePass) {
+    public static ErgoProverBuilder createProver(
+            BlockchainContext ctx, String storageFile, String storagePass) {
         SecretStorage storage = SecretStorage.loadFrom(storageFile);
         storage.unlock(storagePass);
-        ErgoProver prover = ctx.newProverBuilder()
-                .withSecretStorage(storage)
-                .build();
-        return prover;
+        ErgoProverBuilder proverB = ctx.newProverBuilder()
+                .withSecretStorage(storage);
+        return proverB;
     }
 
     public static String send(
             BlockchainContext ctx, ErgoProver senderProver, Address recipient, long amountToSend) {
-        Address sender = senderProver.getAddress();
+
+        ErgoContract pkContract = ErgoContracts.sendToPK(ctx, recipient);
+        SignedTransaction signed = putToContractTx(ctx, senderProver, pkContract, amountToSend);
+        ctx.sendTransaction(signed);
+        return signed.toJson(true);
+    }
+
+    public static List<InputBox> loadTop(BlockchainContext ctx, Address sender, long amount) {
         List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-        List<InputBox> boxesToSpend = selectTop(unspent, amountToSend + MinFee);
+        List<InputBox> selected = selectTop(unspent, amount);
+        return selected;
+    }
+
+    public static SignedTransaction putToContractTx(
+            BlockchainContext ctx, ErgoProver senderProver, ErgoContract contract, long amountToSend) {
+        Address sender = senderProver.getAddress();
+        List<InputBox> boxesToSpend = loadTop(ctx, sender, amountToSend + MinFee);
 
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         OutBox newBox = txB.outBoxBuilder()
                 .value(amountToSend)
-                .contract(ctx.compileContract(
-                        ConstantsBuilder.create()
-                                .item("recipientPk", recipient.getPublicKey())
-                                .build(),
-                        "{ recipientPk }"))
+                .contract(contract)
                 .build();
         UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
                 .outputs(newBox)
@@ -90,7 +106,7 @@ public class BoxOperations {
                 .build();
 
         SignedTransaction signed = senderProver.sign(tx);
-        ctx.sendTransaction(signed);
-        return signed.toJson(true);
+        return signed;
     }
+
 }

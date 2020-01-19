@@ -56,6 +56,10 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(value), ErgoType.groupElementType());
     }
 
+    static public ErgoValue<GroupElement> of(GroupElement ge) {
+        return new ErgoValue<>(ge, ErgoType.groupElementType());
+    }
+
     static public ErgoValue<SigmaProp> of(Values.SigmaBoolean value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
