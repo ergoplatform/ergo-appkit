@@ -14,12 +14,12 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeSta
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
 import sigmastate.interpreter.{ContextExtension, ProverInterpreter}
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 
 import scala.collection.mutable
 
 object Helpers {
   implicit class AppkitTryOps[A](val source: Try[A]) extends AnyVal {
+    import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
     def mapOrThrow[B](f: A => B): B = source.fold(t => throw t, f)
   }
 }
