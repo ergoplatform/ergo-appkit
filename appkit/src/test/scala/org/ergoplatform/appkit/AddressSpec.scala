@@ -32,6 +32,8 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
     val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
     val addr = Pay2SAddress.apply(ergoTree)
     val addr2 = encoder.fromProposition(ergoTree).get
+    val addr3 = encoder.fromProposition(ergoTree.proposition).get
     addr shouldBe addr2
+    addr shouldBe addr3
   }
 }
