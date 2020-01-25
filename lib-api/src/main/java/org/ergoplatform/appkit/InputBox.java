@@ -1,5 +1,8 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.ErgoBox;
+import scala.collection.immutable.Map;
+import sigmastate.SType;
 import sigmastate.Values;
 
 import java.util.List;
@@ -32,5 +35,8 @@ public interface InputBox {
     Values.ErgoTree getErgoTree();
 
     String toJson(boolean prettyPrint);
+
+    Map<ErgoBox.NonMandatoryRegisterId, ? extends Values.EvaluatedValue<? extends SType>> getRegisters();
+
 }
 

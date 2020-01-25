@@ -2,6 +2,8 @@ package org.ergoplatform.appkit;
 
 import special.sigma.GroupElement;
 
+import java.math.BigInteger;
+
 /**
  * This interface is used to configure and build a new {@link ErgoProver prover}.
  */
@@ -31,28 +33,22 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withSecretStorage(SecretStorage storage);
 
     /**
-     * Add DHT prover input using this prover's secret as belonging to the first party (i.e. Alice).
+     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
+     *   h = g^y
+     *   u = g^x
+     *   v = g^xy
      *
-     * @param otherParty       address of the other party whose public key is to be included in
-     *                         Diffie-Hellman Tuple. If this prover corresponds to Alice, then `otherParty`
-     *                         is Bob.
-     * @param additionalSecret an additionalSecret necessary to construct DHT when this prover corresponds to
-     *                         a first party (e.g. Alice)
-     * @see
-     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
-     */
-    ErgoProverBuilder withFirstDHTSecret(Address otherParty, GroupElement additionalSecret);
-
-    /**
-     * Add DHT prover input using this prover's secret as belonging to second party (i.e. Bob).
+     *   NOTE: We can swap x, y and obtain another tuple (g, u, h, v) with secret y (and unknown x).
      *
-     * @param otherParty address of the other party whose public key is to be included in
-     *                   Diffie-Hellman Tuple. This prover is assumed to belong to Bob, then `otherParty`
-     *                   is Alice.
-     * @see
-     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
+     * @param g {@Link GroupElement} instance defining g
+     * @param h {@Link GroupElement} instance defining h
+     * @param u {@Link GroupElement} instance defining u
+     * @param v {@Link GroupElement} instance defining v
+     * @param x {@Link BigInteger} instance defining x
+     * @return
+     *
      */
-    ErgoProverBuilder withSecondDHTSecret(Address otherParty);
+    ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
     /**
      * Builds a new prover using provided configuration.

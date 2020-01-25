@@ -275,14 +275,10 @@ object JavaHelpers {
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
 
-  def createDHTProverInput(
-      firstPk: EcPointType, secondPk: EcPointType, secondSk: BigInteger,
-      additionalSecret: EcPointType): DiffieHellmanTupleProverInput = {
-    val g = dlogGroup.generator
-    val dht = ProveDHTuple(g, firstPk, secondPk, additionalSecret)
-    DiffieHellmanTupleProverInput(secondSk, dht)
+  def createDiffieHellmanTupleProverInput(g:EcPointType, h:EcPointType, u:EcPointType, v:EcPointType, x:BigInteger) = {
+    val dht = ProveDHTuple(g, h, u, v)
+    DiffieHellmanTupleProverInput(x, dht)
   }
-
 }
 
 
