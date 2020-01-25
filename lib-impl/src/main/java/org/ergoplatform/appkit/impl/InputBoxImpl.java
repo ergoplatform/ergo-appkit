@@ -3,9 +3,10 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.appkit.*;
-import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
+import scala.collection.immutable.Map;
+import sigmastate.SType;
 import sigmastate.Values;
 
 import java.util.List;
@@ -61,6 +62,11 @@ public class InputBoxImpl implements InputBox {
         }
         String json = gson.toJson(data);
         return json;
+    }
+
+    @Override
+    public Map<ErgoBox.NonMandatoryRegisterId, ? extends Values.EvaluatedValue<? extends SType>> getRegisters() {
+        return _ergoBox.additionalRegisters();
     }
 
     public ErgoBox getErgoBox() {
