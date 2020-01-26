@@ -62,7 +62,7 @@ public interface BlockchainContext {
 
     ErgoContract compileContract(Constants constants, String ergoScript);
 
-    /** Get unspent boxes containing given address */
+    /** Get unspent boxes owned by the given address */
     List<InputBox> getUnspentBoxesFor(Address address);
 
     /** Get unspent boxes protected by given ergo tree template */
