@@ -51,4 +51,17 @@ public class ExplorerFacade extends ApiFacade {
         });
     }
 
+    static public TransactionOutput transactionsBoxesIdGet(
+            Retrofit r, String boxId) throws ErgoClientException {
+        return execute(r, () -> {
+            Method method = TransactionsApi.class
+                    .getMethod("transactionsBoxesIdGet",
+                            String.class);
+            TransactionOutput res =
+                    RetrofitUtil.<TransactionOutput>invokeServiceMethod(r, method, new Object[]{boxId})
+                            .execute().body();
+            return res;
+        });
+    }
+
 }

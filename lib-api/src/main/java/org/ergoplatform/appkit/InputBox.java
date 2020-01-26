@@ -3,6 +3,7 @@ package org.ergoplatform.appkit;
 import sigmastate.Values;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Interface of UTXO boxes which can be accessed in the blockchain node.
@@ -32,5 +33,7 @@ public interface InputBox {
     Values.ErgoTree getErgoTree();
 
     String toJson(boolean prettyPrint);
+
+    Optional<ErgoId> getSpentTransactionId();
 }
 

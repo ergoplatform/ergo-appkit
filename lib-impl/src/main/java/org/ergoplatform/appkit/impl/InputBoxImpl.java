@@ -9,18 +9,29 @@ import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
 
 import java.util.List;
+import java.util.Optional;
 
 public class InputBoxImpl implements InputBox {
     private final BlockchainContextImpl _ctx;
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
     private final ErgoTransactionOutput _boxData;
+    private final Optional<ErgoId> _spentTxId;
 
     public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData) {
         _ctx = ctx;
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
         _boxData = boxData;
+        _spentTxId = Optional.empty();
+    }
+
+    public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData, Optional<ErgoId> spentTxId) {
+        _ctx = ctx;
+        _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
+        _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
+        _boxData = boxData;
+        _spentTxId = spentTxId;
     }
 
     public InputBoxImpl(BlockchainContextImpl ctx, ErgoBox ergoBox) {
@@ -28,6 +39,7 @@ public class InputBoxImpl implements InputBox {
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
         _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
+        _spentTxId = Optional.empty();
     }
 
     @Override
@@ -70,5 +82,10 @@ public class InputBoxImpl implements InputBox {
     @Override
     public String toString() {
         return String.format("InputBox(%s, %s)", getId(), getValue());
+    }
+
+    @Override
+    public Optional<ErgoId> getSpentTransactionId() {
+        return _spentTxId;
     }
 }

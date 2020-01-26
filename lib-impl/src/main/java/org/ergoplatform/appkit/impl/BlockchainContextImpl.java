@@ -9,8 +9,7 @@ import retrofit2.Retrofit;
 import scorex.util.encode.Base16;
 import sigmastate.Values;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BlockchainContextImpl implements BlockchainContext {
@@ -85,7 +84,8 @@ public class BlockchainContextImpl implements BlockchainContext {
         return boxes.stream().map(box -> {
             String boxId = box.getId();
             ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            return new InputBoxImpl(this, boxInfo);
+            Optional<ErgoId> spentTxId = Optional.ofNullable(box.getSpentTransactionId()).map(ErgoId::create);
+            return new InputBoxImpl(this, boxInfo, spentTxId);
         }).collect(Collectors.toList());
     }
 
@@ -148,6 +148,18 @@ public class BlockchainContextImpl implements BlockchainContext {
                 .transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(_retrofitExplorer,
                         template.getEncodedBytes());
         return getInputBoxes(boxes);
+    }
+
+    @Override
+    public Optional<InputBox> getBoxByIdFromExplorer(ErgoId boxId) {
+        Optional<TransactionOutput> res;
+        try {
+            res = Optional.ofNullable(ExplorerFacade
+                    .transactionsBoxesIdGet(_retrofitExplorer, boxId.toString()));
+        } finally {
+            res = Optional.empty();
+        }
+        return res.flatMap(out -> getInputBoxes(Collections.singletonList(out)).stream().findFirst());
     }
 }
 

@@ -3,6 +3,7 @@ package org.ergoplatform.appkit;
 import sigmastate.Values;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This interface represent a specific context of blockchain for execution
@@ -67,5 +68,8 @@ public interface BlockchainContext {
 
     /** Get unspent boxes protected by given ergo tree template */
     List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template);
+
+    Optional<InputBox> getBoxByIdFromExplorer(ErgoId boxId);
+
 }
 
