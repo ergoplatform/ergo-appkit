@@ -46,12 +46,9 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     }
 
     /**
-     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
-     *   h = g^y
-     *   u = g^x
-     *   v = g^xy
-     *
-     *   NOTE: We can swap x, y and obtain another tuple (g, u, h, v) with secret y (and unknown x).
+     * This code uses original cryptographic notation known from the literature, see the following	     
+     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>	     *   h = g^y
+     * to understand the implementation
      */
     @Override
     public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
