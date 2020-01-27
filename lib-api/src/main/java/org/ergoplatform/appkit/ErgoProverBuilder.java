@@ -33,12 +33,7 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withSecretStorage(SecretStorage storage);
 
     /**
-     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
-     *   h = g^y
-     *   u = g^x
-     *   v = g^xy
-     *
-     *   NOTE: We can swap x, y and obtain another tuple (g, u, h, v) with secret y (and unknown x).
+     * Add DHT prover input using this prover's secret. 
      *
      * @param g {@Link GroupElement} instance defining g
      * @param h {@Link GroupElement} instance defining h
@@ -46,7 +41,12 @@ public interface ErgoProverBuilder {
      * @param v {@Link GroupElement} instance defining v
      * @param x {@Link BigInteger} instance defining x
      * @return
-     *
+     * 
+     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
+     *   h = g^y
+     *   u = g^x
+     *   v = g^xy
+     * 
      */
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
