@@ -47,6 +47,11 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
+    public List<ErgoValue<?>> getRegisters() {
+        return JavaHelpers.getBoxRegisters(_ergoBox);
+    }
+
+    @Override
     public Values.ErgoTree getErgoTree() {
         return _ergoBox.ergoTree();
     }
