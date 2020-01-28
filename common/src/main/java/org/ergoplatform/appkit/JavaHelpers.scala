@@ -23,10 +23,10 @@ import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
 import java.util.{List => JList}
 
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
+import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import sigmastate.basics.DLogProtocol.{ProveDlog}
-import sigmastate.basics.{DiffieHellmanTupleProverInput, ProveDHTuple}
+import sigmastate.basics.DLogProtocol.ProveDlog
+import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
 import sigmastate.interpreter.CryptoConstants.{EcPointType, dlogGroup}
 
 /** Type-class of isomorphisms between types.
@@ -218,6 +218,18 @@ object JavaHelpers {
   private def anyValueToConstant(v: AnyValue): Constant[_ <: SType] = {
     val tpe = Evaluation.rtypeToSType(v.tVal)
     Constant(v.value.asInstanceOf[SType#WrappedType], tpe)
+  }
+
+  def getBoxRegisters(ergoBox: ErgoBox): JList[ErgoValue[_]] = {
+    val size = ergoBox.additionalRegisters.size
+    val res = new util.ArrayList[ErgoValue[_]](size)
+    for (i <- 0 until size) { res.add(null) }
+    for ((r, v: EvaluatedValue[_]) <- ergoBox.additionalRegisters.toIndexedSeq.sortBy(_._1.number)) {
+      val i = r.number - ErgoBox.mandatoryRegistersCount
+      assert(res.get(i) == null, "invalid ordering of registers")
+      res.add(Iso.isoErgoValueToSValue.from(v))
+    }
+    res
   }
 
   def createBoxCandidate(
