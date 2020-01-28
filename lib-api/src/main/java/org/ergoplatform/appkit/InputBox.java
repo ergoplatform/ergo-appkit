@@ -27,8 +27,14 @@ public interface InputBox {
     /**
      * Returns the tokens stored in this box.
      */
-     List<ErgoToken> getTokens();
+    List<ErgoToken> getTokens();
 
+    /**
+     * Returns values of the non-mandatory registers which are stored in the box (R4, R5, R6, R7, R8, R9)
+     * Index 0 corresponds to R4, 1 -> R5, etc.
+     */
+    List<ErgoValue<?>> getRegisters();
+    
     /**
      * Returns the ErgoTree of the script guarding the box
      */
