@@ -6,6 +6,8 @@ import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
 
+import java.util.Objects;
+
 /**
  * Runtime representation of ErgoScript types. ErgoType is a Java friendly
  * wrapper around {@link RType} type descriptor.
@@ -28,9 +30,21 @@ public class ErgoType<T> {
 
     private final RType<?> _rtype;
 
-    /** Use static methods to create instances. */
+    /**
+     * Use static methods to create instances.
+     */
     ErgoType(RType<?> rtype) {
         _rtype = rtype;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(_rtype);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof ErgoType<?>) && Objects.equals(_rtype, ((ErgoType<?>)obj)._rtype);
     }
 
     static public ErgoType<Byte> byteType() { return _byte; }
