@@ -220,13 +220,13 @@ object JavaHelpers {
     Constant(v.value.asInstanceOf[SType#WrappedType], tpe)
   }
 
+  /** Extracts registers as a list of ErgoValue instances (containing type descriptors). */
   def getBoxRegisters(ergoBox: ErgoBox): JList[ErgoValue[_]] = {
     val size = ergoBox.additionalRegisters.size
     val res = new util.ArrayList[ErgoValue[_]](size)
-    for (i <- 0 until size) { res.add(null) }
     for ((r, v: EvaluatedValue[_]) <- ergoBox.additionalRegisters.toIndexedSeq.sortBy(_._1.number)) {
       val i = r.number - ErgoBox.mandatoryRegistersCount
-      assert(res.get(i) == null, "invalid ordering of registers")
+      require(i == res.size(), s"registers are not densely packed in a box: ${ergoBox.additionalRegisters}")
       res.add(Iso.isoErgoValueToSValue.from(v))
     }
     res
