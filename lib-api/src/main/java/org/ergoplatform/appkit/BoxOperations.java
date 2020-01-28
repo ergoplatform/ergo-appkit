@@ -38,6 +38,10 @@ public class BoxOperations {
                      );
              ++i) {
             InputBox box = unspentBoxes.get(i);
+            if (!tokenOpt.isPresent() && !box.getTokens().isEmpty()) {
+                // skip boxes with tokens if token is not asked
+                continue;
+            }
             collected += box.getValue();
             long tokenAmountInBox = box.getTokens().stream()
                     .filter(t -> tokenOpt.isPresent() && t.getId().equals(tokenOpt.get().getId()))

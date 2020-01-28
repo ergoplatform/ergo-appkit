@@ -331,7 +331,7 @@ At the moment Appkit is not published at public servers, so the whole repository
 needs to be clonned and Appkit jar file published locally in the Ivy repository.
 
 ```shell
-$ git clone git@github.com:aslesarenko/ergo-appkit.git
+$ git clone https://github.com/aslesarenko/ergo-appkit.git
 $ cd ergo-appkit
 $ sbt publishLocal 
 ```
