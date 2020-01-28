@@ -6,8 +6,10 @@ import org.ergoplatform.appkit.BoxOperations.{createProver, putToContractTx, loa
 import org.ergoplatform.appkit.ErgoContracts.sendToPK
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.config.ErgoToolConfig
+import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
+import special.sigma.GroupElement
 
 class AnonimousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -31,6 +33,35 @@ class AnonimousAccessSpec extends PropSpec with Matchers
     boxes.forEach { b: InputBox =>
       println(b.toJson(true))
     }
+  }
+
+  property("PreHeader building") {
+    val ergoClient = createMockedErgoClient(data)
+
+    val (tx, pk) = ergoClient.execute[(UnsignedTransactionImpl, GroupElement)] { ctx: BlockchainContext =>
+      val boxes = ctx.getUnspentBoxesFor(Address.create(addr1))
+
+      val aliceProver = createProver(ctx, "storage/E2.json", "abc").build
+      val alicePk = aliceProver.getAddress.getPublicKeyGE
+      val ph = ctx.createPreHeader()
+        .height(ctx.getHeight + 1)
+        .minerPk(alicePk).build()
+      // TODO move this tx building code to some reusable method
+      val txB = ctx.newTxBuilder()
+      val aliceBox = txB.outBoxBuilder
+          .value(MinFee)
+          .contract(ErgoContracts.sendToPK(ctx, aliceProver.getAddress))
+          .build
+
+      val tx = txB.boxesToSpend(boxes)
+        .outputs(aliceBox)
+        .preHeader(ph)
+        .fee(MinFee)
+        .sendChangeTo(aliceProver.getP2PKAddress)
+        .build().asInstanceOf[UnsignedTransactionImpl]
+      (tx, alicePk)
+    }
+    tx.getStateContext().sigmaPreHeader.minerPk shouldBe pk
   }
 
   // see original example in sigma https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28

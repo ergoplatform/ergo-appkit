@@ -28,10 +28,18 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     private List<InputBoxImpl> _inputBoxes;
     private long _feeAmount;
     private ErgoAddress _changeAddress;
+    private PreHeaderImpl _ph;
 
     public UnsignedTransactionBuilderImpl(
             BlockchainContextImpl ctx) {
         _ctx = ctx;
+    }
+
+    @Override
+    public UnsignedTransactionBuilder preHeader(org.ergoplatform.appkit.PreHeader ph) {
+        checkState(_ph == null, "PreHeader is already specified");
+        _ph = (PreHeaderImpl)ph;
+        return this;
     }
 
     @Override
@@ -126,7 +134,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(),
                     ErgoType.headerType().getRType()).to(_ctx.getHeaders());
             private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
-            private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
+            private PreHeader _preHeader = _ph == null ? JavaHelpers.toPreHeader(_allHeaders.apply(0)) : _ph._ph;
 
             @Override
             public Coll<Header> sigmaLastHeaders() {

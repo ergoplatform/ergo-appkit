@@ -6,8 +6,9 @@ import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
-import scorex.util.encode.Base16;
 import sigmastate.Values;
+import sigmastate.eval.CPreHeader;
+import special.sigma.Header;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,13 @@ public class BlockchainContextImpl implements BlockchainContext {
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
+    }
+
+    @Override
+    public PreHeaderBuilder createPreHeader() {
+        Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
+        CPreHeader ph = new CPreHeader(h.version(), h.parentId(), h.timestamp(), h.nBits(), h.height(), h.minerPk(), h.votes());
+        return new PreHeaderBuilderImpl(this);
     }
 
     @Override
