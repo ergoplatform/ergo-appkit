@@ -69,6 +69,9 @@ public interface UnsignedTransactionBuilder {
      */
     BlockchainContext getCtx();
 
+    /** Returns current (either default of configured) pre-header. */
+    PreHeader getPreHeader();
+
     /**
      * Returns the network type of the blockchain represented by the
      *  {@link UnsignedTransactionBuilder#getCtx()

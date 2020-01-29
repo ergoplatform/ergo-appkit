@@ -6,10 +6,9 @@ import org.ergoplatform.appkit.BoxOperations.{createProver, putToContractTx, loa
 import org.ergoplatform.appkit.ErgoContracts.sendToPK
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.config.ErgoToolConfig
-import org.ergoplatform.appkit.impl.UnsignedTransactionImpl
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
-import special.sigma.GroupElement
+import sigmastate.lang.exceptions.InterpreterException
 
 class AnonimousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -38,30 +37,31 @@ class AnonimousAccessSpec extends PropSpec with Matchers
   property("PreHeader building") {
     val ergoClient = createMockedErgoClient(data)
 
-    val (tx, pk) = ergoClient.execute[(UnsignedTransactionImpl, GroupElement)] { ctx: BlockchainContext =>
-      val boxes = ctx.getUnspentBoxesFor(Address.create(addr1))
-
+    val signed = ergoClient.execute { ctx: BlockchainContext =>
       val aliceProver = createProver(ctx, "storage/E2.json", "abc").build
-      val alicePk = aliceProver.getAddress.getPublicKeyGE
+      val aliceAddr = aliceProver.getAddress
+      val alicePk = aliceAddr.getPublicKeyGE
+
+      val firstTx = BoxOperations.putToContractTx(ctx, aliceProver,
+        ctx.compileContract(
+          ConstantsBuilder.create.item("recipientGE", aliceAddr.getPublicKeyGE).build,
+          "{ sigmaProp(CONTEXT.preHeader.minerPk == recipientGE) }"),
+        MinFee * 2)
+      val theBox = firstTx.getOutputsToSpend().get(0)
+
       val ph = ctx.createPreHeader()
         .height(ctx.getHeight + 1)
         .minerPk(alicePk).build()
-      // TODO move this tx building code to some reusable method
-      val txB = ctx.newTxBuilder()
-      val aliceBox = txB.outBoxBuilder
-          .value(MinFee)
-          .contract(ErgoContracts.sendToPK(ctx, aliceProver.getAddress))
-          .build
 
-      val tx = txB.boxesToSpend(boxes)
-        .outputs(aliceBox)
-        .preHeader(ph)
-        .fee(MinFee)
-        .sendChangeTo(aliceProver.getP2PKAddress)
-        .build().asInstanceOf[UnsignedTransactionImpl]
-      (tx, alicePk)
+      // TODO move this tx building code to some reusable method
+      val txB = ctx.newTxBuilder().preHeader(ph)
+      BoxOperations.spendBoxesTx(ctx, txB, util.Arrays.asList(theBox), aliceProver, aliceAddr, MinFee, MinFee)
+
+      an[InterpreterException] shouldBe thrownBy {
+        val txB = ctx.newTxBuilder()
+        BoxOperations.spendBoxesTx(ctx, txB, util.Arrays.asList(theBox), aliceProver, aliceAddr, MinFee, MinFee)
+      }
     }
-    tx.getStateContext().sigmaPreHeader.minerPk shouldBe pk
   }
 
   // see original example in sigma https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28

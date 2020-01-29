@@ -18,6 +18,7 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     private final ApiClient _client;
     private final Retrofit _retrofit;
+    final PreHeaderImpl _preHeader;
     private ExplorerApiClient _explorer;
     private Retrofit _retrofitExplorer;
     private final NetworkType _networkType;
@@ -37,12 +38,12 @@ public class BlockchainContextImpl implements BlockchainContext {
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
+        Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
+        _preHeader = new PreHeaderImpl(JavaHelpers.toPreHeader(h));
     }
 
     @Override
     public PreHeaderBuilder createPreHeader() {
-        Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
-        CPreHeader ph = new CPreHeader(h.version(), h.parentId(), h.timestamp(), h.nBits(), h.height(), h.minerPk(), h.votes());
         return new PreHeaderBuilderImpl(this);
     }
 
@@ -88,7 +89,9 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _client;
     }
 
-    /** This method should be private. No classes of HTTP client should ever leak into interfaces. */
+    /**
+     * This method should be private. No classes of HTTP client should ever leak into interfaces.
+     */
     private List<InputBox> getInputBoxes(List<TransactionOutput> boxes) {
         return boxes.stream().map(box -> {
             String boxId = box.getId();
@@ -99,6 +102,10 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     public NodeInfo getNodeInfo() {
         return _nodeInfo;
+    }
+
+    public PreHeader getPreHeader() {
+        return _preHeader;
     }
 
     public List<BlockHeader> getHeaders() {

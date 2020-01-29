@@ -113,4 +113,24 @@ public class BoxOperations {
         return signed;
     }
 
+    public static SignedTransaction spendBoxesTx(
+            BlockchainContext ctx,
+            UnsignedTransactionBuilder txB,
+            List<InputBox> boxes,
+            ErgoProver sender, Address recipient, long amount, long fee) {
+        OutBox aliceBox = txB.outBoxBuilder()
+                .value(amount)
+                .contract(ErgoContracts.sendToPK(ctx, recipient))
+                .build();
+
+        UnsignedTransaction tx = txB.boxesToSpend(boxes)
+                .outputs(aliceBox)
+                .fee(fee)
+                .sendChangeTo(sender.getP2PKAddress())
+                .build();
+        SignedTransaction signed = sender.sign(tx);
+        return signed;
+    }
+
+
 }
