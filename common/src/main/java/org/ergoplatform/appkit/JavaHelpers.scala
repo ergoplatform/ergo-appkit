@@ -23,7 +23,7 @@ import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
 import java.util.{List => JList}
 
-import sigmastate.utils.Helpers._
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
