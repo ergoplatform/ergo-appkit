@@ -163,7 +163,7 @@ object JavaHelpers {
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
-  val PreHeaderRType: RType[PreHeader] = special.sigma.PreHeaderRType
+  val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
 
   def Algos: ErgoAlgos = org.ergoplatform.settings.ErgoAlgos
 
@@ -196,7 +196,7 @@ object JavaHelpers {
     ErgoAlgos.encode(ErgoAlgos.hash(s))
   }
 
-  def toPreHeader(h: Header): PreHeader = {
+  def toPreHeader(h: Header): special.sigma.PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
   }
 
