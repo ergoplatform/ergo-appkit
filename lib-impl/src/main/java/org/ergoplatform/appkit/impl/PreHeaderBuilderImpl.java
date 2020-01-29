@@ -73,7 +73,7 @@ public class PreHeaderBuilderImpl implements PreHeaderBuilder {
         int height = _height == null ? h.height() : _height;
         GroupElement minerPk = _minerPk == null ? h.minerPk() : _minerPk;
         Coll<Object> votes = _votes == null ? h.votes() : _votes;
-        CPreHeader ph = new CPreHeader( version, parentId, timestamp, nBits, height, minerPk, votes);
+        CPreHeader ph = new CPreHeader(version, parentId, timestamp, nBits, height, minerPk, votes);
         return new PreHeaderImpl(ph);
     }
 }

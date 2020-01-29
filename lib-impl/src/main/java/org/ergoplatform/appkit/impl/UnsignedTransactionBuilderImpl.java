@@ -134,7 +134,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(),
                     ErgoType.headerType().getRType()).to(_ctx.getHeaders());
             private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
-            private PreHeader _preHeader = _ph == null ? JavaHelpers.toPreHeader(_allHeaders.apply(0)) : _ph._ph;
+            private PreHeader _preHeader = _ph == null ? _ctx._preHeader._ph : _ph._ph;
 
             @Override
             public Coll<Header> sigmaLastHeaders() {
@@ -156,6 +156,11 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     @Override
     public BlockchainContext getCtx() {
         return _ctx;
+    }
+
+    @Override
+    public org.ergoplatform.appkit.PreHeader getPreHeader() {
+        return _ph == null ? _ctx.getPreHeader() : _ph;
     }
 
     @Override
