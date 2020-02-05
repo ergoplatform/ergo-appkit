@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
 
-import scala.collection.JavaConversions
+import scala.collection.{JavaConversions, mutable}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
@@ -21,7 +21,7 @@ import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
 import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
-import java.util.{List => JList}
+import java.util.{List => JList, Map => JMap}
 
 import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
@@ -88,6 +88,15 @@ object Iso extends LowPriorityIsos {
       
     override def from(x: EvaluatedValue[SType]): ErgoValue[_] = {
       new ErgoValue(x.value, new ErgoType(Evaluation.stypeToRType(x.tpe)))
+    }
+  }
+
+  implicit def isoJMapToMap[K,V1,V2](iso: Iso[V1, V2]): Iso[JMap[K, V1], scala.collection.Map[K,V2]] = new Iso[JMap[K, V1], scala.collection.Map[K,V2]] {
+    override def to(a: JMap[K, V1]): scala.collection.Map[K, V2] = {
+      JavaConversions.mapAsScalaMap(a).mapValues(iso.to)
+    }
+    override def from(b: scala.collection.Map[K, V2]): JMap[K, V1] = {
+      JavaConversions.mapAsJavaMap(b.mapValues(iso.from))
     }
   }
 

@@ -64,6 +64,23 @@ class AnonimousAccessSpec extends PropSpec with Matchers
     }
   }
 
+  property("SignedInput") {
+    val ergoClient = createMockedErgoClient(data)
+
+    val signed = ergoClient.execute[SignedTransaction] { ctx: BlockchainContext =>
+      val aliceProver = createProver(ctx, "storage/E2.json", "abc").build
+      val aliceAddr = aliceProver.getAddress
+      val alicePk = aliceAddr.getPublicKeyGE
+      val pkContract = ErgoContracts.sendToPK(ctx, aliceAddr)
+      val signed = putToContractTx(ctx, aliceProver, pkContract, MinFee)
+      signed
+    }
+    val in = signed.getSignedInputs.get(0)
+    in.getProofBytes should not be empty
+    in.getContextVars shouldBe empty
+    assert(in.getTransaction eq signed)
+  }
+
   // see original example in sigma https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28
   property("ProveDHTuple") {
     val ergoClient = createMockedErgoClient(
