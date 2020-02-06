@@ -64,13 +64,12 @@ class AnonimousAccessSpec extends PropSpec with Matchers
     }
   }
 
-  property("SignedInput") {
+  property("getSignedInputs") {
     val ergoClient = createMockedErgoClient(data)
 
     val signed = ergoClient.execute[SignedTransaction] { ctx: BlockchainContext =>
       val aliceProver = createProver(ctx, "storage/E2.json", "abc").build
       val aliceAddr = aliceProver.getAddress
-      val alicePk = aliceAddr.getPublicKeyGE
       val pkContract = ErgoContracts.sendToPK(ctx, aliceAddr)
       val signed = putToContractTx(ctx, aliceProver, pkContract, MinFee)
       signed
@@ -79,6 +78,21 @@ class AnonimousAccessSpec extends PropSpec with Matchers
     in.getProofBytes should not be empty
     in.getContextVars shouldBe empty
     assert(in.getTransaction eq signed)
+  }
+
+  property("signedTxFromJson") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val aliceProver = createProver(ctx, "storage/E2.json", "abc").build
+      val aliceAddr = aliceProver.getAddress
+      val pkContract = ErgoContracts.sendToPK(ctx, aliceAddr)
+      val signed = putToContractTx(ctx, aliceProver, pkContract, MinFee)
+      val json = signed.toJson(false)
+      val parsed = ctx.signedTxFromJson(json)
+      val json2 = parsed.toJson(false)
+      json shouldBe json2
+    }
   }
 
   // see original example in sigma https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28

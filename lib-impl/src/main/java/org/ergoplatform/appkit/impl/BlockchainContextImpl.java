@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit.impl;
 
+import com.google.gson.Gson;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
@@ -7,7 +8,6 @@ import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
 import sigmastate.Values;
-import sigmastate.eval.CPreHeader;
 import special.sigma.Header;
 
 import java.util.ArrayList;
@@ -45,6 +45,14 @@ public class BlockchainContextImpl implements BlockchainContext {
     @Override
     public PreHeaderBuilder createPreHeader() {
         return new PreHeaderBuilderImpl(this);
+    }
+
+    @Override
+    public SignedTransaction signedTxFromJson(String json) {
+        Gson gson = getApiClient().getGson();
+        ErgoTransaction txData = gson.fromJson(json, ErgoTransaction.class);
+        ErgoLikeTransaction tx = ScalaBridge.isoErgoTransaction().to(txData);
+        return new SignedTransactionImpl(this, tx);
     }
 
     @Override
