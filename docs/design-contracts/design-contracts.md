@@ -52,7 +52,8 @@ Ergo is similar to Bitcoin).
 
 Since Ergo natively support tokens for this specific example of sending tokens we don't
 need to write any code in ErgoScript.
-What we need instead is to create the 'send' transaction shown in the following figure.
+What we need instead is to create the 'send' transaction shown in the following figure,
+which describe the same token transfer but declaratively.
 
 ![Debugger](send-tx.png)
 
@@ -75,17 +76,52 @@ Thus, when in the Ethereum contract "We send amount from sender to recipient" we
 changing balances and update storage with the concrete set of commands, and this happens
 on-chain. 
 
-In Ergo (as in Bitcoin) the transaction of created off-chain and the effects of the
-transaction on the state is that input coins (or Boxes in Ergo's parlance) are removed and
-output boxes are added to the
+In Ergo (as in Bitcoin) transactions are created off-chain and the effects of the
+transaction on the blockchain state is that input coins (or Boxes in Ergo's parlance) are
+removed and output boxes are added to the
 [UTXO](https://en.wikipedia.org/wiki/Unspent_transaction_output) set, this happens
 atomically (all or nothing), and no contract code is necessary in this simple example.
 
+However in more complex application scenarios we do need to use ErgoScript code and this
+is what we are going to discuss next.
 
 ### From Changing State to Checking Context 
 
-The figure above 
-It is not possible to "change" anything in ErgoScript because all the inputs, outputs and
-other transaction parameters available in the script are immutable.
+In the `send` function example we first check the pre-condition (`require(amount <=
+balances[msg.sender],...)`) and then change the state (i.e. update balances
+`balances[msg.sender] -= amount`). This is typical in Ethereum transactions, before
+we change anything we need to check if it is valid to do at all.
+
+In Ergo, as we discussed, the state (i.e. UTXO set of boxes) is changed implicitly when a
+transaction is included in a block. Thus we only need to check the pre-conditions before
+the transaction can be added to the block. This is where ErgoScript comes into a play.
+
+It is not possible to "change the state" in ErgoScript because it is a language to check
+pre-conditions for spending coins. ErgoScript is purely functional language, without side effects
+operating with immutable data values. This means all the inputs, outputs and other
+transaction parameters available in a script are immutable. This, among other things,
+makes ErgoScript a very simple language, easy to learn and safe to use. Similar to
+Bitcoin, each input box contains a script, which should be executed to the `true` value in
+order to 1) allow spending of the box (i.e. removing from the UTXO set) and 2) add
+the transaction to the block.
+
+It is therefore incorrect to say that ErgoScript is the language of Ergo contracts,
+because it is the language of propositions (of logical predicates, formulas, etc.)
+protecting boxes from "illegal" spending. However, unlike Bitcoin, in Ergo the whole
+transaction content as well as the current blockchain context is available in every
+input's script, which unlocks the whole range of applications like (DEX, DeFi Apps, LETS,
+etc).
+
+"What is Ergo contract?" you may ask. Be patient, that is what we are going to discuss
+next.
  
+### Graphical Notation
+
+
+### From Diagrams To Contracts
+
+### Conclusions
+
+### References
+
 
