@@ -33,6 +33,7 @@ object Helpers {
  */
 class AppkitProvingInterpreter(
       val secretKeys: JList[ExtendedSecretKey],
+      val dLogInputs: JList[DLogProverInput],
       val dhtInputs: JList[DiffieHellmanTupleProverInput],
       params: ErgoLikeParameters)
   extends ErgoLikeInterpreter()(new CompiletimeIRContext) with ProverInterpreter {
@@ -42,9 +43,10 @@ class AppkitProvingInterpreter(
   import Helpers._
 
   val secrets: Seq[SigmaProtocolPrivateInput[_ <: SigmaProtocol[_], _ <: SigmaProtocolCommonInput[_]]] = {
-    val dlogs = JListToIndexedSeq(identityIso[ExtendedSecretKey]).to(secretKeys).map(_.key)
-    val dhts = JListToIndexedSeq(identityIso[DiffieHellmanTupleProverInput]).to(dhtInputs)
-    dlogs ++ dhts
+    val dlogs: IndexedSeq[DLogProverInput] = try JListToIndexedSeq(identityIso[ExtendedSecretKey]).to(secretKeys).map(_.key) catch {case _:Exception =>  IndexedSeq()}
+    val dlogsAdditional: IndexedSeq[DLogProverInput] = try JListToIndexedSeq(identityIso[DLogProverInput]).to(dLogInputs) catch {case _:Exception =>  IndexedSeq()}
+    val dhts: IndexedSeq[DiffieHellmanTupleProverInput] = try JListToIndexedSeq(identityIso[DiffieHellmanTupleProverInput]).to(dhtInputs) catch {case _:Exception =>  IndexedSeq()}
+    dlogs ++ dlogsAdditional ++ dhts
   }
 
   val pubKeys: Seq[ProveDlog] = secrets

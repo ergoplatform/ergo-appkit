@@ -51,6 +51,13 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
     /**
+     * Add Dlog prover input using this prover's secret.
+     *
+     * @param x {@Link BigInteger} instance defining x
+     */
+    ErgoProverBuilder withDLogSecret(BigInteger x);
+
+    /**
      * Builds a new prover using provided configuration.
      */
     ErgoProver build();

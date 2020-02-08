@@ -3,7 +3,6 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.appkit.*;
-import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;

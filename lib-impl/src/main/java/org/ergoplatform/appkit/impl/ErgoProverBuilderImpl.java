@@ -6,6 +6,7 @@ import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.Option;
+import sigmastate.basics.DLogProtocol;
 import sigmastate.basics.DiffieHellmanTupleProverInput;
 import special.sigma.GroupElement;
 
@@ -21,7 +22,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     private final BlockchainContextImpl _ctx;
 
     private ExtendedSecretKey _masterKey;
-    private DiffieHellmanTupleProverInput _dhtSecret;
+    private ArrayList<DiffieHellmanTupleProverInput> _dhtSecrets = new ArrayList<DiffieHellmanTupleProverInput>();
+    private ArrayList<DLogProtocol.DLogProverInput> _dLogSecrets = new ArrayList<DLogProtocol.DLogProverInput>();
 
     public ErgoProverBuilderImpl(BlockchainContextImpl ctx) {
         _ctx = ctx;
@@ -52,7 +54,13 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
      */
     @Override
     public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
-        _dhtSecret = JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x);
+        _dhtSecrets.add(JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x));
+        return this;
+    }
+
+    @Override
+    public ErgoProverBuilder withDLogSecret(BigInteger x) {
+        _dLogSecrets.add(new DLogProtocol.DLogProverInput(x));
         return this;
     }
 
@@ -117,8 +125,10 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         };
         List<ExtendedSecretKey> keys = Arrays.asList(_masterKey);
         ArrayList<DiffieHellmanTupleProverInput> dhtInputs = new ArrayList<>();
-        if (_dhtSecret != null) dhtInputs.add(_dhtSecret);
-        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dhtInputs, parameters);
+        ArrayList<DLogProtocol.DLogProverInput> dLogInputs = new ArrayList<>();
+        _dhtSecrets.forEach(diffieHellmanTupleProverInput -> dhtInputs.add(diffieHellmanTupleProverInput));
+        _dLogSecrets.forEach(dLogProverInput -> dLogInputs.add(dLogProverInput));
+        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dLogInputs, dhtInputs, parameters);
         return new ErgoProverImpl(_ctx, interpreter);
     }
 }

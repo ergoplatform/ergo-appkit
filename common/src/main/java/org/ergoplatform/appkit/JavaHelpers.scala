@@ -1,33 +1,34 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
-import scalan.RType
-import special.collection.Coll
-import com.google.common.base.{Preconditions, Strings}
-
-import scala.collection.JavaConversions
-import org.ergoplatform._
-import org.ergoplatform.ErgoBox.TokenId
-import sigmastate.SType
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.serialization.{ValueSerializer, ErgoTreeSerializer, SigmaSerializer, GroupElementSerializer}
-import scorex.crypto.authds.ADKey
-import scorex.crypto.hash.Digest32
-import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
-import org.ergoplatform.settings.ErgoAlgos
-import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
-import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
-import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
+import java.util
 import java.util.{List => JList}
+
+import com.google.common.base.{Preconditions, Strings}
+import org.ergoplatform.ErgoBox.TokenId
+import org.ergoplatform._
+import org.ergoplatform.settings.ErgoAlgos
+import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
+import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import scalan.RType
+import scorex.crypto.authds.ADKey
+import scorex.crypto.hash.Digest32
+import sigmastate.SType
+import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue}
+import sigmastate.eval.{CPreHeader, Colls, CompiletimeIRContext, CostingSigmaDslBuilder, Evaluation}
+import sigmastate.lang.Terms.ValueOps
+import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
+import special.collection.Coll
+import special.sigma.{AnyValue, AvlTree, GroupElement, Header, PreHeader}
+
+import scala.collection.JavaConversions
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
-import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
-import sigmastate.interpreter.CryptoConstants.{EcPointType, dlogGroup}
+import sigmastate.basics.{DiffieHellmanTupleProverInput, ProveDHTuple}
+import sigmastate.interpreter.CryptoConstants.EcPointType
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
