@@ -55,7 +55,7 @@ need to write any code in ErgoScript.
 What we need instead is to create the 'send' transaction shown in the following figure,
 which describe the same token transfer but declaratively.
 
-![Debugger](send-tx.png)
+![Send](send-tx.png)
 
 We need in particular:
 1) select unspent sender's boxes, containing in total `tB >= amount` of tokens and `B >=
@@ -105,17 +105,51 @@ Bitcoin, each input box contains a script, which should be executed to the `true
 order to 1) allow spending of the box (i.e. removing from the UTXO set) and 2) add
 the transaction to the block.
 
-It is therefore incorrect to say that ErgoScript is the language of Ergo contracts,
+It is therefore inaccurate to say that ErgoScript is the language of Ergo contracts,
 because it is the language of propositions (of logical predicates, formulas, etc.)
-protecting boxes from "illegal" spending. However, unlike Bitcoin, in Ergo the whole
+protecting boxes from "illegal" spending. Unlike Bitcoin, in Ergo the whole
 transaction content as well as the current blockchain context is available in every
-input's script, which unlocks the whole range of applications like (DEX, DeFi Apps, LETS,
-etc).
+input's script. So each input script may check which outputs are created by the transaction,
+their ERG and token amounts. 
 
-"What is Ergo contract?" you may ask. Be patient, that is what we are going to discuss
-next.
- 
+While the Ergo's transaction model unlocks the whole range of applications like (DEX, DeFi
+Apps, LETS, etc), designing contracts as pre-conditions (or guarding scripts) directly is
+not intuitive. In the next section I will introduce useful graphical notation to design
+contracts declaratively as diagrams.
+
 ### Graphical Notation
+
+The idea behind diagrams is based on the following observations. Ergo boxes are immutable
+and cannot be changed. The only thing that can happen with a box is that it can be spent
+in a transaction (which in this case should take it as an input). We therefor can draw a
+flow of boxes through transactions, so that boxes _flowing in_ to the transaction are
+spent and those _flowing out_ are created and added to UTXO. A transaction from this
+perspective is a transformer of old boxes to new ones preserving the balances of ERGs and
+tokens involved.
+
+The following figure show the main elements of the transaction we already saw previously. 
+
+![Anatomy](tx-anatomy.png)
+
+There is a strictly defined meaning (aka semantics) behind every element of _the diagram_,
+so that the diagram is in fact a _formalized specification_, which can be used to
+mechanically create and send the corresponding transaction to Ergo blockchain. We will see
+this in the next section, now let's look at the pieces one by one.
+
+##### Contract Wallet
+
+This is a key element of the diagram. Every box has a guarding script. Most often it is
+the script that contains a public key and checks a signature generated using the
+corresponding secret key. This script is trivial in ErgoScript and looks like `{ sender
+}`, where sender is the named template parameter. We call the corresponding script template
+`pk(pubkey)`, which has one parameter.
+
+_Contract Wallet_ is then a set of all UTXO boxes which have a script with a given
+template and given parameter. In the figure, the template is `pk` and parameter `pubkey`
+is substituted with `sender' (address or public key).
+  
+##### Contract
+
 
 
 ### From Diagrams To Contracts
