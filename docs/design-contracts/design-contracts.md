@@ -136,7 +136,7 @@ so that the diagram is in fact a _formalized specification_, which can be used t
 mechanically create and send the corresponding transaction to Ergo blockchain. We will see
 this in the next section, now let's look at the pieces one by one.
 
-##### Contract Wallet
+##### 1. Contract Wallet 
 
 This is a key element of the diagram. Every box has a guarding script. Most often it is
 the script that contains a public key and checks a signature generated using the
@@ -148,7 +148,21 @@ _Contract Wallet_ is then a set of all UTXO boxes which have a script with a giv
 template and given parameter. In the figure, the template is `pk` and parameter `pubkey`
 is substituted with `sender' (address or public key).
   
-##### Contract
+##### 2. Contract
+
+Even though a contract is a property of a box, on the diagram we group the boxes by
+their contracts. In the example, we have three instantiated contracts pk(sender),
+pk(receiver) and minerFee. Note, that `pk(sender)` is the instantiation of the `pk`
+template with the concrete parameter `sender`.
+
+##### 3. Box name
+
+In the diagram we can give each box a name. Besides readability of the diagram, the name
+can then be used as a synonym of a more comples an indexed access to the box in the
+contract. For example, `change` is the name of the box, which can also be access in the
+contract as `OUTPUTS(2)` (though it is not used this way in the example).
+
+##### 4. Boxes of the wallet
 
 
 
