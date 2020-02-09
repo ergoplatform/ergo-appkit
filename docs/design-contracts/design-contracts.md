@@ -133,8 +133,13 @@ The following figure show the main elements of the transaction we already saw pr
 
 There is a strictly defined meaning (aka semantics) behind every element of _the diagram_,
 so that the diagram is in fact a _formalized specification_, which can be used to
-mechanically create and send the corresponding transaction to Ergo blockchain. We will see
-this in the next section, now let's look at the pieces one by one.
+mechanically create and send the corresponding transaction to Ergo blockchain, we will see
+this in the next section.
+
+Another way to look at the diagram as an executable spread-sheet-like flow of ERGs and
+tokens between boxes, where all transaction balances and conditions are validated.
+
+Now let's look at the pieces of the diagram one by one.
 
 ##### 1. Contract Wallet 
 
@@ -160,13 +165,80 @@ template with the concrete parameter `sender`.
 In the diagram we can give each box a name. Besides readability of the diagram, the name
 can then be used as a synonym of a more comples an indexed access to the box in the
 contract. For example, `change` is the name of the box, which can also be access in the
-contract as `OUTPUTS(2)` (though it is not used this way in the example).
+contract as `OUTPUTS(2)` (though it is not used this way in the example). Box names can
+also be used to specify conditions that should be checked in its script (more about it
+later).
 
 ##### 4. Boxes of the wallet
 
+In the diagram, we show boxes (darker rectangles) as belonging to the contract wallets
+(lighter rectangles). Each such _box rectangle_ is connected with a grey _transaction
+rectangle_ by either <b color="#ED7D31">orange</b> or <b color="#A9D18E">green</b> arrows
+or both. An output box (with incoming green arrow) may include many lines of text where each
+line specifies a condition which should be checked as part of the transaction. The first
+line specifies the condition on the amount of ERG which should be placed in the box. Other
+lines may take one of the following form:
+1) `amount: TOKEN` - the box should contain the given `amount` of the given `TOKEN`
+2) `R == value` - the box should contain the given `value` of the given register `R`
+2) `boxName ? condition` - the box named `boxName` should check `condition` in its script.
 
 
-### From Diagrams To Contracts
+##### 5. Amount of ERGs in the box
+
+Each box should store some minimum amount of ERGs which is checked when a transaction is
+validated. In the diagram the amount of ERGs is _always_ shown as the first line (e.g. `B:
+ERG` or `B - minErg - txFee`). The value type specification `B: ERG` is optional and may
+be used for readability. When the value is given as formula, then this formulate should be
+respected by the transaction which creates the box.
+
+##### 6. Amount of T token 
+
+A box can store values of many tokens. The tokens on the diagram are named and the `value`
+may be associated with the token `T` using `value: T` expression. The `value` may be given
+by formula. If the formula is prefixed with a box name like `boxName ? formula`, then it
+is also should be checked in the guarding script of the `boxName` box. This additional
+specification is very convenient because 1) it allows to validate visual design, and 2) in
+many cases the conditions specified in the boxes of a diagram are enough to synthesize the
+necessary guarding contracts. (more about this
+[below](#from-diagrams-to-ergoscript-contracts))
+
+##### 7. Tx Inputs
+
+Inputs are connected to the corresponding transaction by <b color="#ED7D31">orange</b>
+arrows. An input arrow may have a label of the following forms:
+1) `name@index` - optional name with an index i.e. `fee@0` or `@2`. This is a property of
+the target endpoint of the arrow. The name can be used in conditions of the related boxes
+and the `index` is the position of the corresponding box in INPUTS collection of the
+transaction.
+2) `!action` - is the propety of source of the arrow and gives a name for an alternative
+spendings of the box (we will see this in DEX example)
+
+Because of alternative spendings, a box may have many outgoing <b
+color="#ED7D31">orange</b> arrows, in which case they should be labeled with different
+actions.
+
+##### 8. Transaction
+
+A transaction spends input boxes and creates output boxes. The input boxes are given by
+the <b color="#ED7D31">orange</b> arrows and the labels are respected to put inputs at the
+right indexes in INPUTS collection. The output boxes are given by the <b
+color="#A9D18E">green</b> arrows. Each transaction should preserve a strict balance of ERG
+values (sum of inputs == sum of outputs) and for each token the sum of inputs >= the sum
+of outputs. The design diagram however requires an explicit specification of the ERG and
+token values for all the output boxes to avoid implicit errors and have better readability.
+
+##### 9. Tx Outputs
+Outputs are connected to the corresponding transaction by <b color="#A9D18E">green</b>
+arrows. An output arrow may have a label of the following form`name@index` - optional name
+with an index i.e. `fee@0` or `@2`. This is a property of the source endpoint of the
+arrow. The name can be used in conditions of the related boxes and the `index` is the
+position of the corresponding box in OUTPUTS collection of the transaction.
+
+### More Complex Example: A Decentralized Exchange (DEX)
+
+### From Diagrams To ErgoScript Contracts
+
+### From Diagrams To Appkit Transactions
 
 ### Conclusions
 
