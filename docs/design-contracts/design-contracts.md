@@ -1,4 +1,4 @@
-# A Graphical Notation for Designing of Ergo Contracts
+# ErgoFlow: A Graphical Notation for Designing of Ergo Contracts
 
 ### Why does it matter? 
 
@@ -163,9 +163,9 @@ template with the concrete parameter `sender`.
 ##### 3. Box name
 
 In the diagram we can give each box a name. Besides readability of the diagram, the name
-can then be used as a synonym of a more comples an indexed access to the box in the
-contract. For example, `change` is the name of the box, which can also be access in the
-contract as `OUTPUTS(2)` (though it is not used this way in the example). Box names can
+can then be used as a synonym of a more complex indexed access to the box in the
+contract. For example, `change` is the name of the box, which can also be accessed in the
+ErgoScript contract as `OUTPUTS(2)`. Box names can
 also be used to specify conditions that should be checked in its script (more about it
 later).
 
@@ -180,7 +180,7 @@ line specifies the condition on the amount of ERG which should be placed in the 
 lines may take one of the following form:
 1) `amount: TOKEN` - the box should contain the given `amount` of the given `TOKEN`
 2) `R == value` - the box should contain the given `value` of the given register `R`
-2) `boxName ? condition` - the box named `boxName` should check `condition` in its script.
+3) `boxName ? condition` - the box named `boxName` should check `condition` in its script.
 
 
 ##### 5. Amount of ERGs in the box
@@ -234,7 +234,100 @@ with an index i.e. `fee@0` or `@2`. This is a property of the source endpoint of
 arrow. The name can be used in conditions of the related boxes and the `index` is the
 position of the corresponding box in OUTPUTS collection of the transaction.
 
-### More Complex Example: A Decentralized Exchange (DEX)
+### More Complex Example: Decentralized Exchange (DEX)
+
+Now let's use the described notation to design contracts for a DEX dApp. It is
+simple enough for a post, but it also illustrates all the primitives of the graphical
+language we've introduced.
+
+There are three participants (buyer, seller and DEX) of the DEX dApp and five different
+transaction types, which can be created by participants. The buyer wants to swap `ergAmt`
+ERGs for `tAmt` of `TID` tokens (of vice versa, who send the orders first doesn't matter).
+Both the buyer and the seller can cancel their orders. The DEX off-chain service can find
+matching orders and create a special `Swap` transaction to complete the exchange.
+
+The following diagram fully specifies all the five transactions and the box spending
+conditions that should be satisfied.
+
+![DEX](dex-contracts.png)
+
+Let's see look at the specification of each transaction:
+
+##### BuyOrder Transaction
+
+The transaction spends `E` amount of ERGs (which we will write `E: ERG`) from one or more
+boxes in the `pk(buyer)` wallet. The transaction creates a `bid` box with `ergAmt: ERG`
+protected by the `buyOrder` contract. The `buyOrder` contract is synthesizable from the
+specification (we will discuss this in the next section) either manually or automatically
+by a tool. Even though we don't need to define the `buyOrder` contract explicitly during
+the design time, at running time the `bid` box should contain the `buyOrder` contract as
+the guarding script, otherwise the conditions specified in the diagram will not be checked.
+
+The `change` box is created to make the input and output sums of the transaction balanced.
+The transaction fee box is omited for simplicity, in practice, it should be added
+explicitly because in the case of more complex transactions (like Swap) there are many
+ways to pay transaction fee.
+
+##### CancelBuy, CancelSell Transactions
+
+At any time, the `buyer` can cancel the order by sending `CancelBuy` transaction. The
+transaction should satisfy the guarding `buyOrder` contract which protects the `bid` box.
+As you can see on the diagram, both the `Cancel` and the `Swap` transactions can spend the
+`bid` box. When a box have spending alternatives (or _spending path_) then each
+alternative should be identified by unique name prefixed with `!` (`!cancel` and `!swap`
+for the `bid` box). Each alternative have specific spending conditions. In our example,
+when the `bid` box is spend by the `Cancel` transaction the `?buyer` condition should be
+satisfied, which can be read as "the signature of the buyer should be presented in the
+transaction". Therefore, only buyer can cancel the buy order. This "signature" condition
+is only required for `!cancel` spending alternative and not required for `!swap`.
+
+##### SellOrder Transaction
+
+The `SellOrder` transaction is similar to the `BuyOrder` it has to do with tokens in
+addition to ERGs. The transaction spends `E: ERG` and `T: TID` tokens from seller's wallet
+(specified as `pk(seller)` contract). The two outputs are `ask` and `change`. The change
+is a standard box to balance transaction. The `ask` box stores `tAmt: TID` tokens to swap
+and the `minErg: ERG` - a minimum amount of ERGs required in every box.
+
+##### Swap Transaction
+
+This is a key transaction in the DEX scenario. The transaction has many of spending
+conditions on the input boxes and those conditions are included in the `buyOrder` and
+`sellOrder` contracts and consequently verified when the transaction is added to the
+blockchain. However, on the diagram those conditions are not specified in the `bid` and
+`ask` boxes, they are instead defined in the output boxes of the transaction. 
+
+This is because most of the conditions relate to the properties of the output boxes. This is
+usability convention, we could specify those properties in the `bid` box but, then we would
+had to use more complex expressions.
+
+Let's take the output created by the arrow labeled with `buyerOut@0`. This label tell us
+that the output is at the index `0` in the `OUTPUTS` collection of the transaction and that
+we can refer to this box by the `buyerOut` name. Thus we can label both the box itself and
+the arrow to give it a name.
+
+The conditions shown in the `buyerOut` box have the form `bid ? condition`, which means
+they should be checked before the `bid` box can be spent. 
+The conditions have the following meaning:
+1) `tAmt: TID` require the box to have `tAmt` amount of `TID` token
+2) `R4 == bid.id`  require R4 register in the box to be equal to id of the
+`bid` box.
+3) `@contract` require the box to have the contract of the wallet where it is located on
+the diagram, i.e. `pk(buyer)`
+
+Similar properties are added to the `sellerOut` box, which is specified to be at index `1`
+and the name is given using label on the box itself, rather than on the arrow.
+
+The `Swap` transaction spends two boxes `bid` and `ask` using the `!swap` spending path,
+however unlike `!cancel` the conditions on the path are not specified. This is where the
+`bid ?` and `ask ?` prefixes come into play, so the conditions on the `buyerOut` and
+`sellerOut` boxes are moved to the `!swap` spending path of the `bid` and `ask` boxes
+correspondingly.
+
+If you look at the conditions of the output boxed, you will see that they exactly specify
+the swap of values between seller's and buyer's wallets. Buyer get's the necessary amount
+of `TID` token and seller get's the corresponding amount of ERGs. The `Swap` transaction
+can be created when there are two matching boxes with `buyOrder` and `sellOrder` contracts.
 
 ### From Diagrams To ErgoScript Contracts
 
