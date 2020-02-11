@@ -384,26 +384,35 @@ using the following simple rules
 3) `@contract`  ==> `buyerOut.propositionBytes == buyer.propBytes` where `R4 = buyerOut.R4[Coll[Byte]].get` 
 4) `buyerOut@0` ==> `val buyerOut = OUTPUTS(0)`
 
-After transformation we can get the correct script which checks all the required
-preconditions for spending the `buyOrder` box.
+After transformation we can obtain a correct script which checks all the required
+preconditions for spending the `buyOrder` box. 
 ```
 /** buyOrder contract */
 {
-  val cancelCondition = { buyer }
-  val swapCondition = try {
+  val cancelCondition: SigmaProp = { buyer }      // verify buyer's sig (ProveDlog)
+  val swapCondition = OUTPUTS.size > 0 && {       // securing OUTPUTS access
     val buyerOut = OUTPUTS(0)                     // from buyerOut@0
-    val tid = buyerOut.tokens(TID)
-    val R4 = buyerOut.R4[Coll[Byte]].get
-    tid._2 == tAmt &&                             // from tAmt: TID 
-    R4 == SELF.id &&                              // from R4 == bid.id
-    buyerOut.propositionBytes == buyer.propBytes  // from @contract
+    buyerOut.tokens.size > TID && {               // securing tokens access
+      val tid = buyerOut.tokens(TID)
+      val optR4 = buyerOut.R4[Coll[Byte]]
+      optR4.isDefined && {                        // securing R4 access
+        val R4 = optR4.get
+        tid._2 == tAmt &&                             // from tAmt: TID 
+        R4 == SELF.id &&                              // from R4 == bid.id
+        buyerOut.propositionBytes == buyer.propBytes  // from @contract
+      }
+    } 
   }
   cancelCondition || swapCondition
 }
 ```
 A similar script for the `sellOrder` box can be obtained using the same rules.
+And as we've seen the contracts code can be mechanically generated from the diagram
+specification.
 
 ### From Diagrams To Appkit Transactions
+
+[Ergo Appkit]()
 
 ### Conclusions
 
