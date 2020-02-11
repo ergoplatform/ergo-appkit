@@ -331,6 +331,78 @@ can be created when there are two matching boxes with `buyOrder` and `sellOrder`
 
 ### From Diagrams To ErgoScript Contracts
 
+What is nice about formalized graphical notation is that we can use it to mechanically
+generate the necessary ErgoScript contracts. With tooling support this can be done
+automatically, with a lack of thereof, it can be done manually. This is what we are going
+to do next, create the `buyOrder` contract from the information given in the diagram.
+
+Recall that each contract is a proposition (boolean valued expression) which should
+evaluate to the `true` value. When we have many conditions to be met at the same time we
+can combine them in a logical formula using AND binary operation, and if we have
+alternatives (not necessarily exclusive) we can put them into OR operation. 
+
+The `buyOrder` box have the alternative spending paths `!cancel` and `!swap`. Thus the
+ErgoScript code should have OR operation with two arguments, one for each spending path.
+```
+/** buyOrder contract */
+{
+  val cancelCondition = {}
+  val swapCondition = {}
+  cancelCondition || swapCondition
+}
+```
+The formula for the `cancelCondition` expression is given in the `!cancel` spending path
+of the `buyOrder` box, we can directly include it in the script
+```
+/** buyOrder contract */
+{
+  val cancelCondition = { buyer }
+  val swapCondition = {}
+  cancelCondition || swapCondition
+}
+```
+
+For the `!swap` spending path of the `buyOrder` box the conditions are specified in the
+`buyerOut` output box of the `Swap` transaction. If we simply include them in the
+`swapCondition` then we get incorrect script.
+```
+/** buyOrder contract */
+{
+  val cancelCondition = { buyer }
+  val swapCondition = {
+    tAmt: TID &&
+    R4 == bid.id &&
+    @contract
+  }
+  cancelCondition || swapCondition
+}
+```
+We can however transform the conditions from the diagram syntax to ErgoScript expressions
+using the following simple rules
+1) `tAmt: TID`  ==> `tid._2 == tAmt` where `tid = buyerOut.tokens(TID)`
+2) `R4 == bid.id`  ==> `R4 == SELF.id` where `R4 = buyerOut.R4[Coll[Byte]].get` 
+3) `@contract`  ==> `buyerOut.propositionBytes == buyer.propBytes` where `R4 = buyerOut.R4[Coll[Byte]].get` 
+4) `buyerOut@0` ==> `val buyerOut = OUTPUTS(0)`
+
+After transformation we can get the correct script which checks all the required
+preconditions for spending the `buyOrder` box.
+```
+/** buyOrder contract */
+{
+  val cancelCondition = { buyer }
+  val swapCondition = try {
+    val buyerOut = OUTPUTS(0)                     // from buyerOut@0
+    val tid = buyerOut.tokens(TID)
+    val R4 = buyerOut.R4[Coll[Byte]].get
+    tid._2 == tAmt &&                             // from tAmt: TID 
+    R4 == SELF.id &&                              // from R4 == bid.id
+    buyerOut.propositionBytes == buyer.propBytes  // from @contract
+  }
+  cancelCondition || swapCondition
+}
+```
+A similar script for the `sellOrder` box can be obtained using the same rules.
+
 ### From Diagrams To Appkit Transactions
 
 ### Conclusions
