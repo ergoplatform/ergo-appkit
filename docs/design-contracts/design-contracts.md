@@ -163,11 +163,10 @@ template with the concrete parameter `sender`.
 ##### 3. Box name
 
 In the diagram we can give each box a name. Besides readability of the diagram, the name
-can then be used as a synonym of a more complex indexed access to the box in the
-contract. For example, `change` is the name of the box, which can also be accessed in the
-ErgoScript contract as `OUTPUTS(2)`. Box names can
-also be used to specify conditions that should be checked in its script (more about it
-later).
+can then be used as a synonym of a more complex indexed access to the box in the contract.
+For example, `change` is the name of the box, which can also be accessed in the ErgoScript
+contract as `OUTPUTS(2)`. Box names can also be used to specify conditions that should be
+checked in its script (more about it later).
 
 ##### 4. Boxes of the wallet
 
@@ -187,9 +186,19 @@ lines may take one of the following form:
 
 Each box should store some minimum amount of ERGs which is checked when a transaction is
 validated. In the diagram the amount of ERGs is _always_ shown as the first line (e.g. `B:
-ERG` or `B - minErg - txFee`). The value type specification `B: ERG` is optional and may
+ERG` or `B - minErg - txFee`). The value type ascription `B: ERG` is optional and may
 be used for readability. When the value is given as formula, then this formulate should be
 respected by the transaction which creates the box.
+
+It is important to understand that variables like `tAmt` are not named properties of the
+boxes. They are parameters of the whole diagram and representing some amounts. Or put it
+another way, they are shared parameters between transactions (e.g. Sell Order and Swap
+transactions share tAmt). So basically same name means the same value all over the diagram
+(this is where the tooling would help a lot). However, when it comes to checking those
+values, only explicit conditions which are marked with `?` are transformed to ErgoScript.
+At the same time, all others are actually ensured during transaction building (in an
+application using Appkit API) and transaction validation when it is added to the
+blockchain.
 
 ##### 6. Amount of T token 
 
@@ -384,7 +393,18 @@ using the following simple rules
 3) `@contract`  ==> `buyerOut.propositionBytes == buyer.propBytes` where `R4 = buyerOut.R4[Coll[Byte]].get` 
 4) `buyerOut@0` ==> `val buyerOut = OUTPUTS(0)`
 
-After transformation we can obtain a correct script which checks all the required
+Note, in the diagram `TID` represents a token id, but ErgoScript don't have access to the
+tokens by the ids so we cannot write `tokens.getByKey(TID)`.
+For this reason, when the diagram is translated into ErgoScript, TID becomes a named
+constant of the index in `tokens` collection of the box. The concrete value of the
+constant is assigned when the `BuyOrder` transaction with the `buyOrder` box is created.  
+The correspondence and consistency between the actual tokenId, the `TID` constant and the actual tokens of
+the `buyerOut` box is ensured buy the application code, which is completely possible
+since all the transactions are created by the application. This may sound too complicated,
+but this is part of the translation from diagram specification to actual executable
+application code, most of which can be automated.
+
+After the transformation we can obtain a correct script which checks all the required
 preconditions for spending the `buyOrder` box. 
 ```
 /** buyOrder contract */
