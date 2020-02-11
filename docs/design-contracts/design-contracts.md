@@ -1,27 +1,50 @@
-# ErgoFlow: A Graphical Notation for Designing of Ergo Contracts
+# ErgoFlow: A Declarative Framework for Development of Ergo Contracts
 
-### Why does it matter? 
+### Introduction 
 
 [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf) is the contracts language on
 the Ergo blockchain. Even though it has concise syntax adopted from Scala, it still may
 seem confusing at first, because conceptually ErgoScript is quite different from the
-conventional languages which we all know and love.
+conventional languages which we all know and love. It is because Ergo is UTXO based
+blockchain, whereas smart contracts are traditionally associated with account based
+systems like Ethereum. However, Ergo's transaction model have many advandages over account
+based models and with a right approach it may be much easier to develop Ergo contracts
+than to write and debug Solitity code.
 
-It is because Ergo's programming model is declarative whereas conventional programming is
-imperative. In the declarative model of Ergo you need to tell the system what it should do
-for you leaving it the freedom of choosing how it will be achieved. The typical question
-"How I can send ERGs to Alice in ErgoScript?" should be rephrased as "What I should tell
-the system so that Alice gets the coins?". From this perspective ErgoScript is one piece
-of the puzzle, and the transactions API of
-[Appkit](https://github.com/aslesarenko/ergo-appkit) is the other (we will talk about this
-later in this post).
+There are key aspects of Ergo's programming model (based on UTXO) in which it is different
+from Ethereum (i.e. account model)
 
-Declarative programming models has already won the battle against imperative programming
-in many application domains like Big Data, Stream Processing, Deep Learning, Databases,
-etc. In a long term declarative model is also going to win the hearts of dApp developers.
+##### Paradigm   
+The account model of Ethereum is imperative. A typical task of sending coins from
+Alice to Bob means changing balances in the storage as a series of operations. Ergo's UTXO
+based programming model is declarative where ErgoScript contracts specify conditions for
+a transaction to be accepted by the blockchain (not changes to be made).
 
-In this post I want to introduce a graphical notation which can help in designing of complex
-Ergo contracts in a declarative way.
+##### Scalability
+In the account model of Ethereum both storage changes and validity checks are performed
+on-chain during code execution. In contrast, Ergo transactions are created
+off-chain and only validation checks are performed on-chain thus reducing the amount of
+operations performed by every node of the network. In addition due to immutability of the
+transaction graph, various optimization strategies are possible  to improve throughput
+of full nodes. Light nodes are also possible thus further facilitating scalability.
+
+##### Shared state
+Account model is all about shared mutable state of account storage, which is known to lead
+to complex semantics (and subtle million dollar bugs) in the face of concurrent and
+distributed computations. Ergo model is based on immutable graph of transactions, this
+approach, inherited from UTXO, plays well with the concurrent and distributed nature of
+blockchains and facilitates light trustless clients.
+
+##### Expressive Power
+Ethereum advocated execution of turing-complete language on the blockchain. It
+theoretically promised unlimited potential applications, it practice however, the limits
+come from excessive storage growth, subtle multi-million bugs, gas costs which limit
+application complexity etc. On the other hand, Ergo extends UTXO to enable
+turing-completnes while limiting complexity of the ErgoScript language. The same
+expressive power is achieved in a different, more semantically sound way.
+
+In this article I want to introduce ErgoFlow - a developer framework 
+for designing of complex Ergo contracts in a declarative way.
 
 ### From Imperative to Declarative
 
@@ -29,7 +52,7 @@ In the imperative programming model of Ethereum a transaction is a sequence of o
 executed by Ethereum VM. The following [Solidity
 function](https://solidity.readthedocs.io/en/develop/introduction-to-smart-contracts.html#subcurrency-example)
 implements a transfer of tokens from `sender` to `receiver`. The transaction starts when
-`sender` calls this function on an instance of the contract and ends when the function
+`sender` calls this function on an instance of a contract and ends when the function
 returns.
 
 ```
@@ -43,12 +66,12 @@ function send(address receiver, uint amount) public {
 ```
 
 The function first checks the pre-conditions, then updates the storage (i.e. balances) and
-then publish the post-condition as Sent event. The gas consumed by transaction is sent
+then publish the post-condition as `Sent` event. The gas consumed by transaction is sent
 to the miner as a reward for executing this transaction.
 
-Unlike Ethereum, in Ergo, a transaction is a mapping between input coins which it spends
-and output coins which it creates preserving total balances of ERGs and tokens (in which
-Ergo is similar to Bitcoin). 
+Unlike Ethereum, a transaction in Ergo is a data structure holding a list of input coins
+which it spends and list of output coins which it creates preserving total balances of ERGs and
+tokens (in which Ergo is similar to Bitcoin).
 
 Since Ergo natively support tokens for this specific example of sending tokens we don't
 need to write any code in ErgoScript.
@@ -68,9 +91,9 @@ txFee + minErg` ERGs
 5) create a new transaction, sign it using the sender's secret key and send to the Ergo
 network.
 
-Note, that all the transaction creation is done off-chain using Appkit Transaction API, thus it
-is free of gas. To make it simple Appkit implements a library so
-that the basic transactions like this can be created using a single method call.
+Note, that all the transaction creation is done off-chain (for example using
+[Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API). Ergo network nodes
+don't need to repeat this creation, they only need to validate it.
 
 Thus, when in the Ethereum contract "We send amount from sender to recipient" we literally
 changing balances and update storage with the concrete set of commands, and this happens
@@ -79,11 +102,11 @@ on-chain.
 In Ergo (as in Bitcoin) transactions are created off-chain and the effects of the
 transaction on the blockchain state is that input coins (or Boxes in Ergo's parlance) are
 removed and output boxes are added to the
-[UTXO](https://en.wikipedia.org/wiki/Unspent_transaction_output) set, this happens
-atomically (all or nothing), and no contract code is necessary in this simple example.
+[UTXO](https://en.wikipedia.org/wiki/Unspent_transaction_output) set.
 
-However in more complex application scenarios we do need to use ErgoScript code and this
-is what we are going to discuss next.
+Even though no contract code is necessary in this simple example, however in a more complex
+application scenarios we do need to use ErgoScript code and this is what we are going to
+discuss next.
 
 ### From Changing State to Checking Context 
 
@@ -94,7 +117,7 @@ we change anything we need to check if it is valid to do at all.
 
 In Ergo, as we discussed, the state (i.e. UTXO set of boxes) is changed implicitly when a
 transaction is included in a block. Thus we only need to check the pre-conditions before
-the transaction can be added to the block. This is where ErgoScript comes into a play.
+the transaction can be added to the block. This is where ErgoScript comes into play.
 
 It is not possible to "change the state" in ErgoScript because it is a language to check
 pre-conditions for spending coins. ErgoScript is purely functional language, without side effects
@@ -110,16 +133,16 @@ because it is the language of propositions (of logical predicates, formulas, etc
 protecting boxes from "illegal" spending. Unlike Bitcoin, in Ergo the whole
 transaction content as well as the current blockchain context is available in every
 input's script. So each input script may check which outputs are created by the transaction,
-their ERG and token amounts. 
+their ERG and token amounts (we will use this capability in our example DEX contracts). 
 
 While the Ergo's transaction model unlocks the whole range of applications like (DEX, DeFi
 Apps, LETS, etc), designing contracts as pre-conditions (or guarding scripts) directly is
 not intuitive. In the next section I will introduce useful graphical notation to design
-contracts declaratively as diagrams.
+contracts declaratively as _ErgoFlow diagrams_.
 
 ### Graphical Notation
 
-The idea behind diagrams is based on the following observations. Ergo boxes are immutable
+The idea behind ErgoFlow diagrams is based on the following observations. Ergo boxes are immutable
 and cannot be changed. The only thing that can happen with a box is that it can be spent
 in a transaction (which in this case should take it as an input). We therefor can draw a
 flow of boxes through transactions, so that boxes _flowing in_ to the transaction are
@@ -136,7 +159,7 @@ so that the diagram is in fact a _formalized specification_, which can be used t
 mechanically create and send the corresponding transaction to Ergo blockchain, we will see
 this in the next section.
 
-Another way to look at the diagram as an executable spread-sheet-like flow of ERGs and
+Another way to look at the diagram is as an executable spread-sheet-like flow of ERGs and
 tokens between boxes, where all transaction balances and conditions are validated.
 
 Now let's look at the pieces of the diagram one by one.
@@ -427,14 +450,27 @@ preconditions for spending the `buyOrder` box.
 }
 ```
 A similar script for the `sellOrder` box can be obtained using the same rules.
-And as we've seen the contracts code can be mechanically generated from the diagram
+With the help of the tooling the code of contracts can be mechanically generated from the diagram
 specification.
 
-### From Diagrams To Appkit Transactions
+### From Diagrams To Ergo Transactions
 
-[Ergo Appkit]()
+Since ErgoFlow diagrams are formalized specifications they can be executed.
 
 ### Conclusions
+
+Declarative programming models has already won the battle against imperative programming
+in many application domains like Big Data, Stream Processing, Deep Learning, Databases,
+etc. Ergo is pioneering the declarative model of dApp development as a better and safer
+alternative to the now popular imperative model of smart contracts.
+
+What is next:
+1) Storage format for ErgoFlow specification (EIP)
+2) Interpreter of ErgoFlow specification
+4) Development of complex diagrams will be greatly simplified when specialized graphical
+editing tools appear. This will make desiging and validation of Ergo contracts a joyful
+experience, more like drawing rather than coding.
+
 
 ### References
 
