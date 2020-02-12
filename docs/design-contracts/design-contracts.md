@@ -1,15 +1,15 @@
-# ErgoFlow: A Declarative Framework for Development of Ergo Contracts
+# FlowCards: A Declarative Framework for Development of Ergo Contracts
 
 ### Introduction 
 
 [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf) is the contracts language on
-the Ergo blockchain. Even though it has concise syntax adopted from Scala, it still may
-seem confusing at first, because conceptually ErgoScript is quite different from the
+the Ergo blockchain. Even though it has concise syntax adopted from Scala/Kotlin, it still
+may seem confusing at first, because conceptually ErgoScript is quite different from the
 conventional languages which we all know and love. It is because Ergo is UTXO based
 blockchain, whereas smart contracts are traditionally associated with account based
-systems like Ethereum. However, Ergo's transaction model have many advandages over account
-based models and with a right approach it may be much easier to develop Ergo contracts
-than to write and debug Solitity code.
+systems like Ethereum. However, Ergo's transaction model have many advantages over account
+based models and with a right approach it can be much easier to develop Ergo contracts
+than to write and debug Solidity code.
 
 There are key aspects of Ergo's programming model (based on UTXO) in which it is different
 from Ethereum (i.e. account model)
@@ -37,13 +37,13 @@ blockchains and facilitates light trustless clients.
 
 ##### Expressive Power
 Ethereum advocated execution of turing-complete language on the blockchain. It
-theoretically promised unlimited potential applications, it practice however, the limits
-come from excessive storage growth, subtle multi-million bugs, gas costs which limit
+theoretically promised unlimited potential applications, in practice however, the limits
+came from excessive storage growth, subtle multi-million bugs, gas costs which limit
 application complexity etc. On the other hand, Ergo extends UTXO to enable
 turing-completnes while limiting complexity of the ErgoScript language. The same
-expressive power is achieved in a different, more semantically sound way.
+expressive power is achieved in a different and more semantically sound way.
 
-In this article I want to introduce ErgoFlow - a developer framework 
+In this article I want to introduce Ergo FlowCards - a developer framework 
 for designing of complex Ergo contracts in a declarative way.
 
 ### From Imperative to Declarative
@@ -75,12 +75,12 @@ tokens (in which Ergo is similar to Bitcoin).
 
 Since Ergo natively support tokens for this specific example of sending tokens we don't
 need to write any code in ErgoScript.
-What we need instead is to create the 'send' transaction shown in the following figure,
+Instead we need to create the 'send' transaction shown in the following figure,
 which describe the same token transfer but declaratively.
 
 ![Send](send-tx.png)
 
-We need in particular:
+In particular we have to perform the following steps:
 1) select unspent sender's boxes, containing in total `tB >= amount` of tokens and `B >=
 txFee + minErg` ERGs
 2) create one output (box) which is protected by `recipient` public key with `minErg` ERGs and
@@ -91,33 +91,42 @@ txFee + minErg` ERGs
 5) create a new transaction, sign it using the sender's secret key and send to the Ergo
 network.
 
-Note, that all the transaction creation is done off-chain (for example using
-[Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API). Ergo network nodes
-don't need to repeat this creation, they only need to validate it.
+What is important to understand is that ErgoScript doesn't allow to create transactions.
+Each ErgoScript contract lives inside a transaction and is executed when the transaction
+is validated _on-chain_. 
+
+However the transaction itself has to be created first, which is done _off-chain_ (for
+example using [Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API). Ergo
+network nodes don't need to repeat this transaction creation, they only need to validate
+the already baked transaction. 
+
+Please remember this observation, ErgoScript is not enough to run contracts on Ergo
+blockchain and we also need additional means to create transactions. (Looking ahead, this
+is where FlowCards comes into play).
 
 Thus, when in the Ethereum contract "We send amount from sender to recipient" we literally
 changing balances and update storage with the concrete set of commands, and this happens
-on-chain. 
+_on-chain_. 
 
-In Ergo (as in Bitcoin) transactions are created off-chain and the effects of the
+In Ergo (as in Bitcoin) transactions are created _off-chain_ and the effects of the
 transaction on the blockchain state is that input coins (or Boxes in Ergo's parlance) are
 removed and output boxes are added to the
 [UTXO](https://en.wikipedia.org/wiki/Unspent_transaction_output) set.
 
-Even though no contract code is necessary in this simple example, however in a more complex
-application scenarios we do need to use ErgoScript code and this is what we are going to
-discuss next.
+Even though we don't need any contract code in this simple example, however in a more
+complex application scenarios we do need to use ErgoScript code and this is what we are
+going to discuss next.
 
 ### From Changing State to Checking Context 
 
-In the `send` function example we first check the pre-condition (`require(amount <=
-balances[msg.sender],...)`) and then change the state (i.e. update balances
+Remember that in the `send` function example we first checked the pre-condition (`require(amount <=
+balances[msg.sender],...)`) and then changed the state (i.e. update balances
 `balances[msg.sender] -= amount`). This is typical in Ethereum transactions, before
 we change anything we need to check if it is valid to do at all.
 
 In Ergo, as we discussed, the state (i.e. UTXO set of boxes) is changed implicitly when a
 transaction is included in a block. Thus we only need to check the pre-conditions before
-the transaction can be added to the block. This is where ErgoScript comes into play.
+the transaction can be added to the block. This is what ErgoScript contracts do.
 
 It is not possible to "change the state" in ErgoScript because it is a language to check
 pre-conditions for spending coins. ErgoScript is purely functional language, without side effects
@@ -128,60 +137,81 @@ Bitcoin, each input box contains a script, which should be executed to the `true
 order to 1) allow spending of the box (i.e. removing from the UTXO set) and 2) add
 the transaction to the block.
 
-It is therefore inaccurate to say that ErgoScript is the language of Ergo contracts,
+It is therefore inaccurate to think of ErgoScript as the language of Ergo contracts,
 because it is the language of propositions (of logical predicates, formulas, etc.)
 protecting boxes from "illegal" spending. Unlike Bitcoin, in Ergo the whole
-transaction content as well as the current blockchain context is available in every
+transaction as well as the current blockchain context is available in every
 input's script. So each input script may check which outputs are created by the transaction,
-their ERG and token amounts (we will use this capability in our example DEX contracts). 
+their ERGs and tokens amounts (we will use this capability in our example DEX contracts). 
 
+_In ErgoScript you define the conditions of whether the changes (i.e. coin spending) can
+happen in a given context or not. This is instead of programming the changes imperatively
+in the code._
+ 
 While the Ergo's transaction model unlocks the whole range of applications like (DEX, DeFi
-Apps, LETS, etc), designing contracts as pre-conditions (or guarding scripts) directly is
-not intuitive. In the next section I will introduce useful graphical notation to design
-contracts declaratively as _ErgoFlow diagrams_.
+Apps, LETS, etc), designing contracts as pre-conditions for coin spending (or guarding
+scripts) directly is not intuitive. In the next sections I will introduce a useful graphical
+notation to design contracts declaratively using _FlowCard Diagrams_, which are visual
+representations of executable components (FlowCards). 
 
-### Graphical Notation
+_FlowCards is aiming to radically simplify dApp development on the Ergo platform by
+providing a high-level declarative language, execution runtime, storage format and
+a graphical notation_.
 
-The idea behind ErgoFlow diagrams is based on the following observations. Ergo boxes are immutable
-and cannot be changed. The only thing that can happen with a box is that it can be spent
-in a transaction (which in this case should take it as an input). We therefor can draw a
-flow of boxes through transactions, so that boxes _flowing in_ to the transaction are
-spent and those _flowing out_ are created and added to UTXO. A transaction from this
-perspective is a transformer of old boxes to new ones preserving the balances of ERGs and
-tokens involved.
+We will start with a high level of diagrams and go down to FlowCard specification.
 
-The following figure show the main elements of the transaction we already saw previously. 
+### FlowCard Diagrams
+
+The idea behind FlowCard diagrams is based on the following observations. Ergo boxes are
+immutable and cannot be spent in a transaction (which should take it as an input). We
+therefore can draw a flow of boxes through transactions, so that boxes _flowing in_ to the
+transaction are spent and those _flowing out_ are created and added to the UTXO. A
+transaction from this perspective is a transformer of old boxes to new ones preserving the
+balances of ERGs and tokens involved.
+
+The following figure shows the main elements of the Ergo transaction we saw
+previously (now as a FlowCard Diagram).
 
 ![Anatomy](tx-anatomy.png)
 
-There is a strictly defined meaning (aka semantics) behind every element of _the diagram_,
-so that the diagram is in fact a _formalized specification_, which can be used to
-mechanically create and send the corresponding transaction to Ergo blockchain, we will see
-this in the next section.
+There is a strictly defined meaning (semantics) behind every element of _the diagram_,
+so that the diagram is a visual representation (or a view) of the underlying executable
+component (called FlowCard).
 
-Another way to look at the diagram is as an executable spread-sheet-like flow of ERGs and
-tokens between boxes, where all transaction balances and conditions are validated.
+The FlowCard can be used as a reusable component of an Ergo dApp to create and send the
+transactions to Ergo blockchain. We will discuss this in the next sections.
 
-Now let's look at the pieces of the diagram one by one.
+Now let's look at the pieces of the FlowCard diagram one by one.
 
-##### 1. Contract Wallet 
+##### 1. Name and Parameters 
 
-This is a key element of the diagram. Every box has a guarding script. Most often it is
-the script that contains a public key and checks a signature generated using the
-corresponding secret key. This script is trivial in ErgoScript and looks like `{ sender
-}`, where sender is the named template parameter. We call the corresponding script template
-`pk(pubkey)`, which has one parameter.
+Each flow card is given a name and a list of typed parameters, this is similar to a class
+with constructor arguments. In the figure we see the `Send` flow card with five
+parameters. The parameters can be used in the specification.
 
-_Contract Wallet_ is then a set of all UTXO boxes which have a script with a given
-template and given parameter. In the figure, the template is `pk` and parameter `pubkey`
-is substituted with `sender' (address or public key).
+##### 2. Contract Wallet 
+
+This is a key element of the flow card. Every box has a guarding script. Often it is the
+script that checks a signature against a public key (aka ProveDlog proposition). This
+script is trivial in ErgoScript and is defined like the `{ pubkey }` template where
+`pubkey` is a parameter of type `Address`. In the figure, the script template is applied
+to the parameter `pk(sender)` and thus concrete wallet contract is obtained. Therefore
+`pk(sender)` and `pk(receiver)` yield different scripts and represent different wallets on
+the diagram.
+
+_Contract Wallet_ contains a set of all UTXO boxes which have a given script derived from
+the given template using flow card parameters. For example, in the figure, the template is
+`pk` and parameter `pubkey` is substituted with the `sender' flowcard parameter (address
+or public key).
   
-##### 2. Contract
+##### 3. Contract
 
-Even though a contract is a property of a box, on the diagram we group the boxes by
-their contracts. In the example, we have three instantiated contracts pk(sender),
-pk(receiver) and minerFee. Note, that `pk(sender)` is the instantiation of the `pk`
-template with the concrete parameter `sender`.
+Even though a contract is a property of a box, on the diagram we group the boxes by their
+contracts, therefore it looks like the boxes belong to the contracts, rather than the
+contracts belong to the boxes. In the example, we have three instantiated contracts
+pk(sender), pk(receiver) and minerFee. Note, that `pk(sender)` is the instantiation of the
+`pk` template with the concrete parameter `sender` and `minerFee` is the instantiation of
+the pre-defined contract.
 
 ##### 3. Box name
 
@@ -268,10 +298,11 @@ position of the corresponding box in OUTPUTS collection of the transaction.
 
 ### More Complex Example: Decentralized Exchange (DEX)
 
-Now let's use the described notation to design contracts for a DEX dApp. It is
-simple enough for a post, but it also illustrates all the primitives of the graphical
-language we've introduced.
+Now let's use the described notation to design a FlowCard for a DEX dApp. It is
+simple enough for a post, but it also illustrates all the primitives of the Flowcard
+diagrams we've introduced.
 
+The scenario: <br>
 There are three participants (buyer, seller and DEX) of the DEX dApp and five different
 transaction types, which can be created by participants. The buyer wants to swap `ergAmt`
 ERGs for `tAmt` of `TID` tokens (of vice versa, who send the orders first doesn't matter).
@@ -361,12 +392,40 @@ the swap of values between seller's and buyer's wallets. Buyer get's the necessa
 of `TID` token and seller get's the corresponding amount of ERGs. The `Swap` transaction
 can be created when there are two matching boxes with `buyOrder` and `sellOrder` contracts.
 
+### FlowCards vs ErgoScript?
+
+The key point is to specify conditions like `bid ? R4 == bid.id` in the
+boxes, rather than in the contracts as we used to think. 
+
+This idea of attaching conditions to boxes is a key, because it shifts the focus from
+ErgoScript contracts to the overall flow of values (hence FlowCard name), in such a way,
+that ErgoScript is always generated from them. 
+
+ErgoScript is a language of Ergo blockchain.
+FlowCard is a declarative specification of both off-chain transaction construction and
+on-chain box spending verifications. Since ErgoScript can always be generated for every
+box of a FlowCard we will never need to look at the ErgoScript code. 
+FlowCard is an off-chain component, that can emit transactions to the blockchain.
+If we follow the semantics of the notation and the tooling is implemented correctly
+ErgoScript is automatically generate behind the scene.
+
+We can think of some Embedded DSLs, but I want to go one step further and specify FlowCard
+Specification EIP and a standardized file format (Json/XML/Protobuf). And yes, visual
+notation can be generated, but only as a workaround until we have graphical editing tools.
+
+Having a diagram it is easy to write the text of `def dex(...) = ...` function, but
+it is much harder to write the code first, without having a diagram on the screen. 
+
+Whatever tools are used (DSL, Diagram Editor, etc) they all will produce a component which
+we call FlowCard (e.g. file `*.flowcard` specification format) (or whatever storage is used)
+which will be executed by FlowCard runtime.
+
 ### From Diagrams To ErgoScript Contracts
 
-What is nice about formalized graphical notation is that we can use it to mechanically
+What is nice about FlowCard Specification is that we can use it to 
 generate the necessary ErgoScript contracts. With tooling support this can be done
 automatically, with a lack of thereof, it can be done manually. This is what we are going
-to do next, create the `buyOrder` contract from the information given in the diagram.
+to do next, create the `buyOrder` contract from the information given in the flowcard.
 
 Recall that each contract is a proposition (boolean valued expression) which should
 evaluate to the `true` value. When we have many conditions to be met at the same time we
@@ -455,7 +514,7 @@ specification.
 
 ### From Diagrams To Ergo Transactions
 
-Since ErgoFlow diagrams are formalized specifications they can be executed.
+Since FlowCard diagrams are formalized specifications they can be executed.
 
 ### Conclusions
 
@@ -465,12 +524,25 @@ etc. Ergo is pioneering the declarative model of dApp development as a better an
 alternative to the now popular imperative model of smart contracts.
 
 What is next:
-1) Storage format for ErgoFlow specification (EIP)
-2) Interpreter of ErgoFlow specification
-4) Development of complex diagrams will be greatly simplified when specialized graphical
-editing tools appear. This will make desiging and validation of Ergo contracts a joyful
+1) Storage format for FlowCard Spec, EIP and a standardized file format (Json/XML/Protobuf)
+2) FlowCards runtime, which can run FlowCards, create and send transactions.
+3) Development of complex diagrams will be greatly simplified when specialized graphical
+editing tools appear. This will make designing and validation of Ergo contracts a pleasant
 experience, more like drawing rather than coding.
 
+
+ErgoCards declarative model shifts the focus from writing
+ErgoScript contracts to the overall flow of values (hence FlowCard name), in such a way,
+that ErgoScript is always generated from them. You will never need to look at the
+ErgoScript code and rely on the tooling.
+
+Visual notation can be generated, but only as a workaround until we have graphical editing
+tools. 
+Having a diagram it is easy to write the text of `def dex(...) = ...` function, but
+it is much harder to write the code first, without having a diagram on the screen. 
+
+Whatever tools are used (DSL, Diagram Editor, etc) they all will create `DEX.flowcard` file
+(or whatever storage we use) which will be used.
 
 ### References
 
