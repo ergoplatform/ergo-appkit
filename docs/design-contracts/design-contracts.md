@@ -70,8 +70,8 @@ then publish the post-condition as `Sent` event. The gas consumed by transaction
 to the miner as a reward for executing this transaction.
 
 Unlike Ethereum, a transaction in Ergo is a data structure holding a list of input coins
-which it spends and list of output coins which it creates preserving total balances of ERGs and
-tokens (in which Ergo is similar to Bitcoin).
+which it spends and list of output coins which it creates preserving total balances of
+ERGs and tokens (in which Ergo is similar to Bitcoin).
 
 Since Ergo natively support tokens for this specific example of sending tokens we don't
 need to write any code in ErgoScript.
