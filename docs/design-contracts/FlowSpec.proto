@@ -166,7 +166,9 @@ message Transaction {
 
     /** Represents a reference to a box which is created by this transaction. */
     message OutputArrow {
+        /** Target wallet name */
         string to_wallet = 1;
+        /** Target box name this arrow is pointing to. */
         string box_name = 2;
     }
 }

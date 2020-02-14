@@ -217,9 +217,9 @@ the pre-defined contract.
 
 In the diagram we can give each box a name. Besides readability of the diagram, the name
 can then be used as a synonym of a more complex indexed access to the box in the contract.
-For example, `change` is the name of the box, which can also be accessed in the ErgoScript
-contract as `OUTPUTS(2)`. Box names can also be used to specify conditions that should be
-checked in its script (more about it later).
+For example, `change` is the name of the box, which can also be used in the ErgoScript
+conditions instead of `OUTPUTS(2)`. Box names can also be used to specify conditions that
+should be checked in its script (more about it later).
 
 ##### 4. Boxes of the wallet
 
