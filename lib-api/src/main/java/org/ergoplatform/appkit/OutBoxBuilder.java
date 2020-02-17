@@ -46,7 +46,7 @@ public interface OutBoxBuilder {
      * @param tokenNumberOfDecimals number of decimals
      * @see ErgoToken
      */
-    OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription,String tokenNumberOfDecimals);
+    OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription,int tokenNumberOfDecimals);
 
     /**
      * Configures one or more optional registers of the output box.
