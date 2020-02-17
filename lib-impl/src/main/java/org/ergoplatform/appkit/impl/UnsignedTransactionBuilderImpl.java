@@ -119,6 +119,14 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             appendOutputs(changeOut);
         }
 
+        ErgoId firstInputBoxId = new ErgoId(inputs.head().boxId());
+
+        int mintedTokensNum = _outputCandidates.stream().flatMap(b ->
+                Iso.isoTokensListToPairsColl().from(b.additionalTokens()).stream()
+        ).filter(t -> t.getId().equals(firstInputBoxId)).toArray().length;
+
+        checkState(mintedTokensNum <= 1, String.format("Only one token can be minted, but found %d", mintedTokensNum));
+
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
         UnsignedErgoLikeTransaction tx =
                 new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
