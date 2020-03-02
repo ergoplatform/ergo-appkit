@@ -5,7 +5,10 @@ import org.ergoplatform.*;
 import org.ergoplatform.appkit.*;
 import scala.Tuple2;
 import sigmastate.Values;
+import special.collection.Coll;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -41,6 +44,17 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
         Preconditions.checkArgument(tokens.length > 0,
                 "At least one token should be specified");
         Collections.addAll(_tokens, tokens);
+        return this;
+    }
+
+    @Override
+    public OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription, int tokenNumberOfDecimals) {
+        Charset utf8 = StandardCharsets.UTF_8;
+        ErgoValue<Coll<Byte>> tokenNameVal = ErgoValue.of(tokenName.getBytes(utf8));
+        ErgoValue<Coll<Byte>> tokenDescVal = ErgoValue.of(tokenDescription.getBytes(utf8));
+        ErgoValue<Coll<Byte>> tokenNumOfDecVal = ErgoValue.of(Integer.toString(tokenNumberOfDecimals).getBytes(utf8));
+        Collections.addAll(_registers, tokenNameVal, tokenDescVal, tokenNumOfDecVal);
+        Collections.addAll(_tokens, token);
         return this;
     }
 
