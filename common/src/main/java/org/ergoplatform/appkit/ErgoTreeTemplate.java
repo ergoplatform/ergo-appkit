@@ -6,6 +6,7 @@ import scorex.util.encode.Base16;
 import sigmastate.SType;
 import sigmastate.Values;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +18,28 @@ import java.util.stream.Collectors;
 public class ErgoTreeTemplate {
 
     private final Values.ErgoTree _tree;
+    private final byte[] _templateBytes;
 
     private ErgoTreeTemplate(Values.ErgoTree tree) {
         _tree = tree;
+        _templateBytes = JavaHelpers.ergoTreeTemplateBytes(_tree);
+    }
+
+    @Override
+    public boolean equals(java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ErgoTreeTemplate template = (ErgoTreeTemplate) o;
+        return Arrays.equals(this.getBytes(), template.getBytes());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(_templateBytes);
     }
 
     /**
@@ -28,7 +48,7 @@ public class ErgoTreeTemplate {
      * @return template bytes at the tail of the serialized ErgoTree (i.e. exclusing header and segregated
      * constants)
      */
-    public byte[] getBytes() { return JavaHelpers.ergoTreeTemplateBytes(_tree); }
+    public byte[] getBytes() { return _templateBytes; }
 
     /**
      * Returns template bytes encoded as Base16 string.
