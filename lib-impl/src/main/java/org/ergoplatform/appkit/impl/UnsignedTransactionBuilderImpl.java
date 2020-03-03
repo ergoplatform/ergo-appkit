@@ -10,6 +10,7 @@ import special.sigma.Header;
 import special.sigma.PreHeader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,53 +86,16 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public UnsignedTransaction build() {
-        IndexedSeq<UnsignedInput> inputs = JavaHelpers.toIndexedSeq(_inputs);
+        List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
-
-        Long inputTotal = _inputBoxes.stream().map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
-        Long outputSum = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
-        long outputTotal = outputSum + _feeAmount;
-
-        long changeAmt = inputTotal - outputTotal;
-        boolean noChange = changeAmt < MinChangeValue;
-
-        // if computed changeAmt is too small give it to miner as tips
-        long actualFee = noChange ? _feeAmount + changeAmt : _feeAmount;
-
-        checkState(actualFee >= MinFee,
-                String.format("Fee must be greater then minimum amount (%d NanoErg)", MinFee));
-
-        OutBox feeOut = outBoxBuilder()
-                .value(actualFee)
-                .contract(_ctx.newContract(ErgoScriptPredef.feeProposition(Parameters.MinerRewardDelay)))
-                .build();
-        appendOutputs(feeOut);
-
-        if (!noChange) {
-            checkState(_changeAddress != null, "Change address is not defined");
-
-            OutBox changeOut = outBoxBuilder()
-                    .value(changeAmt)
-                    .contract(_ctx.newContract(_changeAddress.script()))
-                    .build();
-            appendOutputs(changeOut);
-        }
-
-        ErgoId firstInputBoxId = new ErgoId(inputs.head().boxId());
-
-        int mintedTokensNum = _outputCandidates.stream().flatMap(b ->
-                Iso.isoTokensListToPairsColl().from(b.additionalTokens()).stream()
-        ).filter(t -> t.getId().equals(firstInputBoxId)).toArray().length;
-
-        checkState(mintedTokensNum <= 1, String.format("Only one token can be minted, but found %d", mintedTokensNum));
+        checkState(_changeAddress != null, "Change address is not defined");
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
-        UnsignedErgoLikeTransaction tx =
-                new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
-        List<ErgoBox> boxesToSpend =
-                _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
+        IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
+        UnsignedErgoLikeTransaction tx = TransactionOperations.buildUnsignedErgoTx(inputBoxes, dataInputs,
+                outputCandidates, _feeAmount, _changeAddress, _ctx.getHeight());
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
         return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
