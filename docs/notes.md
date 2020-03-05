@@ -116,6 +116,8 @@ mx ideinit
 - [Using Mock Web Server](https://tech.okcupid.com/ui-tests-with-mockwebserver/)
 - [GraalVM with native-image compilation in Travis CI](https://stackoverflow.com/questions/58465833/graalvm-with-native-image-compilation-in-travis-ci)
 - [Quarkus and GraalVM: Booting Hibernate at Supersonic Speed, Subatomic Size](https://www.infoq.com/presentations/quarkus-graalvm-sao-paulo-2019/)
+- [http4s + Graal](https://github.com/hhandoko/http4s-graal)
+- [Building Serverless Scala Services with GraalVM](https://www.inner-product.com/posts/serverless-scala-services-with-graalvm/)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)
