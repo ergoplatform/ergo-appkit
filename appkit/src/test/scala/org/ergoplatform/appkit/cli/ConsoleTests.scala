@@ -9,7 +9,7 @@ class ConsoleTests extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
   val scenario = ConsoleScenario(Seq(
     WriteRead("Enter line 1> ", "input line 1"),
     WriteRead("Enter line 2> ", "input line 2"),
-    WriteRead("You entered: input line 1input line 2\n", ""),
+    WriteRead("You entered: input line 1input line 2\n", "")
   ))
 
   property("read input string") {
