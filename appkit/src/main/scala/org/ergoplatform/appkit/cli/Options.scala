@@ -34,7 +34,7 @@ object CmdOption {
   final val Prefix: String = "--"
   
   /** Options supported by this application */
-  val options: Seq[CmdOption] = Array(ConfigOption, DryRunOption, PrintJsonOption, LimitListOption)
+  lazy val options: Seq[CmdOption] = Array(ConfigOption, DryRunOption, PrintJsonOption, LimitListOption)
 }
 
 /** String option to specify path to a configuration file. The path is relative to current working directory.
