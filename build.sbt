@@ -73,6 +73,8 @@ version in ThisBuild := {
 
 git.gitUncommittedChanges in ThisBuild := true
 
+val mockitoScalaVerstion = "1.11.4"
+
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
@@ -203,7 +205,11 @@ lazy val appkit = (project in file("appkit"))
       libApi % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
-      libraryDependencies ++= Seq(mockWebServer))
+      libraryDependencies ++= Seq(
+        mockWebServer//,
+//        "org.mockito" %% "mockito-scala" % mockitoScalaVerstion % "test",
+//        "org.mockito" %% "mockito-scala-scalatest" % mockitoScalaVerstion % "test"
+      ))
     .settings(publish / skip := true)
 
 lazy val aggregateCompile = ScopeFilter(
