@@ -5,6 +5,8 @@ import org.ergoplatform.appkit.{ErgoClient, NetworkType}
 
 /** Application execution context. Contains all the data necessary to parse and execute command. */
 case class AppContext(
+     /** CLI application which has created this context */
+     cliApp: CliApplication,
      /** Arguments of command line passed to ErgoTool.main */
      commandLineArgs: Seq[String],
      /** Console interface to be used during command execution */
