@@ -13,30 +13,18 @@ class CliApplicationSpec
     extends PropSpec
         with Matchers
         with ScalaCheckDrivenPropertyChecks
-        with ConsoleTesting {
+        with ConsoleTesting
+        with CommandsTesting {
 
-  // NOTE, mainnet data is used for testing
   val testConfigFile = "ergotool.json"
+  val responsesDir: String = "appkit/src/test/resources/mockwebserver"
 
   property("help command") {
     TestCliApplication.commandsMap.values.foreach { c =>
-      val consoleOps = parseScenario("")
-      val res = runScenario(consoleOps) { console =>
-        val name = "help"
-        val args = Seq(c.name)
-        TestCliApplication.run(name +: (Seq(ConfigOption.cmdText, testConfigFile) ++ args), console, {
-          ctx => {
-            val nrs = IndexedSeq.empty[String]
-            val ers = IndexedSeq.empty[String]
-            new FileMockedErgoClient(nrs.convertTo[JList[JString]], ers.convertTo[JList[JString]])
-          }
-        })
-      }
-
+      val res = runCommand(TestCliApplication, "help", Seq(c.name), expectedConsoleScenario = "")
       res should include (s"Command Name:\t${c.name}")
       res should include (s"Doc page:\t${c.docUrl}")
     }
   }
-
 
 }
