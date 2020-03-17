@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
     sonatypeSnapshots,
     Resolver.mavenCentral),
-  homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
+  homepage := Some(url("https://github.com/ergoplatform/ergo-appkit")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
   description := "A Library for Polyglot Development of Ergo Applications",
   pomExtra :=

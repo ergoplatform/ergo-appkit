@@ -158,7 +158,7 @@ abstract class CmdDescriptor(
   /** Returns the descriptors of parameters of the command. */
   def parameters: Seq[CmdParameter] = Nil
 
-  val BaseDocUrl = "https://aslesarenko.github.io/ergo-tool/api"
+  val BaseDocUrl = "https://ergoplatform.github.io/ergo-tool/api"
 
   /** Url of the ScalaDoc for this command. */
   def docUrl: String = {
