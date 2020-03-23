@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.ergoplatform.appkit.Parameters.MinFee;
+import org.ergoplatform.wallet.boxes.BoxSelectors;
 
 /**
  * A collection of utility operations implemented in terms of abstract Appkit interfaces.
@@ -14,48 +15,14 @@ public class BoxOperations {
     public static List<InputBox> selectTop(
             List<InputBox> unspentBoxes,
             long amountToSpend) {
-        return selectTop(unspentBoxes, amountToSpend, Optional.empty());
+        return selectTop(unspentBoxes, amountToSpend, new ArrayList<>());
     }
 
     public static List<InputBox> selectTop(
             List<InputBox> unspentBoxes,
             long amountToSpend,
-            Optional<ErgoToken> tokenOpt) {
-        if (amountToSpend == 0 && !tokenOpt.isPresent()) {
-            // all unspent boxes are requested
-            return unspentBoxes;
-        }
-
-        // collect boxes to cover requested amount of coins and tokens
-        ArrayList<InputBox> res = new ArrayList<InputBox>();
-        long collected = 0;
-        long collectedTokens = 0;
-        long tokenAmount = tokenOpt.map(ErgoToken::getValue).orElse(0L);
-        for (int i = 0;
-             i < unspentBoxes.size() &&
-                     (collected < amountToSpend ||
-                             (tokenOpt.isPresent() && collectedTokens < tokenAmount)
-                     );
-             ++i) {
-            InputBox box = unspentBoxes.get(i);
-            if (!tokenOpt.isPresent() && !box.getTokens().isEmpty()) {
-                // skip boxes with tokens if token is not asked
-                continue;
-            }
-            collected += box.getValue();
-            long tokenAmountInBox = box.getTokens().stream()
-                    .filter(t -> tokenOpt.isPresent() && t.getId().equals(tokenOpt.get().getId()))
-                    .map(ErgoToken::getValue)
-                    .reduce(0L, Long::sum);
-            collectedTokens += tokenAmountInBox;
-            res.add(box);
-        }
-        if (collected < amountToSpend)
-            throw new RuntimeException("Not enough coins in boxes to pay " + amountToSpend);
-        if (tokenOpt.isPresent() && collectedTokens < tokenAmount)
-            throw new RuntimeException("Not enough tokens (id " + tokenOpt.get().getId().toString() + ") in" +
-                    " boxes to pay " + tokenAmount + ", found only " + collectedTokens);
-        return res;
+            List<ErgoToken> tokensToSpend) {
+        return BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, amountToSpend, tokensToSpend);
     }
 
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {

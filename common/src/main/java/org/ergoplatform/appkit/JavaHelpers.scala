@@ -28,6 +28,7 @@ import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
 import sigmastate.interpreter.CryptoConstants.{EcPointType, dlogGroup}
+import scorex.util.{bytesToId, idToBytes, ModifierId}
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -75,6 +76,22 @@ object Iso extends LowPriorityIsos {
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
     override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
+  }
+
+  implicit val isoJListErgoTokenToMapPair: Iso[JList[ErgoToken], Map[ModifierId, Long]] = 
+    new Iso[JList[ErgoToken], Map[ModifierId, Long]] {
+    override def to(a: JList[ErgoToken]): Map[ModifierId, Long] = {
+      import JavaHelpers._
+      a.convertTo[IndexedSeq[(TokenId, Long)]]
+        .map(t => bytesToId(t._1) -> t._2)
+        .toMap
+    }
+    override def from(t: Map[ModifierId, Long]): JList[ErgoToken] = {
+      import JavaHelpers._
+      val pairs: IndexedSeq[(TokenId, Long)] = t.toIndexedSeq
+        .map(t => (Digest32 @@ idToBytes(t._1)) -> t._2)
+      pairs.convertTo[JList[ErgoToken]]
+    }
   }
 
   implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
