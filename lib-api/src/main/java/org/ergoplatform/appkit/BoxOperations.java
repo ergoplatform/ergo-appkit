@@ -22,7 +22,11 @@ public class BoxOperations {
             List<InputBox> unspentBoxes,
             long amountToSpend,
             List<ErgoToken> tokensToSpend) {
-        return BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, amountToSpend, tokensToSpend);
+        List<InputBox> found = BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, amountToSpend, tokensToSpend);
+        if (found.isEmpty()) {
+            throw new RuntimeException("Not enough funds in boxes to pay " + amountToSpend + " nanoERGs, tokens: " + tokensToSpend);
+        }
+        return found;
     }
 
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {

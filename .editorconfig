@@ -3,8 +3,13 @@
 
 root = true
 
-[*.scala]
+[*]
 end_of_line = LF
 indent_style = space
-indent_size = 2
 insert_final_newline = true
+
+[*.scala]
+indent_size = 2
+
+[*.java]
+indent_size = 4
