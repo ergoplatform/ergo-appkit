@@ -89,13 +89,20 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
+        checkState(_feeAmount >= MinFee, "Fee amount should be >= " + MinFee + ", got " + _feeAmount);
         checkState(_changeAddress != null, "Change address is not defined");
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
         IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
-        UnsignedErgoLikeTransaction tx = TransactionBuilder.buildUnsignedTx(inputBoxes, dataInputs,
-                outputCandidates, _feeAmount, Option.apply(_changeAddress), _ctx.getHeight(),
-                MinFee, MinChangeValue, Parameters.MinerRewardDelay).get();
+        UnsignedErgoLikeTransaction tx = TransactionBuilder.buildUnsignedTx(
+            inputBoxes,
+            dataInputs, 
+            outputCandidates, 
+            _ctx.getHeight(),
+            _feeAmount, 
+            _changeAddress, 
+            MinChangeValue, 
+            Parameters.MinerRewardDelay).get();
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
         return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
