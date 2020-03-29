@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.ergoplatform.appkit.Parameters.MinFee;
-import org.ergoplatform.wallet.boxes.BoxSelectors;
 
 /**
  * A collection of utility operations implemented in terms of abstract Appkit interfaces.
