@@ -23,10 +23,12 @@ object BoxSelectorsJavaHelpers {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
       .map(InputBoxWrapper.apply).toIterator
     val targetAssets = tokensToSpend.convertTo[Map[ModifierId, Long]]
-    val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets)
-      .toSeq
-      .flatMap { _.boxes.map(_.inputBox) }
-      .toIndexedSeq
+    val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets) match {
+      case Left(err) => 
+        throw new RuntimeException(
+          s"Not enough funds in boxes to pay $amountToSpend nanoERGs, \ntokens: $tokensToSpend, \nreason: $err")
+      case Right(v) => v.boxes.map(_.inputBox).toIndexedSeq
+    }
     foundBoxes.convertTo[JList[InputBox]]
   }
 
