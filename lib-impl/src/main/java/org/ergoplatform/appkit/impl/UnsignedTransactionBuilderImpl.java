@@ -5,6 +5,8 @@ import org.ergoplatform.appkit.*;
 import org.ergoplatform.appkit.impl.ScalaBridge;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import org.ergoplatform.wallet.transactions.TransactionBuilder;
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector$;
+import org.ergoplatform.wallet.boxes.BoxSelector;
 import scala.Option;
 import scala.collection.IndexedSeq;
 import special.collection.Coll;
@@ -94,6 +96,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
         IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
+        BoxSelector boxSelector = DefaultBoxSelector$.MODULE$;
         UnsignedErgoLikeTransaction tx = TransactionBuilder.buildUnsignedTx(
             inputBoxes,
             dataInputs, 
@@ -102,7 +105,8 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             _feeAmount, 
             _changeAddress, 
             MinChangeValue, 
-            Parameters.MinerRewardDelay).get();
+            Parameters.MinerRewardDelay,
+            boxSelector).get();
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
         return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
