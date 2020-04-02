@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import scala.collection.mutable
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector
 import java.util.{List => JList, Map => JMap}
 import org.ergoplatform.appkit.JavaHelpers._
@@ -14,7 +15,8 @@ object BoxSelectorsJavaHelpers {
 
   final case class InputBoxWrapper(val inputBox: InputBox) extends ErgoBoxAssets {
     override def value: Long = inputBox.getValue
-    override def tokens: Map[ModifierId, Long] = inputBox.getTokens.convertTo[Map[ModifierId, Long]]
+    override def tokens: Map[ModifierId, Long] = 
+      inputBox.getTokens.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
   }
 
   def selectBoxes(unspentBoxes: JList[InputBox],
@@ -22,7 +24,7 @@ object BoxSelectorsJavaHelpers {
                   tokensToSpend: JList[ErgoToken]): JList[InputBox] = {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
       .map(InputBoxWrapper.apply).toIterator
-    val targetAssets = tokensToSpend.convertTo[Map[ModifierId, Long]]
+    val targetAssets = tokensToSpend.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
     val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets) match {
       case Left(err) => 
         throw new RuntimeException(
