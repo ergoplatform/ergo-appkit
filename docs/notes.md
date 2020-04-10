@@ -101,6 +101,7 @@ mx ideinit
 
 ### References
 
+- [Awesome Graal](https://github.com/neomatrix369/awesome-graal)
 - [Assisted Configuration of Native Image Builds](https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md)
 - [Proof-of-concept: Configuration to get native-image to generate a bin](https://github.com/cloudstateio/cloudstate/pull/56)
 - [Akka HTTP + GraalVM native](https://github.com/vmencik/akka-graal-native/blob/master/README.md#logging)
@@ -125,6 +126,7 @@ mx ideinit
 - [com.oracle.graal.pointsto.constraints.UnsupportedFeatureException creating Micronaut native image with Redis Lettuce](https://github.com/oracle/graal/issues/1036)
 - [On security provider and Bouncy Castle with NI](https://github.com/oracle/graal/issues/951)
 - [Error:java: javacTask: source release 8 requires target release 1.8](https://stackoverflow.com/questions/29888592/errorjava-javactask-source-release-8-requires-target-release-1-8?noredirect=1)
+- [Kotlin coroutines with loops are 18 times slower under the Graal CI.(closed in 20.1)](https://github.com/oracle/graal/issues/1330)
 
 ## Ruby notes after `brew install ruby`
 By default, binaries installed by gem will be placed into:
