@@ -1,11 +1,8 @@
-package org.ergoplatform.appkit.examples.util;
+package org.ergoplatform.appkit;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.ergoplatform.appkit.BlockchainContext;
-import org.ergoplatform.appkit.ErgoClientException;
-import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;

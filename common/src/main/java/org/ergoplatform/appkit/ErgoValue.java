@@ -10,6 +10,7 @@ import special.sigma.GroupElement;
 import special.sigma.SigmaProp;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -30,6 +31,21 @@ public class ErgoValue<T> {
 
     public ErgoType<T> getType() {
         return _type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_type, _value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ErgoValue) {
+           ErgoValue<?> other = (ErgoValue<?>)obj;
+           return Objects.equals(_type, other._type) && Objects.equals(_value, other._value);
+        }
+        else
+          return false;
     }
 
     static public ErgoValue<Byte> of(byte value) {
@@ -54,6 +70,10 @@ public class ErgoValue<T> {
 
     static public ErgoValue<GroupElement> of(ECPoint value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(value), ErgoType.groupElementType());
+    }
+
+    static public ErgoValue<GroupElement> of(GroupElement ge) {
+        return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
     static public ErgoValue<SigmaProp> of(Values.SigmaBoolean value) {

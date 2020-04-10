@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit.impl;
 
+import com.google.gson.Gson;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
@@ -7,6 +8,7 @@ import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
 import sigmastate.Values;
+import special.sigma.Header;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     private final ApiClient _client;
     private final Retrofit _retrofit;
+    final PreHeaderImpl _preHeader;
     private ExplorerApiClient _explorer;
     private Retrofit _retrofitExplorer;
     private final NetworkType _networkType;
@@ -35,6 +38,21 @@ public class BlockchainContextImpl implements BlockchainContext {
         _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
+        Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
+        _preHeader = new PreHeaderImpl(JavaHelpers.toPreHeader(h));
+    }
+
+    @Override
+    public PreHeaderBuilder createPreHeader() {
+        return new PreHeaderBuilderImpl(this);
+    }
+
+    @Override
+    public SignedTransaction signedTxFromJson(String json) {
+        Gson gson = getApiClient().getGson();
+        ErgoTransaction txData = gson.fromJson(json, ErgoTransaction.class);
+        ErgoLikeTransaction tx = ScalaBridge.isoErgoTransaction().to(txData);
+        return new SignedTransactionImpl(this, tx);
     }
 
     @Override
@@ -79,8 +97,23 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _client;
     }
 
+    /**
+     * This method should be private. No classes of HTTP client should ever leak into interfaces.
+     */
+    private List<InputBox> getInputBoxes(List<TransactionOutput> boxes) {
+        return boxes.stream().map(box -> {
+            String boxId = box.getId();
+            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
+            return new InputBoxImpl(this, boxInfo);
+        }).collect(Collectors.toList());
+    }
+
     public NodeInfo getNodeInfo() {
         return _nodeInfo;
+    }
+
+    public PreHeader getPreHeader() {
+        return _preHeader;
     }
 
     public List<BlockHeader> getHeaders() {
@@ -127,13 +160,17 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public List<InputBox> getUnspentBoxesFor(Address address) {
-        List<TransactionOutput> boxes = ExplorerFacade.transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
-        List<InputBox> unspentBoxes = boxes.stream().map(box -> {
-            String boxId = box.getId();
-            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            return new InputBoxImpl(this, boxInfo);
-        }).collect(Collectors.toList());
-        return unspentBoxes;
+        List<TransactionOutput> boxes = ExplorerFacade
+                .transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
+        return getInputBoxes(boxes);
+    }
+
+    @Override
+    public List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template) {
+        List<TransactionOutput> boxes = ExplorerFacade
+                .transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(_retrofitExplorer,
+                        template.getEncodedBytes());
+        return getInputBoxes(boxes);
     }
 }
 

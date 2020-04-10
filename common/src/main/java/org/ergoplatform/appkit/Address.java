@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
@@ -7,7 +8,10 @@ import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.basics.DLogProtocol;
+import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.utils.Helpers;
+import special.sigma.GroupElement;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
@@ -62,7 +66,9 @@ public class Address {
      */
     public boolean isP2PK() { return _address instanceof P2PKAddress; }
 
-    /** Obtain an instance of {@link ErgoAddress} related to this Address instance.
+    /**
+     * Obtain an instance of {@link ErgoAddress} related to this Address instance.
+     *
      * @return {@link ErgoAddress} instance associated with this address
      */
     public ErgoAddress getErgoAddress() {
@@ -78,6 +84,14 @@ public class Address {
     }
 
     /**
+     * Extract public key from P2PKAddress and return its group element
+     */
+    public GroupElement getPublicKeyGE() {
+        SecP256K1Point point = getPublicKey().value();
+        return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
+    }
+
+    /**
      * Create Ergo Address from base58 string.
      *
      * @param base58Str base58 string representation of address bytes.
@@ -89,7 +103,7 @@ public class Address {
         return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
     }
 
-    public static Address fromMnemonic(NetworkType networkType, String mnemonic, String mnemonicPass) {
+    public static Address fromMnemonic(NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
         DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);

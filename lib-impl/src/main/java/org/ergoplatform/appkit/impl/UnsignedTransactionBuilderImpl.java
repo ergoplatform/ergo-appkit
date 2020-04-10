@@ -4,14 +4,16 @@ import org.ergoplatform.*;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.appkit.impl.ScalaBridge;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
+import org.ergoplatform.wallet.transactions.TransactionBuilder;
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector$;
+import org.ergoplatform.wallet.boxes.BoxSelector;
+import scala.Option;
 import scala.collection.IndexedSeq;
 import special.collection.Coll;
 import special.sigma.Header;
 import special.sigma.PreHeader;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,10 +30,18 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     private List<InputBoxImpl> _inputBoxes;
     private long _feeAmount;
     private ErgoAddress _changeAddress;
+    private PreHeaderImpl _ph;
 
     public UnsignedTransactionBuilderImpl(
             BlockchainContextImpl ctx) {
         _ctx = ctx;
+    }
+
+    @Override
+    public UnsignedTransactionBuilder preHeader(org.ergoplatform.appkit.PreHeader ph) {
+        checkState(_ph == null, "PreHeader is already specified");
+        _ph = (PreHeaderImpl)ph;
+        return this;
     }
 
     @Override
@@ -77,45 +87,26 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public UnsignedTransaction build() {
-        IndexedSeq<UnsignedInput> inputs = JavaHelpers.toIndexedSeq(_inputs);
+        List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
-
-        Long inputTotal = _inputBoxes.stream().map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
-        Long outputSum = _outputCandidates.stream().map(b -> b.value()).reduce(0L, (x, y) -> x + y);
-        long outputTotal = outputSum + _feeAmount;
-
-        long changeAmt = inputTotal - outputTotal;
-        boolean noChange = changeAmt < MinChangeValue;
-
-        // if computed changeAmt is too small give it to miner as tips
-        long actualFee = noChange ? _feeAmount + changeAmt : _feeAmount;
-
-        checkState(actualFee >= MinFee,
-                String.format("Fee must be greater then minimum amount (%d NanoErg)", MinFee));
-
-        OutBox feeOut = outBoxBuilder()
-                .value(actualFee)
-                .contract(_ctx.newContract(ErgoScriptPredef.feeProposition(Parameters.MinerRewardDelay)))
-                .build();
-        appendOutputs(feeOut);
-
-        if (!noChange) {
-            checkState(_changeAddress != null, "Change address is not defined");
-
-            OutBox changeOut = outBoxBuilder()
-                    .value(changeAmt)
-                    .contract(_ctx.newContract(_changeAddress.script()))
-                    .build();
-            appendOutputs(changeOut);
-        }
+        checkState(_feeAmount >= MinFee, "Fee amount should be >= " + MinFee + ", got " + _feeAmount);
+        checkState(_changeAddress != null, "Change address is not defined");
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
-        UnsignedErgoLikeTransaction tx =
-                new UnsignedErgoLikeTransaction(inputs, dataInputs, outputCandidates);
-        List<ErgoBox> boxesToSpend =
-                _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
+        IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
+        BoxSelector boxSelector = DefaultBoxSelector$.MODULE$;
+        UnsignedErgoLikeTransaction tx = TransactionBuilder.buildUnsignedTx(
+            inputBoxes,
+            dataInputs, 
+            outputCandidates, 
+            _ctx.getHeight(),
+            _feeAmount, 
+            _changeAddress, 
+            MinChangeValue, 
+            Parameters.MinerRewardDelay,
+            boxSelector).get();
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
         return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
@@ -126,7 +117,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             private Coll<Header> _allHeaders = Iso.JListToColl(ScalaBridge.isoBlockHeader(),
                     ErgoType.headerType().getRType()).to(_ctx.getHeaders());
             private Coll<Header> _headers = _allHeaders.slice(1, _allHeaders.length());
-            private PreHeader _preHeader = JavaHelpers.toPreHeader(_allHeaders.apply(0));
+            private PreHeader _preHeader = _ph == null ? _ctx._preHeader._ph : _ph._ph;
 
             @Override
             public Coll<Header> sigmaLastHeaders() {
@@ -148,6 +139,11 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     @Override
     public BlockchainContext getCtx() {
         return _ctx;
+    }
+
+    @Override
+    public org.ergoplatform.appkit.PreHeader getPreHeader() {
+        return _ph == null ? _ctx.getPreHeader() : _ph;
     }
 
     @Override

@@ -38,6 +38,17 @@ public interface OutBoxBuilder {
     OutBoxBuilder tokens(ErgoToken... tokens);
 
     /**
+     * Mints new token according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md
+     *
+     * @param token token to mint
+     * @param tokenName token verbose name
+     * @param tokenDescription token description
+     * @param tokenNumberOfDecimals number of decimals
+     * @see ErgoToken
+     */
+    OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription,int tokenNumberOfDecimals);
+
+    /**
      * Configures one or more optional registers of the output box.
      * Each box have 4 mandatory registers holding value of NanoErgs, guarding script,
      * tokens, creation info.
@@ -48,7 +59,7 @@ public interface OutBoxBuilder {
      * @see ErgoValue
      * @see org.ergoplatform.ErgoBox.NonMandatoryRegisterId
      */
-    OutBoxBuilder registers(ErgoValue... registers);
+    OutBoxBuilder registers(ErgoValue<?>... registers);
 
     /**
      * Creates {@link OutBox} instance using specified parameters.

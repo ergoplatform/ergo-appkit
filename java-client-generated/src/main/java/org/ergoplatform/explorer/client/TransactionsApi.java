@@ -41,7 +41,7 @@ public interface TransactionsApi {
    * @return Call&lt;TransactionOutput&gt;
    */
   @GET("transactions/boxes/byAddress/{id}")
-  Call<TransactionOutput> transactionsBoxesByAddressIdGet(
+  Call<List<TransactionOutput>> transactionsBoxesByAddressIdGet(
             @retrofit2.http.Path("id") String id            
   );
 
@@ -63,7 +63,7 @@ public interface TransactionsApi {
    * @return Call&lt;TransactionOutput&gt;
    */
   @GET("transactions/boxes/byErgoTree/{ergoTree}")
-  Call<TransactionOutput> transactionsBoxesByErgoTreeErgoTreeGet(
+  Call<List<TransactionOutput>> transactionsBoxesByErgoTreeErgoTreeGet(
             @retrofit2.http.Path("ergoTree") String ergoTree            
   );
 
@@ -74,8 +74,19 @@ public interface TransactionsApi {
    * @return Call&lt;TransactionOutput&gt;
    */
   @GET("transactions/boxes/byErgoTree/unspent/{ergoTree}")
-  Call<TransactionOutput> transactionsBoxesByErgoTreeUnspentErgoTreeGet(
+  Call<List<TransactionOutput>> transactionsBoxesByErgoTreeUnspentErgoTreeGet(
             @retrofit2.http.Path("ergoTree") String ergoTree            
+  );
+
+  /**
+   * Get unspent boxes protected by given ergoTreeTemplate
+   *
+   * @param ergoTreeTemplate  (required)
+   * @return Call&lt;TransactionOutput&gt;
+   */
+  @GET("transactions/boxes/byErgoTreeTemplate/unspent/{ergoTreeTemplate}")
+  Call<List<TransactionOutput>> transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(
+          @retrofit2.http.Path("ergoTreeTemplate") String ergoTreeTemplate
   );
 
   /**
@@ -107,7 +118,7 @@ public interface TransactionsApi {
    * @return Call&lt;Transaction&gt;
    */
   @GET("transactions/since/{height}")
-  Call<Transaction> transactionsSinceHeightGet(
+  Call<List<Transaction>> transactionsSinceHeightGet(
             @retrofit2.http.Path("height") Integer height            
   );
 

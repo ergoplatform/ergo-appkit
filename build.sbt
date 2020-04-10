@@ -1,4 +1,4 @@
-import sbt.Keys.publishMavenStyle
+import sbt.Keys.{publishMavenStyle, scalaVersion}
 
 import scala.util.Try
 
@@ -10,8 +10,6 @@ lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/c
 
 lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
-crossScalaVersions := Seq(scala212, scala211)
-scalaVersion := scala212
 
 //javacOptions ++=
 //    "-source" :: "1.7" ::
@@ -20,12 +18,14 @@ scalaVersion := scala212
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
+  crossScalaVersions := Seq(scala212, scala211),
+  scalaVersion := scala212,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
     sonatypeSnapshots,
     Resolver.mavenCentral),
-  homepage := Some(url("https://github.com/aslesarenko/ergo-appkit")),
+  homepage := Some(url("https://github.com/ergoplatform/ergo-appkit")),
   licenses := Seq("CC0" -> url("https://creativecommons.org/publicdomain/zero/1.0/legalcode")),
   description := "A Library for Polyglot Development of Ergo Applications",
   pomExtra :=
@@ -73,6 +73,8 @@ version in ThisBuild := {
 
 git.gitUncommittedChanges in ThisBuild := true
 
+val mockitoScalaVerstion = "1.11.4"
+
 val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
@@ -118,9 +120,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "3.1.1"
-val ergoWalletVersion = "appkit-wallet-f7f7d673-SNAPSHOT"
-
+val sigmaStateVersion = "3.2.1"
+val ergoWalletVersion = "develop-9ff67741-SNAPSHOT" 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
@@ -203,7 +204,11 @@ lazy val appkit = (project in file("appkit"))
       libApi % allConfigDependency,
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
-      libraryDependencies ++= Seq( mockWebServer ))
+      libraryDependencies ++= Seq(
+        mockWebServer//,
+//        "org.mockito" %% "mockito-scala" % mockitoScalaVerstion % "test",
+//        "org.mockito" %% "mockito-scala-scalatest" % mockitoScalaVerstion % "test"
+      ))
     .settings(publish / skip := true)
 
 lazy val aggregateCompile = ScopeFilter(

@@ -1,11 +1,19 @@
 package org.ergoplatform.appkit.impl;
 
 import com.google.gson.Gson;
+import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.Input;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.Iso;
+import org.ergoplatform.appkit.SignedInput;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
@@ -20,7 +28,7 @@ public class SignedTransactionImpl implements SignedTransaction {
     /**
      * Returns underlying {@link ErgoLikeTransaction}
      */
-    ErgoLikeTransaction getTx() {
+    public ErgoLikeTransaction getTx() {
         return _tx;
     }
 
@@ -46,5 +54,21 @@ public class SignedTransactionImpl implements SignedTransaction {
         Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
         String json = gson.toJson(tx);
         return json;
+    }
+
+    @Override
+    public List<SignedInput> getSignedInputs() {
+        List<Input> inputs = Iso.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
+        List<SignedInput> res = inputs.stream()
+                .map(input -> (SignedInput)new SignedInputImpl(this, input)).collect(Collectors.toList());
+        return res;
+    }
+
+    @Override
+    public List<InputBox> getOutputsToSpend() {
+        List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
+        List<InputBox> res = outputs.stream()
+          .map(ergoBox -> (InputBox)new InputBoxImpl(_ctx, ergoBox)).collect(Collectors.toList());
+        return res;
     }
 }

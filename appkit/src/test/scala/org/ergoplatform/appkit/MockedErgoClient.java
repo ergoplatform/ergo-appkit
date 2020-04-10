@@ -1,6 +1,4 @@
-package org.ergoplatform.appkit.examples.util;
-
-import org.ergoplatform.appkit.ErgoClient;
+package org.ergoplatform.appkit;
 
 import java.util.List;
 

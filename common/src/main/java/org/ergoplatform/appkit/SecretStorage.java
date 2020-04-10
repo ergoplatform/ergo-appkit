@@ -48,6 +48,10 @@ public class SecretStorage {
         return new Address(p2pk);
     }
 
+    public void unlock(SecretString encryptionPass) {
+        unlock(encryptionPass.toStringUnsecure());
+    }
+
     public void unlock(String encryptionPass) {
         Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass);
         if (resTry.isFailure()) {
@@ -57,12 +61,17 @@ public class SecretStorage {
     }
 
     public static SecretStorage createFromMnemonicIn(
+            String secretDir, Mnemonic mnemonic, SecretString encryptionPassword) {
+        return createFromMnemonicIn(secretDir, mnemonic, encryptionPassword.toStringUnsecure());
+    }
+
+    public static SecretStorage createFromMnemonicIn(
             String secretDir, Mnemonic mnemonic, String encryptionPassword) {
-        Option<String> passOpt = Iso.jstringToOptionString().to(mnemonic.getPassword());
+        Option<String> passOpt = Iso.arrayCharToOptionString().to(mnemonic.getPassword());
         SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
 
         JsonSecretStorage jsonStorage = JsonSecretStorage
-                .restore(mnemonic.getPhrase(), passOpt, encryptionPassword, settings);
+                .restore(mnemonic.getPhrase().toStringUnsecure(), passOpt, encryptionPassword, settings);
 
         return new SecretStorage(jsonStorage);
     }

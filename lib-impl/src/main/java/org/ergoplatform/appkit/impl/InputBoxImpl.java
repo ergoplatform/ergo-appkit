@@ -2,12 +2,13 @@ package org.ergoplatform.appkit.impl;
 
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.appkit.*;
 import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
+import sigmastate.Values;
+
+import java.util.List;
 
 public class InputBoxImpl implements InputBox {
     private final BlockchainContextImpl _ctx;
@@ -37,6 +38,22 @@ public class InputBoxImpl implements InputBox {
     @Override
     public Long getValue() {
         return _ergoBox.value();
+    }
+
+    @Override
+    public List<ErgoToken> getTokens() {
+        List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
+        return tokens;
+    }
+
+    @Override
+    public List<ErgoValue<?>> getRegisters() {
+        return JavaHelpers.getBoxRegisters(_ergoBox);
+    }
+
+    @Override
+    public Values.ErgoTree getErgoTree() {
+        return _ergoBox.ergoTree();
     }
 
     @Override

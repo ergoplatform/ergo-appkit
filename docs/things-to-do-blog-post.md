@@ -2,7 +2,7 @@
 
 > With thanks to [Robert Kornacki](https://github.com/robkorn) and [Denys Zadorozhnyi](https://github.com/greenhat).
 
-[Ergo Appkit](https://github.com/aslesarenko/ergo-appkit) is a library for
+[Ergo Appkit](https://github.com/ergoplatform/ergo-appkit) is a library for
 polyglot development of Ergo Applications based on
 [GraalVM](https://www.graalvm.org/). GraalVM has many [great
 use cases](https://medium.com/graalvm/graalvm-ten-things-12d9111f307d). Expanding on that, in this article we will go through some of the Appkit
@@ -54,7 +54,7 @@ Appkit aims to provide a set of interfaces which can be used idiomatically
 in Java. You will feel right at home using Appkit if you are a Java veteran.
 
 Please follow the [setup
-instructions](https://github.com/aslesarenko/ergo-appkit#setup) for GraalVM and
+instructions](https://github.com/ergoplatform/ergo-appkit#setup) for GraalVM and
 Appkit if you wish to reproduce the examples below.
 
 To use Appkit in our Java implementation of FreezeCoin we must add the
@@ -132,7 +132,7 @@ ErgoNodeConfig nodeConf = conf.getNode();
 ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
 ```
 
-Now that we have an instance of [ErgoClient](https://github.com/aslesarenko/ergo-appkit/blob/master/lib-api/src/main/java/org/ergoplatform/appkit/ErgoClient.java),
+Now that we have an instance of [ErgoClient](https://github.com/ergoplatform/ergo-appkit/blob/master/lib-api/src/main/java/org/ergoplatform/appkit/ErgoClient.java),
 we can execute any block of code and have access to the current blockchain context.
 
 ```java
@@ -588,6 +588,6 @@ applications powered by Appkit.
 
 1. [Ergo Site](https://ergoplatform.org/en/)
 2. [Ergo Sources](https://github.com/ergoplatform/ergo)
-3. [Ergo Appkit](https://github.com/aslesarenko/ergo-appkit)
+3. [Ergo Appkit](https://github.com/ergoplatform/ergo-appkit)
 4. [Ergo Appkit Examples](https://github.com/aslesarenko/ergo-appkit-examples)
 5. [GraalVM](https://www.graalvm.org)

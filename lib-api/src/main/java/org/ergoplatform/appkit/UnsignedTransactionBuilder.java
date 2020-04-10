@@ -17,10 +17,16 @@ import java.util.List;
  */
 public interface UnsignedTransactionBuilder {
     /**
+     * Specifies {@link PreHeader} instance to be used for transaction signing.
+     */
+    UnsignedTransactionBuilder preHeader(PreHeader ph);
+
+    /**
      * Specifies boxes that will be spent by the transaction when it will be included in a block.
      *
      * @param boxes list of boxes to be spent by the transaction. The boxes can either be
-     *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from scratch
+     *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from
+     *               scratch
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
@@ -29,22 +35,24 @@ public interface UnsignedTransactionBuilder {
     /**
      * Specifies output boxes of the transaction. After this transaction is
      * {@link UnsignedTransactionBuilder#build() built}, {@link ErgoProver#sign(UnsignedTransaction)} signed,
-     * {@link BlockchainContext#sendTransaction(SignedTransaction) sent} to the node and included into a next block
+     * {@link BlockchainContext#sendTransaction(SignedTransaction) sent} to the node and included into a
+     * next block
      * the output boxes will be put in the UTXO set.
      *
      * @param outputs output boxes created by the transaction
      */
     UnsignedTransactionBuilder outputs(OutBox... outputs);
 
-
     /**
      * Adds transaction fee output.
+     *
      * @param feeAmount transaction fee amount in NanoErgs
      */
     UnsignedTransactionBuilder fee(long feeAmount);
 
     /**
      * Adds change output to the specified address if needed.
+     *
      * @param address address to send output
      */
     UnsignedTransactionBuilder sendChangeTo(ErgoAddress address);
@@ -61,8 +69,12 @@ public interface UnsignedTransactionBuilder {
      */
     BlockchainContext getCtx();
 
+    /** Returns current (either default of configured) pre-header. */
+    PreHeader getPreHeader();
+
     /**
-     * Returns the network type of the blockchain represented by the {@link UnsignedTransactionBuilder#getCtx()
+     * Returns the network type of the blockchain represented by the
+     *  {@link UnsignedTransactionBuilder#getCtx()
      * context} of this builder.
      */
     NetworkType getNetworkType();

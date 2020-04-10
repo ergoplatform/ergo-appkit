@@ -5,7 +5,10 @@ import org.ergoplatform.*;
 import org.ergoplatform.appkit.*;
 import scala.Tuple2;
 import sigmastate.Values;
+import special.collection.Coll;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -18,7 +21,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     private long _value = 0;
     private ErgoContract _contract;
     private ArrayList<ErgoToken> _tokens = new ArrayList<>();
-    private ArrayList<ErgoValue> _registers = new ArrayList<>();
+    private ArrayList<ErgoValue<?>> _registers = new ArrayList<>();
 
     public OutBoxBuilderImpl(
             BlockchainContextImpl ctx, UnsignedTransactionBuilderImpl txB) {
@@ -45,7 +48,18 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
     }
 
     @Override
-    public OutBoxBuilderImpl registers(ErgoValue... registers) {
+    public OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription, int tokenNumberOfDecimals) {
+        Charset utf8 = StandardCharsets.UTF_8;
+        ErgoValue<Coll<Byte>> tokenNameVal = ErgoValue.of(tokenName.getBytes(utf8));
+        ErgoValue<Coll<Byte>> tokenDescVal = ErgoValue.of(tokenDescription.getBytes(utf8));
+        ErgoValue<Coll<Byte>> tokenNumOfDecVal = ErgoValue.of(Integer.toString(tokenNumberOfDecimals).getBytes(utf8));
+        Collections.addAll(_registers, tokenNameVal, tokenDescVal, tokenNumOfDecVal);
+        Collections.addAll(_tokens, token);
+        return this;
+    }
+
+    @Override
+    public OutBoxBuilderImpl registers(ErgoValue<?>... registers) {
         Preconditions.checkArgument(registers.length > 0,
                 "At least one register should be specified");
         Collections.addAll(_registers, registers);
@@ -56,7 +70,7 @@ public class OutBoxBuilderImpl implements OutBoxBuilder {
         checkState(_contract != null, "Contract is not defined");
         Values.ErgoTree tree = _contract.getErgoTree();
         ErgoBoxCandidate ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens,
-                new ArrayList<Tuple2<String, Object>>(), _txB.getCtx().getHeight());  // TODO pass user specified
+                _registers, _txB.getCtx().getHeight());  // TODO pass user specified
         // creationHeight
         return new OutBoxImpl(_ctx, ergoBoxCandidate);
     }
