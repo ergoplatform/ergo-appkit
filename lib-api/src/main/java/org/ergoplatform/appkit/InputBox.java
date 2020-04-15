@@ -1,5 +1,8 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.ErgoBox;
+import scala.collection.immutable.Map;
+import sigmastate.SType;
 import sigmastate.Values;
 
 import java.util.List;
