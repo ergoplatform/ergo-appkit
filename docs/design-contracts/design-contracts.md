@@ -1,6 +1,6 @@
-# FlowCards: A Declarative Framework for Development of Ergo Contracts
+# FlowCards: A Concept of Declarative Framework for Development of Ergo Contracts
 
-### Introduction 
+## Introduction 
 
 [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf) is the contracts language on
 the Ergo blockchain. Even though it has concise syntax adopted from Scala/Kotlin, it still
@@ -11,42 +11,44 @@ systems like Ethereum. However, Ergo's transaction model have many advantages ov
 based models and with a right approach it can be much easier to develop Ergo contracts
 than to write and debug Solidity code.
 
-There are key aspects of Ergo's programming model (based on UTXO) in which it is different
-from Ethereum (i.e. account model)
+There are key aspects of the Ergo's programming model in which Ergo is different
+from Ethereum (which is based on account transaction model).
 
 ##### Paradigm   
 The account model of Ethereum is imperative. A typical task of sending coins from
 Alice to Bob means changing balances in the storage as a series of operations. Ergo's UTXO
 based programming model is declarative where ErgoScript contracts specify conditions for
-a transaction to be accepted by the blockchain (not changes to be made).
+a transaction to be accepted by the blockchain (not changes to be made in the storage
+state as result of the contract execution).
 
 ##### Scalability
 In the account model of Ethereum both storage changes and validity checks are performed
-on-chain during code execution. In contrast, Ergo transactions are created
-off-chain and only validation checks are performed on-chain thus reducing the amount of
+_on-chain_ during code execution. In contrast, Ergo transactions are created
+_off-chain_ and only validation checks are performed on-chain thus reducing the amount of
 operations performed by every node of the network. In addition due to immutability of the
-transaction graph, various optimization strategies are possible  to improve throughput
-of full nodes. Light nodes are also possible thus further facilitating scalability.
+transaction graph, various optimization strategies are possible to improve throughput
+of transactions per second in the network. Light verifying nodes are also possible thus
+further facilitating scalability and accessibility of the network.
 
 ##### Shared state
 Account model is all about shared mutable state of account storage, which is known to lead
 to complex semantics (and subtle million dollar bugs) in the face of concurrent and
-distributed computations. Ergo model is based on immutable graph of transactions, this
-approach, inherited from UTXO, plays well with the concurrent and distributed nature of
+distributed computations. Ergo model is based on an immutable graph of transactions, this
+approach, inherited from Bitcoin, plays well with the concurrent and distributed nature of
 blockchains and facilitates light trustless clients.
 
 ##### Expressive Power
-Ethereum advocated execution of turing-complete language on the blockchain. It
-theoretically promised unlimited potential applications, in practice however, the limits
-came from excessive storage growth, subtle multi-million bugs, gas costs which limit
-application complexity etc. On the other hand, Ergo extends UTXO to enable
-turing-completnes while limiting complexity of the ErgoScript language. The same
+Ethereum advocated execution of a turing-complete language on the blockchain. It
+theoretically promised unlimited potential applications, in practice however, the
+limitation comes from excessive storage growth, subtle multi-million bugs, gas costs which
+limit contracts complexity etc. On the other hand, Ergo extends UTXO to enable
+turing-completeness while limiting complexity of the ErgoScript language. The same
 expressive power is achieved in a different and more semantically sound way.
 
-In this article I want to introduce Ergo FlowCards - a developer framework 
-for designing of complex Ergo contracts in a declarative way.
+In this article I want to introduce a concept of FlowCard - a dApps developer component 
+for designing of complex Ergo contracts in a declarative and visual way.
 
-### From Imperative to Declarative
+## From Imperative to Declarative
 
 In the imperative programming model of Ethereum a transaction is a sequence of operations
 executed by Ethereum VM. The following [Solidity
@@ -66,56 +68,53 @@ function send(address receiver, uint amount) public {
 ```
 
 The function first checks the pre-conditions, then updates the storage (i.e. balances) and
-then publish the post-condition as `Sent` event. The gas consumed by transaction is sent
-to the miner as a reward for executing this transaction.
+then publishes the post-condition as the `Sent` event. The gas which is consumed by the
+transaction is sent to the miner as a reward for executing this transaction.
 
 Unlike Ethereum, a transaction in Ergo is a data structure holding a list of input coins
-which it spends and list of output coins which it creates preserving total balances of
+which it spends and a list of output coins which it creates preserving total balances of
 ERGs and tokens (in which Ergo is similar to Bitcoin).
 
-Since Ergo natively support tokens for this specific example of sending tokens we don't
-need to write any code in ErgoScript.
-Instead we need to create the 'send' transaction shown in the following figure,
-which describe the same token transfer but declaratively.
+Turning back to the example above, since Ergo natively supports tokens, therefore for this
+specific example of sending tokens we don't need to write any code in ErgoScript. Instead
+we need to create the 'send' transaction shown in the following figure, which describes
+the same token transfer but declaratively.
 
 ![Send](send-tx.png)
 
-In particular we have to perform the following steps:
-1) select unspent sender's boxes, containing in total `tB >= amount` of tokens and `B >=
-txFee + minErg` ERGs
-2) create one output (box) which is protected by `recipient` public key with `minErg` ERGs and
-`amount` of tokens
-3) create one _fee_ output protected by the minerFee contract with `txFee` ERGs 
-4) create one _change_ output protected by `sender` public key, containing
-`B - minErg - txFee` ERGs and `tB - amount` tokens.
-5) create a new transaction, sign it using the sender's secret key and send to the Ergo
+The picture visually describes the following steps, which the network user needs to
+perform:
+1) Select unspent sender's boxes, containing in total `tB >= amount` of tokens and `B >=
+txFee + minErg` ERGs.
+2) Create an output `target` box which is protected by the `receiver` public key with `minErg`
+ERGs and `amount` of `T` tokens.
+3) Create one _fee_ output protected by the `minerFee` contract with `txFee` ERGs.
+4) Create one _change_ output protected by the `sender` public key, containing
+`B - minErg - txFee` ERGs and `tB - amount` of `T` tokens.
+5) Create a new transaction, sign it using the sender's secret key and send to the Ergo
 network.
 
-What is important to understand is that ErgoScript doesn't allow to create transactions.
-Each ErgoScript contract lives inside a transaction and is executed when the transaction
-is validated _on-chain_. 
+What is important to understand is that all these steps are preformed _off-chain_ (for
+example using [Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API) by the
+user's application. Ergo network node doesn't need to repeat this transaction creation, it
+only needs to validate the already baked transaction. ErgoScript contracts are stored in
+the inputs of the transaction and specify spending condition. The node executes them
+_on-chain_ when the transaction is validated. The transaction is valid when all the
+conditions are satisfied, in which case all the scripts execute to a boolean value of
+true.
 
-However the transaction itself has to be created first, which is done _off-chain_ (for
-example using [Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API). Ergo
-network nodes don't need to repeat this transaction creation, they only need to validate
-the already baked transaction. 
+Thus, when in the Ethereum contract we "send amount from sender to recipient" we literally
+changing balances and update the storage with the concrete set of commands, this happens
+_on-chain_ and a new transaction is also created _on-chain_ as the result of this process. 
 
-Please remember this observation, ErgoScript is not enough to run contracts on Ergo
-blockchain and we also need additional means to create transactions. (Looking ahead, this
-is where FlowCards comes into play).
-
-Thus, when in the Ethereum contract "We send amount from sender to recipient" we literally
-changing balances and update storage with the concrete set of commands, and this happens
-_on-chain_. 
-
-In Ergo (as in Bitcoin) transactions are created _off-chain_ and the effects of the
-transaction on the blockchain state is that input coins (or Boxes in Ergo's parlance) are
-removed and output boxes are added to the
+In Ergo (as in Bitcoin) transactions are created _off-chain_ and the network nodes only
+verify them. The effects of the transaction on the blockchain state is that input coins
+(or Boxes in Ergo's parlance) are removed and output boxes are added to the
 [UTXO](https://en.wikipedia.org/wiki/Unspent_transaction_output) set.
 
-Even though we don't need any contract code in this simple example, however in a more
-complex application scenarios we do need to use ErgoScript code and this is what we are
-going to discuss next.
+In the example don't use any ErgoScript contract and assume a simple signature check is
+used as spending pre-condition. However in a more complex application scenarios we do need
+to use ErgoScript code and this is what we are going to discuss next.
 
 ### From Changing State to Checking Context 
 
