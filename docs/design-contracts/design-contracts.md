@@ -98,10 +98,9 @@ What is important to understand is that all these steps are preformed _off-chain
 example using [Appkit](https://github.com/aslesarenko/ergo-appkit) Transaction API) by the
 user's application. Ergo network node doesn't need to repeat this transaction creation, it
 only needs to validate the already baked transaction. ErgoScript contracts are stored in
-the inputs of the transaction and specify spending condition. The node executes them
-_on-chain_ when the transaction is validated. The transaction is valid when all the
-conditions are satisfied, in which case all the scripts execute to a boolean value of
-true.
+the inputs of the transaction and check spending conditions. The node executes the
+contracts _on-chain_ when the transaction is validated. The transaction is valid when all
+the conditions are satisfied.
 
 Thus, when in the Ethereum contract we "send amount from sender to recipient" we literally
 changing balances and update the storage with the concrete set of commands, this happens
@@ -116,7 +115,7 @@ In the example don't use any ErgoScript contract and assume a simple signature c
 used as spending pre-condition. However in a more complex application scenarios we do need
 to use ErgoScript code and this is what we are going to discuss next.
 
-### From Changing State to Checking Context 
+## From Changing State to Checking Context 
 
 Remember that in the `send` function example we first checked the pre-condition (`require(amount <=
 balances[msg.sender],...)`) and then changed the state (i.e. update balances
@@ -124,36 +123,37 @@ balances[msg.sender],...)`) and then changed the state (i.e. update balances
 we change anything we need to check if it is valid to do at all.
 
 In Ergo, as we discussed, the state (i.e. UTXO set of boxes) is changed implicitly when a
-transaction is included in a block. Thus we only need to check the pre-conditions before
+valid transaction is included in a block. Thus we only need to check the pre-conditions before
 the transaction can be added to the block. This is what ErgoScript contracts do.
 
 It is not possible to "change the state" in ErgoScript because it is a language to check
-pre-conditions for spending coins. ErgoScript is purely functional language, without side effects
-operating with immutable data values. This means all the inputs, outputs and other
-transaction parameters available in a script are immutable. This, among other things,
-makes ErgoScript a very simple language, easy to learn and safe to use. Similar to
+pre-conditions for spending coins. ErgoScript is purely functional language, without side
+effects, operating with immutable data values. This means all the inputs, outputs and
+other transaction parameters available in a script are immutable. This, among other
+things, makes ErgoScript a very simple language, easy to learn and safe to use. Similar to
 Bitcoin, each input box contains a script, which should be executed to the `true` value in
-order to 1) allow spending of the box (i.e. removing from the UTXO set) and 2) add
-the transaction to the block.
+order to 1) allow spending of the box (i.e. removing from the UTXO set) and 2) add the
+transaction to the block.
 
-It is therefore inaccurate to think of ErgoScript as the language of Ergo contracts,
-because it is the language of propositions (of logical predicates, formulas, etc.)
-protecting boxes from "illegal" spending. Unlike Bitcoin, in Ergo the whole
-transaction as well as the current blockchain context is available in every
-input's script. So each input script may check which outputs are created by the transaction,
-their ERGs and tokens amounts (we will use this capability in our example DEX contracts). 
+It is therefore incorrect (strictly speaking) to think of ErgoScript as the language of
+Ergo contracts, because it is the language of propositions (logical predicates, formulas,
+etc.) which protect boxes from "illegal" spending. Unlike Bitcoin, in Ergo the whole
+transaction and a part of the current blockchain context is available in every script. So
+each script may check which outputs are created by the transaction, their ERGs and tokens
+amounts (we will use this capability in our example DEX contracts), current block number
+etc.
 
 _In ErgoScript you define the conditions of whether the changes (i.e. coin spending) can
-happen in a given context or not. This is instead of programming the changes imperatively
-in the code._
+happen in a given context or not. This is in contrast to programming the changes
+imperatively in the code of a contract._
  
 While the Ergo's transaction model unlocks the whole range of applications like (DEX, DeFi
 Apps, LETS, etc), designing contracts as pre-conditions for coin spending (or guarding
-scripts) directly is not intuitive. In the next sections I will introduce a useful graphical
-notation to design contracts declaratively using _FlowCard Diagrams_, which are visual
-representations of executable components (FlowCards). 
+scripts) directly is not intuitive. In the next sections we will consider a useful graphical
+notation to design contracts declaratively using _FlowCard Diagrams_, which is a visual
+representation of executable components (FlowCards). 
 
-_FlowCards is aiming to radically simplify dApp development on the Ergo platform by
+_FlowCards aim to radically simplify dApp development on the Ergo platform by
 providing a high-level declarative language, execution runtime, storage format and
 a graphical notation_.
 
