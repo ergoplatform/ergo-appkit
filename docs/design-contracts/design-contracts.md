@@ -398,48 +398,24 @@ the swap of values between seller's and buyer's wallets. Buyer get's the necessa
 of `TID` token and seller get's the corresponding amount of ERGs. The `Swap` transaction
 is created when there are two matching boxes with `buyOrder` and `sellOrder` contracts.
 
-### FlowCards vs ErgoScript?
+## From Diagrams To ErgoScript Contracts
 
-The key point is to specify conditions like `bid ? R4 == bid.id` in the
-boxes, rather than in the contracts as we used to think. 
+What is interesting about FlowCard specification is that we can use it to automatically
+generate the necessary [ErgoTree](https://ergoplatform.org/docs/ErgoTree.pdf) scripts.
+With the appropriate tooling support this can be done automatically, with the lack of
+thereof, it can be done manually. Thus, the FlowCard allows to capture and visually
+represent all the design choices and semantic details of Ergo dApp. 
 
-This idea of attaching conditions to boxes is a key, because it shifts the focus from
-ErgoScript contracts to the overall flow of values (hence FlowCard name), in such a way,
-that ErgoScript is always generated from them. 
+What we are going to do next is to mechanically create the `buyOrder` contract from the
+information given in the `DEX` flow card. 
 
-ErgoScript is a language of Ergo blockchain.
-FlowCard is a declarative specification of both off-chain transaction construction and
-on-chain box spending verifications. Since ErgoScript can always be generated for every
-box of a FlowCard we will never need to look at the ErgoScript code. 
-FlowCard is an off-chain component, that can emit transactions to the blockchain.
-If we follow the semantics of the notation and the tooling is implemented correctly
-ErgoScript is automatically generate behind the scene.
-
-We can think of some Embedded DSLs, but I want to go one step further and specify FlowCard
-Specification EIP and a standardized file format (Json/XML/Protobuf). And yes, visual
-notation can be generated, but only as a workaround until we have graphical editing tools.
-
-Having a diagram it is easy to write the text of `def dex(...) = ...` function, but
-it is much harder to write the code first, without having a diagram on the screen. 
-
-Whatever tools are used (DSL, Diagram Editor, etc) they all will produce a component which
-we call FlowCard (e.g. file `*.flowcard` specification format) (or whatever storage is used)
-which will be executed by FlowCard runtime.
-
-### From Diagrams To ErgoScript Contracts
-
-What is interesting about FlowCard Specification is that we can use it to 
-generate the necessary ErgoScript contracts. With tooling support this can be done
-automatically, with a lack of thereof, it can be done manually. This is what we are going
-to do next, create the `buyOrder` contract from the information given in the flow card.
-
-Recall that each contract is a proposition (boolean valued expression) which should
-evaluate to the `true` value. When we have many conditions to be met at the same time we
-can combine them in a logical formula using AND binary operation, and if we have
-alternatives (not necessarily exclusive) we can put them into OR operation. 
+Recall that each script is a proposition (boolean valued expression) which should evaluate
+to `true` to allow spending of the box. When we have many conditions to be met at the same
+time we can combine them in a logical formula using AND binary operation, and if we have
+alternatives (not necessarily exclusive) we can put them into OR operation.
 
 The `buyOrder` box have the alternative spending paths `!cancel` and `!swap`. Thus the
-ErgoScript code should have OR operation with two arguments, one for each spending path.
+ErgoScript code should have OR operation with two arguments - one for each spending path.
 ```
 /** buyOrder contract */
 {
@@ -461,7 +437,7 @@ of the `buyOrder` box, we can directly include it in the script
 
 For the `!swap` spending path of the `buyOrder` box the conditions are specified in the
 `buyerOut` output box of the `Swap` transaction. If we simply include them in the
-`swapCondition` then we get incorrect script.
+`swapCondition` then we get a syntactically incorrect script.
 ```
 /** buyOrder contract */
 {
@@ -474,83 +450,80 @@ For the `!swap` spending path of the `buyOrder` box the conditions are specified
   cancelCondition || swapCondition
 }
 ```
-We can however transform the conditions from the diagram syntax to ErgoScript expressions
+We can however translate the conditions from the diagram syntax to ErgoScript expressions
 using the following simple rules
-1) `tAmt: TID`  ==> `tid._2 == tAmt` where `tid = buyerOut.tokens(TID)`
-2) `R4 == bid.id`  ==> `R4 == SELF.id` where `R4 = buyerOut.R4[Coll[Byte]].get` 
-3) `@contract`  ==> `buyerOut.propositionBytes == buyer.propBytes` where `R4 = buyerOut.R4[Coll[Byte]].get` 
-4) `buyerOut@0` ==> `val buyerOut = OUTPUTS(0)`
+1) `buyerOut@0` ==> `val buyerOut = OUTPUTS(0)`
+2) `tAmt: TID`  ==> `tid._2 == tAmt` where `tid = buyerOut.tokens(TID)`
+3) `R4 == bid.id`  ==> `R4 == SELF.id` where `R4 = buyerOut.R4[Coll[Byte]].get` 
+4) `script == buyer`  ==> `buyerOut.propositionBytes == buyer.propBytes` 
 
 Note, in the diagram `TID` represents a token id, but ErgoScript don't have access to the
-tokens by the ids so we cannot write `tokens.getByKey(TID)`.
-For this reason, when the diagram is translated into ErgoScript, TID becomes a named
-constant of the index in `tokens` collection of the box. The concrete value of the
-constant is assigned when the `BuyOrder` transaction with the `buyOrder` box is created.  
-The correspondence and consistency between the actual tokenId, the `TID` constant and the actual tokens of
-the `buyerOut` box is ensured buy the application code, which is completely possible
-since all the transactions are created by the application. This may sound too complicated,
-but this is part of the translation from diagram specification to actual executable
-application code, most of which can be automated.
+tokens by the ids so we cannot write `tokens.getByKey(TID)`. For this reason, when the
+diagram is translated into ErgoScript, TID becomes a named constant of the index in
+`tokens` collection of the box. The concrete value of the constant is assigned when the
+`BuyOrder` transaction with the `buyOrder` box is created. The correspondence and
+consistency between the actual tokenId, the `TID` constant and the actual tokens of the
+`buyerOut` box is ensured buy the _off-chain_ application code, which is completely
+possible since all the transactions are created by the application using FlowCard as a
+guiding specification. This may sound too complicated, but this is part of the translation
+from diagram specification to actual executable application code, most of which can be
+automated.
 
 After the transformation we can obtain a correct script which checks all the required
 preconditions for spending the `buyOrder` box. 
 ```
 /** buyOrder contract */
+def DEX(buyer: Addrss, seller: Address, TID: Int, ergAmt: Long, tAmt: Long)
 {
   val cancelCondition: SigmaProp = { buyer }      // verify buyer's sig (ProveDlog)
   val swapCondition = OUTPUTS.size > 0 && {       // securing OUTPUTS access
     val buyerOut = OUTPUTS(0)                     // from buyerOut@0
     buyerOut.tokens.size > TID && {               // securing tokens access
       val tid = buyerOut.tokens(TID)
-      val optR4 = buyerOut.R4[Coll[Byte]]
-      optR4.isDefined && {                        // securing R4 access
-        val R4 = optR4.get
+      val regR4 = buyerOut.R4[Coll[Byte]]
+      regR4.isDefined && {                        // securing R4 access
+        val R4 = regR4.get
         tid._2 == tAmt &&                             // from tAmt: TID 
         R4 == SELF.id &&                              // from R4 == bid.id
-        buyerOut.propositionBytes == buyer.propBytes  // from @contract
+        buyerOut.propositionBytes == buyer.propBytes  // from script == buyer
       }
     } 
   }
   cancelCondition || swapCondition
 }
 ```
-A similar script for the `sellOrder` box can be obtained using the same rules.
-With the help of the tooling the code of contracts can be mechanically generated from the diagram
-specification.
+A similar script for the `sellOrder` box can be obtained using the same translation rules.
+With the help of the tooling the code of contracts can be mechanically generated from the
+diagram specification.
 
-### From Diagrams To Ergo Transactions
-
-Since FlowCard diagrams are formalized specifications they can be executed.
-
-### Conclusions
+## Conclusions
 
 Declarative programming models has already won the battle against imperative programming
 in many application domains like Big Data, Stream Processing, Deep Learning, Databases,
 etc. Ergo is pioneering the declarative model of dApp development as a better and safer
 alternative to the now popular imperative model of smart contracts.
 
-What is next:
-1) Storage format for FlowCard Spec, EIP and a standardized file format (Json/XML/Protobuf)
-2) FlowCards runtime, which can run FlowCards, create and send transactions.
-3) Development of complex diagrams will be greatly simplified when specialized graphical
-editing tools appear. This will make designing and validation of Ergo contracts a pleasant
-experience, more like drawing rather than coding.
+The concept of FlowCard shifts the focus from writing ErgoScript contracts to the
+overall flow of values (hence FlowCard name), in such a way, that ErgoScript is always
+generated from them. You will never need to look at the ErgoScript code once the tooling
+is in place.
 
+Here are the possible next steps for future work:
 
-ErgoCards declarative model shifts the focus from writing
-ErgoScript contracts to the overall flow of values (hence FlowCard name), in such a way,
-that ErgoScript is always generated from them. You will never need to look at the
-ErgoScript code and rely on the tooling.
+1) Storage format for FlowCard Spec and the corresponding EIP standardized file format
+(Json/XML/Protobuf). This will allow various tools (Diagram Editor, Runtime, dApps etc) to
+create and use `*.flowcard` files.
 
-Visual notation can be generated, but only as a workaround until we have graphical editing
-tools. 
-Having a diagram it is easy to write the text of `def dex(...) = ...` function, but
-it is much harder to write the code first, without having a diagram on the screen. 
+2) FlowCard Viewer, which can generate the diagrams from `*.flowcard` files.
 
-Whatever tools are used (DSL, Diagram Editor, etc) they all will create `DEX.flowcard` file
-(or whatever storage we use) which will be used.
+3) FlowCard Runtime, which can run `*.flowcard` files, create and send transactions to Ergo network.
 
-### References
+4) FlowCard Designer Tool, which can simplify development of complex diagrams . This will
+make designing and validation of Ergo contracts a pleasant experience, more like drawing
+rather than coding. In addition, the correctness of the whole dApp scenario can be
+verified and controlled by the tooling.
+
+## References
 
 - [Ergo](https://ergoplatform.org/)
 - [Ergo Appkit](https://github.com/ergoplatform/ergo-appkit)
