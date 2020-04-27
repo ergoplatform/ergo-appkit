@@ -1,4 +1,4 @@
-# FlowCards: A Concept of Declarative Framework for Development of Ergo Contracts
+# FlowCards: A Concept of Declarative Framework for Development of Ergo dApps
 
 ## Introduction 
 
@@ -298,94 +298,98 @@ optional name is accompanied with an index i.e. `fee@0` or `@2`. This is a prope
 source endpoint of the arrow. The name is used in conditions of the related boxes and the
 `index` is the position of the corresponding box in OUTPUTS collection of the transaction.
 
-## More Complex Example: Decentralized Exchange (DEX)
+## Example: Decentralized Exchange (DEX)
 
-Now let's use the described notation to design a FlowCard for a DEX dApp. It is
-simple enough for a post, but it also illustrates all the primitives of the Flowcard
-diagrams we've introduced.
+Now let's use the described notation to design a FlowCard for a DEX dApp. It is simple
+enough for the presentation, but it also illustrates all the key features of the FlowCard
+diagrams we've introduced in the previous section.
 
-The scenario: <br>
-There are three participants (buyer, seller and DEX) of the DEX dApp and five different
-transaction types, which are created by participants. The buyer wants to swap `ergAmt`
-ERGs for `tAmt` of `TID` tokens (of vice versa, who send the orders first doesn't matter).
-Both the buyer and the seller can cancel their orders. The DEX off-chain service can find
-matching orders and create a special `Swap` transaction to complete the exchange.
+The dApp scenario is shown in the figure below: <br> There are three participants (buyer,
+seller and DEX) of the DEX dApp and five different transaction types, which are created by
+participants. The buyer wants to swap `ergAmt` of ERGs for `tAmt` of `TID` tokens (or vice
+versa, the seller wants to sell `TID` tokens for ERGs, who sends the order first doesn't
+matter). Both the buyer and the seller can cancel their orders any time. The DEX off-chain
+matching service can find matching orders and create the special `Swap` transaction to
+complete the exchange.
 
-The following diagram fully specifies all the five transactions and the box spending
-conditions that should be satisfied.
+The following diagram fully (and formally) specifies all the five transactions that must
+be created _off-chain_ by the DEX dApp. It also specifies all the spending conditions that
+should be verified _on-chain_.
 
-![DEX](dex-contracts.png)
+![DEX](dex-flowcard.png)
 
-Let's see look at the specification of each transaction:
+Let's discuss the FlowCard diagram and the logic of each transaction in details:
 
-##### BuyOrder Transaction
+##### Buy Order Transaction
 
-The transaction spends `E` amount of ERGs (which we will write `E: ERG`) from one or more
-boxes in the `pk(buyer)` wallet. The transaction creates a `bid` box with `ergAmt: ERG`
-protected by the `buyOrder` contract. The `buyOrder` contract is synthesizable from the
-specification (we will discuss this in the next section) either manually or automatically
-by a tool. Even though we don't need to define the `buyOrder` contract explicitly during
-the design time, at running time the `bid` box should contain the `buyOrder` contract as
-the guarding script, otherwise the conditions specified in the diagram will not be checked.
+A buyer creates a `Buy Order` transaction. The transaction spends `E` amount of ERGs
+(which we will write `E: ERG`) from one or more boxes in the `pk(buyer)` wallet. The
+transaction creates a `bid` box with `ergAmt: ERG` protected by the `buyOrder` script. The
+`buyOrder` script is synthesized from the specification (see
+[below](#from-diagrams-to-ergoscript-contracts)) either manually or automatically by a
+tool. Even though we don't need to define the `buyOrder` script explicitly during the
+design time, at running time the `bid` box should contain the `buyOrder` script as the
+guarding proposition (which checks the box spending conditions), otherwise the conditions
+specified in the diagram will not be checked.
 
 The `change` box is created to make the input and output sums of the transaction balanced.
-The transaction fee box is omited for simplicity, in practice, it should be added
-explicitly because in the case of more complex transactions (like Swap) there are many
-ways to pay transaction fee.
+The transaction fee box is omitted because it can be added automatically by the tools. In
+practice, however, the designer can add the fee box explicitly to the a diagram. It covers
+the cases of more complex transactions (like Swap) where there are many ways to pay
+transaction fee.
 
-##### CancelBuy, CancelSell Transactions
+##### Cancel Buy, Cancel Sell Transactions
 
 At any time, the `buyer` can cancel the order by sending `CancelBuy` transaction. The
 transaction should satisfy the guarding `buyOrder` contract which protects the `bid` box.
 As you can see on the diagram, both the `Cancel` and the `Swap` transactions can spend the
-`bid` box. When a box have spending alternatives (or _spending path_) then each
-alternative should be identified by unique name prefixed with `!` (`!cancel` and `!swap`
+`bid` box. When a box have spending alternatives (or _spending paths_) then each
+alternative is identified by unique name prefixed with `!` (`!cancel` and `!swap`
 for the `bid` box). Each alternative have specific spending conditions. In our example,
-when the `bid` box is spend by the `Cancel` transaction the `?buyer` condition should be
-satisfied, which we read as "the signature of the buyer should be presented in the
+when the `Cancel Buy` transaction spends the `bid` box the `?buyer` condition should be
+satisfied, which we read as "the signature for the `buyer` address should be presented in the
 transaction". Therefore, only buyer can cancel the buy order. This "signature" condition
 is only required for `!cancel` spending alternative and not required for `!swap`.
 
-##### SellOrder Transaction
+##### Sell Order Transaction
 
-The `SellOrder` transaction is similar to the `BuyOrder` it has to do with tokens in
+The `Sell Order` transaction is similar to the `BuyOrder` it has to do with tokens in
 addition to ERGs. The transaction spends `E: ERG` and `T: TID` tokens from seller's wallet
 (specified as `pk(seller)` contract). The two outputs are `ask` and `change`. The change
-is a standard box to balance transaction. The `ask` box stores `tAmt: TID` tokens to swap
-and the `minErg: ERG` - a minimum amount of ERGs required in every box.
+is a standard box to balance transaction. The `ask` box keeps `tAmt: TID` tokens for the exchange
+and `minErg: ERG` - the minimum amount of ERGs required in every box.
 
 ##### Swap Transaction
 
-This is a key transaction in the DEX scenario. The transaction has many of spending
+This is a key transaction in the DEX dApp scenario. The transaction has many of spending
 conditions on the input boxes and those conditions are included in the `buyOrder` and
-`sellOrder` contracts and consequently verified when the transaction is added to the
+`sellOrder` scripts and verified when the transaction is added to the
 blockchain. However, on the diagram those conditions are not specified in the `bid` and
 `ask` boxes, they are instead defined in the output boxes of the transaction. 
 
-This is because most of the conditions relate to the properties of the output boxes. This is
-usability convention, we could specify those properties in the `bid` box but, then we would
+This is usability convention because most of the conditions relate to the properties of
+the output boxes. We could specify those properties in the `bid` box, but then we would
 had to use more complex expressions.
 
-Let's take the output created by the arrow labeled with `buyerOut@0`. This label tell us
-that the output is at the index `0` in the `OUTPUTS` collection of the transaction and that
-we can refer to this box by the `buyerOut` name. Thus we can label both the box itself and
-the arrow to give it a name.
+Let's consider the output created by the arrow labeled with `buyerOut@0`. This label tell
+us that the output is at the index `0` in the `OUTPUTS` collection of the transaction and
+that in the diagram we can refer to this box by the `buyerOut` name. Thus we can label
+both the box itself and the arrow to give the box a name.
 
 The conditions shown in the `buyerOut` box have the form `bid ? condition`, which means
-they should be verified in order to spend the `bid` box. 
+they should be verified _on-chain_ in order to spend the `bid` box. 
 The conditions have the following meaning:
-1) `tAmt: TID` require the box to have `tAmt` amount of `TID` token
-2) `R4 == bid.id`  require R4 register in the box to be equal to id of the
-`bid` box.
-3) `@contract` require the box to have the contract of the wallet where it is located on
-the diagram, i.e. `pk(buyer)`
+- `tAmt: TID` require the box to have `tAmt` amount of `TID` token
+- `R4 == bid.id`  require R4 register in the box to be equal to id of the `bid` box.
+- `script == buyer` require the `buyerOut` box to have the script of the wallet where it
+is located on the diagram, i.e. `pk(buyer)`
 
 Similar properties are added to the `sellerOut` box, which is specified to be at index `1`
 and the name is given using label on the box itself, rather than on the arrow.
 
-The `Swap` transaction spends two boxes `bid` and `ask` using the `!swap` spending path,
+The `Swap` transaction spends two boxes `bid` and `ask` using the `!swap` spending path on both,
 however unlike `!cancel` the conditions on the path are not specified. This is where the
-`bid ?` and `ask ?` prefixes come into play, so the conditions on the `buyerOut` and
+`bid ?` and `ask ?` prefixes come into play, so the conditions listed in the `buyerOut` and
 `sellerOut` boxes are moved to the `!swap` spending path of the `bid` and `ask` boxes
 correspondingly.
 
@@ -548,4 +552,10 @@ Whatever tools are used (DSL, Diagram Editor, etc) they all will create `DEX.flo
 
 ### References
 
+- [Ergo](https://ergoplatform.org/)
+- [Ergo Appkit](https://github.com/ergoplatform/ergo-appkit)
+- [Introduction to Appkit](https://ergoplatform.org/en/blog/2019_12_03_top5/)
+- [Appkit Examples](https://github.com/aslesarenko/ergo-appkit-examples)
+- [ErgoDex ScalaDocs](https://ergoplatform.github.io/ergo-dex/api/org/ergoplatform/dex/ErgoDexTool$.html)
+- [ErgoTree Specification](https://ergoplatform.org/docs/ErgoTree.pdf)
 
