@@ -159,17 +159,17 @@ a graphical notation_.
 
 We will start with a high level of diagrams and go down to FlowCard specification.
 
-### FlowCard Diagrams
+## FlowCard Diagrams
 
-The idea behind FlowCard diagrams is based on the following observations. Ergo boxes are
-immutable and cannot be spent in a transaction (which should take it as an input). We
+The idea behind FlowCard diagrams is based on the following observations: 1) Ergo boxes
+are immutable and can only be spent in the transaction which take it as an input. 2) We
 therefore can draw a flow of boxes through transactions, so that boxes _flowing in_ to the
-transaction are spent and those _flowing out_ are created and added to the UTXO. A
-transaction from this perspective is a transformer of old boxes to new ones preserving the
-balances of ERGs and tokens involved.
+transaction are spent and those _flowing out_ are created and added to the UTXO. 3) A
+transaction from this perspective is simply a transformer of old boxes to the new ones
+preserving the balances of ERGs and tokens involved.
 
-The following figure shows the main elements of the Ergo transaction we saw
-previously (now as a FlowCard Diagram).
+The following figure shows the main elements of the Ergo transaction we've already seen
+previously (now under the name of FlowCard Diagram).
 
 ![Anatomy](tx-anatomy.png)
 
@@ -184,43 +184,43 @@ Now let's look at the pieces of the FlowCard diagram one by one.
 
 ##### 1. Name and Parameters 
 
-Each flow card is given a name and a list of typed parameters, this is similar to a class
-with constructor arguments. In the figure we see the `Send` flow card with five
-parameters. The parameters can be used in the specification.
+Each flow card is given a name and a list of typed parameters, this is similar to a
+template with parameters. In the figure we see the `Send` flow card with five parameters.
+The parameters are used in the specification.
 
 ##### 2. Contract Wallet 
 
 This is a key element of the flow card. Every box has a guarding script. Often it is the
-script that checks a signature against a public key (aka ProveDlog proposition). This
-script is trivial in ErgoScript and is defined like the `{ pubkey }` template where
-`pubkey` is a parameter of type `Address`. In the figure, the script template is applied
-to the parameter `pk(sender)` and thus concrete wallet contract is obtained. Therefore
-`pk(sender)` and `pk(receiver)` yield different scripts and represent different wallets on
-the diagram.
+script that checks a signature against a public key. This script is trivial in ErgoScript
+and is defined like the `def pk(pubkey: Address) = { pubkey }` template where `pubkey` is
+a parameter of type `Address`. In the figure, the script template is applied to the
+parameter `pk(sender)` and thus concrete wallet contract is obtained. Therefore
+`pk(sender)` and `pk(receiver)` yield different scripts and represent _different_ wallets
+on the diagram, even though they use the same template.
 
 _Contract Wallet_ contains a set of all UTXO boxes which have a given script derived from
-the given template using flow card parameters. For example, in the figure, the template is
-`pk` and parameter `pubkey` is substituted with the `sender' flowcard parameter (address
-or public key).
+the given script template using flow card parameters. For example, in the figure, the
+template is `pk` and parameter `pubkey` is substituted with the `sender' flow card
+parameter.
   
 ##### 3. Contract
 
 Even though a contract is a property of a box, on the diagram we group the boxes by their
 contracts, therefore it looks like the boxes belong to the contracts, rather than the
 contracts belong to the boxes. In the example, we have three instantiated contracts
-pk(sender), pk(receiver) and minerFee. Note, that `pk(sender)` is the instantiation of the
+`pk(sender)`, `pk(receiver)` and `minerFee`. Note, that `pk(sender)` is the instantiation of the
 `pk` template with the concrete parameter `sender` and `minerFee` is the instantiation of
-the pre-defined contract.
+the pre-defined contract which protects the miner reward boxes.
 
-##### 3. Box name
+##### 4. Box name
 
-In the diagram we can give each box a name. Besides readability of the diagram, the name
-can then be used as a synonym of a more complex indexed access to the box in the contract.
-For example, `change` is the name of the box, which can also be used in the ErgoScript
-conditions instead of `OUTPUTS(2)`. Box names can also be used to specify conditions that
-should be checked in its script (more about it later).
+In the diagram we can give each box a name. Besides readability of the diagram, we use the
+name as a synonym of a more complex indexed access to the box in the contract. For
+example, `change` is the name of the box, which can also be used in the ErgoScript
+conditions instead of `OUTPUTS(2)`. We also use box names to associate spending conditions
+with the boxes.
 
-##### 4. Boxes of the wallet
+##### 5. Boxes in the wallet
 
 In the diagram, we show boxes (darker rectangles) as belonging to the contract wallets
 (lighter rectangles). Each such _box rectangle_ is connected with a grey _transaction
@@ -233,69 +233,72 @@ lines may take one of the following form:
 2) `R == value` - the box should contain the given `value` of the given register `R`
 3) `boxName ? condition` - the box named `boxName` should check `condition` in its script.
 
+We discuss these conditions in the sections below.
 
-##### 5. Amount of ERGs in the box
+##### 6. Amount of ERGs in the box
 
-Each box should store some minimum amount of ERGs which is checked when a transaction is
+Each box should store a minimum amount of ERGs. This is checked when the creating transaction is
 validated. In the diagram the amount of ERGs is _always_ shown as the first line (e.g. `B:
 ERG` or `B - minErg - txFee`). The value type ascription `B: ERG` is optional and may
-be used for readability. When the value is given as formula, then this formulate should be
+be used for readability. When the value is given as formula, then this formula should be
 respected by the transaction which creates the box.
 
-It is important to understand that variables like `tAmt` are not named properties of the
-boxes. They are parameters of the whole diagram and representing some amounts. Or put it
-another way, they are shared parameters between transactions (e.g. Sell Order and Swap
-transactions share tAmt). So basically same name means the same value all over the diagram
-(this is where the tooling would help a lot). However, when it comes to checking those
-values, only explicit conditions which are marked with `?` are transformed to ErgoScript.
-At the same time, all others are actually ensured during transaction building (in an
+It is important to understand that variables like `amount` and `txFee` are not named
+properties of the boxes. They are parameters of the whole diagram and representing some
+amounts. Or put it another way, they are shared parameters between transactions (e.g. Sell
+Order and Swap transactions from DEX example below share the `tAmt` parameter). So
+basically the same name means the same value all over the diagram (this is where the
+tooling would help a lot). However, when it comes to _on-chain_ validation of those values,
+only explicit conditions which are marked with `?` are transformed to ErgoScript. At the
+same time, all other conditions are ensured _off-chain_ during transaction building (for example in an
 application using Appkit API) and transaction validation when it is added to the
 blockchain.
 
-##### 6. Amount of T token 
+##### 7. Amount of T token 
 
-A box can store values of many tokens. The tokens on the diagram are named and the `value`
-may be associated with the token `T` using `value: T` expression. The `value` may be given
-by formula. If the formula is prefixed with a box name like `boxName ? formula`, then it
-is also should be checked in the guarding script of the `boxName` box. This additional
-specification is very convenient because 1) it allows to validate visual design, and 2) in
-many cases the conditions specified in the boxes of a diagram are enough to synthesize the
-necessary guarding contracts. (more about this
+A box can store values of many tokens. The tokens on the diagram are named and a `value`
+variable may be associated with the token `T` using `value: T` expression. The `value` may
+be given by formula. If the formula is prefixed with a box name like `boxName ? formula`,
+then it is also should be checked in the guarding script of the `boxName` box. This
+additional specification is very convenient because 1) it allows to validate the visual
+design automatically, and 2) the conditions specified in the boxes of a diagram are enough
+to synthesize the necessary guarding scripts. (more about this
 [below](#from-diagrams-to-ergoscript-contracts))
 
-##### 7. Tx Inputs
+##### 8. Tx Inputs
 
 Inputs are connected to the corresponding transaction by <b color="#ED7D31">orange</b>
 arrows. An input arrow may have a label of the following forms:
 1) `name@index` - optional name with an index i.e. `fee@0` or `@2`. This is a property of
-the target endpoint of the arrow. The name can be used in conditions of the related boxes
+the target endpoint of the arrow. The name is used in conditions of the related boxes
 and the `index` is the position of the corresponding box in INPUTS collection of the
 transaction.
-2) `!action` - is the propety of source of the arrow and gives a name for an alternative
-spendings of the box (we will see this in DEX example)
+2) `!action` - is a property of the source of the arrow and gives a name for an alternative
+spending path of the box (we will see this in DEX example)
 
-Because of alternative spendings, a box may have many outgoing <b
+Because of alternative spending paths, a box may have many outgoing <b
 color="#ED7D31">orange</b> arrows, in which case they should be labeled with different
 actions.
 
-##### 8. Transaction
+##### 9. Transaction
 
 A transaction spends input boxes and creates output boxes. The input boxes are given by
 the <b color="#ED7D31">orange</b> arrows and the labels are respected to put inputs at the
 right indexes in INPUTS collection. The output boxes are given by the <b
 color="#A9D18E">green</b> arrows. Each transaction should preserve a strict balance of ERG
 values (sum of inputs == sum of outputs) and for each token the sum of inputs >= the sum
-of outputs. The design diagram however requires an explicit specification of the ERG and
-token values for all the output boxes to avoid implicit errors and have better readability.
+of outputs. The design diagram requires an explicit specification of the ERG and token
+values for all the output boxes to avoid implicit errors and ensure better readability.
 
-##### 9. Tx Outputs
+##### 10. Tx Outputs
+
 Outputs are connected to the corresponding transaction by <b color="#A9D18E">green</b>
-arrows. An output arrow may have a label of the following form`name@index` - optional name
-with an index i.e. `fee@0` or `@2`. This is a property of the source endpoint of the
-arrow. The name can be used in conditions of the related boxes and the `index` is the
-position of the corresponding box in OUTPUTS collection of the transaction.
+arrows. An output arrow may have a label of the following form`name@index`, where an
+optional name is accompanied with an index i.e. `fee@0` or `@2`. This is a property of the
+source endpoint of the arrow. The name is used in conditions of the related boxes and the
+`index` is the position of the corresponding box in OUTPUTS collection of the transaction.
 
-### More Complex Example: Decentralized Exchange (DEX)
+## More Complex Example: Decentralized Exchange (DEX)
 
 Now let's use the described notation to design a FlowCard for a DEX dApp. It is
 simple enough for a post, but it also illustrates all the primitives of the Flowcard
@@ -303,7 +306,7 @@ diagrams we've introduced.
 
 The scenario: <br>
 There are three participants (buyer, seller and DEX) of the DEX dApp and five different
-transaction types, which can be created by participants. The buyer wants to swap `ergAmt`
+transaction types, which are created by participants. The buyer wants to swap `ergAmt`
 ERGs for `tAmt` of `TID` tokens (of vice versa, who send the orders first doesn't matter).
 Both the buyer and the seller can cancel their orders. The DEX off-chain service can find
 matching orders and create a special `Swap` transaction to complete the exchange.
@@ -339,7 +342,7 @@ As you can see on the diagram, both the `Cancel` and the `Swap` transactions can
 alternative should be identified by unique name prefixed with `!` (`!cancel` and `!swap`
 for the `bid` box). Each alternative have specific spending conditions. In our example,
 when the `bid` box is spend by the `Cancel` transaction the `?buyer` condition should be
-satisfied, which can be read as "the signature of the buyer should be presented in the
+satisfied, which we read as "the signature of the buyer should be presented in the
 transaction". Therefore, only buyer can cancel the buy order. This "signature" condition
 is only required for `!cancel` spending alternative and not required for `!swap`.
 
@@ -369,7 +372,7 @@ we can refer to this box by the `buyerOut` name. Thus we can label both the box 
 the arrow to give it a name.
 
 The conditions shown in the `buyerOut` box have the form `bid ? condition`, which means
-they should be checked before the `bid` box can be spent. 
+they should be verified in order to spend the `bid` box. 
 The conditions have the following meaning:
 1) `tAmt: TID` require the box to have `tAmt` amount of `TID` token
 2) `R4 == bid.id`  require R4 register in the box to be equal to id of the
@@ -389,7 +392,7 @@ correspondingly.
 If you look at the conditions of the output boxed, you will see that they exactly specify
 the swap of values between seller's and buyer's wallets. Buyer get's the necessary amount
 of `TID` token and seller get's the corresponding amount of ERGs. The `Swap` transaction
-can be created when there are two matching boxes with `buyOrder` and `sellOrder` contracts.
+is created when there are two matching boxes with `buyOrder` and `sellOrder` contracts.
 
 ### FlowCards vs ErgoScript?
 
@@ -421,10 +424,10 @@ which will be executed by FlowCard runtime.
 
 ### From Diagrams To ErgoScript Contracts
 
-What is nice about FlowCard Specification is that we can use it to 
+What is interesting about FlowCard Specification is that we can use it to 
 generate the necessary ErgoScript contracts. With tooling support this can be done
 automatically, with a lack of thereof, it can be done manually. This is what we are going
-to do next, create the `buyOrder` contract from the information given in the flowcard.
+to do next, create the `buyOrder` contract from the information given in the flow card.
 
 Recall that each contract is a proposition (boolean valued expression) which should
 evaluate to the `true` value. When we have many conditions to be met at the same time we
