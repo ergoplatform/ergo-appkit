@@ -65,6 +65,13 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         return this;
     }
 
+    /**
+     * This allows adding additional secret for use in proveDlog, when the secret is not part of the wallet.
+     *
+     * Multiple secrets can be added by calling this method multiple times.
+     *
+     * Multiple secrets are necessary for statements that need multiple proveDlogs, such as proveDlog(a) && proveDlog(b), where a and b are two group elements.
+     */
     @Override
     public ErgoProverBuilder withDLogSecret(BigInteger x) {
         _dLogSecret = new DLogProtocol.DLogProverInput(x);

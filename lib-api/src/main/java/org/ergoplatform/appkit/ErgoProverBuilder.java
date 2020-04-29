@@ -33,12 +33,15 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withSecretStorage(SecretStorage storage);
 
     /**
-     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
-     *   h = g^y
-     *   u = g^x
-     *   v = g^xy
+     * ProveDHTuple is a statement consisting of a tuple of 4 group elements called (g, h, u, v)
      *
-     *   NOTE: We can swap x, y and obtain another tuple (g, u, h, v) with secret y (and unknown x).
+     * The statement requires the prover to prove knowledge of some secret integer x such that
+     *
+     *   u = g^x
+     *    and
+     *   y = h^x
+     *
+     * This method configures this builder to the statement ProveDHTuple(g, h, u, v) with the supplied secret x
      *
      * @param g {@Link GroupElement} instance defining g
      * @param h {@Link GroupElement} instance defining h
@@ -48,6 +51,9 @@ public interface ErgoProverBuilder {
      *
      * @see
      * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
+     *
+     * @see
+     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b54a173865a532de09bbcbf10da32ee2a491c8f9/sigmastate/src/main/scala/sigmastate/basics/DiffieHellmanTupleProtocol.scala#L58">implementation</a>
      *
      */
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
