@@ -33,15 +33,13 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withSecretStorage(SecretStorage storage);
 
     /**
-     * ProveDHTuple is a statement consisting of a tuple of 4 group elements called (g, h, u, v)
+     * Configures this builder to use group elements (g, h, u, v) and secret x for a ProveDHTuple statement when building a new prover
      *
-     * The statement requires the prover to prove knowledge of some secret integer x such that
+     * ProveDHTuple is a statement consisting of 4 group elements (g, h, u, v) and requires the prover to prove knowledge of secret integer x such that
      *
      *   u = g^x
      *    and
      *   y = h^x
-     *
-     * This method configures this builder to the statement ProveDHTuple(g, h, u, v) with the supplied secret x
      *
      * @param g {@Link GroupElement} instance defining g
      * @param h {@Link GroupElement} instance defining h
@@ -58,6 +56,13 @@ public interface ErgoProverBuilder {
      */
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
+    /**
+     * This allows adding additional secret for use in proveDlog, when the secret is not part of the wallet.
+     *
+     * Multiple secrets can be added by calling this method multiple times.
+     *
+     * Multiple secrets are necessary for statements that need multiple proveDlogs, such as proveDlog(a) && proveDlog(b), where a and b are two group elements.
+     */
     ErgoProverBuilder withDLogSecret(BigInteger x);
 
     /**

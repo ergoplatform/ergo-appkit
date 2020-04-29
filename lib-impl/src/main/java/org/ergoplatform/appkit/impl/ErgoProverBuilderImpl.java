@@ -47,31 +47,12 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         return this;
     }
 
-    /**
-     * This code uses original cryptographic notation known from the literature, see the following
-     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
-     * to understand the implementation, where this _masterKey belong to Bob
-     *
-     * ProveDHTuple is of the form (g, h, u, v) with secret x (and unknown y), where:
-     *   h = g^y
-     *   u = g^x
-     *   v = g^xy
-     *
-     *   NOTE: We can swap x, y and obtain another tuple (g, u, h, v) with secret y (and unknown x).
-     */
     @Override
     public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
         _dhtSecret = JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x);
         return this;
     }
 
-    /**
-     * This allows adding additional secret for use in proveDlog, when the secret is not part of the wallet.
-     *
-     * Multiple secrets can be added by calling this method multiple times.
-     *
-     * Multiple secrets are necessary for statements that need multiple proveDlogs, such as proveDlog(a) && proveDlog(b), where a and b are two group elements.
-     */
     @Override
     public ErgoProverBuilder withDLogSecret(BigInteger x) {
         _dLogSecret = new DLogProtocol.DLogProverInput(x);

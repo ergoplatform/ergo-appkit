@@ -19,8 +19,9 @@ class DHTProverSpec extends PropSpec with Matchers
     val g: GroupElement = CryptoConstants.dlogGroup.generator
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gY.exp(x)
+    val gXY:GroupElement = gX.exp(y)
 
     ergoClient.execute { ctx: BlockchainContext =>
       val input = ctx.newTxBuilder.outBoxBuilder.registers(
