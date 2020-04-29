@@ -1,5 +1,7 @@
 # FlowCards: A Declarative Framework for Development of Ergo dApps
 
+> With thanks to [Robert Kornacki](https://github.com/robkorn) for polishing of the draft.
+
 ## Introduction 
 
 [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf) is the smart contract language used
