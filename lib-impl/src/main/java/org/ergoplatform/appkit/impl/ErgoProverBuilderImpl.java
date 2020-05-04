@@ -118,14 +118,10 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
                 return _params.getBlockVersion().byteValue();
             }
         };
-        List<ExtendedSecretKey> keys;
-        if (_masterKey == null) {
-            keys = new ArrayList<>();
-        } else {
-            keys = Arrays.asList(_masterKey);
-        }
+        ArrayList<ExtendedSecretKey> keys = new ArrayList<>();
         ArrayList<DiffieHellmanTupleProverInput> dhtInputs = new ArrayList<>();
         ArrayList<DLogProtocol.DLogProverInput> dLogInputs = new ArrayList<>();
+        if (_masterKey != null) keys.add(_masterKey);
         if (_dhtSecret != null) dhtInputs.add(_dhtSecret);
         if (_dLogSecret != null) dLogInputs.add(_dLogSecret);
         AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dLogInputs, dhtInputs, parameters);
