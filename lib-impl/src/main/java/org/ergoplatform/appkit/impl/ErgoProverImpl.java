@@ -31,7 +31,7 @@ public class ErgoProverImpl implements ErgoProver {
 
     @Override
     public BigInt getSecretKey() {
-        return CostingSigmaDslBuilder$.MODULE$.BigInt(_prover.secretKeys().get(0).key().w());
+        return CostingSigmaDslBuilder$.MODULE$.BigInt(_prover.secretKeys().get(0).privateInput().w());
     }
 
     @Override

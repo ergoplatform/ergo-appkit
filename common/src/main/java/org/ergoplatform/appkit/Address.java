@@ -105,7 +105,7 @@ public class Address {
 
     public static Address fromMnemonic(NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
-        DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
+        DLogProtocol.ProveDlog pk = masterKey.publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
