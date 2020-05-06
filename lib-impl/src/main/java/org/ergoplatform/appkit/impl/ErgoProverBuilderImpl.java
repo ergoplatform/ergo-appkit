@@ -56,8 +56,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     @Override
     public ErgoProverBuilder withFirstDHTSecret(Address otherParty, GroupElement additionalSecret) {
         checkState(_firstSecret == null, "First secret already defined.");
-        BigInteger x = _masterKey.key().w();  // Alice's secret
-        SecP256K1Point g_x = _masterKey.key().publicImage().value();  // Alice's public key
+        BigInteger x = _masterKey.privateInput().w();  // Alice's secret
+        SecP256K1Point g_x = _masterKey.publicImage().value();  // Alice's public key
         SecP256K1Point g_y = otherParty.getPublicKey().value();       // Bob's public key
         _firstSecret = JavaHelpers.createDHTProverInput(g_y, g_x, x,
                 (SecP256K1Point)additionalSecret.value());
@@ -72,8 +72,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     @Override
     public ErgoProverBuilder withSecondDHTSecret(Address otherParty) {
         checkState(_secondSecret == null, "Second secret already defined.");
-        BigInteger y = _masterKey.key().w();                         // Bob's secret key
-        SecP256K1Point g_y = _masterKey.key().publicImage().value(); // Bob's public key
+        BigInteger y = _masterKey.privateInput().w();                         // Bob's secret key
+        SecP256K1Point g_y = _masterKey.publicImage().value(); // Bob's public key
         SecP256K1Point g_x = otherParty.getPublicKey().value();
         SecP256K1Point g_xy = CryptoConstants.dlogGroup().exponentiate(g_x, y);
         _secondSecret = JavaHelpers.createDHTProverInput(g_x, g_y, y, g_xy);

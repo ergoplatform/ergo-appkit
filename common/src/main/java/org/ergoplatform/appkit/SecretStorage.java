@@ -43,7 +43,7 @@ public class SecretStorage {
     }
 
     public Address getAddressFor(NetworkType networkType) {
-        DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().key().publicImage();
+        DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().publicImage();
         P2PKAddress p2pk = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pk);
     }

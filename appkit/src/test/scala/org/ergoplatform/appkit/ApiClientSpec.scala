@@ -30,7 +30,7 @@ class ApiClientSpec
     val tree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(treeBytes)
     println(tree)
     val newBytes = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
-      treeBytes, positions = Array(1), newVals = Array(SigmaPropConstant(masterKey.key.publicImage)))
+      treeBytes, positions = Array(1), newVals = Array(SigmaPropConstant(masterKey.publicImage)))
     val newTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
     println(newTree)
     println(ErgoAlgos.encode(newBytes))
