@@ -117,6 +117,8 @@ mx ideinit
 - [Using Mock Web Server](https://tech.okcupid.com/ui-tests-with-mockwebserver/)
 - [GraalVM with native-image compilation in Travis CI](https://stackoverflow.com/questions/58465833/graalvm-with-native-image-compilation-in-travis-ci)
 - [Quarkus and GraalVM: Booting Hibernate at Supersonic Speed, Subatomic Size](https://www.infoq.com/presentations/quarkus-graalvm-sao-paulo-2019/)
+- [http4s + Graal](https://github.com/hhandoko/http4s-graal)
+- [Building Serverless Scala Services with GraalVM](https://www.inner-product.com/posts/serverless-scala-services-with-graalvm/)
 
 ### Issues
 - [okhttp parse error with GraalVM CE 19.0.0](https://github.com/oracle/graal/issues/1521)
@@ -147,3 +149,31 @@ For compilers to find ruby you may need to set:
 
 For pkg-config to find ruby you may need to set:
   export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
+
+## FlowCards vs ErgoScript?
+
+The key point is to specify conditions like `bid ? R4 == bid.id` in the
+boxes, rather than in the contracts as we used to think. 
+
+This idea of attaching conditions to boxes is a key, because it shifts the focus from
+ErgoScript contracts to the overall flow of values (hence FlowCard name), in such a way,
+that ErgoScript is always generated from them. 
+
+ErgoScript is a language of Ergo blockchain.
+FlowCard is a declarative specification of both off-chain transaction construction and
+on-chain box spending verifications. Since ErgoScript can always be generated for every
+box of a FlowCard we will never need to look at the ErgoScript code. 
+FlowCard is an off-chain component, that can emit transactions to the blockchain.
+If we follow the semantics of the notation and the tooling is implemented correctly
+ErgoScript is automatically generate behind the scene.
+
+We can think of some Embedded DSLs, but I want to go one step further and specify FlowCard
+Specification EIP and a standardized file format (Json/XML/Protobuf). And yes, visual
+notation can be generated, but only as a workaround until we have graphical editing tools.
+
+Having a diagram it is easy to write the text of `def dex(...) = ...` function, but
+it is much harder to write the code first, without having a diagram on the screen. 
+
+Whatever tools are used (DSL, Diagram Editor, etc) they all will produce a component which
+we call FlowCard (e.g. file `*.flowcard` specification format) (or whatever storage is used)
+which will be executed by FlowCard runtime.

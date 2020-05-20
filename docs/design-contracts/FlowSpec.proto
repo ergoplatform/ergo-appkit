@@ -1,0 +1,176 @@
+syntax = "proto3";
+package org.ergoplatform.flow.spec;
+
+/** Each flow card is given a name and a list of typed parameters, this is similar to a
+ * class with constructor arguments. The parameters can be used in the specification of
+ * wallets and transactions.
+ */
+message FlowSpec {
+    /** Name of the FlowCard specification. */
+    string name = 1;
+
+    /** Parameters of the FlowCard */
+    repeated Parameter parameters = 2;
+
+    /** Wallets defined in this FlowSpec. Can be referred from `transactions` by name. */
+    repeated Wallet wallets = 3;
+
+    /** Transactions defined in this FlowSpec */
+    repeated Transaction transactions = 4;
+
+    /** Descriptor of single FlowSpec parameter. */
+    message Parameter {
+        /** Unique name of the parameter*/
+        string name = 1;
+        /** Type of the parameter value in ErgoScript syntax. */
+        string type = 2;
+    }
+}
+
+/** A wallet contains a set of all UTXO boxes protected by the same script. The script may
+ * be derived from the whole FlowSpec, for example from the `SpendingPaths` and
+ * `Box.Condition`.
+ */
+message Wallet {
+    /** Name of the wallet, unique among wallets of FlowCard  */
+    string name = 1;
+
+    /** Base spending condition for all boxes of the wallet. */
+    string base_condition = 2;
+
+    /** Specifications of boxes which are spend and created by the FlowSpec transactions.
+     * The boxes are identified by name.
+     */
+    repeated Box boxes = 3;
+
+    /** Represent a Box belonging to the wallet.
+     * Because all the boxes in the wallet share the same contract, this message doen't
+     * keep it, it can be obtained from the parent Wallet.
+     */
+    message Box {
+        /** Name of the box, unique among boxes of the enclosing wallet.  */
+        string name = 1;
+
+        /** Specifies the conditions on the value of ERGs in the box.
+         * In the FlowSpec diagram this is _always_ shown
+         * as the first line (e.g. `B: ERG` or `B - minErg - txFee`). The value type
+         * ascription `B: ERG` is optional and may be used for readability. When the
+         * value is given as formula, then this formulate should be respected by the
+         * transaction which creates the box, and if the `target_box` is defined, then
+         * this condition should be checked as part of `target_box` spending.
+         * Syntax of formulas is limited to arithmetic and based on ErgoScript.
+         */
+        ErgCondition ergs = 2;
+
+        /** Specifies formulas for each token. Each item is identified by token name, and
+         * each value is validated by the formula same as `ergs`.
+         */
+        repeated TokenCondition tokens = 3;
+
+        /** If the Condition contains `target_box`, then the condition should be added to
+         * the guarding script of that target box. This additional specification is very
+         * convenient because 1) it allows to validate visual design, and 2) in many
+         * cases the conditions specified in the boxes are enough to synthesize the
+         * necessary guarding contracts for target boxes.
+         */
+        repeated Condition conditions = 4;
+
+        /** Represents conditions for ERG amounts. */
+        message ErgCondition {
+            /** Optional name of the Box where this `condition` should be checked before
+             * spending.
+             */
+            string target_box = 1;
+
+            /** Expression of the following forms:
+             - "val name: ERG" - declaration of a new variable name
+             - "expr: ERG" - the value should be computed as `expr`
+            */
+            string condition = 2;
+        }
+
+        message TokenCondition {
+            /** Name of the token introduced as FlowSpec parameter. */
+            string tokenName = 1;
+
+            /** Optional name of the Box where this `condition` should be checked before
+             * spending.
+             */
+            string target_box = 2;
+
+            /** Expression of the following forms:
+             - "val name: ERG" - declaration of a new variable name
+             - "expr: ERG" - the value should be computed as `expr`
+            */
+            string condition = 3;
+        }
+
+        message Condition {
+            /** Required name of the Box where this `condition` should be checked before
+             * spending.
+             */
+            string target_box = 1;
+
+            /** ErgoScript expression which should be ANDed with the target box's guarding
+             * proposition. */
+            string condition = 2;
+        }
+    }
+}
+
+/** A transaction spends input boxes and creates output boxes.
+ * The input boxes are given * by `inputs` list and the order is respected to put those
+ * inputs at the right indexes in INPUTS collection or ErgoScript.
+ * The output boxes are given by the `outputs` list.
+ *
+ * Each transaction should preserve a strict balance of ERG values (sum of inputs == sum
+ * of outputs) and for each token the sum of inputs >= the sum of outputs. The FlowSpec
+ * however requires an explicit specification of the ERG and token values for all the
+ * output boxes to avoid implicit errors and have better readability. The inputs and
+ * output formulas of the FlowSpec are analyzed for balance correctness.
+ */
+message Transaction {
+    /** Name of the transaction */
+    string name = 1;
+
+    /** Input arrows from the boxes spent by this transaction. */
+    repeated InputArrow inputs = 2;
+
+    /** Output arrows to the boxes created by this transaction. */
+    repeated OutputArrow outputs = 3;
+
+    /** Represents a reference to the box which is spent by the transaction.
+     * Each InputArrow specifies a spending path for the box.
+     * One box may have many alternative spending paths.
+     */
+    message InputArrow {
+        /** Name of the wallet */
+        string from_wallet = 1;
+
+        /** Name of the box in the wallet. */
+        string box_name = 2;
+
+        /** Specification of the spending path. */
+        SpendingPath spending_path = 3;
+    }
+
+    /** Specifies spending alternative of the box. */
+    message SpendingPath {
+        /** Name of the spending action */
+        string action = 1;
+
+        /** ErgoScript expression which should be ANDed with the input box's guarding
+         * proposition. The box is defined by the InputArrow of this path. */
+        string condition = 2;
+    }
+
+    /** Represents a reference to a box which is created by this transaction. */
+    message OutputArrow {
+        /** Target wallet name */
+        string to_wallet = 1;
+        /** Target box name this arrow is pointing to. */
+        string box_name = 2;
+    }
+}
+
+
