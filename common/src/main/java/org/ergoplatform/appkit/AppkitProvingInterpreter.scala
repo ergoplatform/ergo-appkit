@@ -43,7 +43,7 @@ class AppkitProvingInterpreter(
   import Helpers._
 
   val secrets: Seq[SigmaProtocolPrivateInput[_ <: SigmaProtocol[_], _ <: SigmaProtocolCommonInput[_]]] = {
-    val dlogs: IndexedSeq[DLogProverInput] = JListToIndexedSeq(identityIso[ExtendedSecretKey]).to(secretKeys).map(_.key)
+    val dlogs: IndexedSeq[DLogProverInput] = JListToIndexedSeq(identityIso[ExtendedSecretKey]).to(secretKeys).map(_.privateInput)
     val dlogsAdditional: IndexedSeq[DLogProverInput] = JListToIndexedSeq(identityIso[DLogProverInput]).to(dLogInputs)
     val dhts: IndexedSeq[DiffieHellmanTupleProverInput] = JListToIndexedSeq(identityIso[DiffieHellmanTupleProverInput]).to(dhtInputs)
     dlogs ++ dlogsAdditional ++ dhts

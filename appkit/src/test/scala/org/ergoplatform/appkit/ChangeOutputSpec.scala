@@ -144,7 +144,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val unsigned = txB.boxesToSpend(inputs).outputs(tokenBox).fee(15000000).sendChangeTo(changeAddr).build()
       val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned) // alice signing bob's box. Does not work here but works in other cases.
       val outputs = signed.getOutputsToSpend
-      assert(outputs.size == 3)
+      assert(outputs.size == 2)
       println(signed.toJson(false))
     }
   }
