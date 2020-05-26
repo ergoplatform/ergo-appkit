@@ -17,18 +17,19 @@ import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
-import special.sigma.{Header, GroupElement, AnyValue, AvlTree, PreHeader}
+import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
 import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
 import java.util.{List => JList, Map => JMap}
 
-import sigmastate.utils.Helpers._
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
+import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
-import sigmastate.interpreter.CryptoConstants.{EcPointType, dlogGroup}
-import scorex.util.{bytesToId, idToBytes, ModifierId}
+import sigmastate.interpreter.CryptoConstants.EcPointType
+import scorex.util.{idToBytes, bytesToId, ModifierId}
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -179,12 +180,20 @@ object JavaHelpers {
     def convertTo[B](implicit iso: Iso[A,B]): B = iso.to(x)
   }
 
-  implicit class StringExtensions(val source: String) extends AnyVal {
-    def toBytes: Array[Byte] = decodeStringToBytes(source)
+  implicit class StringExtensions(val base16: String) extends AnyVal {
+    /** Decodes this base16 string to byte array. */
+    def toBytes: Array[Byte] = decodeStringToBytes(base16)
 
-    def toColl: Coll[Byte] = decodeStringToColl(source)
+    /** Decodes this base16 string to byte array and wrap it as Coll[Byte]. */
+    def toColl: Coll[Byte] = decodeStringToColl(base16)
 
-    def toGroupElement: GroupElement = decodeStringToGE(source)
+    /** Decodes this base16 string to byte array and parse it using [[GroupElementSerializer]]. */
+    def toGroupElement: GroupElement = decodeStringToGE(base16)
+
+    /** Decodes this base16 string to byte array and parse it using
+      * [[ErgoTreeSerializer.deserializeErgoTree()]].
+      */
+    def toErgoTree: ErgoTree = decodeStringToErgoTree(base16)
   }
 
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
@@ -198,25 +207,40 @@ object JavaHelpers {
     ValueSerializer.deserialize(bytes).asInstanceOf[T]
   }
 
-  def decodeStringToBytes(str: String): Array[Byte] = {
-    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+  /** Decodes this base16 string to byte array. */
+  def decodeStringToBytes(base16: String): Array[Byte] = {
+    val bytes = ErgoAlgos.decode(base16).fold(t => throw t, identity)
     bytes
   }
 
-  def decodeStringToColl(str: String): Coll[Byte] = {
-    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+  /** Decodes this base16 string to byte array and wrap it as Coll[Byte]. */
+  def decodeStringToColl(base16: String): Coll[Byte] = {
+    val bytes = ErgoAlgos.decode(base16).fold(t => throw t, identity)
     Colls.fromArray(bytes)
   }
 
-  def decodeStringToGE(str: String): GroupElement = {
-    val bytes = ErgoAlgos.decode(str).fold(t => throw t, identity)
+  /** Decodes this base16 string to byte array and parse it using [[GroupElementSerializer]]. */
+  def decodeStringToGE(base16: String): GroupElement = {
+    val bytes = ErgoAlgos.decode(base16).fold(t => throw t, identity)
     val pe = GroupElementSerializer.parse(SigmaSerializer.startReader(bytes))
     SigmaDsl.GroupElement(pe)
+  }
+
+  /** Decodes this base16 string to byte array and parse it using
+   * [[ErgoTreeSerializer.deserializeErgoTree()]].
+   */
+  def decodeStringToErgoTree(base16: String): ErgoTree = {
+    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(base16).get)
   }
 
   def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {
     implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
     P2PKAddress(pk)
+  }
+
+  def createP2SAddress(ergoTree: ErgoTree, networkPrefix: NetworkPrefix): Pay2SAddress = {
+    implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
+    Pay2SAddress(ergoTree)
   }
 
   def hash(s: String): String = {
@@ -314,12 +338,9 @@ object JavaHelpers {
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
 
-  def createDHTProverInput(
-      firstPk: EcPointType, secondPk: EcPointType, secondSk: BigInteger,
-      additionalSecret: EcPointType): DiffieHellmanTupleProverInput = {
-    val g = dlogGroup.generator
-    val dht = ProveDHTuple(g, firstPk, secondPk, additionalSecret)
-    DiffieHellmanTupleProverInput(secondSk, dht)
+  def createDiffieHellmanTupleProverInput(g:EcPointType, h:EcPointType, u:EcPointType, v:EcPointType, x:BigInteger) = {
+    val dht = ProveDHTuple(g, h, u, v)
+    DiffieHellmanTupleProverInput(x, dht)
   }
 
 }
