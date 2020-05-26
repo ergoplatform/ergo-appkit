@@ -40,14 +40,15 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input)
 
-      // below is ergoTree of a random box picked from the block explorer. The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
+      // below is ergoTree of a random box picked from the block explorer.
+      // The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
       // We just need valid ergoTree to construct the change address
       val tree = "100207036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a120400d805d601db6a01ddd6027300d603b2a5730100d604e4c672030407d605e4c672030507eb02ce7201720272047205ce7201720472027205"
-      implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder.apply(NetworkType.MAINNET.networkPrefix);
-      val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
-      val changeAddr = Pay2SAddress.apply(ergoTree)
+      val ergoTree = JavaHelpers.decodeStringToErgoTree(tree)
+      val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(1000000).sendChangeTo(changeAddr).build()
-      val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned) // alice signing bob's box. Does not work here but works in other cases.
+      // alice signing bob's box. Does not work here but works in other cases.
+      val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned)
       val outputs = signed.getOutputsToSpend
       assert(outputs.size == 3)
       println(signed.toJson(false))
@@ -76,16 +77,18 @@ class ChangeOutputSpec extends PropSpec with Matchers
       )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 0)
 
       val txB = ctx.newTxBuilder()
-      val output = txB.outBoxBuilder().value(15000000).contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+      val output = txB.outBoxBuilder()
+        .value(15000000)
+        .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input)
 
-      // below is ergoTree of a random box picked from the block explorer. The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
+      // below is ergoTree of a random box picked from the block explorer.
+      // The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
       // We just need valid ergoTree to construct the change address
       val tree = "100207036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a120400d805d601db6a01ddd6027300d603b2a5730100d604e4c672030407d605e4c672030507eb02ce7201720272047205ce7201720472027205"
-      implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder.apply(NetworkType.MAINNET.networkPrefix);
-      val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
-      val changeAddr = Pay2SAddress.apply(ergoTree)
+      val ergoTree = JavaHelpers.decodeStringToErgoTree(tree)
+      val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(15000000).sendChangeTo(changeAddr).build()
       val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned) // alice signing bob's box. Does not work here but works in other cases.
       val outputs = signed.getOutputsToSpend
@@ -138,9 +141,8 @@ class ChangeOutputSpec extends PropSpec with Matchers
       // below is ergoTree of a random box picked from the block explorer. The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
       // We just need valid ergoTree to construct the change address
       val tree = "100207036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a120400d805d601db6a01ddd6027300d603b2a5730100d604e4c672030407d605e4c672030507eb02ce7201720272047205ce7201720472027205"
-      implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder.apply(NetworkType.MAINNET.networkPrefix);
-      val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
-      val changeAddr = Pay2SAddress.apply(ergoTree)
+      val ergoTree = JavaHelpers.decodeStringToErgoTree(tree)
+      val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(tokenBox).fee(15000000).sendChangeTo(changeAddr).build()
       val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned) // alice signing bob's box. Does not work here but works in other cases.
       val outputs = signed.getOutputsToSpend
