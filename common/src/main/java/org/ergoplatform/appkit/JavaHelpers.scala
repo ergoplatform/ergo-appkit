@@ -23,6 +23,7 @@ import java.lang.{Long => JLong, String => JString}
 import java.math.BigInteger
 import java.util.{List => JList, Map => JMap}
 
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
