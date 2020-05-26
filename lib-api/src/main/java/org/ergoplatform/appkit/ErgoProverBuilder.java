@@ -33,9 +33,11 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withSecretStorage(SecretStorage storage);
 
     /**
-     * Configures this builder to use group elements (g, h, u, v) and secret x for a ProveDHTuple statement when building a new prover
+     * Configures this builder to use group elements (g, h, u, v) and secret x for a
+     * ProveDHTuple statement when building a new prover.
      *
-     * ProveDHTuple is a statement consisting of 4 group elements (g, h, u, v) and requires the prover to prove knowledge of secret integer x such that
+     * ProveDHTuple is a statement consisting of 4 group elements (g, h, u, v) and
+     * requires the prover to prove knowledge of secret integer x such that.
      *
      *   u = g^x
      *    and
@@ -52,16 +54,17 @@ public interface ErgoProverBuilder {
      *
      * @see
      * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b54a173865a532de09bbcbf10da32ee2a491c8f9/sigmastate/src/main/scala/sigmastate/basics/DiffieHellmanTupleProtocol.scala#L58">implementation</a>
-     *
      */
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
     /**
-     * This allows adding additional secret for use in proveDlog, when the secret is not part of the wallet.
+     * This allows adding additional secret for use in proveDlog, when the secret is not
+     * part of the wallet.
      *
      * Multiple secrets can be added by calling this method multiple times.
      *
-     * Multiple secrets are necessary for statements that need multiple proveDlogs, such as proveDlog(a) && proveDlog(b), where a and b are two group elements.
+     * Multiple secrets are necessary for statements that need multiple proveDlogs, such
+     * as proveDlog(a) && proveDlog(b), where a and b are two group elements.
      */
     ErgoProverBuilder withDLogSecret(BigInteger x);
 
