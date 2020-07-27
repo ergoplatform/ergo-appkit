@@ -317,6 +317,10 @@ object JavaHelpers {
     new UnsignedInput(ADKey @@ boxIdBytes)
   }
 
+  def createDataInput(boxIdBytes: Array[Byte]): DataInput = {
+    DataInput(ADKey @@ boxIdBytes)
+  }
+
   def collRType[T](tItem: RType[T]): RType[Coll[T]] = special.collection.collRType(tItem)
 
   def BigIntRType: RType[special.sigma.BigInt] = special.sigma.BigIntRType
