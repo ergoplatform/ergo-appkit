@@ -28,7 +28,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     ArrayList<DataInput> _dataInputs = new ArrayList<>();
     ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
     private List<InputBoxImpl> _inputBoxes;
-    private List<InputBoxImpl> _dataInputBoxes;
+    private List<InputBoxImpl> _dataInputBoxes = new ArrayList<>();
     private long _feeAmount;
     private ErgoAddress _changeAddress;
     private PreHeaderImpl _ph;
