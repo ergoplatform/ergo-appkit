@@ -1,13 +1,7 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scorex.util.encode.Base16
-import sigmastate.eval._
-import sigmastate.interpreter.CryptoConstants
-import sigmastate.serialization.ErgoTreeSerializer
-import special.sigma.GroupElement
 
 class DataInputsSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
