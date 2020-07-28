@@ -28,6 +28,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     ArrayList<DataInput> _dataInputs = new ArrayList<>();
     ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
     private List<InputBoxImpl> _inputBoxes;
+    private List<InputBoxImpl> _dataInputBoxes = new ArrayList<>();
     private long _feeAmount;
     private ErgoAddress _changeAddress;
     private PreHeaderImpl _ph;
@@ -54,6 +55,19 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         _inputBoxes = inputBoxes.stream()
                 .map(b -> (InputBoxImpl)b)
                 .collect(Collectors.toList());
+        return this;
+    }
+
+    @Override
+    public UnsignedTransactionBuilder withDataInputs(List<InputBox> inputBoxes) {
+        List<DataInput> items = inputBoxes
+            .stream()
+            .map(box -> JavaHelpers.createDataInput(box.getId().getBytes()))
+            .collect(Collectors.toList());
+        _dataInputs.addAll(items);
+        _dataInputBoxes = inputBoxes.stream()
+            .map(b -> (InputBoxImpl)b)
+            .collect(Collectors.toList());
         return this;
     }
 
@@ -88,6 +102,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     @Override
     public UnsignedTransaction build() {
         List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
+        List<ErgoBox> dataInputBoxes = _dataInputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
@@ -109,7 +124,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
             boxSelector).get();
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
-        return new UnsignedTransactionImpl(tx, boxesToSpend, new ArrayList<>(), stateContext);
+        return new UnsignedTransactionImpl(tx, boxesToSpend, dataInputBoxes, stateContext);
     }
 
     private ErgoLikeStateContext createErgoLikeStateContext() {

@@ -1,0 +1,169 @@
+syntax = "proto3";
+package org.ergoplatform.flow.cards;
+
+/** FlowGraph is a serializable representation of a graph of boxes connected with
+ * transactions. The graph have nodes of two types: boxes and transactions, and edges of
+ * two types spending edges and producing edges. Of alternatively, FlowGraph can be thought
+ * as hyper-graph, with boxes are nodes and transactions as hyper-edges.
+ * The graph can be executed by FlowGraphExecutor in the provided data environment
+ * (DataEnv).
+ * The execution of a FlowGraph is defined by FlowGraphExecutor.
+ * Roughly, FlowGraph works as intermediary between dApp and Ergo blockchain.
+ * Each box can be used to request data from Ergo blockchain in order to populate
+ * InputBox. Then, having all InputBoxs for a transaction, the Transaction and the output
+ * boxes pointed to by OutputArrows can be used as a builder of ErgoTransaction. 
+ * Thus created ErgoTransaction can be sent to Ergo blockchain.
+ * After the ErgoTransaction is sent, the process can continue one step further down the
+ * FlowGraph dependencies. This can also happen asyncronously, as execution of one
+ * transaction can simultaneously unlock many others down the graph.
+ */
+message FlowGraph {
+  /** Collection of all boxes identified by unique names.
+   * Every box should be connected to at least one transaction.
+   */
+  repeated Box boxes = 1;
+
+  /** Collection of all transactions connected with boxes.
+   */
+  repeated Transaction transactions = 2;
+}
+
+/** Represents serialized bytes of any Value instance which is serialized using
+ * ValueSerializer. The Value represents expressions which can be evaluated by
+ * Evaluator in a given data environment (which is raughly a key-value store). Every
+ * ValUse(id) node of the expression is evaluated by requesting data environment using
+ * id as a key.
+ * This can be used to parameterize all FlowGraph expressions with FlowGraph parameters so
+ * that each parameter can be accessed from any expression by unique id. This mapping of
+ * named parameters to ids is done by the compiler, which translates FlowSpec into
+ * FlowGraph.
+ */
+message ValueExpr {
+  /** Expression bytes in base16 encoding. The expression have ValueSerializer format.
+   * The FlowGraphExecutor can deserialize this bytes and then evaluate the obtained
+   * Value using Evaluator.
+   */
+  string bytesBase16 = 1;
+}
+
+/** A specification of the Box builder. The fields of this Box contain ValueExprs which
+ * can be evaluated in the DataEnv producing data that can be put into ErgoBox, which in
+ * turn can be put into an Ergo transaction.
+ */
+message Box {
+  /** Name of the box. */
+  string name = 1;
+
+  /** An expression which will produce value of this box. */
+  ValueExpr value = 2;
+
+  /** Contract which protects this box. */
+  Contract contract = 3;
+
+  /** List of tokens of this box. When the expressions are evaluated, the resulting
+   * id-value pairs should form a valid set of tokens.
+   */
+  repeated Token tokens = 4;
+
+  /** Non-mandatory registers added to the box. The constraints on this list are those of
+   * ErgoBox.
+   */
+  repeated ValueExpr registers = 5;
+
+  /** Represents token added to the box. */
+  message Token {
+    /** Token id expression which, when evaluated, produces token id as Coll[Byte]
+     * ErgoScript type.
+     */
+    ValueExpr id = 1;
+    /** Token value expression which evaluates to a Long value. */
+    ValueExpr value = 2;
+  }
+
+  message Contract {
+    /** Expression bytes in base16 encoding. The expression have ValueSerializer format
+     * and should produce valid bytes of serialized ErgoTree. For example this can be
+     * either ByteArrayConstant(ergoTreeBytes) or an application of substConstants
+     * function. When this box is used to generate Ergo transaction, the expression
+     * should be executed and the resulting ErgoTree will be saved in the Ergo
+     * transaction.
+     */
+    ValueExpr ergoTreeExpr = 1;
+
+    /** Parameters of the ErgoTree template, which can be used by dApps:
+     * 1) to inspect script template placeholders
+     * 2) to use ergoTreeBase16 as template and instantiate it with concrete values
+     * 4) to access segregated constants by name
+
+     * The number and the order of parameters should correspond to the number and the order
+     * of segregated constants in ErgoTree, otherwise the box is malformed. This should be
+     * ensured by the compiler.
+     */
+    repeated Parameter templateParams = 2;
+
+    message Parameter {
+      /** Parameter name to be used in dApps. */
+      string name = 1;
+      /** Data type of the arg (in ErgoScript syntax). */
+      string type = 2;
+      /** Human readable description of this parameter. */
+      string description = 3;
+    }
+  }
+}
+
+/** A transaction spends input boxes and creates output boxes. The input boxes are given
+ * by `inputs` list of InputArrow and the order is respected to put those inputs at the
+ * right indexes in INPUTS collection or ErgoScript.
+ * The output boxes are given by the `outputs` list of OutputArrow.
+ *
+ * Each transaction should preserve a strict balance of ERG values (sum of inputs == sum
+ * of outputs) and for each token the sum of inputs >= the sum of outputs.
+ * The FlowGraph requires an explicit specification of the ERG and token values for all the
+ * output boxes as executable expressions. These expressions are executed when the
+ * FlowGraph's transaction is used to generate a new Ergo Transaction.
+ */
+message Transaction {
+  /** Name of the transaction */
+  string name = 1;
+
+  /** Input arrows from the boxes spent by this transaction. */
+  repeated InputArrow inputs = 2;
+
+  /** Output arrows to the boxes created by this transaction. */
+  repeated OutputArrow outputs = 3;
+
+  /** Represents a reference to the box which is spent by the transaction.
+   * Each InputArrow specifies a spending path for the box.
+   * One box may have many alternative spending paths.
+   */
+  message InputArrow {
+    /** Name of the box in the FlowGraph to be spend by this transaction. */
+    string box_name = 1;
+
+    /** Specification of the spending path. */
+    repeated SpendingArg spending_args = 3;
+  }
+
+  /** Specifies spending argument of the input. Each argument corresponds to a context
+   * variable which should be passed to the ErgoScript contract (see getVar operation).
+   */
+  message SpendingArg {
+    /** Name of the spending arg. */
+    string name = 1;
+    /** Id of the context variable (aka ContextExtension variable). */
+    uint32 varId = 2;
+    /** Data type of the arg (in ErgoScript syntax). */
+    string type = 3;
+    /** Human readable description of this argument. */
+    string description = 4;
+  }
+
+  /** Represents a reference to a box which is created by this transaction. */
+  message OutputArrow {
+    /** Name of the box in the FlowGraph this arrow is pointing to and which is created by
+     * this transaction.
+     */
+    string box_name = 2;
+  }
+}

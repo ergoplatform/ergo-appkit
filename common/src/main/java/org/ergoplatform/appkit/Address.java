@@ -4,9 +4,11 @@ import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.Pay2SAddress;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
+import sigmastate.Values;
 import sigmastate.basics.DLogProtocol;
 import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.utils.Helpers;
@@ -20,9 +22,10 @@ public class Address {
 
     ErgoAddress _address;
 
-    public Address(P2PKAddress p2pkAddress) {
-        _address = p2pkAddress;
-        ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(p2pkAddress.encoder().networkPrefix());
+    public Address(ErgoAddress ergoAddress) {
+        _address = ergoAddress;
+        ErgoAddressEncoder encoder =
+            ErgoAddressEncoder.apply(ergoAddress.addressTypePrefix());
         _base58String = encoder.toString(_address);
         _addrBytes = Base58.decode(_base58String).get();
     }
@@ -39,22 +42,26 @@ public class Address {
         Try<byte[]> res = Base58.decode(base58String);
         if (res.isFailure())
             throw new RuntimeException(
-                    "Invalid address encoding, expected base58 string: " + base58String,
-                    (Throwable)new Helpers.TryOps(res).toEither().left().get());
+                "Invalid address encoding, expected base58 string: " + base58String,
+                (Throwable)new Helpers.TryOps(res).toEither().left().get());
         _addrBytes = res.get();
-        ErgoAddressEncoder encoder = ErgoAddressEncoder.apply(getNetworkType().networkPrefix);
+        ErgoAddressEncoder encoder =
+            ErgoAddressEncoder.apply(getNetworkType().networkPrefix);
         Try<ErgoAddress> addrTry = encoder.fromString(base58String);
         if (addrTry.isFailure())
             throw new RuntimeException(
-                    "Invalid address encoding, expected base58 string: " + base58String,
-                    (Throwable)new Helpers.TryOps(addrTry).toEither().left().get());
+                "Invalid address encoding, expected base58 string: " + base58String,
+                (Throwable)new Helpers.TryOps(addrTry).toEither().left().get());
         _address = addrTry.get();
     }
 
     /**
      * @return NetworkType of this address.
      */
-    public NetworkType getNetworkType() { return isMainnet() ? NetworkType.MAINNET : NetworkType.TESTNET; }
+    public NetworkType getNetworkType() {
+        return isMainnet() ? NetworkType.MAINNET :
+            NetworkType.TESTNET;
+    }
 
     /**
      * @return true if this address from Ergo mainnet.
@@ -65,6 +72,29 @@ public class Address {
      * @return true if this address has Pay-To-Public-Key type.
      */
     public boolean isP2PK() { return _address instanceof P2PKAddress; }
+
+    /**
+     * @return underlying {@link P2PKAddress}.
+     * @throws IllegalArgumentException if this instance is not P2PK address
+     */
+    public P2PKAddress asP2PK() {
+        checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
+        return (P2PKAddress)_address;
+    }
+
+    /**
+     * @return true if this address has Pay-To-Script type.
+     */
+    public boolean isP2S() { return _address instanceof Pay2SAddress; }
+
+    /**
+     * @return underlying {@link Pay2SAddress}.
+     * @throws IllegalArgumentException if this instance is not P2S address
+     */
+    public Pay2SAddress asP2S() {
+        checkArgument(isP2S(), "This instance %s is not Pay2SAddress", this);
+        return (Pay2SAddress)_address;
+    }
 
     /**
      * Obtain an instance of {@link ErgoAddress} related to this Address instance.
@@ -78,10 +108,7 @@ public class Address {
     /**
      * Extract public key from P2PKAddress.
      */
-    public DLogProtocol.ProveDlog getPublicKey() {
-        checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
-        return ((P2PKAddress)_address).pubkey();
-    }
+    public DLogProtocol.ProveDlog getPublicKey() { return asP2PK().pubkey(); }
 
     /**
      * Extract public key from P2PKAddress and return its group element
@@ -103,11 +130,18 @@ public class Address {
         return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
     }
 
-    public static Address fromMnemonic(NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
+    public static Address fromMnemonic(
+        NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
-        DLogProtocol.ProveDlog pk = masterKey.key().publicImage();
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
+        DLogProtocol.ProveDlog pk = masterKey.publicImage();
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk,
+            networkType.networkPrefix);
         return new Address(p2pkAddress);
+    }
+
+    public static Address fromErgoTree(Values.ErgoTree ergoTree, NetworkType networkType) {
+        Pay2SAddress p2sAddress = JavaHelpers.createP2SAddress(ergoTree, networkType.networkPrefix);
+        return new Address(p2sAddress);
     }
 
     @Override

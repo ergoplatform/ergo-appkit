@@ -6,9 +6,8 @@ import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.Option;
-import scala.collection.IndexedSeq;
+import sigmastate.basics.DLogProtocol;
 import sigmastate.basics.DiffieHellmanTupleProverInput;
-import sigmastate.interpreter.CryptoConstants;
 import special.sigma.GroupElement;
 
 import java.math.BigInteger;
@@ -23,8 +22,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     private final BlockchainContextImpl _ctx;
 
     private ExtendedSecretKey _masterKey;
-    private DiffieHellmanTupleProverInput _firstSecret;
-    private DiffieHellmanTupleProverInput _secondSecret;
+    private DiffieHellmanTupleProverInput _dhtSecret;
+    private DLogProtocol.DLogProverInput _dLogSecret;
 
     public ErgoProverBuilderImpl(BlockchainContextImpl ctx) {
         _ctx = ctx;
@@ -48,35 +47,15 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
         return this;
     }
 
-    /**
-     * This code uses original cryptographic notation known from the literature, see the following
-     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
-     * to understand the implementation, where this _masterKey belong to Bob
-     */
     @Override
-    public ErgoProverBuilder withFirstDHTSecret(Address otherParty, GroupElement additionalSecret) {
-        checkState(_firstSecret == null, "First secret already defined.");
-        BigInteger x = _masterKey.key().w();  // Alice's secret
-        SecP256K1Point g_x = _masterKey.key().publicImage().value();  // Alice's public key
-        SecP256K1Point g_y = otherParty.getPublicKey().value();       // Bob's public key
-        _firstSecret = JavaHelpers.createDHTProverInput(g_y, g_x, x,
-                (SecP256K1Point)additionalSecret.value());
+    public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
+        _dhtSecret = JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x);
         return this;
     }
 
-    /**
-     * This code uses original cryptographic notation known from the literature, see the following
-     * <a href="https://github.com/ScorexFoundation/sigmastate-interpreter/blob/b3695bdb785c9b3a94545ffea506358ee3f8ed3d/sigmastate/src/test/scala/sigmastate/utxo/examples/DHTupleExampleSpecification.scala#L28">example</a>
-     * to understand the implementation, where this _masterKey belong to Bob
-     */
     @Override
-    public ErgoProverBuilder withSecondDHTSecret(Address otherParty) {
-        checkState(_secondSecret == null, "Second secret already defined.");
-        BigInteger y = _masterKey.key().w();                         // Bob's secret key
-        SecP256K1Point g_y = _masterKey.key().publicImage().value(); // Bob's public key
-        SecP256K1Point g_x = otherParty.getPublicKey().value();
-        SecP256K1Point g_xy = CryptoConstants.dlogGroup().exponentiate(g_x, y);
-        _secondSecret = JavaHelpers.createDHTProverInput(g_x, g_y, y, g_xy);
+    public ErgoProverBuilder withDLogSecret(BigInteger x) {
+        _dLogSecret = new DLogProtocol.DLogProverInput(x);
         return this;
     }
 
@@ -139,11 +118,13 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
                 return _params.getBlockVersion().byteValue();
             }
         };
-        List<ExtendedSecretKey> keys = Arrays.asList(_masterKey);
+        ArrayList<ExtendedSecretKey> keys = new ArrayList<>();
         ArrayList<DiffieHellmanTupleProverInput> dhtInputs = new ArrayList<>();
-        if (_firstSecret != null) dhtInputs.add(_firstSecret);
-        if (_secondSecret != null) dhtInputs.add(_secondSecret);
-        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dhtInputs, parameters);
+        ArrayList<DLogProtocol.DLogProverInput> dLogInputs = new ArrayList<>();
+        if (_masterKey != null) keys.add(_masterKey);
+        if (_dhtSecret != null) dhtInputs.add(_dhtSecret);
+        if (_dLogSecret != null) dLogInputs.add(_dLogSecret);
+        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dLogInputs, dhtInputs, parameters);
         return new ErgoProverImpl(_ctx, interpreter);
     }
 }

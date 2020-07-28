@@ -9,6 +9,8 @@ import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
 
 import java.util.List;
+import scala.collection.immutable.Map;
+import sigmastate.SType;
 
 public class InputBoxImpl implements InputBox {
     private final BlockchainContextImpl _ctx;
