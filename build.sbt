@@ -22,7 +22,7 @@ lazy val commonSettings = Seq(
   scalaVersion := scala212,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
-    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+    "Typesafe maven releases" at "https://dl.bintray.com/typesafe/maven-releases/",
     sonatypeSnapshots,
     Resolver.mavenCentral),
   homepage := Some(url("https://github.com/ergoplatform/ergo-appkit")),
