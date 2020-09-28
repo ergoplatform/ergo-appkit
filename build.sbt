@@ -22,7 +22,7 @@ lazy val commonSettings = Seq(
   scalaVersion := scala212,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
-    "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+    "Typesafe maven releases" at "https://dl.bintray.com/typesafe/maven-releases/",
     sonatypeSnapshots,
     Resolver.mavenCentral),
   homepage := Some(url("https://github.com/ergoplatform/ergo-appkit")),
@@ -75,9 +75,10 @@ git.gitUncommittedChanges in ThisBuild := true
 
 val mockitoScalaVerstion = "1.11.4"
 
-val testingDependencies = Seq(
+lazy val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  (sigmaState % Test).classifier("tests")
 )
 
 lazy val testSettings = Seq(
@@ -120,7 +121,7 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "3.2.1"
+val sigmaStateVersion = "3.3.1"
 val ergoWalletVersion = "v3.2.3-11f8615f-SNAPSHOT"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
@@ -134,6 +135,7 @@ lazy val mockWebServer = "com.squareup.okhttp3" % "mockwebserver" % "3.12.0" % "
 
 libraryDependencies ++= Seq(
   sigmaState,
+  (sigmaState % Test).classifier("tests"),
   ergoWallet,
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
