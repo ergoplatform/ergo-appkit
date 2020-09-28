@@ -1,11 +1,11 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.ErgoBox
-import org.ergoplatform.ErgoBox.NonMandatoryRegisterId
 import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.Values.{EvaluatedValue, IntConstant, ByteArrayConstant}
 import sigmastate.{SType, TrivialProp}
+import sigmastate.helpers.TestingHelpers._
 
 class JavaHelpersSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -17,7 +17,7 @@ class JavaHelpersSpec extends PropSpec with Matchers
   type Registers = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
 
   def boxWithRegs(regs: Registers) = {
-    ErgoBox(10, TrivialProp.TrueProp, 100, Nil, regs)
+    testBox(10, TrivialProp.TrueProp, 100, Nil, regs)
   }
 
   def check(regs: Registers, expRegs: IndexedSeq[ErgoValue[_]]) = {
