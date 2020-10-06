@@ -62,6 +62,20 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder fee(long feeAmount);
 
     /**
+     * Configures amounts for tokens to be burnt.
+     * Each Ergo box can store zero or more tokens (aka assets).
+     * In contrast to strict requirement on ERG balance between transaction inputs and outputs,
+     * the amounts of output tokens can be less then the amounts of input tokens.
+     * This is interpreted as token burning i.e. reducing the total amount of tokens in
+     * circulation in the blockchain.
+     * Note, once issued/burnt, the amount of tokens in circulation cannot be increased.
+     *
+     * @param tokens one or more tokens to be burnt as part of the transaction.
+     * @see ErgoToken
+     */
+    UnsignedTransactionBuilder tokensToBurn(ErgoToken... tokens);
+
+    /**
      * Adds change output to the specified address if needed.
      *
      * @param address address to send output
