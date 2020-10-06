@@ -28,7 +28,7 @@ public interface SignedTransaction {
     List<SignedInput> getSignedInputs();
 
     /**
-     * Outputs of this transaction represented as {@link InputBox} objects read to be spent in the next
+     * Outputs of this transaction represented as {@link InputBox} objects ready to be spent in the next
      * chained transaction.
      * This method can be used to create a chain of transactions. Thus {@code tx1.getOutputsToSpend()} returns
      * a list of boxes which are ready to be included as input boxes to a new tx2.

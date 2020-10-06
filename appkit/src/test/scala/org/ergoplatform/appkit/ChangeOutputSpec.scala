@@ -1,13 +1,14 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scorex.util.encode.Base16
 import sigmastate.eval._
 import sigmastate.interpreter.CryptoConstants
-import sigmastate.serialization.ErgoTreeSerializer
 import special.sigma.GroupElement
+import JavaHelpers._
+import java.util.{List => JList}
+
+import org.ergoplatform.appkit.Parameters.MinFee
 
 class ChangeOutputSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -97,7 +98,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
     }
   }
 
-  property("NoTokenChangeOutput") {
+  property("NoTokenChangeOutput + token burning") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     val g: GroupElement = CryptoConstants.dlogGroup.generator
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
@@ -120,6 +121,8 @@ class ChangeOutputSpec extends PropSpec with Matchers
       )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 0)
 
       val tokenId = input0.getId.toString
+      val tokenAmount = 5000000000L
+      val tokenAmountToBurn = 2000000000L
 
       val ph = ctx.createPreHeader()
         .height(ctx.getHeight + 1)
@@ -128,7 +131,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder().preHeader(ph) // for issuing token
       val tokenBox = txB.outBoxBuilder
         .value(15000000) // value of token box, doesn't really matter
-        .tokens(new ErgoToken(tokenId, 5000000000L)) // amount of token issuing
+        .tokens(new ErgoToken(tokenId, tokenAmount)) // amount of token issuing
         .contract(ctx.compileContract( // contract of the box containing tokens, just has to be spendable
           ConstantsBuilder.empty(),
           "{sigmaProp(1 < 2)}"
@@ -148,6 +151,43 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val outputs = signed.getOutputsToSpend
       assert(outputs.size == 2)
       println(signed.toJson(false))
+      val boxWithToken = outputs.get(0)
+      assert(boxWithToken.getTokens.size() == 1)
+
+      // move Ergs from boxWithToken and burn tokens in the transaction
+      {
+        val expectedChange = MinFee
+        val txB = ctx.newTxBuilder()
+        val ergAmountToSend = boxWithToken.getValue - MinFee - expectedChange
+        val out = txB.outBoxBuilder
+          .value(ergAmountToSend)
+          .contract(ctx.compileContract( // contract of the box containing tokens, just has to be spendable
+            ConstantsBuilder.empty(), "{sigmaProp(1 < 2)}"
+          ))
+          .build()
+        val unsigned = txB
+          .boxesToSpend(IndexedSeq(boxWithToken).convertTo[JList[InputBox]])
+          .outputs(out)
+          .tokensToBurn(new ErgoToken(tokenId, tokenAmountToBurn))
+          .fee(MinFee)
+          .sendChangeTo(changeAddr)
+          .build()
+        val signed = ctx.newProverBuilder().build().sign(unsigned)
+        val outputs = signed.getOutputsToSpend
+        assert(outputs.size == 3)
+        val out0 = outputs.get(0)
+        val fee = outputs.get(1)
+        val change = outputs.get(2)
+        out0.getValue shouldBe ergAmountToSend
+        out0.getTokens.size() shouldBe 0
+
+        fee.getValue shouldBe MinFee
+        fee.getTokens.size shouldBe 0
+
+        change.getValue shouldBe expectedChange
+        change.getTokens.size() shouldBe 1
+        change.getTokens.get(0).getValue shouldBe (tokenAmount - tokenAmountToBurn)
+      }
     }
   }
 }
