@@ -25,6 +25,7 @@ import java.util.{List => JList, Map => JMap}
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
+import org.ergoplatform.wallet.TokensMap
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
@@ -79,22 +80,23 @@ object Iso extends LowPriorityIsos {
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
   }
 
-  implicit val isoJListErgoTokenToMapPair: Iso[JList[ErgoToken], mutable.LinkedHashMap[ModifierId, Long]] = 
+  implicit val isoJListErgoTokenToMapPair: Iso[JList[ErgoToken], mutable.LinkedHashMap[ModifierId, Long]] =
     new Iso[JList[ErgoToken], mutable.LinkedHashMap[ModifierId, Long]] {
-    override def to(a: JList[ErgoToken]): mutable.LinkedHashMap[ModifierId, Long] = {
-      import JavaHelpers._
-      val lhm = new mutable.LinkedHashMap[ModifierId, Long]()
-      a.convertTo[IndexedSeq[(TokenId, Long)]]
-        .map(t => bytesToId(t._1) -> t._2)
-        .foldLeft(lhm)(_ += _)
+      override def to(a: JList[ErgoToken]): mutable.LinkedHashMap[ModifierId, Long] = {
+        import JavaHelpers._
+        val lhm = new mutable.LinkedHashMap[ModifierId, Long]()
+        a.convertTo[IndexedSeq[(TokenId, Long)]]
+          .map(t => bytesToId(t._1) -> t._2)
+          .foldLeft(lhm)(_ += _)
+      }
+
+      override def from(t: mutable.LinkedHashMap[ModifierId, Long]): JList[ErgoToken] = {
+        import JavaHelpers._
+        val pairs: IndexedSeq[(TokenId, Long)] = t.toIndexedSeq
+          .map(t => (Digest32 @@ idToBytes(t._1)) -> t._2)
+        pairs.convertTo[JList[ErgoToken]]
+      }
     }
-    override def from(t: mutable.LinkedHashMap[ModifierId, Long]): JList[ErgoToken] = {
-      import JavaHelpers._
-      val pairs: IndexedSeq[(TokenId, Long)] = t.toIndexedSeq
-        .map(t => (Digest32 @@ idToBytes(t._1)) -> t._2)
-      pairs.convertTo[JList[ErgoToken]]
-    }
-  }
 
   implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
     override def to(et: ErgoType[_]): SType = Evaluation.rtypeToSType(et.getRType)
@@ -347,6 +349,9 @@ object JavaHelpers {
     DiffieHellmanTupleProverInput(x, dht)
   }
 
+  def createTokensMap(linkedMap: mutable.LinkedHashMap[ModifierId, Long]): TokensMap = {
+    linkedMap.toMap
+  }
 }
 
 

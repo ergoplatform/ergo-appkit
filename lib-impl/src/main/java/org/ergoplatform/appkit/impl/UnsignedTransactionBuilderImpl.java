@@ -7,8 +7,8 @@ import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import org.ergoplatform.wallet.transactions.TransactionBuilder;
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector$;
 import org.ergoplatform.wallet.boxes.BoxSelector;
-import scala.Option;
 import scala.collection.IndexedSeq;
+import scala.collection.immutable.Map;
 import special.collection.Coll;
 import special.sigma.Header;
 import special.sigma.PreHeader;
@@ -29,6 +29,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
     ArrayList<ErgoBoxCandidate> _outputCandidates = new ArrayList<>();
     private List<InputBoxImpl> _inputBoxes;
     private List<InputBoxImpl> _dataInputBoxes = new ArrayList<>();
+    private List<ErgoToken> _tokensToBurn = new ArrayList<>();
     private long _feeAmount;
     private ErgoAddress _changeAddress;
     private PreHeaderImpl _ph;
@@ -86,6 +87,12 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         return this;
     }
 
+    @Override
+    public UnsignedTransactionBuilder tokensToBurn(ErgoToken... tokens) {
+        _tokensToBurn.addAll(Stream.of(tokens).collect(Collectors.toList()));
+        return this;
+    }
+
     private void appendOutputs(OutBox... outputs) {
         ErgoBoxCandidate[] boxes =
                 Stream.of(outputs).map(c -> ((OutBoxImpl)c).getErgoBoxCandidate()).toArray(n -> new ErgoBoxCandidate[n]);
@@ -101,8 +108,12 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public UnsignedTransaction build() {
-        List<ErgoBox> boxesToSpend = _inputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
-        List<ErgoBox> dataInputBoxes = _dataInputBoxes.stream().map(b -> b.getErgoBox()).collect(Collectors.toList());
+        List<ErgoBox> boxesToSpend = _inputBoxes.stream()
+            .map(b -> b.getErgoBox())
+            .collect(Collectors.toList());
+        List<ErgoBox> dataInputBoxes = _dataInputBoxes.stream()
+            .map(b -> b.getErgoBox())
+            .collect(Collectors.toList());
         IndexedSeq<DataInput> dataInputs = JavaHelpers.toIndexedSeq(_dataInputs);
 
         checkState(_feeAmount > 0, "Fee amount should be defined (using fee() method).");
@@ -111,16 +122,20 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
         IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
+        Map<String, Object> burnTokens = JavaHelpers.createTokensMap(
+          Iso$.MODULE$.isoJListErgoTokenToMapPair().to(_tokensToBurn)
+        );
         BoxSelector boxSelector = DefaultBoxSelector$.MODULE$;
         UnsignedErgoLikeTransaction tx = TransactionBuilder.buildUnsignedTx(
             inputBoxes,
-            dataInputs, 
-            outputCandidates, 
+            dataInputs,
+            outputCandidates,
             _ctx.getHeight(),
-            _feeAmount, 
-            _changeAddress, 
-            MinChangeValue, 
+            _feeAmount,
+            _changeAddress,
+            MinChangeValue,
             Parameters.MinerRewardDelay,
+            burnTokens,
             boxSelector).get();
         ErgoLikeStateContext stateContext = createErgoLikeStateContext();
 
