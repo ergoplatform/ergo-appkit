@@ -6,39 +6,43 @@ import sigmastate.eval._
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
-class DHTProverSpec extends PropSpec with Matchers
+import scala.util.Try
+
+class MultiProveDlog extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting {
 
-  property("DHTProver") {
+  property("Multi DlogProver") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     val g: GroupElement = CryptoConstants.dlogGroup.generator
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gX.exp(y)
 
     ergoClient.execute { ctx: BlockchainContext =>
-      val input = ctx.newTxBuilder.outBoxBuilder.registers(
-        ErgoValue.of(gY), ErgoValue.of(gXY) // <--- correct one, (Alice's full mix box)
-        //        ErgoValue.of(gXY), ErgoValue.of(gY) // <--- wrong one, (Bob's full mix box). Alice should not be able to sign.
+      val input1 = ctx.newTxBuilder.outBoxBuilder.registers(
+        ErgoValue.of(gX)
       ).value(20000000).contract(ctx.compileContract(
         ConstantsBuilder.empty(),
-        """{
-          |  val gY = SELF.R4[GroupElement].get
-          |  val gXY = SELF.R5[GroupElement].get
-          |  proveDHTuple(gY, gY, gXY, gXY)
-          |}""".stripMargin
+        """proveDlog(SELF.R4[GroupElement].get)""".stripMargin
       )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 0)
+
+      val input2 = ctx.newTxBuilder.outBoxBuilder.registers(
+        ErgoValue.of(gY)
+      ).value(20000000).contract(ctx.compileContract(
+        ConstantsBuilder.empty(),
+        """proveDlog(SELF.R4[GroupElement].get)""".stripMargin
+      )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 1)
 
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
-        .value(10000000)
+        .value(20000000)
         .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
       val inputs = new java.util.ArrayList[InputBox]()
-      inputs.add(input)
+      inputs.add(input1)
+      inputs.add(input2)
 
       // below is ergoTree of a random box picked from the block explorer. The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
       // We just need valid ergoTree to construct the change address
@@ -46,8 +50,11 @@ class DHTProverSpec extends PropSpec with Matchers
       val ergoTree = JavaHelpers.decodeStringToErgoTree(tree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(10000000).sendChangeTo(changeAddr).build()
-      ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned) // alice signing bob's box. Does not work here but works in other cases.
+
+      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(y).build().sign(unsigned)).isSuccess shouldBe true
+      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(BigInt(1).bigInteger).build().sign(unsigned)).isSuccess shouldBe false
     }
   }
 }
+
 

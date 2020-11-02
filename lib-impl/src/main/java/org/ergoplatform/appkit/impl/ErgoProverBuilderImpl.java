@@ -22,8 +22,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
     private final BlockchainContextImpl _ctx;
 
     private ExtendedSecretKey _masterKey;
-    private DiffieHellmanTupleProverInput _dhtSecret;
-    private DLogProtocol.DLogProverInput _dLogSecret;
+    private ArrayList<DiffieHellmanTupleProverInput> _dhtSecrets = new ArrayList<>();
+    private ArrayList<DLogProtocol.DLogProverInput> _dLogSecrets = new ArrayList<>();
 
     public ErgoProverBuilderImpl(BlockchainContextImpl ctx) {
         _ctx = ctx;
@@ -49,13 +49,13 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
     @Override
     public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
-        _dhtSecret = JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x);
+        _dhtSecrets.add(JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x));
         return this;
     }
 
     @Override
     public ErgoProverBuilder withDLogSecret(BigInteger x) {
-        _dLogSecret = new DLogProtocol.DLogProverInput(x);
+        _dLogSecrets.add(new DLogProtocol.DLogProverInput(x));
         return this;
     }
 
@@ -119,12 +119,8 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
             }
         };
         ArrayList<ExtendedSecretKey> keys = new ArrayList<>();
-        ArrayList<DiffieHellmanTupleProverInput> dhtInputs = new ArrayList<>();
-        ArrayList<DLogProtocol.DLogProverInput> dLogInputs = new ArrayList<>();
         if (_masterKey != null) keys.add(_masterKey);
-        if (_dhtSecret != null) dhtInputs.add(_dhtSecret);
-        if (_dLogSecret != null) dLogInputs.add(_dLogSecret);
-        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, dLogInputs, dhtInputs, parameters);
+        AppkitProvingInterpreter interpreter = new AppkitProvingInterpreter(keys, _dLogSecrets, _dhtSecrets, parameters);
         return new ErgoProverImpl(_ctx, interpreter);
     }
 }
