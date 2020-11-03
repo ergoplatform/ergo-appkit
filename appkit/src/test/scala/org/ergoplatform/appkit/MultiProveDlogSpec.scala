@@ -8,41 +8,32 @@ import special.sigma.GroupElement
 
 import scala.util.Try
 
-class MultiProveDHT extends PropSpec with Matchers
+class MultiProveDlogSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting {
 
-  property("Multi DHTProver") {
+  property("Multi DlogProver") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     val g: GroupElement = CryptoConstants.dlogGroup.generator
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gX.exp(y)
-
-    val x1 = BigInt("287235612876647164378132684712638457").bigInteger
-    val y1 = BigInt("640956873409567839086738967389673896").bigInteger
-
-    val gX1:GroupElement = g.exp(x1)
-    val gY1:GroupElement = g.exp(y1)
-    val gX1Y1:GroupElement = gX1.exp(y1)
-
 
     ergoClient.execute { ctx: BlockchainContext =>
       val input1 = ctx.newTxBuilder.outBoxBuilder.registers(
-        ErgoValue.of(gY), ErgoValue.of(gX), ErgoValue.of(gXY)
+        ErgoValue.of(gX)
       ).value(20000000).contract(ctx.compileContract(
         ConstantsBuilder.empty(),
-        """proveDHTuple(groupGenerator, SELF.R4[GroupElement].get, SELF.R5[GroupElement].get, SELF.R6[GroupElement].get)""".stripMargin
+        """proveDlog(SELF.R4[GroupElement].get)""".stripMargin
       )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 0)
 
       val input2 = ctx.newTxBuilder.outBoxBuilder.registers(
-        ErgoValue.of(gY1), ErgoValue.of(gX1), ErgoValue.of(gX1Y1)
+        ErgoValue.of(gY)
       ).value(20000000).contract(ctx.compileContract(
         ConstantsBuilder.empty(),
-        """proveDHTuple(groupGenerator, SELF.R4[GroupElement].get, SELF.R5[GroupElement].get, SELF.R6[GroupElement].get)""".stripMargin
+        """proveDlog(SELF.R4[GroupElement].get)""".stripMargin
       )).build().convertToInputWith("f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809", 1)
 
       val txB = ctx.newTxBuilder()
@@ -60,7 +51,15 @@ class MultiProveDHT extends PropSpec with Matchers
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(10000000).sendChangeTo(changeAddr).build()
 
-      Try(ctx.newProverBuilder().withDHTData(g, gY, gX, gXY, x).withDHTData(g, gY1, gX1, gX1Y1, x1).build().sign(unsigned)).isSuccess shouldBe true
+      // Dlog with two different secrets
+      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(y).build().sign(unsigned)).isSuccess shouldBe true
+
+      // Dlog with wrong secret(s)
+      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(BigInt(1).bigInteger).build().sign(unsigned)).isSuccess shouldBe false
+
+      // Dlog with duplicate secrets
+      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(y).withDLogSecret(x).build().sign(unsigned)).isSuccess shouldBe false
+
     }
   }
 }

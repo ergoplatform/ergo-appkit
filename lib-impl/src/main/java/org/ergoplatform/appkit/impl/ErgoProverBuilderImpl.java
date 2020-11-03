@@ -49,13 +49,19 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
     @Override
     public ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x) {
-        _dhtSecrets.add(JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x));
+        DiffieHellmanTupleProverInput dht = JavaHelpers.createDiffieHellmanTupleProverInput((SecP256K1Point)g.value(), (SecP256K1Point)h.value(), (SecP256K1Point)u.value(), (SecP256K1Point)v.value(), x);
+        if (_dhtSecrets.contains(dht))
+            throw new IllegalStateException("DHTuple secret already exists");
+        _dhtSecrets.add(dht);
         return this;
     }
 
     @Override
     public ErgoProverBuilder withDLogSecret(BigInteger x) {
-        _dLogSecrets.add(new DLogProtocol.DLogProverInput(x));
+        DLogProtocol.DLogProverInput dLog = new DLogProtocol.DLogProverInput(x);
+        if (_dLogSecrets.contains(dLog))
+            throw new IllegalStateException("Dlog secret already exists");
+        _dLogSecrets.add(dLog);
         return this;
     }
 
