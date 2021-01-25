@@ -76,19 +76,21 @@ class AppkitProvingInterpreter(
       val unsignedInput = unsignedTx.inputs(boxIdx)
       require(util.Arrays.equals(unsignedInput.boxId, inputBox.id))
 
-      val transactionContext = TransactionContext(boxesToSpend, dataBoxes, unsignedTx, boxIdx.toShort)
+      val transactionContext = TransactionContext(boxesToSpend, dataBoxes, unsignedTx)
 
-      val context = new ErgoLikeContext(ErgoInterpreter.avlTreeFromDigest(stateContext.previousStateDigest),
+      val context = new ErgoLikeContext(
+        ErgoInterpreter.avlTreeFromDigest(stateContext.previousStateDigest),
         stateContext.sigmaLastHeaders,
         stateContext.sigmaPreHeader,
         transactionContext.dataBoxes,
         transactionContext.boxesToSpend,
         transactionContext.spendingTransaction,
-        transactionContext.selfIndex,
+        boxIdx.toShort,
         ContextExtension.empty,
         ValidationRules.currentSettings,
         params.maxBlockCost,
-        currentCost
+        currentCost,
+        (params.blockVersion - 1).toByte
       )
 
       prove(inputBox.ergoTree, context, unsignedTx.messageToSign).mapOrThrow { proverResult =>
