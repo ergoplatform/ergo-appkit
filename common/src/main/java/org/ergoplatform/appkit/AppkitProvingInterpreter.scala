@@ -13,7 +13,7 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeSta
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.{ContextExtension, ProverInterpreter}
+import sigmastate.interpreter.ProverInterpreter
 
 import scala.collection.mutable
 
@@ -23,19 +23,6 @@ object Helpers {
     def mapOrThrow[B](f: A => B): B = source.fold(t => throw t, f)
   }
 }
-
-/** Input ErgoBox paired with context variables (aka ContextExtensions).
- *
- * @param box       an instance of ErgoBox which is used as an input of the transaction.
- * @param extension a set of context variables necessary to satisfy the box's
- *                  guarding proposition.
- *                  This extension is also saved in the corresponding
- *                  [[org.ergoplatform.Input]] instance of the signed transaction.
- */
-case class ExtendedInputBox(
-  box: ErgoBox,
-  extension: ContextExtension
-)
 
 /**
  * A class which holds secrets and can sign transactions (aka generate proofs).

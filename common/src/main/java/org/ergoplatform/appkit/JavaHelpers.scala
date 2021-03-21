@@ -31,6 +31,7 @@ import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
 import sigmastate.interpreter.CryptoConstants.EcPointType
 import scorex.util.{idToBytes, bytesToId, ModifierId}
+import sigmastate.interpreter.ContextExtension
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -109,6 +110,27 @@ object Iso extends LowPriorityIsos {
       
     override def from(x: EvaluatedValue[SType]): ErgoValue[_] = {
       new ErgoValue(x.value, new ErgoType(Evaluation.stypeToRType(x.tpe)))
+    }
+  }
+
+  implicit val isoContextVarsToContextExtension: Iso[JList[ContextVar], ContextExtension] = new Iso[JList[ContextVar], ContextExtension] {
+    import JavaHelpers._
+    override def to(vars: JList[ContextVar]): ContextExtension = {
+      var values: Map[Byte, EvaluatedValue[SType]] = Map.empty
+      vars.convertTo[IndexedSeq[ContextVar]].foreach { v =>
+        val id = v.getId
+        val value = v.getValue
+        if (values.contains(id)) sys.error(s"Duplicate variable id: ($id -> $value")
+        values += (v.getId() -> isoErgoValueToSValue.to(v.getValue))
+      }
+      ContextExtension(values)
+    }
+    override def from(b: ContextExtension): JList[ContextVar] = {
+      val iso = JListToIndexedSeq[ContextVar, ContextVar]
+      val vars = iso.from(b.values
+        .map { case (id, v) => new ContextVar(id, isoErgoValueToSValue.from(v)) }
+        .toIndexedSeq)
+      vars
     }
   }
 

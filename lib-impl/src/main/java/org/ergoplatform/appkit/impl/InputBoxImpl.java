@@ -8,6 +8,9 @@ import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import sigmastate.interpreter.ContextExtension;
 
 public class InputBoxImpl implements InputBox {
@@ -15,7 +18,7 @@ public class InputBoxImpl implements InputBox {
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
     private final ErgoTransactionOutput _boxData;
-    private final ContextExtension _extension;
+    private ContextExtension _extension;
 
     public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData) {
         _ctx = ctx;
@@ -57,6 +60,16 @@ public class InputBoxImpl implements InputBox {
     @Override
     public Values.ErgoTree getErgoTree() {
         return _ergoBox.ergoTree();
+    }
+
+    @Override
+    public InputBox withContextVars(ContextVar... variables) {
+        ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
+          Stream.of(variables).collect(Collectors.toList())
+        );
+        InputBoxImpl res =  new InputBoxImpl(_ctx, _ergoBox);
+        res._extension = extension;
+        return res;
     }
 
     @Override
