@@ -108,8 +108,8 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public UnsignedTransaction build() {
-        List<ErgoBox> boxesToSpend = _inputBoxes.stream()
-            .map(b -> b.getErgoBox())
+        List<ExtendedInputBox> boxesToSpend = _inputBoxes.stream()
+            .map(b -> new ExtendedInputBox(b.getErgoBox(), b.getExtension()))
             .collect(Collectors.toList());
         List<ErgoBox> dataInputBoxes = _dataInputBoxes.stream()
             .map(b -> b.getErgoBox())
@@ -121,7 +121,10 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
         checkState(_changeAddress != null, "Change address is not defined");
 
         IndexedSeq<ErgoBoxCandidate> outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates);
-        IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend);
+        IndexedSeq<ErgoBox> inputBoxes = JavaHelpers.toIndexedSeq(
+            boxesToSpend.stream()
+                .map(eb -> eb.box())
+                .collect(Collectors.toList()));
         Map<String, Object> burnTokens = JavaHelpers.createTokensMap(
           Iso$.MODULE$.isoJListErgoTokenToMapPair().to(_tokensToBurn)
         );
