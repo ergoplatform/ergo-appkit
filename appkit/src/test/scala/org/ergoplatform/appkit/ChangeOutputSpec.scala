@@ -6,7 +6,7 @@ import sigmastate.eval._
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 import JavaHelpers._
-import java.util.{List => JList}
+import java.util.{Arrays, List => JList}
 
 import org.ergoplatform.appkit.Parameters.MinFee
 
@@ -44,8 +44,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
         .contract(ctx.compileContract(
           ConstantsBuilder.empty(),"{sigmaProp(true)}"))
         .build()
-      val inputs = new java.util.ArrayList[InputBox]()
-      inputs.add(input)
+      val inputs = Arrays.asList(input)
 
       // below is ergoTree of a random box picked from the block explorer.
       // The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
