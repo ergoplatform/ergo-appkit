@@ -97,4 +97,11 @@ public class ContextVar {
         return new ContextVar(id, ErgoValue.of(value));
     }
 
+    static public ContextVar of(byte id, byte[] arr) {
+        return new ContextVar(id, ErgoValue.of(arr));
+    }
+
+    static public <T> ContextVar of(byte id, ErgoValue<T> v) {
+        return new ContextVar(id, v);
+    }
 }
