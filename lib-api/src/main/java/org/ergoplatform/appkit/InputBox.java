@@ -40,6 +40,16 @@ public interface InputBox {
      */
     Values.ErgoTree getErgoTree();
 
+    /**
+     * Extends the given input with context variables (aka {@link
+     * sigmastate.interpreter.ContextExtension}.
+     * Note, this method don't change `this` instance.
+     *
+     * @param variables a list of variables
+     * @return a new instance of InputBox with the given variables attached.
+     */
+    InputBox withContextVars(ContextVar... variables);
+
     String toJson(boolean prettyPrint);
 }
 

@@ -3,26 +3,29 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.appkit.*;
-import org.ergoplatform.explorer.client.model.TransactionOutput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
 
 import java.util.List;
-import scala.collection.immutable.Map;
-import sigmastate.SType;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import sigmastate.interpreter.ContextExtension;
 
 public class InputBoxImpl implements InputBox {
     private final BlockchainContextImpl _ctx;
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
     private final ErgoTransactionOutput _boxData;
+    private ContextExtension _extension;
 
     public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData) {
         _ctx = ctx;
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
         _boxData = boxData;
+        _extension = ContextExtension.empty();
     }
 
     public InputBoxImpl(BlockchainContextImpl ctx, ErgoBox ergoBox) {
@@ -30,6 +33,7 @@ public class InputBoxImpl implements InputBox {
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
         _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
+        _extension = ContextExtension.empty();
     }
 
     @Override
@@ -59,6 +63,16 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
+    public InputBox withContextVars(ContextVar... variables) {
+        ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
+          Stream.of(variables).collect(Collectors.toList())
+        );
+        InputBoxImpl res =  new InputBoxImpl(_ctx, _ergoBox);
+        res._extension = extension;
+        return res;
+    }
+
+    @Override
     public String toJson(boolean prettyPrint) {
         Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
         ErgoTransactionOutput data = _boxData;
@@ -72,6 +86,10 @@ public class InputBoxImpl implements InputBox {
 
     public ErgoBox getErgoBox() {
         return _ergoBox;
+    }
+
+    public ContextExtension getExtension() {
+        return _extension;
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeSta
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.{ContextExtension, ProverInterpreter}
+import sigmastate.interpreter.ProverInterpreter
 
 import scala.collection.mutable
 
@@ -57,7 +57,7 @@ class AppkitProvingInterpreter(
    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
    */
   def sign(unsignedTx: UnsignedErgoLikeTransaction,
-           boxesToSpend: IndexedSeq[ErgoBox],
+           boxesToSpend: IndexedSeq[ExtendedInputBox],
            dataBoxes: IndexedSeq[ErgoBox],
            stateContext: ErgoLikeStateContext): Try[ErgoLikeTransaction] = Try {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
@@ -70,13 +70,13 @@ class AppkitProvingInterpreter(
     val outputsCost = unsignedTx.outputCandidates.size * params.outputCost
     val initialCost: Long = inputsCost + dataInputsCost + outputsCost
 
+    val transactionContext = TransactionContext(boxesToSpend.map(_.box), dataBoxes, unsignedTx)
+
     val provedInputs = mutable.ArrayBuilder.make[Input]()
     var currentCost = initialCost
     for ((inputBox, boxIdx) <- boxesToSpend.zipWithIndex) {
       val unsignedInput = unsignedTx.inputs(boxIdx)
-      require(util.Arrays.equals(unsignedInput.boxId, inputBox.id))
-
-      val transactionContext = TransactionContext(boxesToSpend, dataBoxes, unsignedTx)
+      require(util.Arrays.equals(unsignedInput.boxId, inputBox.box.id))
 
       val context = new ErgoLikeContext(
         ErgoInterpreter.avlTreeFromDigest(stateContext.previousStateDigest),
@@ -86,14 +86,14 @@ class AppkitProvingInterpreter(
         transactionContext.boxesToSpend,
         transactionContext.spendingTransaction,
         boxIdx.toShort,
-        ContextExtension.empty,
+        inputBox.extension,
         ValidationRules.currentSettings,
         params.maxBlockCost,
         currentCost,
         (params.blockVersion - 1).toByte
       )
 
-      prove(inputBox.ergoTree, context, unsignedTx.messageToSign).mapOrThrow { proverResult =>
+      prove(inputBox.box.ergoTree, context, unsignedTx.messageToSign).mapOrThrow { proverResult =>
         currentCost += proverResult.cost
         if (currentCost > context.costLimit)
           throw new Exception(s"Cost of transaction $unsignedTx exceeds limit ${context.costLimit}")

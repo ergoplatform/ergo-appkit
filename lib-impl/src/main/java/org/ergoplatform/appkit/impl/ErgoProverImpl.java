@@ -37,7 +37,7 @@ public class ErgoProverImpl implements ErgoProver {
     @Override
     public SignedTransaction sign(UnsignedTransaction tx) {
         UnsignedTransactionImpl txImpl = (UnsignedTransactionImpl)tx;
-        IndexedSeq<ErgoBox> boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend());
+        IndexedSeq<ExtendedInputBox> boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend());
         IndexedSeq<ErgoBox> dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes());
         ErgoLikeTransaction signed =
                 _prover.sign(txImpl.getTx(), boxesToSpend, dataBoxes, txImpl.getStateContext()).get();
