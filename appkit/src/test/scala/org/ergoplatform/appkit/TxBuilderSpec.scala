@@ -6,11 +6,13 @@ import java.util.Arrays
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
 import sigmastate.eval.CBigInt
+import sigmastate.helpers.NegativeTesting
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
-  with HttpClientTesting {
+  with HttpClientTesting
+  with NegativeTesting {
 
   def createTestInput(ctx: BlockchainContext): InputBox = {
     ctx.newTxBuilder.outBoxBuilder
@@ -25,6 +27,24 @@ class TxBuilderSpec extends PropSpec with Matchers
       .build().convertToInputWith(
       "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809",
       0)
+  }
+
+  property("ContextVar id should be in range") {
+    for (id <- 0 to Byte.MaxValue) {
+      ContextVar.of(id.toByte, 10)
+    }
+
+    def checkFailed(invalidId: Int) = {
+      assertExceptionThrown(
+        ContextVar.of(invalidId.toByte, 10),
+        exceptionLike[IllegalArgumentException]("Context variable id should be in range"),
+        clue = s"id: $invalidId"
+      )
+    }
+
+    for (id <- Byte.MinValue to -1) {
+      checkFailed(id)
+    }
   }
 
   property("InputBox support context variables") {

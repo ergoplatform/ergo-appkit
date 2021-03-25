@@ -15,6 +15,12 @@ import java.util.Objects;
  * @see sigmastate.interpreter.ContextExtension
  */
 public class ContextVar {
+    /** Minimal valid id of a context variable. */
+    public static final byte MIN_ID = 0;
+
+    /** Maximal valid id of a context variable. */
+    public static final byte MAX_ID = Byte.MAX_VALUE;
+
     private final byte _id;
     private final ErgoValue<?> _value;
 
@@ -27,6 +33,9 @@ public class ContextVar {
      * @see ErgoValue
      */
     public ContextVar(byte id, ErgoValue<?> value) {
+        if (id < MIN_ID)
+            throw new IllegalArgumentException(String.format(
+                "Context variable id should be in range [0 .. $d]: %d", MAX_ID, id));
         _id = id;
         _value = value;
     }
