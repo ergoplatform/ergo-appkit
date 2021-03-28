@@ -19,7 +19,7 @@ import sigmastate.lang.Terms.ValueOps
 import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
-import java.lang.{Long => JLong, String => JString}
+import java.lang.{Byte => JByte, Short => JShort, Integer => JInt, Long => JLong, String => JString}
 import java.math.BigInteger
 import java.util.{List => JList, Map => JMap}
 
@@ -70,6 +70,21 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit def inverseIso[A,B](implicit iso: Iso[A,B]): Iso[B,A] = InverseIso[A,B](iso)
+
+  implicit val jbyteToByte: Iso[JByte, Byte] = new Iso[JByte, Byte] {
+    override def to(b: JByte): Byte = b
+    override def from(a: Byte): JByte = a
+  }
+
+  implicit val jshortToShort: Iso[JShort, Short] = new Iso[JShort, Short] {
+    override def to(b: JShort): Short = b
+    override def from(a: Short): JShort = a
+  }
+
+  implicit val jintToInt: Iso[JInt, Int] = new Iso[JInt, Int] {
+    override def to(b: JInt): Int = b
+    override def from(a: Int): JInt = a
+  }
 
   implicit val jlongToLong: Iso[JLong, Long] = new Iso[JLong, Long] {
     override def to(b: JLong): Long = b

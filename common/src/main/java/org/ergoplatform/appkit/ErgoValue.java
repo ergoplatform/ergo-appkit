@@ -66,19 +66,19 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<scala.Byte> of(byte value) {
-        return new ErgoValue(scala.Byte.box(value), ErgoType.byteType());
+        return new ErgoValue(Iso.jbyteToByte().to(Byte.valueOf(value)), ErgoType.byteType());
     }
 
-    static public ErgoValue<Short> of(short value) {
-        return new ErgoValue<>(value, ErgoType.shortType());
+    static public ErgoValue<scala.Short> of(short value) {
+        return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
     }
 
-    static public ErgoValue<Integer> of(int value) {
-        return new ErgoValue<>(value, ErgoType.integerType());
+    static public ErgoValue<scala.Int> of(int value) {
+        return new ErgoValue(Iso.jintToInt().to(Integer.valueOf(value)), ErgoType.integerType());
     }
 
-    static public ErgoValue<Long> of(long value) {
-        return new ErgoValue<>(value, ErgoType.longType());
+    static public ErgoValue<scala.Long> of(long value) {
+        return new ErgoValue(Iso.jlongToLong().to(Long.valueOf(value)), ErgoType.longType());
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
