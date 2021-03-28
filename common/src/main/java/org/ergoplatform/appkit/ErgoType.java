@@ -18,11 +18,11 @@ public class ErgoType<T> {
     private static ErgoType<scala.Int> _integer = new ErgoType(RType.IntType());
     private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
-    private static ErgoType<GroupElement> _groupElement = new ErgoType<>(JavaHelpers.GroupElementRType());
-    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType<>(JavaHelpers.SigmaPropRType());
-    private static ErgoType<AvlTree> _avlTree = new ErgoType<>(JavaHelpers.AvlTreeRType());
-    private static ErgoType<Header> _header = new ErgoType<>(JavaHelpers.HeaderRType());
-    private static ErgoType<PreHeader> _preHeader = new ErgoType<>(JavaHelpers.PreHeaderRType());
+    private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
+    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
+    private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
+    private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
+    private static ErgoType<PreHeader> _preHeader = new ErgoType(JavaHelpers.PreHeaderRType());
 
     public RType<T> getRType() {
         return _rtype;
