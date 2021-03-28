@@ -65,8 +65,8 @@ public class ErgoValue<T> {
           return false;
     }
 
-    static public ErgoValue<Byte> of(byte value) {
-        return new ErgoValue<>(value, ErgoType.byteType());
+    static public ErgoValue<scala.Byte> of(byte value) {
+        return new ErgoValue(scala.Byte.box(value), ErgoType.byteType());
     }
 
     static public ErgoValue<Short> of(short value) {
@@ -101,15 +101,19 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
 
-    static public ErgoValue<Coll<Byte>> of(byte[] arr) {
+    static public ErgoValue<Coll<scala.Byte>> of(byte[] arr) {
         Coll value = JavaHelpers.collFrom(arr);
-        ErgoType<Coll<Byte>> type = ErgoType.collType(ErgoType.byteType());
-        return new ErgoValue<Coll<Byte>>(value, type);
+        ErgoType<Coll<scala.Byte>> type = ErgoType.collType(ErgoType.byteType());
+        return new ErgoValue<Coll<scala.Byte>>(value, type);
     }
 
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
         Coll<T> value = JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
         return new ErgoValue<>(value, ErgoType.collType(tT));
+    }
+
+    static public <T> ErgoValue<Coll<T>> ofColl(Coll<T> coll, ErgoType<T> tT) {
+        return new ErgoValue<>(coll, ErgoType.collType(tT));
     }
 
     /**
