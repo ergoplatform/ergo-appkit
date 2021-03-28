@@ -1,10 +1,12 @@
 package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
+import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
 import sigmastate.serialization.ValueSerializer;
+import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
 import special.sigma.AvlTree;
 import special.sigma.BigInt;
@@ -33,6 +35,19 @@ public class ErgoValue<T> {
 
     public ErgoType<T> getType() {
         return _type;
+    }
+
+    /**
+     * Encode this value as Base16 hex string.
+     * 1) it transforms this value into {@link Values.ConstantNode} of sigma.
+     * 2) it serializes the constant into byte array using {@link sigmastate.serialization.ConstantSerializer}
+     * 3) the bytes are encoded using Base16 encoder into string
+     * @return hex string of serialized bytes
+     */
+    public String toHex() {
+        Values.EvaluatedValue<SType> c = Iso.isoErgoValueToSValue().to(this);
+        byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
+        return Base16$.MODULE$.encode(bytes);
     }
 
     @Override
