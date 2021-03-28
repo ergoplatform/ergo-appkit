@@ -112,7 +112,7 @@ public class ErgoValue<T> {
         return new ErgoValue<>(value, ErgoType.collType(tT));
     }
 
-    static public <T> ErgoValue<Coll<T>> ofColl(Coll<T> coll, ErgoType<T> tT) {
+    static public <T> ErgoValue<Coll<T>> of(Coll<T> coll, ErgoType<T> tT) {
         return new ErgoValue<>(coll, ErgoType.collType(tT));
     }
 
