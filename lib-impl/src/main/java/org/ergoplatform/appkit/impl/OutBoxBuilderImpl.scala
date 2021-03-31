@@ -8,12 +8,13 @@ import org.ergoplatform.appkit._
 
 import scala.collection.mutable.ArrayBuffer
 
-class OutBoxBuilderImpl(val _ctx: BlockchainContextImpl,
-                        val _txB: UnsignedTransactionBuilderImpl) extends OutBoxBuilder {
+class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuilder {
+  private val _ctx = _txB.getCtx.asInstanceOf[BlockchainContextImpl]
   private var _value: Long = 0
   private var _contract: ErgoContract = _
   private val _tokens = ArrayBuffer.empty[ErgoToken]
   private val _registers = ArrayBuffer.empty[ErgoValue[_]]
+  private var _creationHeightOpt: Option[Int] = None
 
   override def value(value: Long): OutBoxBuilderImpl = {
     _value = value
@@ -52,11 +53,18 @@ class OutBoxBuilderImpl(val _ctx: BlockchainContextImpl,
     this
   }
 
+  override def creationHeight(height: Int): OutBoxBuilder = {
+    _creationHeightOpt = Some(height)
+    this
+  }
+
   override def build: OutBox = {
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
     // TODO pass user specified creationHeight
-    val ergoBoxCandidate = JavaHelpers.createBoxCandidate(_value, tree, _tokens, _registers, _txB.getCtx.getHeight)
+    val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
+        _value, tree, _tokens, _registers,
+        creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
     new OutBoxImpl(_ctx, ergoBoxCandidate)
   }
 }
