@@ -25,6 +25,7 @@ import java.util.{List => JList, Map => JMap}
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
+import org.ergoplatform.appkit.Iso.{JListToColl, isoErgoTokenToPair}
 import org.ergoplatform.wallet.TokensMap
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
@@ -324,14 +325,15 @@ object JavaHelpers {
 
   def createBoxCandidate(
         value: Long, tree: ErgoTree,
-        tokens: util.List[ErgoToken],
-        registers: util.List[ErgoValue[_]], creationHeight: Int): ErgoBoxCandidate = {
+        tokens: Seq[ErgoToken],
+        registers: Seq[ErgoValue[_]], creationHeight: Int): ErgoBoxCandidate = {
     import ErgoBox.nonMandatoryRegisters
-    val nRegs = registers.size()
+    val nRegs = registers.length
     Preconditions.checkArgument(nRegs <= nonMandatoryRegisters.length,
        "Too many additional registers %d. Max allowed %d", nRegs, nonMandatoryRegisters.length)
-    val ts = tokens.convertTo[Coll[(TokenId, Long)]]
-    val rs = toIndexedSeq(registers).zipWithIndex.map { case (ergoValue, i) =>
+    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+    val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
+    val rs = registers.zipWithIndex.map { case (ergoValue, i) =>
       val id = ErgoBox.nonMandatoryRegisters(i)
       val value = Iso.isoErgoValueToSValue.to(ergoValue)
       id -> value
