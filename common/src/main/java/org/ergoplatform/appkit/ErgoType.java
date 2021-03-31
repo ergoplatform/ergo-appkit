@@ -13,27 +13,27 @@ import java.util.Objects;
  * wrapper around {@link RType} type descriptor.
  */
 public class ErgoType<T> {
-    private static ErgoType<Byte> _byte = new ErgoType<>(RType.ByteType());
-    private static ErgoType<Short> _short = new ErgoType<>(RType.ShortType());
-    private static ErgoType<Integer> _integer = new ErgoType<>(RType.IntType());
-    private static ErgoType<Long> _long = new ErgoType<>(RType.LongType());
-    private static ErgoType<BigInt> _bigInt = new ErgoType<>(JavaHelpers.BigIntRType());
-    private static ErgoType<GroupElement> _groupElement = new ErgoType<>(JavaHelpers.GroupElementRType());
-    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType<>(JavaHelpers.SigmaPropRType());
-    private static ErgoType<AvlTree> _avlTree = new ErgoType<>(JavaHelpers.AvlTreeRType());
-    private static ErgoType<Header> _header = new ErgoType<>(JavaHelpers.HeaderRType());
-    private static ErgoType<PreHeader> _preHeader = new ErgoType<>(JavaHelpers.PreHeaderRType());
+    private static ErgoType<scala.Byte> _byte = new ErgoType(RType.ByteType());
+    private static ErgoType<scala.Short> _short = new ErgoType(RType.ShortType());
+    private static ErgoType<scala.Int> _integer = new ErgoType(RType.IntType());
+    private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
+    private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
+    private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
+    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
+    private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
+    private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
+    private static ErgoType<PreHeader> _preHeader = new ErgoType(JavaHelpers.PreHeaderRType());
 
     public RType<T> getRType() {
-        return (RType<T>)_rtype;
+        return _rtype;
     }
 
-    private final RType<?> _rtype;
+    private final RType<T> _rtype;
 
     /**
      * Use static methods to create instances.
      */
-    ErgoType(RType<?> rtype) {
+    ErgoType(RType<T> rtype) {
         _rtype = rtype;
     }
 
@@ -47,13 +47,13 @@ public class ErgoType<T> {
         return (obj instanceof ErgoType<?>) && Objects.equals(_rtype, ((ErgoType<?>)obj)._rtype);
     }
 
-    static public ErgoType<Byte> byteType() { return _byte; }
+    static public ErgoType<scala.Byte> byteType() { return _byte; }
 
-    static public ErgoType<Short> shortType() { return _short; }
+    static public ErgoType<scala.Short> shortType() { return _short; }
 
-    static public ErgoType<Integer> integerType() { return _integer; }
+    static public ErgoType<scala.Int> integerType() { return _integer; }
 
-    static public ErgoType<Long> longType() { return _long; }
+    static public ErgoType<scala.Long> longType() { return _long; }
 
     static public ErgoType<BigInt> bigIntType() { return _bigInt; }
 

@@ -1,10 +1,12 @@
 package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
+import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
 import sigmastate.serialization.ValueSerializer;
+import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
 import special.sigma.AvlTree;
 import special.sigma.BigInt;
@@ -35,6 +37,19 @@ public class ErgoValue<T> {
         return _type;
     }
 
+    /**
+     * Encode this value as Base16 hex string.
+     * 1) it transforms this value into {@link Values.ConstantNode} of sigma.
+     * 2) it serializes the constant into byte array using {@link sigmastate.serialization.ConstantSerializer}
+     * 3) the bytes are encoded using Base16 encoder into string
+     * @return hex string of serialized bytes
+     */
+    public String toHex() {
+        Values.EvaluatedValue<SType> c = Iso.isoErgoValueToSValue().to(this);
+        byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
+        return Base16$.MODULE$.encode(bytes);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(_type, _value);
@@ -50,20 +65,20 @@ public class ErgoValue<T> {
           return false;
     }
 
-    static public ErgoValue<Byte> of(byte value) {
-        return new ErgoValue<>(value, ErgoType.byteType());
+    static public ErgoValue<scala.Byte> of(byte value) {
+        return new ErgoValue(Iso.jbyteToByte().to(Byte.valueOf(value)), ErgoType.byteType());
     }
 
-    static public ErgoValue<Short> of(short value) {
-        return new ErgoValue<>(value, ErgoType.shortType());
+    static public ErgoValue<scala.Short> of(short value) {
+        return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
     }
 
-    static public ErgoValue<Integer> of(int value) {
-        return new ErgoValue<>(value, ErgoType.integerType());
+    static public ErgoValue<scala.Int> of(int value) {
+        return new ErgoValue(Iso.jintToInt().to(Integer.valueOf(value)), ErgoType.integerType());
     }
 
-    static public ErgoValue<Long> of(long value) {
-        return new ErgoValue<>(value, ErgoType.longType());
+    static public ErgoValue<scala.Long> of(long value) {
+        return new ErgoValue(Iso.jlongToLong().to(Long.valueOf(value)), ErgoType.longType());
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
@@ -86,15 +101,19 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
 
-    static public ErgoValue<Coll<Byte>> of(byte[] arr) {
+    static public ErgoValue<Coll<scala.Byte>> of(byte[] arr) {
         Coll value = JavaHelpers.collFrom(arr);
-        ErgoType<Coll<Byte>> type = ErgoType.collType(ErgoType.byteType());
-        return new ErgoValue<Coll<Byte>>(value, type);
+        ErgoType<Coll<scala.Byte>> type = ErgoType.collType(ErgoType.byteType());
+        return new ErgoValue<Coll<scala.Byte>>(value, type);
     }
 
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
         Coll<T> value = JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
         return new ErgoValue<>(value, ErgoType.collType(tT));
+    }
+
+    static public <T> ErgoValue<Coll<T>> of(Coll<T> coll, ErgoType<T> tT) {
+        return new ErgoValue<>(coll, ErgoType.collType(tT));
     }
 
     /**
