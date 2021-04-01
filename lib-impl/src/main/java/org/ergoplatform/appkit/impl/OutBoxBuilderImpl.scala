@@ -61,7 +61,6 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   override def build: OutBox = {
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
-    // TODO pass user specified creationHeight
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
         _value, tree, _tokens, _registers,
         creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
