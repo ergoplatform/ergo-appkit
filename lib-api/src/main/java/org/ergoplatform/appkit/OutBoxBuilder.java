@@ -62,6 +62,16 @@ public interface OutBoxBuilder {
     OutBoxBuilder registers(ErgoValue<?>... registers);
 
     /**
+     * Configure the height when the transaction containing the box was created.
+     * This height, when explicitly specified, should not exceed height of the block,
+     * containing the transaction with this output box.
+     * By default, when this method is not used, the creationHeight is taken from the
+     * current {@link BlockchainContext} instance used by this builder.
+     * @param height specified block height
+     */
+    OutBoxBuilder creationHeight(int height);
+
+    /**
      * Creates {@link OutBox} instance using specified parameters.
      *
      * @return output box which can be {@link UnsignedTransactionBuilder#outputs(OutBox...) added}

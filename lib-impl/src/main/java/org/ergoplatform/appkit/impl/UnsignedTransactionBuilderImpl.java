@@ -181,7 +181,7 @@ public class UnsignedTransactionBuilderImpl implements UnsignedTransactionBuilde
 
     @Override
     public OutBoxBuilder outBoxBuilder() {
-        return new OutBoxBuilderImpl(_ctx, this);
+        return new OutBoxBuilderImpl(this);
     }
 
     @Override

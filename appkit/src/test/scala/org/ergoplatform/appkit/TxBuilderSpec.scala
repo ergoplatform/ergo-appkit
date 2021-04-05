@@ -15,7 +15,7 @@ class TxBuilderSpec extends PropSpec with Matchers
   with NegativeTesting {
 
   def createTestInput(ctx: BlockchainContext): InputBox = {
-    ctx.newTxBuilder.outBoxBuilder
+    val out = ctx.newTxBuilder.outBoxBuilder
       .value(30000000)
       .contract(ctx.compileContract(
         ConstantsBuilder.empty(),
@@ -24,7 +24,11 @@ class TxBuilderSpec extends PropSpec with Matchers
          |  val v10 = getVar[BigInt](10).get
          |  sigmaProp(v1.toBigInt == v10)
          |}""".stripMargin))
-      .build().convertToInputWith(
+      .build()
+      
+    out.getCreationHeight shouldBe ctx.getHeight
+
+    out.convertToInputWith(
       "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809",
       0)
   }
@@ -59,9 +63,11 @@ class TxBuilderSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(15000000)
+        .creationHeight(ctx.getHeight + 1) // just an example of using height
         .contract(ctx.compileContract(
           ConstantsBuilder.empty(),"{sigmaProp(true)}"))
         .build()
+      output.getCreationHeight shouldBe ctx.getHeight + 1
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(Arrays.asList(input))

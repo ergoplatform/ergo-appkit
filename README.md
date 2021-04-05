@@ -5,17 +5,15 @@ be removed without notice.**
 
 ## Contents
 - [Introduction](#introduction)
-- [Examples](#examples)
-    - [Using from Java](#using-from-java)
-    - [Using from JavaScript](#using-from-javascript)
-    - [Using from Python](#using-from-python)
-    - [Using from Ruby](#using-from-ruby)
+- [Using from Java](#using-from-java)
+- [Using from other languages](#using-from-other-languages)
 - [Repository organization](#repository-organization)
 - [Setup](#setup)
     - [Prerequisites](#prerequisites)
         - [Install GraalVM Community Edition on MacOS](#install-graalvm-community-edition-on-macos)
     - [Building the Appkit jar file](#building-the-appkit-jar-file)
 - [Why Polyglot](#why-polyglot)
+- [Projects that use Appkit](#projects-that-use-appkit)
 
 ## Introduction
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
@@ -70,19 +68,19 @@ Please follow the [setup instructions](#setup) to get started.
 ### Using from Java 
 
 Among other things, Appkit library allows to communicate with Ergo nodes via
-REST API. Let's see how we can write a simple Java console application (called
-[ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java))
+REST API. Let's see how we can write ErgoTool - a simple Java console application (similar to
+[ergo-tool](https://github.com/ergoplatform/ergo-tool) utility)
 which uses Appkit library. ErgoTool allows to create and send a new transaction
 to an Ergo node which, for example, can be started locally and thus available at
 `http://localhost:9052/`. Suppose we [set up a full
 node](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and started
 it using the following command.
 ```shell
-$ java -jar -Xmx4G target/scala-2.12/ergo-3.1.3.jar --testnet -c ergo-testnet.conf
+$ java -jar -Xmx4G target/scala-2.12/ergo-4.0.8.jar --testnet -c ergo-testnet.conf
 ```
 
-We will need some configuration parameters which we can load from
-[ergotool.json](ergotool.json) file which looks like this
+We will need some configuration parameters which can be loaded from
+`ergotool.json` file which looks like this
 ```json
 {
   "node": {
@@ -212,66 +210,13 @@ return signed.toJson(true);
 ```
 As the last step we serialize signed transaction into Json with turned on pretty
 printing. Please see the [full source
-code](examples/src/main/java/org/ergoplatform/example/ErgoToolJava.java) of the
+code](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examples/src/main/java/org/ergoplatform/appkit/examples/FreezeCoin.java) of the
 example.
 
-### Using from JavaScript
-
-Before running JavaScript example it my be helpful to run Java example
-first to make sure everything is set up correctly.
-
-GraalVM can [run JavaScript and
-Node.js](https://www.graalvm.org/docs/reference-manual/languages/js/)
-applications out of the box and it is compatible with the [ECMAScript 2019
-specification](http://www.ecma-international.org/ecma-262/10.0/index.html).
-Additionally, `js` and `node` launchers accept special `--jvm` and `--polyglot`
-command line options which allow JS script to access Java objects and classes.
-
-That said, a JS example of ErgoTool can be executed using Node.js
-```shell
-$ node --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
-  examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
-```
-
-Start session for debugging
-```shell
-$ node --jvm --inspect --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
-  examples/src/main/java/org/ergoplatform/example/ErgoTool.js  1000000000
-```
-
-### Using from Python
-
-Before running Python example it my be helpful to run Java example
-first to make sure everything is set up correctly.
-
-GraalVM can [run Python
-scripts](https://www.graalvm.org/docs/reference-manual/languages/python/), though
-the Python implementation is still experimental (see also
-[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/python/#python-compatibility)
-for details).
-
-[Python example of ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoTool.py) can be executed using the following command
-```shell
-$ graalpython --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar \
-  --polyglot examples/src/main/java/org/ergoplatform/example/ErgoTool.py 1900000000
-```
-
-### Using from Ruby
-
-Before running Ruby example it my be helpful to run Java example
-first to make sure everything is set up correctly.
-
-GraalVM can [run Ruby
-scripts](https://www.graalvm.org/docs/reference-manual/languages/ruby/), though
-the Ruby implementation is still experimental (see also
-[compatibility section](https://www.graalvm.org/docs/reference-manual/languages/ruby/#compatibility)
-for details).
-
-[Ruby example of ErgoTool](examples/src/main/java/org/ergoplatform/example/ErgoTool.rb) can be executed using the following command
-```shell
-$ ruby --polyglot --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar 
-    examples/src/main/java/org/ergoplatform/example/ErgoTool.rb 1900000000
-```
+## Using from other languages
+In additiona to Java, Appkit can be used to write Ergo applications in Scala, JavaScript,
+Python and Ruby and run those applications under GraalVM.
+Please see [examples](https://github.com/aslesarenko/ergo-appkit-examples).
 
 ## Repository organization
 
@@ -287,8 +232,15 @@ $ ruby --polyglot --jvm --vm.cp=target/scala-2.12/ergo-appkit-3.1.0.jar
 
 ### Prerequisites
 
-Appkit require GraalVM (Community or Enterprise edition) to be
-[downloaded](https://www.graalvm.org/downloads/) and installed. Community
+Appkit is Java/Scala library which is cross compiled by both Scala 2.11 and Scala 2.12
+compilers. As a result it can run on JVMv7 (when it is built with Scala 2.11) and JVMv8
+and above (when it is built with Scala 2.12). In addition Appkit jar built with Scala 2.11
+can be [used as a library in Android
+application](https://github.com/aslesarenko/ergo-android).
+
+For using Appkit from non-JVM languages (JS, Python, Ruby) GraalVM is required (Community
+or Enterprise edition). It can be [downloaded](https://www.graalvm.org/downloads/) and
+installed on the computer where the App is supposed to run. Community
 edition should be enough for Ergo Appkit library.
 
 #### Install GraalVM Community Edition on MacOS
@@ -366,13 +318,25 @@ interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter/pulls),
 `native-image` and can be compiled into either native application or shared library.
 
 - Appkit API interfaces can be used from JavaScript and Python by design. They
-can also be used from C/C++ (this is work in progress, and corresponding
-examples will be added later).
+can also be [used from C/C++](https://github.com/aslesarenko/ergo-appkit-examples/tree/master/c-examples) .
 
 - Appkit can be pre-compiled to native-image based launchers of both JavaScript
 and Python to enjoy fast startup and lower runtime memory
-overhead when running scripts (work in progress)
+overhead when running scripts 
 
 - Appkit native shared library can be used from Python and JavaScript through FFI
-(work in progress)
 
+## Projects that use Appkit
+
+Appkit is a foundational non-opinionated libarary which can be used to create other
+libraries, Apps and tools. Here is the list of project which are using Appkit. 
+
+- [ergo-tool](https://github.com/ergoplatform/ergo-tool)
+- [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples)
+- [ergo-android](https://github.com/aslesarenko/ergo-android)
+- [ErgoMixer](https://github.com/ergoMixer/ergoMixBack)
+- [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds)
+- [Gravity-Ergo-Proxy](https://github.com/mhssamadani/Gravity-Ergo-Proxy)
+- [Kiosk](https://github.com/scalahub/Kiosk)
+- [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo)
+- Add your project here by creating a PR

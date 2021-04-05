@@ -17,6 +17,12 @@ public interface OutBox {
     long getValue();
 
     /**
+     * The height (block number) when the transaction containing this output box was
+     * created.
+     */
+    int getCreationHeight();
+
+    /**
      * Returns a token with the given id.
      */
     ErgoToken token(ErgoId id);
