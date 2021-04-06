@@ -50,6 +50,15 @@ public interface InputBox {
      */
     InputBox withContextVars(ContextVar... variables);
 
+    /**
+     * Json representation of this transaction.
+     */
     String toJson(boolean prettyPrint);
+
+    /**
+     * Json representation of this transaction.
+     */
+    String toJson(boolean prettyPrint, boolean formatJson);
+
 }
 

@@ -74,14 +74,19 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public String toJson(boolean prettyPrint) {
-        Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
-        ErgoTransactionOutput data = _boxData;
-        if (prettyPrint) {
-            data = _ctx.getApiClient().cloneDataObject(_boxData);
-            data.ergoTree(_ergoBox.ergoTree().toString());
-        }
-        String json = gson.toJson(data);
-        return json;
+        return toJson(prettyPrint, true);
+    }
+
+    @Override
+    public String toJson(boolean prettyPrint, boolean formatJson) {
+    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
+    	ErgoTransactionOutput data = _boxData;
+    	if (prettyPrint) {
+    		data = _ctx.getApiClient().cloneDataObject(_boxData);
+    		data.ergoTree(_ergoBox.ergoTree().toString());
+    	}
+    	String json = gson.toJson(data);
+    	return json;
     }
 
     public ErgoBox getErgoBox() {

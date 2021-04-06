@@ -44,16 +44,21 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public String toJson(boolean prettyPrint) {
-        ErgoTransaction tx = ScalaBridge.isoErgoTransaction().from(_tx);
-        if (prettyPrint) {
-            tx.getOutputs().forEach(o -> {
-                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
-                o.ergoTree(tree.toString());
-            });
-        }
-        Gson gson = prettyPrint ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
-        String json = gson.toJson(tx);
-        return json;
+        return toJson(prettyPrint, true);
+    }
+
+    @Override
+    public String toJson(boolean prettyPrint, boolean formatJson) {
+    	ErgoTransaction tx = ScalaBridge.isoErgoTransaction().from(_tx);
+    	if (prettyPrint) {
+    		tx.getOutputs().forEach(o -> {
+    			Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+    			o.ergoTree(tree.toString());
+    		});
+    	}
+    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
+    	String json = gson.toJson(tx);
+    	return json;
     }
 
     @Override
