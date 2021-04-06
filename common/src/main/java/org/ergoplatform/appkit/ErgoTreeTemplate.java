@@ -64,11 +64,7 @@ public class ErgoTreeTemplate {
      * {@link ErgoTreeTemplate#applyParameters} method.
      * In general, constants of ErgoTree cannot be replaced, but every placeholder can.
      */
-	public int getParameterCount() {
-		Iso<List<Values.Constant<SType>>, IndexedSeq<Values.Constant<SType>>> iso =
-		 Iso.JListToIndexedSeq(Iso.identityIso());
-		return iso.from(_tree.constants()).size();
-	}
+    public int getParameterCount() { return _tree.constants().length(); }
 
     /**
      * Returns types of all template parameters (placeholders in the ErgoTree).
