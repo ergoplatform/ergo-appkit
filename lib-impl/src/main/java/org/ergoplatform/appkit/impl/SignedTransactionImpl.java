@@ -19,10 +19,12 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     private final BlockchainContextImpl _ctx;
     private final ErgoLikeTransaction _tx;
+    private final int _txCost;
 
-    public SignedTransactionImpl(BlockchainContextImpl ctx, ErgoLikeTransaction tx) {
+    public SignedTransactionImpl(BlockchainContextImpl ctx, ErgoLikeTransaction tx, int txCost) {
         _ctx = ctx;
         _tx = tx;
+        _txCost = txCost;
     }
 
     /**
@@ -70,5 +72,10 @@ public class SignedTransactionImpl implements SignedTransaction {
         List<InputBox> res = outputs.stream()
           .map(ergoBox -> (InputBox)new InputBoxImpl(_ctx, ergoBox)).collect(Collectors.toList());
         return res;
+    }
+
+    @Override
+    public int getCost() {
+        return _txCost;
     }
 }
