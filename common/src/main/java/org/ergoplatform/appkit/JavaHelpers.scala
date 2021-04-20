@@ -383,7 +383,24 @@ object JavaHelpers {
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
   }
 
-  def createDiffieHellmanTupleProverInput(g:EcPointType, h:EcPointType, u:EcPointType, v:EcPointType, x:BigInteger) = {
+  def createDiffieHellmanTupleProverInput(g: GroupElement,
+                                          h: GroupElement,
+                                          u: GroupElement,
+                                          v: GroupElement,
+                                          x: BigInteger): DiffieHellmanTupleProverInput = {
+    createDiffieHellmanTupleProverInput(
+      g = SigmaDsl.toECPoint(g).asInstanceOf[EcPointType],
+      h = SigmaDsl.toECPoint(h).asInstanceOf[EcPointType],
+      u = SigmaDsl.toECPoint(u).asInstanceOf[EcPointType],
+      v = SigmaDsl.toECPoint(v).asInstanceOf[EcPointType], x
+    )
+  }
+
+  def createDiffieHellmanTupleProverInput(g: EcPointType,
+                                          h: EcPointType,
+                                          u: EcPointType,
+                                          v: EcPointType,
+                                          x: BigInteger): DiffieHellmanTupleProverInput = {
     val dht = ProveDHTuple(g, h, u, v)
     DiffieHellmanTupleProverInput(x, dht)
   }
