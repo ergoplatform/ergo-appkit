@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import java.nio.charset.StandardCharsets
 
 import com.google.common.base.Preconditions.checkState
+import org.ergoplatform.SigmaConstants
 import org.ergoplatform.appkit._
 
 import scala.collection.mutable.ArrayBuffer
@@ -27,8 +28,9 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   }
 
   override def tokens(tokens: ErgoToken*): OutBoxBuilderImpl = {
-    Preconditions.checkArgument(tokens.nonEmpty,
-      "At least one token should be specified": Any)
+    require(tokens.nonEmpty, "At least one token should be specified")
+    val maxTokens = SigmaConstants.MaxTokens.value
+    require(tokens.size <= maxTokens, SigmaConstants.MaxTokens.description + s": $maxTokens")
     _tokens ++= tokens
     this
   }

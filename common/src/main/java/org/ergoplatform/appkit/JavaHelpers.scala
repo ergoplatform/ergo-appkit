@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
 
-import scala.collection.{JavaConversions, mutable}
+import scala.collection.{mutable, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
@@ -16,16 +16,17 @@ import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, Extensions}
+import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
-import java.lang.{Byte => JByte, Short => JShort, Integer => JInt, Long => JLong, String => JString}
+import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
 import java.math.BigInteger
-import java.util.{List => JList, Map => JMap}
+import java.util.{Map => JMap, List => JList}
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import org.ergoplatform.appkit.Iso.{JListToColl, isoErgoTokenToPair}
+import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
 import org.ergoplatform.wallet.TokensMap
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
@@ -33,6 +34,8 @@ import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
 import sigmastate.interpreter.CryptoConstants.EcPointType
 import scorex.util.{idToBytes, bytesToId, ModifierId}
 import sigmastate.interpreter.ContextExtension
+
+import scala.util.Try
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -408,6 +411,31 @@ object JavaHelpers {
   def createTokensMap(linkedMap: mutable.LinkedHashMap[ModifierId, Long]): TokensMap = {
     linkedMap.toMap
   }
+
+  // TODO the method below is copied from ErgoTransaction. Both of them should be moved to ergo-wallet.
+
+  /**
+   * Extracts a mapping (assets -> total amount) from a set of boxes passed as a parameter.
+   * That is, the method is checking amounts of assets in the boxes(i.e. that a box contains positive
+   * amount for an asset) and then summarize and group their corresponding amounts.
+   *
+   * @param boxes - boxes to check and extract assets from
+   * @return a mapping from asset id to to balance and total assets number
+   */
+  def extractAssets(boxes: IndexedSeq[ErgoBoxCandidate]): Try[(Map[Seq[Byte], Long], Int)] = Try {
+    val map: mutable.Map[Seq[Byte], Long] = mutable.Map[Seq[Byte], Long]()
+    val assetsNum = boxes.foldLeft(0) { case (acc, box) =>
+      require(box.additionalTokens.length <= SigmaConstants.MaxTokens.value, "too many assets in one box")
+      box.additionalTokens.foreach { case (assetId, amount) =>
+        val aiWrapped = assetId: Seq[Byte]
+        val total = map.getOrElse(aiWrapped, 0L)
+        map.put(aiWrapped, Math.addExact(total, amount))
+      }
+      acc + box.additionalTokens.size
+    }
+    map.toMap -> assetsNum
+  }
+
 }
 
 
