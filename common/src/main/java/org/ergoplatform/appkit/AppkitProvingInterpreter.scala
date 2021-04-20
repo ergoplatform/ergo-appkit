@@ -88,8 +88,20 @@ class AppkitProvingInterpreter(
 
     val transactionContext = TransactionContext(boxesToSpend.map(_.box), dataBoxes, unsignedTx)
 
-    val provedInputs = mutable.ArrayBuilder.make[Input]()
     var currentCost = startCost
+
+    val (outAssets, outAssetsNum) = JavaHelpers.extractAssets(unsignedTx.outputCandidates)
+    val (inAssets, inAssetsNum) = JavaHelpers.extractAssets(boxesToSpend.map(_.box))
+
+    val tokenAccessCost = params.tokenAccessCost
+    val totalAssetsAccessCost =
+      Math.addExact(
+        Math.multiplyExact(Math.addExact(outAssetsNum, inAssetsNum), tokenAccessCost),
+        Math.multiplyExact(Math.addExact(inAssets.size, outAssets.size), tokenAccessCost))
+    currentCost = addCost(currentCost, totalAssetsAccessCost, maxCost, "")
+
+    val provedInputs = mutable.ArrayBuilder.make[Input]()
+
     for ((inputBox, boxIdx) <- boxesToSpend.zipWithIndex) {
       val unsignedInput = unsignedTx.inputs(boxIdx)
       require(util.Arrays.equals(unsignedInput.boxId, inputBox.box.id))

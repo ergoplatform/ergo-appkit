@@ -35,8 +35,6 @@ import sigmastate.interpreter.CryptoConstants.EcPointType
 import scorex.util.{idToBytes, bytesToId, ModifierId}
 import sigmastate.interpreter.ContextExtension
 
-import scala.util.Try
-
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
   * represents the same information (entity) but in a different way.
@@ -422,7 +420,7 @@ object JavaHelpers {
    * @param boxes - boxes to check and extract assets from
    * @return a mapping from asset id to to balance and total assets number
    */
-  def extractAssets(boxes: IndexedSeq[ErgoBoxCandidate]): Try[(Map[Seq[Byte], Long], Int)] = Try {
+  def extractAssets(boxes: IndexedSeq[ErgoBoxCandidate]): (Map[Seq[Byte], Long], Int) = {
     val map: mutable.Map[Seq[Byte], Long] = mutable.Map[Seq[Byte], Long]()
     val assetsNum = boxes.foldLeft(0) { case (acc, box) =>
       require(box.additionalTokens.length <= SigmaConstants.MaxTokens.value, "too many assets in one box")
