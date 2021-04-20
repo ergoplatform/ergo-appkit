@@ -5,6 +5,7 @@ import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.Parameters;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import scala.NotImplementedError;
 import scala.Option;
 import sigmastate.basics.DLogProtocol;
 import sigmastate.basics.DiffieHellmanTupleProverInput;
@@ -111,12 +112,12 @@ public class ErgoProverBuilderImpl implements ErgoProverBuilder {
 
             @Override
             public Option<Object> softForkStartingHeight() {
-                return Option.apply(0);
+                throw new NotImplementedError();
             }
 
             @Override
             public Option<Object> softForkVotesCollected() {
-                return Option.apply(0);
+                throw new NotImplementedError();
             }
 
             @Override

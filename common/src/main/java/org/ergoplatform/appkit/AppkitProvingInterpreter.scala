@@ -9,17 +9,18 @@ import java.util.{List => JList}
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocol, SigmaProtocolPrivateInput, SigmaProtocolCommonInput, DiffieHellmanTupleProverInput}
 import org.ergoplatform._
+import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext, TransactionContext}
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
 import sigmastate.interpreter.ProverInterpreter
-
+import sigmastate.utxo.CostTable
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import scala.collection.mutable
 
 object Helpers {
   implicit class AppkitTryOps[A](val source: Try[A]) extends AnyVal {
-    import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
     def mapOrThrow[B](f: A => B): B = source.fold(t => throw t, f)
   }
 }
@@ -53,27 +54,39 @@ class AppkitProvingInterpreter(
     .filter { case _: DLogProverInput => true case _ => false}
     .map(_.asInstanceOf[DLogProverInput].publicImage)
 
+  def addCost(currentCost: Long, delta: Long, limit: Long, msg: String): Long = {
+    val newCost = Math.addExact(currentCost, delta)
+    if (newCost > limit)
+      throw new Exception(s"Cost of transaction $newCost exceeds limit $limit: $msg")
+    newCost
+  }
+
   /**
    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
    */
   def sign(unsignedTx: UnsignedErgoLikeTransaction,
            boxesToSpend: IndexedSeq[ExtendedInputBox],
            dataBoxes: IndexedSeq[ErgoBox],
-           stateContext: ErgoLikeStateContext): Try[ErgoLikeTransaction] = Try {
+           stateContext: ErgoLikeStateContext,
+           baseCost: Int): Try[ErgoLikeTransaction] = Try {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
     if (unsignedTx.dataInputs.length != dataBoxes.length) throw new Exception("Not enough data boxes")
 
     // Cost of transaction initialization: we should read and parse all inputs and data inputs,
     // and also iterate through all outputs to check rules
-    val inputsCost = boxesToSpend.size * params.inputCost
-    val dataInputsCost = dataBoxes.size * params.dataInputCost
-    val outputsCost = unsignedTx.outputCandidates.size * params.outputCost
-    val initialCost: Long = inputsCost + dataInputsCost + outputsCost
+    val initialCost = ArithUtils.addExact(
+      CostTable.interpreterInitCost,
+      Math.multiplyExact(boxesToSpend.size, params.inputCost),
+      Math.multiplyExact(dataBoxes.size, params.dataInputCost),
+      Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
+    )
+    val maxCost = params.maxBlockCost
+    val startCost = addCost(baseCost, initialCost, maxCost, msg = unsignedTx.toString())
 
     val transactionContext = TransactionContext(boxesToSpend.map(_.box), dataBoxes, unsignedTx)
 
     val provedInputs = mutable.ArrayBuilder.make[Input]()
-    var currentCost = initialCost
+    var currentCost = startCost
     for ((inputBox, boxIdx) <- boxesToSpend.zipWithIndex) {
       val unsignedInput = unsignedTx.inputs(boxIdx)
       require(util.Arrays.equals(unsignedInput.boxId, inputBox.box.id))
@@ -88,17 +101,17 @@ class AppkitProvingInterpreter(
         boxIdx.toShort,
         inputBox.extension,
         ValidationRules.currentSettings,
-        params.maxBlockCost,
-        currentCost,
-        (params.blockVersion - 1).toByte
+        costLimit = maxCost - currentCost,
+        initCost = 0,
+        activatedScriptVersion = (params.blockVersion - 1).toByte
       )
 
-      prove(inputBox.box.ergoTree, context, unsignedTx.messageToSign).mapOrThrow { proverResult =>
-        currentCost += proverResult.cost
-        if (currentCost > context.costLimit)
-          throw new Exception(s"Cost of transaction $unsignedTx exceeds limit ${context.costLimit}")
-        provedInputs += Input(unsignedInput.boxId, proverResult)
-      }
+      val proverResult = prove(inputBox.box.ergoTree, context, unsignedTx.messageToSign).getOrThrow
+      val signedInput = Input(unsignedInput.boxId, proverResult)
+
+      currentCost = addCost(currentCost, proverResult.cost, maxCost, msg = signedInput.toString())
+
+      provedInputs += signedInput
     }
 
     new ErgoLikeTransaction(provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
