@@ -63,12 +63,15 @@ class AppkitProvingInterpreter(
 
   /**
    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
+   * @param baseCost the cost accumulated before this transaction
+   * @return a new signed transaction with all inputs signed and the cost of this transaction
+   *         The returned cost doesn't include `baseCost`.
    */
   def sign(unsignedTx: UnsignedErgoLikeTransaction,
            boxesToSpend: IndexedSeq[ExtendedInputBox],
            dataBoxes: IndexedSeq[ErgoBox],
            stateContext: ErgoLikeStateContext,
-           baseCost: Int): Try[ErgoLikeTransaction] = Try {
+           baseCost: Int): Try[(ErgoLikeTransaction, Int)] = Try {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
     if (unsignedTx.dataInputs.length != dataBoxes.length) throw new Exception("Not enough data boxes")
 
@@ -114,7 +117,9 @@ class AppkitProvingInterpreter(
       provedInputs += signedInput
     }
 
-    new ErgoLikeTransaction(provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
+    val signedTx = new ErgoLikeTransaction(provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
+    val txCost = currentCost.toInt - baseCost
+    (signedTx, txCost)
   }
 
 }
