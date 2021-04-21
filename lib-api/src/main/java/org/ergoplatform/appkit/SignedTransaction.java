@@ -23,6 +23,11 @@ public interface SignedTransaction {
     String toJson(boolean prettyPrint);
 
     /**
+     * Json representation of this transaction.
+     */
+    String toJson(boolean prettyPrint, boolean formatJson);
+
+    /**
      * All signed inputs which will be spent when this transaction will be included in the blockchain.
      */
     List<SignedInput> getSignedInputs();
