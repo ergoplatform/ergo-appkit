@@ -146,6 +146,7 @@ libraryDependencies ++= Seq(
 )
 
 val apiClientDeps = Seq(
+  "com.squareup.okhttp3" % "logging-interceptor" % "3.12.0",
   "com.squareup.okhttp3" % "okhttp" % "3.12.0",
   "com.google.code.findbugs" % "jsr305" % "3.0.2",
   "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",

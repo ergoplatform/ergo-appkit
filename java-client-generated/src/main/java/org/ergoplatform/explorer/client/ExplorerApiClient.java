@@ -6,6 +6,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -77,6 +78,12 @@ public class ExplorerApiClient {
 
     if (!_hostUrl.endsWith("/"))
       _hostUrl = _hostUrl + "/";
+
+    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+    // set your desired log level
+      logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+      okBuilder.addInterceptor(logging);  // <-- this is the important line!
 
     adapterBuilder = new Retrofit
             .Builder()
