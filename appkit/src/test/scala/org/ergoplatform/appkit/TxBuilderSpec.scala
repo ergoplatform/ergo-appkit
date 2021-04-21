@@ -78,6 +78,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       // alice signing bob's box. Does not work here but works in other cases.
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
+      signed.getCost shouldBe 14685
 
       // check the signed transaction contains all the context variables
       // we attached to the input box
