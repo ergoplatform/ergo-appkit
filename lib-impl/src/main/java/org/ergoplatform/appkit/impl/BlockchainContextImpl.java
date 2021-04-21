@@ -52,7 +52,7 @@ public class BlockchainContextImpl implements BlockchainContext {
         Gson gson = getApiClient().getGson();
         ErgoTransaction txData = gson.fromJson(json, ErgoTransaction.class);
         ErgoLikeTransaction tx = ScalaBridge.isoErgoTransaction().to(txData);
-        return new SignedTransactionImpl(this, tx);
+        return new SignedTransactionImpl(this, tx, 0);
     }
 
     @Override

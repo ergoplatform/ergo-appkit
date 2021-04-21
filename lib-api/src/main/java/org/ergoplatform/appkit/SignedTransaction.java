@@ -34,5 +34,13 @@ public interface SignedTransaction {
      * a list of boxes which are ready to be included as input boxes to a new tx2.
      */
     List<InputBox> getOutputsToSpend();
+
+    /**
+     * Returns the estimated cost of this transaction.
+     * NOTE, this cost is only an approximation of the actual cost of the transaction.
+     * The actual cost may depend on the blockchain context, which may differ at the time
+     * the transaction is picked up into a block candidate.
+     */
+    int getCost();
 }
 
