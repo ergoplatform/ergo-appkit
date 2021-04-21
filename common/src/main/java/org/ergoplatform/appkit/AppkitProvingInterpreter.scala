@@ -54,7 +54,7 @@ class AppkitProvingInterpreter(
     .filter { case _: DLogProverInput => true case _ => false}
     .map(_.asInstanceOf[DLogProverInput].publicImage)
 
-  def addCost(currentCost: Long, delta: Long, limit: Long, msg: String): Long = {
+  def addCostLimited(currentCost: Long, delta: Long, limit: Long, msg: => String): Long = {
     val newCost = Math.addExact(currentCost, delta)
     if (newCost > limit)
       throw new Exception(s"Cost of transaction $newCost exceeds limit $limit: $msg")
@@ -84,7 +84,7 @@ class AppkitProvingInterpreter(
       Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
     )
     val maxCost = params.maxBlockCost
-    val startCost = addCost(baseCost, initialCost, maxCost, msg = unsignedTx.toString())
+    val startCost = addCostLimited(baseCost, initialCost, maxCost, msg = unsignedTx.toString())
 
     val transactionContext = TransactionContext(boxesToSpend.map(_.box), dataBoxes, unsignedTx)
 
@@ -98,7 +98,9 @@ class AppkitProvingInterpreter(
       Math.addExact(
         Math.multiplyExact(Math.addExact(outAssetsNum, inAssetsNum), tokenAccessCost),
         Math.multiplyExact(Math.addExact(inAssets.size, outAssets.size), tokenAccessCost))
-    currentCost = addCost(currentCost, totalAssetsAccessCost, maxCost, "")
+    currentCost = addCostLimited(currentCost,
+      delta = totalAssetsAccessCost,
+      limit = maxCost, msg = s"when adding assets cost of $totalAssetsAccessCost")
 
     val provedInputs = mutable.ArrayBuilder.make[Input]()
 
@@ -124,7 +126,7 @@ class AppkitProvingInterpreter(
       val proverResult = prove(inputBox.box.ergoTree, context, unsignedTx.messageToSign).getOrThrow
       val signedInput = Input(unsignedInput.boxId, proverResult)
 
-      currentCost = addCost(currentCost, proverResult.cost, maxCost, msg = signedInput.toString())
+      currentCost = addCostLimited(currentCost, proverResult.cost, maxCost, msg = signedInput.toString())
 
       provedInputs += signedInput
     }
