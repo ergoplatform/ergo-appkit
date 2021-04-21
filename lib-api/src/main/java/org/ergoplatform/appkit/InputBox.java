@@ -52,11 +52,23 @@ public interface InputBox {
 
     /**
      * Json representation of this transaction.
+     *
+     * @param prettyPrint if `true` then ergoTree is pretty-printed, otherwise encoded bytes
+     *                    are used.
+     * @return string with json text
      */
     String toJson(boolean prettyPrint);
 
     /**
      * Json representation of this transaction.
+     * Note, Json formatting is pretty-printed if either prettyPrint or formatJson is set
+     * to true.
+     *
+     * @param prettyPrint if `true` then ergoTree is pretty-printed, otherwise
+     *                    encoded bytes are used.
+     * @param formatJson  if `true` then json pretty printer is used to format json output.
+     *
+     * @return string with json text
      */
     String toJson(boolean prettyPrint, boolean formatJson);
 
