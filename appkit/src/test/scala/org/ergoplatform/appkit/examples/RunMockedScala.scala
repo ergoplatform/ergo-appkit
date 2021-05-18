@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit.examples
 
-import org.ergoplatform.appkit.{AppkitTesting, HttpClientTesting, SecretString, BlockchainContext}
+import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.appkit.{HttpClientTesting, SecretString, BlockchainContext}
 
 object RunMockedScala extends App with AppkitTesting with HttpClientTesting {
   val data = MockData(

@@ -3,6 +3,7 @@ package org.ergoplatform.appkit
 import java.math.BigInteger
 import java.util.Arrays
 
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
 import sigmastate.eval.CBigInt

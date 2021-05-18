@@ -9,6 +9,7 @@ import JavaHelpers._
 import java.util.{Arrays, List => JList}
 
 import org.ergoplatform.appkit.Parameters.MinFee
+import org.ergoplatform.appkit.testing.AppkitTesting
 
 class ChangeOutputSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks

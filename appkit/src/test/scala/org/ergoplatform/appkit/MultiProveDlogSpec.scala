@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._

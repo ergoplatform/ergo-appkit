@@ -1,9 +1,10 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.ErgoBox
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{EvaluatedValue, IntConstant, ByteArrayConstant}
+import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
 import sigmastate.{SType, TrivialProp}
 import sigmastate.helpers.TestingHelpers._
 
