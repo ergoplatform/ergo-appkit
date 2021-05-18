@@ -42,9 +42,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(15000000)
-        .contract(ctx.compileContract(
-          ConstantsBuilder.empty(),"{sigmaProp(true)}"))
-        .build()
+        .contract(truePropContract(ctx)).build()
       val inputs = Arrays.asList(input)
 
       // below is ergoTree of a random box picked from the block explorer.
@@ -89,7 +87,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(15000000)
-        .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}"))
+        .contract(truePropContract(ctx))
         .build()
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input)

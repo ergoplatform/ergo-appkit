@@ -65,8 +65,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val output = txB.outBoxBuilder()
         .value(15000000)
         .creationHeight(ctx.getHeight + 1) // just an example of using height
-        .contract(ctx.compileContract(
-          ConstantsBuilder.empty(),"{sigmaProp(true)}"))
+        .contract(truePropContract(ctx))
         .build()
       output.getCreationHeight shouldBe ctx.getHeight + 1
 

@@ -37,7 +37,7 @@ class DHTProverSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(10000000)
-        .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+        .contract(truePropContract(ctx)).build()
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input)
 

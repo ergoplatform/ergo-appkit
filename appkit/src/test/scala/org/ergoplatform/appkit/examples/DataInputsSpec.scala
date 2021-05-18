@@ -36,7 +36,9 @@ class DataInputsSpec extends PropSpec with Matchers
 
       val txB = ctx.newTxBuilder()
 
-      val dummyOutput = txB.outBoxBuilder().value(10000000).contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+      val dummyOutput = txB.outBoxBuilder()
+        .value(10000000)
+        .contract(truePropContract(ctx)).build()
 
       val inputs = new java.util.ArrayList[InputBox]()
 
@@ -70,7 +72,9 @@ class DataInputsSpec extends PropSpec with Matchers
 
       val txB = ctx.newTxBuilder()
 
-      val dummyOutput = txB.outBoxBuilder().value(10000000).contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+      val dummyOutput = txB.outBoxBuilder()
+        .value(10000000)
+        .contract(truePropContract(ctx)).build()
 
       val inputs = new java.util.ArrayList[InputBox]()
       val dataInputs = new java.util.ArrayList[InputBox]()
@@ -106,7 +110,9 @@ class DataInputsSpec extends PropSpec with Matchers
 
       val txB = ctx.newTxBuilder()
 
-      val dummyOutput = txB.outBoxBuilder().value(10000000).contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+      val dummyOutput = txB.outBoxBuilder()
+        .value(10000000)
+        .contract(truePropContract(ctx)).build()
 
       val inputs = new java.util.ArrayList[InputBox]()
       val dataInputs = new java.util.ArrayList[InputBox]()

@@ -40,7 +40,7 @@ class MultiProveDlogSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(20000000)
-        .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+        .contract(truePropContract(ctx)).build()
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input1)
       inputs.add(input2)
