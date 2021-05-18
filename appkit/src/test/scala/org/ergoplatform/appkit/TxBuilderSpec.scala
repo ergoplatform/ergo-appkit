@@ -118,4 +118,34 @@ class TxBuilderSpec extends PropSpec with Matchers
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
+  
+  property("non-standard fee contract") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val txB = ctx.newTxBuilder()
+      val input = txB.outBoxBuilder()
+        .value(30000000)
+        .contract(truePropContract(ctx))
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      val output = txB.outBoxBuilder()
+        .value(29000000)
+        .contract(truePropContract(ctx)).build()
+      val feeOut = txB.outBoxBuilder()
+        .value(1000000)
+        .contract(truePropContract(ctx))
+        .build()
+
+      val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
+
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output, feeOut)
+        .sendChangeTo(changeAddr)
+        .build()
+      val prover = ctx.newProverBuilder().build()
+      val signed = prover.sign(unsigned)
+
+      signed.getOutputsToSpend.size() shouldBe 2
+    }
+  }
 }
