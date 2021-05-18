@@ -25,7 +25,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
   private var _inputBoxes: List[InputBoxImpl] = null
   private var _dataInputBoxes: List[InputBoxImpl] = new ArrayList[InputBoxImpl]
   private val _tokensToBurn: List[ErgoToken] = new ArrayList[ErgoToken]
-  private var _feeAmount = 0L
+  private var _feeAmount: Option[Long] = None
   private var _changeAddress: ErgoAddress = null
   private var _ph: PreHeaderImpl = null
 
@@ -59,8 +59,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
   }
 
   override def fee(feeAmount: Long): UnsignedTransactionBuilder = {
-    require(_feeAmount == 0, "Fee already defined")
-    _feeAmount = feeAmount
+    require(_feeAmount.isEmpty, "Fee already defined")
+    _feeAmount = Some(feeAmount)
     this
   }
 
@@ -85,15 +85,15 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
     val dataInputBoxes = _dataInputBoxes.map(b => b.getErgoBox)
     val dataInputs = JavaHelpers.toIndexedSeq(_dataInputs)
-    require(_feeAmount > 0, "Fee amount should be defined (using fee() method).")
-    require(_feeAmount >= MinFee, "Fee amount should be >= " + MinFee + ", got " + _feeAmount)
+    require(_feeAmount.isEmpty || _feeAmount.get >= MinFee,
+      s"When fee amount is defined it should be >= $MinFee, got ${_feeAmount.get}")
     require(_changeAddress != null, "Change address is not defined")
     val outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates)
     val inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend.map(eb => eb.box))
     val burnTokens = JavaHelpers.createTokensMap(Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn))
     val tx = TransactionBuilder.buildUnsignedTx(
       inputs = inputBoxes, dataInputs = dataInputs, outputCandidates = outputCandidates,
-      currentHeight = _ctx.getHeight, feeAmount = _feeAmount,
+      currentHeight = _ctx.getHeight, createFeeOutput = _feeAmount,
       changeAddress = _changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = Parameters.MinerRewardDelay, burnTokens = burnTokens,
       boxSelector = DefaultBoxSelector).get
