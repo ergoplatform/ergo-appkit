@@ -12,7 +12,7 @@ class OutBoxImpl(_ctx: BlockchainContextImpl,
 
   override def token(id: ErgoId): ErgoToken = null
 
-  private[impl] def getErgoBoxCandidate = _ergoBoxCandidate
+  private[impl] def getErgoBoxCandidate: ErgoBoxCandidate = _ergoBoxCandidate
 
   override def convertToInputWith(txId: String, boxIndex: Short) = {
     val box = _ergoBoxCandidate.toBox(ModifierId @@ txId, boxIndex)

@@ -237,6 +237,12 @@ object JavaHelpers {
     def toErgoTree: ErgoTree = decodeStringToErgoTree(base16)
   }
 
+  implicit class ListOps[A](val xs: JList[A]) extends AnyVal {
+    def map[B](f: A => B): JList[B] = {
+      xs.convertTo[IndexedSeq[A]].map(f).convertTo[JList[B]]
+    }
+  }
+
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType

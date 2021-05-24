@@ -3,6 +3,8 @@ package org.ergoplatform.appkit
 import java.math.BigInteger
 import java.util.Arrays
 
+import org.ergoplatform.ErgoScriptPredef
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
 import sigmastate.eval.CBigInt
@@ -13,6 +15,8 @@ class TxBuilderSpec extends PropSpec with Matchers
   with AppkitTesting
   with HttpClientTesting
   with NegativeTesting {
+
+  val mockTxId = "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809"
 
   def createTestInput(ctx: BlockchainContext): InputBox = {
     val out = ctx.newTxBuilder.outBoxBuilder
@@ -25,12 +29,9 @@ class TxBuilderSpec extends PropSpec with Matchers
          |  sigmaProp(v1.toBigInt == v10)
          |}""".stripMargin))
       .build()
-      
-    out.getCreationHeight shouldBe ctx.getHeight
 
-    out.convertToInputWith(
-      "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809",
-      0)
+    out.getCreationHeight shouldBe ctx.getHeight
+    out.convertToInputWith(mockTxId, 0)
   }
 
   property("ContextVar id should be in range") {
@@ -64,8 +65,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val output = txB.outBoxBuilder()
         .value(15000000)
         .creationHeight(ctx.getHeight + 1) // just an example of using height
-        .contract(ctx.compileContract(
-          ConstantsBuilder.empty(),"{sigmaProp(true)}"))
+        .contract(truePropContract(ctx))
         .build()
       output.getCreationHeight shouldBe ctx.getHeight + 1
 
@@ -87,6 +87,65 @@ class TxBuilderSpec extends PropSpec with Matchers
         extensions.containsKey(cv.getId) shouldBe true
         extensions.get(cv.getId) shouldBe cv.getValue
       }
+    }
+  }
+
+  property("Transaction builder can bypass creating feeOut box") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val txB = ctx.newTxBuilder()
+      val input = txB.outBoxBuilder()
+        .value(30000000)
+        .contract(truePropContract(ctx))
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      val output = txB.outBoxBuilder()
+        .value(29000000)
+        .contract(truePropContract(ctx)).build()
+      val feeOut = txB.outBoxBuilder()
+        .value(1000000)
+        .contract(ctx.newContract(ErgoScriptPredef.feeProposition()))
+        .build()
+
+      val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output, feeOut)
+        .sendChangeTo(changeAddr)
+        .build()
+      val prover = ctx.newProverBuilder().build()
+      val signed = prover.sign(unsigned)
+
+      signed.getOutputsToSpend.size() shouldBe 2
+    }
+  }
+  
+  property("non-standard fee contract") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val txB = ctx.newTxBuilder()
+      val input = txB.outBoxBuilder()
+        .value(30000000)
+        .contract(truePropContract(ctx))
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      val output = txB.outBoxBuilder()
+        .value(29000000)
+        .contract(truePropContract(ctx)).build()
+      val feeOut = txB.outBoxBuilder()
+        .value(1000000)
+        .contract(truePropContract(ctx))
+        .build()
+
+      val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
+
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output, feeOut)
+        .sendChangeTo(changeAddr)
+        .build()
+      val prover = ctx.newProverBuilder().build()
+      val signed = prover.sign(unsigned)
+
+      signed.getOutputsToSpend.size() shouldBe 2
     }
   }
 }

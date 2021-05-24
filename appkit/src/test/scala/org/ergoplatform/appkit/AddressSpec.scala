@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
