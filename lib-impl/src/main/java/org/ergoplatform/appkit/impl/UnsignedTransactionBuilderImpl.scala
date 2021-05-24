@@ -83,14 +83,26 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
-  def checkNonEmpty[T](list: Option[List[T]], msg: => String) = {
-    require(list.isDefined && !list.get.isEmpty, msg)
+  def getNonEmpty[T](list: Option[List[T]], msg: => String): List[T] = {
+    list match {
+      case Some(list) if !list.isEmpty => list
+      case _ =>
+        throw new IllegalArgumentException("requirement failed: "+ msg)
+    }
+  }
+
+  def getDefined[T](opt: Option[T], msg: => String): T = {
+    opt match {
+      case Some(x) => x
+      case _ =>
+        throw new IllegalArgumentException("requirement failed: "+ msg)
+    }
   }
 
   override def build: UnsignedTransaction = {
-    checkNonEmpty(_inputBoxes, "Input boxes are not specified")
-    checkNonEmpty(_outputCandidates, "Output boxes are not specified")
-    val boxesToSpend = _inputBoxes.get
+    val inputBoxes = getInputBoxesImpl
+    val outputCandidates = getNonEmpty(_outputCandidates, "Output boxes are not specified")
+    val boxesToSpend = inputBoxes
       .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
     val dataInputBoxes = _dataInputBoxes
        .getOrElse(new util.ArrayList[InputBoxImpl]())
@@ -98,16 +110,16 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     val dataInputs = JavaHelpers.toIndexedSeq(_dataInputs)
     require(_feeAmount.isEmpty || _feeAmount.get >= MinFee,
       s"When fee amount is defined it should be >= $MinFee, got ${_feeAmount.get}")
-    require(_changeAddress.isDefined, "Change address is not defined")
-    val outputCandidates = JavaHelpers.toIndexedSeq(_outputCandidates.get)
-    val inputBoxes = JavaHelpers.toIndexedSeq(boxesToSpend.map(eb => eb.box))
+    val changeAddress = getDefined(_changeAddress, "Change address is not defined")
+    val outputCandidatesSeq = JavaHelpers.toIndexedSeq(outputCandidates)
+    val inputBoxesSeq = JavaHelpers.toIndexedSeq(boxesToSpend.map(eb => eb.box))
     val burnTokens = JavaHelpers.createTokensMap(
       Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn.getOrElse(new ArrayList[ErgoToken]))
     )
     val tx = TransactionBuilder.buildUnsignedTx(
-      inputs = inputBoxes, dataInputs = dataInputs, outputCandidates = outputCandidates,
+      inputs = inputBoxesSeq, dataInputs = dataInputs, outputCandidates = outputCandidatesSeq,
       currentHeight = _ctx.getHeight, createFeeOutput = _feeAmount,
-      changeAddress = _changeAddress.get, minChangeValue = MinChangeValue,
+      changeAddress = changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = Parameters.MinerRewardDelay, burnTokens = burnTokens,
       boxSelector = DefaultBoxSelector).get
     val stateContext = createErgoLikeStateContext
@@ -142,7 +154,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def getNetworkType: NetworkType = _ctx.getNetworkType
 
+  private def getInputBoxesImpl: List[InputBoxImpl] =
+    getNonEmpty(_inputBoxes, "Input boxes are not specified")
+
   override def getInputBoxes: List[InputBox] =
-    _inputBoxes.get.stream.collect(Collectors.toList[InputBox])
+    getInputBoxesImpl.stream.collect(Collectors.toList[InputBox])
 }
 
