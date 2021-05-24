@@ -11,7 +11,7 @@ import sigmastate.serialization.ValueSerializer
 import sigmastate.serialization.generators.ObjectGenerators
 
 class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
-  with AppkitTesting with ObjectGenerators {
+  with AppkitTestingCommon with ObjectGenerators {
 
   def Coll[T](items: T*)(implicit cT: RType[T]) = SigmaDsl.Colls.fromItems(items:_*)
 

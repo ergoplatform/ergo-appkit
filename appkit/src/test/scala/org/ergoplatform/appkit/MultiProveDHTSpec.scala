@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
@@ -48,7 +49,7 @@ class MultiProveDHTSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder()
       val output = txB.outBoxBuilder()
         .value(20000000)
-        .contract(ctx.compileContract(ConstantsBuilder.empty(),"{sigmaProp(true)}")).build()
+        .contract(truePropContract(ctx)).build()
       val inputs = new java.util.ArrayList[InputBox]()
       inputs.add(input1)
       inputs.add(input2)

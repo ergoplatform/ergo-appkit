@@ -5,6 +5,7 @@ import java.util
 import org.ergoplatform.appkit.BoxOperations.{createProver, loadTop, putToContractTx}
 import org.ergoplatform.appkit.ErgoContracts.sendToPK
 import org.ergoplatform.appkit.Parameters.MinFee
+import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
