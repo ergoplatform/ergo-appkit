@@ -1,8 +1,5 @@
 # Appkit: A Library for Polyglot Development of Ergo Applications 
 
-**NOTE: The code in Appkit is experimental. All APIs may change and/or
-be removed without notice.**
-
 ## Contents
 - [Introduction](#introduction)
 - [Using from Java](#using-from-java)
@@ -18,20 +15,27 @@ be removed without notice.**
 ## Introduction
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
 contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
-blockchain architecture Ergo provides advanced contractual capabilities, which
-are not possible in Bitcoin.
+blockchain architecture Ergo provides advanced contractual capabilities based on
+eUTXO model, which are not possible in Bitcoin.
 
 Because of these capabilities numerous decentralized applications become
-possible(see [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf),
+possible (see also [ErgoScript](https://ergoplatform.org/docs/ErgoScript.pdf) and
 [Advanced ErgoScript
-examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf),
-[CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/),
-[Auctions On Ergo](https://www.ergoforum.org/t/auctions-on-ergo/122),
-[Interest-Free Loan
-Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc). Ergo
-applications can avoid centralization of trust and instead rely on trust-less
-truly decentralized protocols which are implemented using Ergo contracts
-deployed on Ergo blockchain.
+examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)):
+ - [SigmaUSD](https://sigmausd.io/) - the first UTxO-based stable coin.
+ - [ErgoMixer](https://github.com/ergoMixer/ergoMixBack) - The first working
+ non-custodial, programmable, non-interactive mixer in the cryptocurrency space.
+ - [ErgoAuctions](https://ergoauctions.org) - a decentralized auction house,
+ secure and easy to use. A simple way to sell or buy Ergo's tokens, artworks,
+ NFTs, etc.
+- [ErgoDex](https://ergodex.io/) - Decentralized exchange on Ergo and Cardano
+- [CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/),
+- [Interest-Free Loan
+Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc). 
+
+Ergo Applications can avoid centralization of trust and instead rely on
+trust-less truly decentralized protocols which are implemented using Ergo
+contracts deployed on Ergo blockchain.
 
 By its very nature, Ergo applications are both decentralized and cross-platform
 ranging from web applications running in browsers, mobile applications running
@@ -41,16 +45,19 @@ to services deployed in cloud servers.
 That said, it is very desirable to provide consistent programming model and APIs
 to facilitate all those application scenarios and platforms.
 
-Appkit library is based on [GraalVM](https://www.graalvm.org) - a novel next
-generation approach to implement software which is reusable across several
-programming languages and execution environments (see [motivation for using
-Graal](#why-graal) below).
-
-Appkit has idiomatic Java API and is written in Java/Scala. It is a thin wrapper
-around core components provided by [ErgoScript
+Ergo Appkit has idiomatic Java API and is written in Java/Scala. It is a thin
+wrapper around core components provided by [ErgoScript
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter) and
 [Ergo protocol](https://github.com/ergoplatform/ergo) implementations which are
-written in Scala.
+written in Scala. It is
+[published](https://mvnrepository.com/artifact/org.ergoplatform/ergo-appkit) on
+maven repository and cross compiled to both Java 7 and Java 8+ jars.
+
+The Appkit library is compatible with [GraalVM](https://www.graalvm.org) - a
+novel next generation approach to implement software which is reusable across
+several programming languages and execution environments. For example if Node.js
+application is run on GraalVM, then it can use Appkit to interact with Ergo
+Blockchain (see [motivation for using Graal](#why-graal) below). 
 
 Using Appkit Ergo applications can be written in one of the languages supported
 by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using this
@@ -59,7 +66,9 @@ programming model provided by Appkit. In addition Appkit based Ergo applications
 can be compiled into native code using [native-image ahead of time
 compiler](https://www.graalvm.org/docs/reference-manual/native-image/) and then
 executed without Java VM with very fast startup time and lower runtime memory
-overhead compared to a Java VM.
+overhead compared to a Java VM. For example this allows to create very
+responsive command line utility applications such as
+[ergo-tool](https://github.com/ergoplatform/ergo-tool).
 
 Please follow the [setup instructions](#setup) to get started.
 
@@ -68,11 +77,12 @@ Please follow the [setup instructions](#setup) to get started.
 ### Using from Java 
 
 Among other things, Appkit library allows to communicate with Ergo nodes via
-REST API. Let's see how we can write ErgoTool - a simple Java console application (similar to
+[REST API](https://github.com/ergoplatform/ergo/blob/master/src/main/resources/api/openapi.yaml). 
+Let's see how we can write ErgoTool - a simple Java console application (similar to
 [ergo-tool](https://github.com/ergoplatform/ergo-tool) utility)
 which uses Appkit library. ErgoTool allows to create and send a new transaction
-to an Ergo node which, for example, can be started locally and thus available at
-`http://localhost:9052/`. Suppose we [set up a full
+to an any existing Ergo node on the network which. A new node can also be started
+locally and thus available at `http://localhost:9052/`. Suppose we [set up a full
 node](https://github.com/ergoplatform/ergo/wiki/Set-up-a-full-node) and started
 it using the following command.
 ```shell
@@ -80,12 +90,12 @@ $ java -jar -Xmx4G target/scala-2.12/ergo-4.0.8.jar --testnet -c ergo-testnet.co
 ```
 
 We will need some configuration parameters which can be loaded from
-`ergotool.json` file which looks like this
+[ergotool.json](ergotool.json) file which looks like this
 ```json
 {
   "node": {
     "nodeApi": {
-      "apiUrl": "http://localhost:9051/",
+      "apiUrl": "http://139.59.29.87:9053",
       "apiKey": "82344a18c24adc42b78f52c58facfdf19c8cc38858a5f22e68070959499076e1"
     },
     "wallet": {
@@ -93,15 +103,22 @@ We will need some configuration parameters which can be loaded from
       "password": "",
       "mnemonicPassword": ""
     },
-    "networkType": "TESTNET"
+    "networkType": "MAINNET"
+  },
+  "parameters": {
+    "newBoxSpendingDelay": "30"
   }
 }
 ```
+
 Here `apiKey` is the secret key required for API authentication which can be
 obtained as described
 [here](https://github.com/ergoplatform/ergo/wiki/Ergo-REST-API#setting-an-api-key).
 And mnemonic is the secret phrase obtained during [setup of a new
-wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation).
+wallet](https://github.com/ergoplatform/ergo/wiki/Wallet-documentation) or if
+you don't want to setup your node using ergo-tool's
+[mnemonic](https://github.com/ergoplatform/ergo-tool#supported-commands)
+command.
 
 Our example app also reads the amount of NanoErg to put into a new box from command line arguments
 ```java
