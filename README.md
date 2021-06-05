@@ -9,7 +9,7 @@
     - [Prerequisites](#prerequisites)
         - [Install GraalVM Community Edition on MacOS](#install-graalvm-community-edition-on-macos)
     - [Building the Appkit jar file](#building-the-appkit-jar-file)
-- [Why Polyglot](#why-polyglot)
+- [Why Polyglot](#how-graalvm-can-be-used)
 - [Projects that use Appkit](#projects-that-use-appkit)
 
 ## Introduction
@@ -29,9 +29,9 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)):
  secure and easy to use. A simple way to sell or buy Ergo's tokens, artworks,
  NFTs, etc.
 - [ErgoDex](https://ergodex.io/) - Decentralized exchange on Ergo and Cardano
-- [CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/),
+- [CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/) - a way of raising capital through the collective efforts of individuals
 - [Interest-Free Loan
-Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc). 
+Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc.
 
 Ergo Applications can avoid centralization of trust and instead rely on
 trust-less truly decentralized protocols which are implemented using Ergo
