@@ -181,7 +181,7 @@ that box.
 
 ```java
 // the only way to create transaction is using builder obtained from the context
-// the builder keeps relationship with the context to access nessary blockchain data.
+// the builder keeps relationship with the context to access necessary blockchain data.
 UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
 // create new box using new builder obtained from the transaction builder
@@ -202,16 +202,16 @@ If no such constants are used, then `ConstantsBuilder.empty()` can be passed.
 
 In this specific case we pass public key of the `prover` for `pkOwner` 
 placeholder of the script meaning the box can be spend only by the owner of the
-Ergo node we are working with. 
+public key from the `wallet` section of [ergotool.json](ergotool.json). 
 
-Next create an unsigned transaction using all the data collected so far.
+Next we create an unsigned transaction using all the data collected so far.
 ```java
 // tell transaction builder which boxes we are going to spend, which outputs
 // to create, amount of transaction fees and address for change coins.
 UnsignedTransaction tx = txB.boxesToSpend(boxes.get())
         .outputs(newBox)
         .fee(Parameters.MinFee)
-        .sendChangeTo(prover.getP2PKAddress())
+        .sendChangeTo(prover.getP2PKAddress()) // i.e. back to the wallet's pk
         .build();
 ```
 
@@ -223,7 +223,7 @@ is not really used here.
 ```java
 SignedTransaction signed = prover.sign(tx);
 String txId = ctx.sendTransaction(signed);
-return signed.toJson(true);
+return signed.toJson(/*prettyPrint=*/true, /*formatJson=*/true);
 ```
 As the last step we serialize signed transaction into Json with turned on pretty
 printing. Please see the [full source
@@ -232,7 +232,8 @@ example.
 
 ## Using from other languages
 In additiona to Java, Appkit can be used to write Ergo applications in Scala, JavaScript,
-Python and Ruby and run those applications under GraalVM.
+Python and Ruby and run those applications under GraalVM, which support cross
+language interoperability.
 Please see [examples](https://github.com/aslesarenko/ergo-appkit-examples).
 
 ## Repository organization
@@ -264,8 +265,8 @@ edition should be enough for Ergo Appkit library.
 
 First you need to download an archive with the [latest
 release](https://github.com/oracle/graal/releases) of GraalVM (e.g.
-`graalvm-ce-darwin-amd64-19.2.1.tar.gz`) for MacOS and put the programs from it
-onto the `$PATH`.
+`graalvm-ce-darwin-amd64-19.2.1.tar.gz` at the time of writing) for MacOS and
+put the programs from it onto the `$PATH`.
 
 ```shell
 $ cd <your/directory/with/downloaded/graal>
@@ -296,8 +297,10 @@ GraalVM JavaScript (GraalVM CE Native 19.2.1)
 
 ### Building the Appkit jar file
 
-At the moment Appkit is not published at public servers, so the whole repository
-needs to be clonned and Appkit jar file published locally in the Ivy repository.
+Appkit is
+[published](https://mvnrepository.com/artifact/org.ergoplatform/ergo-appkit),
+however, you can clone the whole repository build it and published locally in
+the Ivy repository.
 
 ```shell
 $ git clone https://github.com/ergoplatform/ergo-appkit.git
@@ -305,7 +308,7 @@ $ cd ergo-appkit
 $ sbt publishLocal 
 ```
 
-## Why Polyglot?
+## How GraalVM can be used?
 
 After many years of research and development GraalVM project has matured enough end
 became [production ready](https://medium.com/graalvm/announcing-graalvm-19-4590cf354df8).
@@ -331,8 +334,9 @@ languages.
 
 - All the code from [ErgoScript
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter/pulls),
-[ergo-wallet](https://github.com/ergoplatform/ergo-wallet) and this Appkit is compatible with
-`native-image` and can be compiled into either native application or shared library.
+[ergo-wallet](https://github.com/ergoplatform/ergo-wallet) and this Appkit
+library is compatible with `native-image` and can be compiled into either native
+application or shared library.
 
 - Appkit API interfaces can be used from JavaScript and Python by design. They
 can also be [used from C/C++](https://github.com/aslesarenko/ergo-appkit-examples/tree/master/c-examples) .
@@ -346,14 +350,15 @@ overhead when running scripts
 ## Projects that use Appkit
 
 Appkit is a foundational non-opinionated libarary which can be used to create other
-libraries, Apps and tools. Here is the list of project which are using Appkit. 
+libraries, Apps and tools. Here is the list of projects which use Appkit. 
 
-- [ergo-tool](https://github.com/ergoplatform/ergo-tool)
-- [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples)
-- [ergo-android](https://github.com/aslesarenko/ergo-android)
-- [ErgoMixer](https://github.com/ergoMixer/ergoMixBack)
-- [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds)
-- [Gravity-Ergo-Proxy](https://github.com/mhssamadani/Gravity-Ergo-Proxy)
-- [Kiosk](https://github.com/scalahub/Kiosk)
-- [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo)
+- [ergo-tool](https://github.com/ergoplatform/ergo-tool) - a Command Line Interface application for Ergo
+- [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples) - Ergo Appkit Examples
+- [ergo-android](https://github.com/aslesarenko/ergo-android) - Example Android application 
+- [ErgoMixer](https://github.com/ergoMixer/ergoMixBack) - a web application for mixing ergs and tokens based on Ergo platform
+- [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds) - Run contracts + off-chain code in the browser
+- [Gravity-Ergo-Proxy](https://github.com/mhssamadani/Gravity-Ergo-Proxy) - Wrapper of Ergo Node to work with Gravity.tech
+- [ergo-jde](https://github.com/ergoplatform/ergo-jde) - JSON dApp Environment (JDE)
+- [Kiosk](https://github.com/scalahub/Kiosk) - a library on top of Ergo-Appkit for interacting with the Ergo Blockchain
+- [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo) - a non-interactive (and non-custodial) mixing scheme on top of the Ergo Platform blockchain
 - Add your project here by creating a PR
