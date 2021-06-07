@@ -119,10 +119,10 @@ public class NodeInfo {
   private Long launchTime = null;
 
   @SerializedName("headersScore")
-  private Integer headersScore = null;
+  private BigInteger headersScore = null;
 
   @SerializedName("fullBlocksScore")
-  private Integer fullBlocksScore = null;
+  private BigInteger fullBlocksScore = null;
 
   @SerializedName("genesisBlockId")
   private String genesisBlockId = null;
@@ -424,7 +424,7 @@ public class NodeInfo {
     this.launchTime = launchTime;
   }
 
-  public NodeInfo headersScore(Integer headersScore) {
+  public NodeInfo headersScore(BigInteger headersScore) {
     this.headersScore = headersScore;
     return this;
   }
@@ -434,15 +434,15 @@ public class NodeInfo {
    * @return headersScore
   **/
   @Schema(required = true, description = "Can be 'null' if no headers is applied since node launch")
-  public Integer getHeadersScore() {
+  public BigInteger getHeadersScore() {
     return headersScore;
   }
 
-  public void setHeadersScore(Integer headersScore) {
+  public void setHeadersScore(BigInteger headersScore) {
     this.headersScore = headersScore;
   }
 
-  public NodeInfo fullBlocksScore(Integer fullBlocksScore) {
+  public NodeInfo fullBlocksScore(BigInteger fullBlocksScore) {
     this.fullBlocksScore = fullBlocksScore;
     return this;
   }
@@ -452,11 +452,11 @@ public class NodeInfo {
    * @return fullBlocksScore
   **/
   @Schema(required = true, description = "Can be 'null' if no full block is applied since node launch")
-  public Integer getFullBlocksScore() {
+  public BigInteger getFullBlocksScore() {
     return fullBlocksScore;
   }
 
-  public void setFullBlocksScore(Integer fullBlocksScore) {
+  public void setFullBlocksScore(BigInteger fullBlocksScore) {
     this.fullBlocksScore = fullBlocksScore;
   }
 
