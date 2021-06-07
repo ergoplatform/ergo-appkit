@@ -12,6 +12,7 @@
 
 package org.ergoplatform.restapi.client;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Arrays;
 import com.google.gson.TypeAdapter;
@@ -109,7 +110,7 @@ public class NodeInfo {
   private Integer unconfirmedCount = null;
 
   @SerializedName("difficulty")
-  private Integer difficulty = null;
+  private BigInteger difficulty = null;
 
   @SerializedName("currentTime")
   private Long currentTime = null;
@@ -368,7 +369,7 @@ public class NodeInfo {
     this.unconfirmedCount = unconfirmedCount;
   }
 
-  public NodeInfo difficulty(Integer difficulty) {
+  public NodeInfo difficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
     return this;
   }
@@ -379,11 +380,11 @@ public class NodeInfo {
    * @return difficulty
   **/
   @Schema(example = "667", required = true, description = "Difficulty on current bestFullHeaderId. Can be 'null' if no full block is applied since node launch")
-  public Integer getDifficulty() {
+  public BigInteger getDifficulty() {
     return difficulty;
   }
 
-  public void setDifficulty(Integer difficulty) {
+  public void setDifficulty(BigInteger difficulty) {
     this.difficulty = difficulty;
   }
 

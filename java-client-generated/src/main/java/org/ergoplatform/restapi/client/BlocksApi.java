@@ -1,11 +1,20 @@
-package org.ergoplatform.restapi.client;
+package org.ergoplatform.restapi.client;//retrofit2
+
+import org.ergoplatform.restapi.client.CollectionFormats.*;
 
 import retrofit2.Call;
 import retrofit2.http.*;
 
-import java.math.BigDecimal;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
-import java.util.List;
+import org.ergoplatform.restapi.client.ApiError;
+import java.math.BigDecimal;
+import org.ergoplatform.restapi.client.BlockHeader;
+import org.ergoplatform.restapi.client.BlockTransactions;
+import org.ergoplatform.restapi.client.FullBlock;
+import org.ergoplatform.restapi.client.MerkleProof;
+
 
 public interface BlocksApi {
   /**
@@ -100,14 +109,14 @@ public interface BlocksApi {
 
   /**
    * Get Merkle proof for transaction
-   *
+   * 
    * @param headerId ID of a wanted block transactions (required)
    * @param txId ID of a wanted transaction (required)
    * @return Call&lt;MerkleProof&gt;
    */
   @GET("blocks/{headerId}/proofFor/{txId}")
   Call<MerkleProof> getProofForTx(
-            @retrofit2.http.Path("headerId") String headerId            ,         @retrofit2.http.Path("txId") String txId
+            @retrofit2.http.Path("headerId") String headerId            ,         @retrofit2.http.Path("txId") String txId            
   );
 
   /**
