@@ -13,35 +13,39 @@
 package org.ergoplatform.restapi.client;
 
 import java.util.Objects;
-
+import java.util.Arrays;
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import java.io.IOException;
 /**
- * Body4
+ * Body5
  */
 
 
-public class Body4 {
-  @SerializedName("address")
-  private String address = null;
+public class Body5 {
+  @SerializedName("derivationPath")
+  private String derivationPath = null;
 
-  public Body4 address(String address) {
-    this.address = address;
+  public Body5 derivationPath(String derivationPath) {
+    this.derivationPath = derivationPath;
     return this;
   }
 
    /**
-   * Pay2PubKey address
-   * @return address
+   * Derivation path for a new secret to derive
+   * @return derivationPath
   **/
-  @Schema(example = "3WzCFq7mkykKqi4Ykdk8BK814tkh6EsPmA42pQZxU2NRwSDgd6yB", required = true, description = "Pay2PubKey address")
-  public String getAddress() {
-    return address;
+  @Schema(example = "m/1/2", required = true, description = "Derivation path for a new secret to derive")
+  public String getDerivationPath() {
+    return derivationPath;
   }
 
-  public void setAddress(String address) {
-    this.address = address;
+  public void setDerivationPath(String derivationPath) {
+    this.derivationPath = derivationPath;
   }
 
 
@@ -53,22 +57,22 @@ public class Body4 {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Body4 body4 = (Body4) o;
-    return Objects.equals(this.address, body4.address);
+    Body5 body5 = (Body5) o;
+    return Objects.equals(this.derivationPath, body5.derivationPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(address);
+    return Objects.hash(derivationPath);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Body4 {\n");
+    sb.append("class Body5 {\n");
     
-    sb.append("    address: ").append(toIndentedString(address)).append("\n");
+    sb.append("    derivationPath: ").append(toIndentedString(derivationPath)).append("\n");
     sb.append("}");
     return sb.toString();
   }
