@@ -112,7 +112,7 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _nodeInfo;
     }
 
-    public PreHeader getPreHeader() {
+    public org.ergoplatform.appkit.PreHeader getPreHeader() {
         return _preHeader;
     }
 

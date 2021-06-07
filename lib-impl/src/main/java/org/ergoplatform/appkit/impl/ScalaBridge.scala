@@ -200,7 +200,7 @@ object ScalaBridge {
         minerPk = h.getPowSolutions.getPk.toGroupElement,
         powOnetimePk = h.getPowSolutions.getW.toGroupElement,
         powNonce = h.getPowSolutions.getN.toColl,
-        powDistance = SigmaDsl.BigInt(h.getPowSolutions.getD.toBigIntegerExact),
+        powDistance = SigmaDsl.BigInt(h.getPowSolutions.getD),
         votes = h.getVotes.toColl
       )
 
