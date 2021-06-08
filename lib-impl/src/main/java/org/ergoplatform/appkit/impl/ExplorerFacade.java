@@ -32,23 +32,4 @@ public class ExplorerFacade extends ApiFacade {
         });
     }
 
-    /**
-     * Get unspent boxes protected by given contract template @GET("transactions/boxes/byErgoTreeTemplate/unspent/{ergoTreeTemplate}")
-     *
-     * @param ergoTreeTemplate (required)
-     * @return TransactionOutput
-     */
-    static public List<OutputInfo> transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(
-            Retrofit r, String ergoTreeTemplate) throws ErgoClientException {
-        return execute(r, () -> {
-            Method method = DefaultApi.class
-                    .getMethod("transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet",
-                            String.class);
-            List<OutputInfo> res =
-                    RetrofitUtil.<List<OutputInfo>>invokeServiceMethod(r, method, new Object[]{ergoTreeTemplate})
-                            .execute().body();
-            return res;
-        });
-    }
-
 }

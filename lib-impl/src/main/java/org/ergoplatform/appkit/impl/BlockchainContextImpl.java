@@ -164,13 +164,5 @@ public class BlockchainContextImpl implements BlockchainContext {
                 .transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
         return getInputBoxes(boxes);
     }
-
-    @Override
-    public List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template) {
-        List<OutputInfo> boxes = ExplorerFacade
-                .transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(_retrofitExplorer,
-                        template.getEncodedBytes());
-        return getInputBoxes(boxes);
-    }
 }
 
