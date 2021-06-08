@@ -13,16 +13,10 @@
 package org.ergoplatform.explorer.client.model;
 
 import java.util.Objects;
-import java.util.Arrays;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
+
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.IOException;
-import org.ergoplatform.explorer.client.model.PowSolutionInfo;
-import org.ergoplatform.explorer.client.model.Tuple3ByteByteByte;
+
 /**
  * HeaderInfo
  */
@@ -72,7 +66,7 @@ public class HeaderInfo {
   private PowSolutionInfo powSolutions = null;
 
   @SerializedName("votes")
-  private Tuple3ByteByteByte votes = null;
+  private java.util.List<Integer> votes = null;
 
   public HeaderInfo id(String id) {
     this.id = id;
@@ -326,7 +320,7 @@ public class HeaderInfo {
     this.powSolutions = powSolutions;
   }
 
-  public HeaderInfo votes(Tuple3ByteByteByte votes) {
+  public HeaderInfo votes(java.util.List<Integer> votes) {
     this.votes = votes;
     return this;
   }
@@ -336,11 +330,11 @@ public class HeaderInfo {
    * @return votes
   **/
   @Schema(required = true, description = "")
-  public Tuple3ByteByteByte getVotes() {
+  public java.util.List<Integer> getVotes() {
     return votes;
   }
 
-  public void setVotes(Tuple3ByteByteByte votes) {
+  public void setVotes(java.util.List<Integer> votes) {
     this.votes = votes;
   }
 
