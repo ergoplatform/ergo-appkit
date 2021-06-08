@@ -29,19 +29,19 @@ import org.ergoplatform.explorer.client.model.TransactionInfo;
 
 public class ItemsA {
   @SerializedName("items")
-  private java.util.List<TransactionInfo> items = null;
+  private java.util.List<OutputInfo> items = null;
 
   @SerializedName("total")
   private Integer total = null;
 
-  public ItemsA items(java.util.List<TransactionInfo> items) {
+  public ItemsA items(java.util.List<OutputInfo> items) {
     this.items = items;
     return this;
   }
 
-  public ItemsA addItemsItem(TransactionInfo itemsItem) {
+  public ItemsA addItemsItem(OutputInfo itemsItem) {
     if (this.items == null) {
-      this.items = new java.util.ArrayList<TransactionInfo>();
+      this.items = new java.util.ArrayList<OutputInfo>();
     }
     this.items.add(itemsItem);
     return this;
@@ -52,11 +52,11 @@ public class ItemsA {
    * @return items
   **/
   @Schema(description = "")
-  public java.util.List<TransactionInfo> getItems() {
+  public java.util.List<OutputInfo> getItems() {
     return items;
   }
 
-  public void setItems(java.util.List<TransactionInfo> items) {
+  public void setItems(java.util.List<OutputInfo> items) {
     this.items = items;
   }
 

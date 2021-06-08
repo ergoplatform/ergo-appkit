@@ -2,6 +2,7 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.explorer.client.DefaultApi;
+import org.ergoplatform.explorer.client.model.ItemsA;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
@@ -24,11 +25,12 @@ public class ExplorerFacade extends ApiFacade {
     static public List<OutputInfo> transactionsBoxesByAddressUnspentIdGet(
             Retrofit r, String id) throws ErgoClientException {
         return execute(r, () -> {
-            Method method = DefaultApi.class.getMethod("getApiV1BoxesUnspentByaddressP1", String.class);
-            List<OutputInfo> res =
-                    RetrofitUtil.<List<OutputInfo>>invokeServiceMethod(r, method, new Object[]{id, null, null})
+            Method method = DefaultApi.class.getMethod(
+              "getApiV1BoxesUnspentByaddressP1", String.class, Integer.class, Integer.class);
+            ItemsA res =
+                    RetrofitUtil.<ItemsA>invokeServiceMethod(r, method, new Object[]{id, null, null})
                             .execute().body();
-            return res;
+            return res.getItems();
         });
     }
 
