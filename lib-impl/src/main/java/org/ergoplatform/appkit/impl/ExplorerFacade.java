@@ -1,8 +1,8 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.ErgoClientException;
-import org.ergoplatform.explorer.client.TransactionsApi;
-import org.ergoplatform.explorer.client.model.TransactionOutput;
+import org.ergoplatform.explorer.client.DefaultApi;
+import org.ergoplatform.explorer.client.model.OutputInfo;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
@@ -21,12 +21,12 @@ public class ExplorerFacade extends ApiFacade {
      * @param id  (required)
      * @return TransactionOutput
      */
-    static public List<TransactionOutput> transactionsBoxesByAddressUnspentIdGet(
+    static public List<OutputInfo> transactionsBoxesByAddressUnspentIdGet(
             Retrofit r, String id) throws ErgoClientException {
         return execute(r, () -> {
-            Method method = TransactionsApi.class.getMethod("transactionsBoxesByAddressUnspentIdGet", String.class);
-            List<TransactionOutput> res =
-                    RetrofitUtil.<List<TransactionOutput>>invokeServiceMethod(r, method, new Object[]{id})
+            Method method = DefaultApi.class.getMethod("getApiV1BoxesUnspentByaddressP1", String.class);
+            List<OutputInfo> res =
+                    RetrofitUtil.<List<OutputInfo>>invokeServiceMethod(r, method, new Object[]{id, null, null})
                             .execute().body();
             return res;
         });
@@ -38,14 +38,14 @@ public class ExplorerFacade extends ApiFacade {
      * @param ergoTreeTemplate (required)
      * @return TransactionOutput
      */
-    static public List<TransactionOutput> transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(
+    static public List<OutputInfo> transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet(
             Retrofit r, String ergoTreeTemplate) throws ErgoClientException {
         return execute(r, () -> {
-            Method method = TransactionsApi.class
+            Method method = DefaultApi.class
                     .getMethod("transactionsBoxesByErgoTreeTemplateUnspentErgoTreeTemplateGet",
                             String.class);
-            List<TransactionOutput> res =
-                    RetrofitUtil.<List<TransactionOutput>>invokeServiceMethod(r, method, new Object[]{ergoTreeTemplate})
+            List<OutputInfo> res =
+                    RetrofitUtil.<List<OutputInfo>>invokeServiceMethod(r, method, new Object[]{ergoTreeTemplate})
                             .execute().body();
             return res;
         });
