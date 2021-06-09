@@ -59,8 +59,8 @@ public class OutputInfo {
   @SerializedName("assets")
   private java.util.List<AssetInstanceInfo> assets = null;
 
-  @SerializedName("additionalRegisters")
-  private AdditionalRegisters additionalRegisters = null;
+//  @SerializedName("additionalRegisters")
+//  private AdditionalRegisters additionalRegisters = null;
 
   @SerializedName("spentTransactionId")
   private String spentTransactionId = null;
@@ -256,23 +256,23 @@ public class OutputInfo {
     this.assets = assets;
   }
 
-  public OutputInfo additionalRegisters(AdditionalRegisters additionalRegisters) {
-    this.additionalRegisters = additionalRegisters;
-    return this;
-  }
+//  public OutputInfo additionalRegisters(AdditionalRegisters additionalRegisters) {
+//    this.additionalRegisters = additionalRegisters;
+//    return this;
+//  }
 
-   /**
-   * Get additionalRegisters
-   * @return additionalRegisters
-  **/
-  @Schema(required = true, description = "")
-  public AdditionalRegisters getAdditionalRegisters() {
-    return additionalRegisters;
-  }
-
-  public void setAdditionalRegisters(AdditionalRegisters additionalRegisters) {
-    this.additionalRegisters = additionalRegisters;
-  }
+//   /**
+//   * Get additionalRegisters
+//   * @return additionalRegisters
+//  **/
+//  @Schema(required = true, description = "")
+//  public AdditionalRegisters getAdditionalRegisters() {
+//    return additionalRegisters;
+//  }
+//
+//  public void setAdditionalRegisters(AdditionalRegisters additionalRegisters) {
+//    this.additionalRegisters = additionalRegisters;
+//  }
 
   public OutputInfo spentTransactionId(String spentTransactionId) {
     this.spentTransactionId = spentTransactionId;
@@ -330,14 +330,14 @@ public class OutputInfo {
         Objects.equals(this.ergoTree, outputInfo.ergoTree) &&
         Objects.equals(this.address, outputInfo.address) &&
         Objects.equals(this.assets, outputInfo.assets) &&
-        Objects.equals(this.additionalRegisters, outputInfo.additionalRegisters) &&
+        //Objects.equals(this.additionalRegisters, outputInfo.additionalRegisters) &&
         Objects.equals(this.spentTransactionId, outputInfo.spentTransactionId) &&
         Objects.equals(this.mainChain, outputInfo.mainChain);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(boxId, transactionId, blockId, value, index, creationHeight, settlementHeight, ergoTree, address, assets, additionalRegisters, spentTransactionId, mainChain);
+    return Objects.hash(boxId, transactionId, blockId, value, index, creationHeight, settlementHeight, ergoTree, address, assets, /*additionalRegisters,*/ spentTransactionId, mainChain);
   }
 
 
@@ -356,7 +356,7 @@ public class OutputInfo {
     sb.append("    ergoTree: ").append(toIndentedString(ergoTree)).append("\n");
     sb.append("    address: ").append(toIndentedString(address)).append("\n");
     sb.append("    assets: ").append(toIndentedString(assets)).append("\n");
-    sb.append("    additionalRegisters: ").append(toIndentedString(additionalRegisters)).append("\n");
+    //sb.append("    additionalRegisters: ").append(toIndentedString(additionalRegisters)).append("\n");
     sb.append("    spentTransactionId: ").append(toIndentedString(spentTransactionId)).append("\n");
     sb.append("    mainChain: ").append(toIndentedString(mainChain)).append("\n");
     sb.append("}");
