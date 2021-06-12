@@ -27,7 +27,7 @@ import java.util.{Map => JMap, List => JList}
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.{TokensMap, Constants}
+import org.ergoplatform.wallet.TokensMap
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
@@ -444,7 +444,7 @@ object JavaHelpers {
     * The resulting path corresponds to `m/44'/429'/0'/0/index` path.
     */
   def eip3DerivationWithLastIndex(index: Int) = {
-    val firstPath = Constants.eip3DerivationPath
+    val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1) :+ index, firstPath.publicBranch)
   }
 }
