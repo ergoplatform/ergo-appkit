@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.wallet.secrets.{ExtendedSecretKey, DerivationPath}
 import scalan.RType
 import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
@@ -16,7 +16,7 @@ import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, Extensions}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -27,7 +27,7 @@ import java.util.{Map => JMap, List => JList}
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.TokensMap
+import org.ergoplatform.wallet.{TokensMap, Constants}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
@@ -440,6 +440,13 @@ object JavaHelpers {
     map.toMap -> assetsNum
   }
 
+  /** Creates a new EIP-3 derivation path with the given last index.
+    * The resulting path corresponds to `m/44'/429'/0'/0/index` path.
+    */
+  def eip3DerivationWithLastIndex(index: Int) = {
+    val firstPath = Constants.eip3DerivationPath
+    DerivationPath(firstPath.decodedPath.dropRight(1) :+ index, firstPath.publicBranch)
+  }
 }
 
 
