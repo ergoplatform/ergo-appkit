@@ -177,4 +177,23 @@ class TxBuilderSpec extends PropSpec with Matchers
     )
   }
 
+  private def testEip3Address(ctx: BlockchainContext, index: Int): Address = {
+    Address.createEip3Address(index, ctx.getNetworkType,
+      mnemonic, SecretString.empty())
+  }
+
+  property("ErgoProverBuilder.withEip3Secret should pass secrets to the prover") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val prover = ctx.newProverBuilder()
+        .withMnemonic(mnemonic, SecretString.empty())
+        .withEip3Secret(0)
+        .withEip3Secret(1)
+        .build()
+      assert(prover.getEip3Addresses.contains(testEip3Address(ctx, 0)))
+      assert(prover.getEip3Addresses.contains(testEip3Address(ctx, 1)))
+    }
+  }
+
+
 }

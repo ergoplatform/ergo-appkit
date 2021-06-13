@@ -7,7 +7,7 @@ import sigmastate.basics.{DLogProtocol, DiffieHellmanTupleProverInput}
 import special.sigma.GroupElement
 import java.math.BigInteger
 import java.util
-
+import JavaHelpers._
 import scala.collection.mutable.ArrayBuffer
 
 class ErgoProverBuilderImpl(_ctx: BlockchainContextImpl) extends ErgoProverBuilder {
@@ -83,8 +83,10 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextImpl) extends ErgoProverBuild
       override def blockVersion: Byte = _params.getBlockVersion.byteValue
     }
     val keys = new util.ArrayList[ExtendedSecretKey]
-    if (_masterKey != null)
+    if (_masterKey != null) {
       keys.add(_masterKey)
+      keys.addAll(_eip2Keys.map(_._2).to[IndexedSeq].convertTo[util.List[ExtendedSecretKey]])
+    }
     val interpreter = new AppkitProvingInterpreter(keys, _dLogSecrets, _dhtSecrets, parameters)
     new ErgoProverImpl(_ctx, interpreter)
   }

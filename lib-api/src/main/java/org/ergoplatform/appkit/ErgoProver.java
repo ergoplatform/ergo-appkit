@@ -4,6 +4,8 @@ import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import special.sigma.BigInt;
 
+import java.util.List;
+
 /**
  * Interface of the provers that can be used to sign {@link UnsignedTransaction}s.
  */
@@ -26,6 +28,13 @@ public interface ErgoProver {
      * @see <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP-32</a>
      */
     BigInt getSecretKey();
+
+    /**
+     * Returns a master secret key of this prover.
+     *
+     * @see <a href="https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki">BIP-32</a>
+     */
+    List<Address> getEip3Addresses();
 
     /**
      * Signs unsigned transaction by using configured secrets.
