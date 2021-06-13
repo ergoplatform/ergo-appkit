@@ -15,6 +15,8 @@ public interface ErgoProver {
 
     /**
      * Returns Pay-To-Public-Key address of this prover (represented as {@link Address}).
+     * The returned address corresponds to the master secret derived from the mnemonic
+     * phrase configured in the builder.
      */
     Address getAddress();
 

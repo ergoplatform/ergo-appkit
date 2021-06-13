@@ -148,4 +148,33 @@ class TxBuilderSpec extends PropSpec with Matchers
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
+
+  property("ErgoProverBuilder.withEip3Secret require mnemonic") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    assertExceptionThrown(
+      ergoClient.execute { ctx: BlockchainContext =>
+        ctx.newProverBuilder()
+          .withEip3Secret(0)
+          .build()
+      },
+      exceptionLike[IllegalArgumentException](
+        "Mnemonic is not specified, use withMnemonic method.")
+    )
+  }
+
+  property("ErgoProverBuilder.withEip3Secret check uniqueness of derivation index") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    assertExceptionThrown(
+      ergoClient.execute { ctx: BlockchainContext =>
+        ctx.newProverBuilder()
+          .withMnemonic(mnemonic, SecretString.empty())
+          .withEip3Secret(0)
+          .withEip3Secret(0) // attempt to add the same index
+          .build()
+      },
+      exceptionLike[IllegalArgumentException](
+        "Secret key for derivation index 0 has already been added.")
+    )
+  }
+
 }

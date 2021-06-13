@@ -8,8 +8,14 @@ import special.sigma.GroupElement
 import java.math.BigInteger
 import java.util
 
+import scala.collection.mutable.ArrayBuffer
+
 class ErgoProverBuilderImpl(_ctx: BlockchainContextImpl) extends ErgoProverBuilder {
   private var _masterKey: ExtendedSecretKey = _
+
+  /** Generated EIP-3 secret keys paired with their derivation path index. */
+  private var _eip2Keys =  ArrayBuffer.empty[(Int, ExtendedSecretKey)]
+
   private val _dhtSecrets = new util.ArrayList[DiffieHellmanTupleProverInput]
   private val _dLogSecrets = new util.ArrayList[DLogProtocol.DLogProverInput]
 
@@ -21,6 +27,17 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextImpl) extends ErgoProverBuild
 
   override def withMnemonic(mnemonic: Mnemonic): ErgoProverBuilder =
     withMnemonic(mnemonic.getPhrase, mnemonic.getPassword)
+
+  override def withEip3Secret(index: Int): ErgoProverBuilder = {
+    require(_masterKey != null, s"Mnemonic is not specified, use withMnemonic method.")
+    require(!_eip2Keys.exists(_._1 == index),
+            s"Secret key for derivation index $index has already been added.")
+    val path = JavaHelpers.eip3DerivationWithLastIndex(index)
+    val secretKey = _masterKey.derive(path)
+    _eip2Keys += (index -> secretKey)
+    this
+  }
+
 
   override def withSecretStorage(storage: SecretStorage): ErgoProverBuilder = {
     if (storage.isLocked)

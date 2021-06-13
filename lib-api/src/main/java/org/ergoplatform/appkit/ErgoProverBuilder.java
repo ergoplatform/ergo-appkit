@@ -25,6 +25,15 @@ public interface ErgoProverBuilder {
     ErgoProverBuilder withMnemonic(Mnemonic mnemonic);
 
     /**
+     * Configure this builder to derive the new EIP-3 secret key with the given index.
+     * The derivation uses master key derived from the mnemonic configured using {@link
+     * ErgoProverBuilder#withMnemonic(SecretString, SecretString)}.
+     *
+     * @param index last index in the EIP-3 derivation path.
+     */
+    ErgoProverBuilder withEip3Secret(int index);
+
+    /**
      * Configure this builder to use the given {@link SecretStorage} when building a new prover.
      *
      * @param storage {@link SecretStorage} instance containing encrypted secret seed phrase to be used in
