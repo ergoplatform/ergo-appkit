@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import java.io.File
 import java.math.BigInteger
 import java.util.Arrays
 
@@ -190,10 +191,38 @@ class TxBuilderSpec extends PropSpec with Matchers
         .withEip3Secret(0)
         .withEip3Secret(1)
         .build()
-      assert(prover.getEip3Addresses.contains(testEip3Address(ctx, 0)))
-      assert(prover.getEip3Addresses.contains(testEip3Address(ctx, 1)))
+      assert(prover.getEip3Addresses.size() == 2)
+      assert(prover.getEip3Addresses.get(0) == testEip3Address(ctx, 0))
+      assert(prover.getEip3Addresses.get(1) == testEip3Address(ctx, 1))
     }
   }
 
+  property("send to recipient (non EIP-3)") {
+    val data = MockData(
+      Seq(
+        loadNodeResponse("response_Box1.json"),
+        loadNodeResponse("response_Box2.json"),
+        loadNodeResponse("response_Box3.json"),
+        "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
+      Seq(
+        loadExplorerResponse("response_boxesByAddressUnspent.json")))
+
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute(ctx => {
+      val senderProver = BoxOperations.createProver(ctx,
+          new File("storage/E2.json").getPath, "abc")
+        .withEip3Secret(0)
+        .withEip3Secret(1)
+        .build
+
+      val recipient = senderProver.getEip3Addresses.get(1)
+      val amountToSend = 1000000
+      val pkContract = ErgoContracts.sendToPK(ctx, recipient)
+      val signed = BoxOperations.putToContractTx(ctx,
+          senderProver, false, pkContract, amountToSend)
+      assert(signed != null)
+    })
+  }
 
 }
