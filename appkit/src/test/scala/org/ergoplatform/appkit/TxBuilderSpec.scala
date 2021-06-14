@@ -209,7 +209,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
     val ergoClient = createMockedErgoClient(data)
 
-    ergoClient.execute(ctx => {
+    ergoClient.execute { ctx: BlockchainContext =>
       val senderProver = BoxOperations.createProver(ctx,
           new File("storage/E2.json").getPath, "abc")
         .withEip3Secret(0)
@@ -222,7 +222,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signed = BoxOperations.putToContractTx(ctx,
           senderProver, false, pkContract, amountToSend)
       assert(signed != null)
-    })
+    }
   }
 
 }
