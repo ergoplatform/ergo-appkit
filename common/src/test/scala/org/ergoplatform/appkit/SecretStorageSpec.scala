@@ -7,24 +7,24 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
     with AppkitTestingCommon {
-  val mnemonic = Mnemonic.create("phrase".toCharArray, "mnemonic pass".toCharArray)
+  val mnemonicWithPassword = Mnemonic.create("phrase".toCharArray, "mnemonic pass".toCharArray)
   val encryptionPass = "encryption pass"
 
   property("create from mnemonic") {
-    withNewStorageFor(mnemonic, encryptionPass) { storage =>
+    withNewStorageFor(mnemonicWithPassword, encryptionPass) { storage =>
       storage.isLocked shouldBe true
       storage.getFile().exists() shouldBe true
     }
   }
 
   property("unlocked by password with ") {
-    withNewStorageFor(mnemonic, encryptionPass) { storage =>
+    withNewStorageFor(mnemonicWithPassword, encryptionPass) { storage =>
       storage.unlock(encryptionPass)
       storage.isLocked shouldBe false
-      val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic)
+      val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonicWithPassword)
       val secret = storage.getSecret()
       secret should not be(null)
-      val expSecret = JavaHelpers.seedToMasterKey(mnemonic.getPhrase, mnemonic.getPassword)
+      val expSecret = JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword)
       expSecret shouldBe secret
       storage.getAddressFor(NetworkType.TESTNET) shouldBe addr
     }
@@ -32,14 +32,14 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
 
   property("not unlock by wrong password") {
     a[RuntimeException] shouldBe thrownBy {
-      withNewStorageFor(mnemonic, encryptionPass) { storage =>
+      withNewStorageFor(mnemonicWithPassword, encryptionPass) { storage =>
         storage.unlock("wrong password")
       }
     }
   }
 
   property("load from file") {
-    withNewStorageFor(mnemonic, encryptionPass) { storage =>
+    withNewStorageFor(mnemonicWithPassword, encryptionPass) { storage =>
       val fileName = storage.getFile.getPath
       val loaded = SecretStorage.loadFrom(fileName)
       loaded.isLocked shouldBe true

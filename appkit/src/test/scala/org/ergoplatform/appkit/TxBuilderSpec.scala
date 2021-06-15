@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import java.io.File
 import java.math.BigInteger
 import java.util.Arrays
 
@@ -148,4 +149,80 @@ class TxBuilderSpec extends PropSpec with Matchers
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
+
+  property("ErgoProverBuilder.withEip3Secret require mnemonic") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    assertExceptionThrown(
+      ergoClient.execute { ctx: BlockchainContext =>
+        ctx.newProverBuilder()
+          .withEip3Secret(0)
+          .build()
+      },
+      exceptionLike[IllegalArgumentException](
+        "Mnemonic is not specified, use withMnemonic method.")
+    )
+  }
+
+  property("ErgoProverBuilder.withEip3Secret check uniqueness of derivation index") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    assertExceptionThrown(
+      ergoClient.execute { ctx: BlockchainContext =>
+        ctx.newProverBuilder()
+          .withMnemonic(mnemonic, SecretString.empty())
+          .withEip3Secret(0)
+          .withEip3Secret(0) // attempt to add the same index
+          .build()
+      },
+      exceptionLike[IllegalArgumentException](
+        "Secret key for derivation index 0 has already been added.")
+    )
+  }
+
+  private def testEip3Address(ctx: BlockchainContext, index: Int): Address = {
+    Address.createEip3Address(index, ctx.getNetworkType,
+      mnemonic, SecretString.empty())
+  }
+
+  property("ErgoProverBuilder.withEip3Secret should pass secrets to the prover") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val prover = ctx.newProverBuilder()
+        .withMnemonic(mnemonic, SecretString.empty())
+        .withEip3Secret(0)
+        .withEip3Secret(1)
+        .build()
+      assert(prover.getEip3Addresses.size() == 2)
+      assert(prover.getEip3Addresses.get(0) == testEip3Address(ctx, 0))
+      assert(prover.getEip3Addresses.get(1) == testEip3Address(ctx, 1))
+    }
+  }
+
+  property("send to recipient (non EIP-3)") {
+    val data = MockData(
+      Seq(
+        loadNodeResponse("response_Box1.json"),
+        loadNodeResponse("response_Box2.json"),
+        loadNodeResponse("response_Box3.json"),
+        "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
+      Seq(
+        loadExplorerResponse("response_boxesByAddressUnspent.json")))
+
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val senderProver = BoxOperations.createProver(ctx,
+          new File("storage/E2.json").getPath, "abc")
+        .withEip3Secret(0)
+        .withEip3Secret(1)
+        .build
+
+      val recipient = senderProver.getEip3Addresses.get(1)
+      val amountToSend = 1000000
+      val pkContract = ErgoContracts.sendToPK(ctx, recipient)
+      val signed = BoxOperations.putToContractTx(ctx,
+          senderProver, false, pkContract, amountToSend)
+      assert(signed != null)
+    }
+  }
+
 }
