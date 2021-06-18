@@ -23,7 +23,7 @@ import java.util.Map;
  * Spending proof for transaction input
  */
 @Schema(description = "Spending proof for transaction input")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class SpendingProof {
   @SerializedName("proofBytes")
   private String proofBytes = null;

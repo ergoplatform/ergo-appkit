@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Request for generation of asset issue transaction
  */
 @Schema(description = "Request for generation of asset issue transaction")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class AssetIssueRequest {
   @SerializedName("address")
   private String address = null;

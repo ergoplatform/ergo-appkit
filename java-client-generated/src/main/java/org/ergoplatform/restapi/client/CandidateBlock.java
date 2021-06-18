@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Can be null if node is not mining or candidate block is not ready
  */
 @Schema(description = "Can be null if node is not mining or candidate block is not ready")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class CandidateBlock {
   @SerializedName("version")
   private Integer version = null;

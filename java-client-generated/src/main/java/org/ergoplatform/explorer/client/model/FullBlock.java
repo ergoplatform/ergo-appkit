@@ -30,7 +30,7 @@ import org.ergoplatform.explorer.client.model.Transaction;
  * Block with header and transactions
  */
 @Schema(description = "Block with header and transactions")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class FullBlock {
   @SerializedName("header")
   private BlockHeader header = null;

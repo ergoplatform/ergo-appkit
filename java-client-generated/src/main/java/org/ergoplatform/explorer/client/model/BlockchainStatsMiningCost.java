@@ -26,7 +26,7 @@ import java.math.BigDecimal;
  * BlockchainStatsMiningCost
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class BlockchainStatsMiningCost {
   @SerializedName("totalMinersRevenue")
   private BigDecimal totalMinersRevenue = null;

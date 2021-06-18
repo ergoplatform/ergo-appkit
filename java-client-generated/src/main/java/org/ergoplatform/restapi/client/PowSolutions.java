@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * An object containing all components of pow solution
  */
 @Schema(description = "An object containing all components of pow solution")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class PowSolutions {
   @SerializedName("pk")
   private String pk = null;

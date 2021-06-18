@@ -29,7 +29,7 @@ import org.ergoplatform.explorer.client.model.TransactionOutput;
  * Transaction without any lockers and unlockers
  */
 @Schema(description = "Transaction without any lockers and unlockers")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class Transaction {
   @SerializedName("id")
   private String id = null;

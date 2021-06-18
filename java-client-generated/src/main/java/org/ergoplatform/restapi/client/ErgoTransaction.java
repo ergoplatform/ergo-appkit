@@ -24,7 +24,7 @@ import java.util.List;
  * Ergo transaction
  */
 @Schema(description = "Ergo transaction")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class ErgoTransaction {
   @SerializedName("id")
   private String id = null;

@@ -27,7 +27,7 @@ import org.ergoplatform.explorer.client.model.Miner;
  * Block for search results
  */
 @Schema(description = "Block for search results")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class SearchBlock {
   @SerializedName("id")
   private String id = null;

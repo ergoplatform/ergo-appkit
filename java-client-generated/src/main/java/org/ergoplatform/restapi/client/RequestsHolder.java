@@ -23,7 +23,7 @@ import java.util.List;
  * Holds many transaction requests and transaction fee
  */
 @Schema(description = "Holds many transaction requests and transaction fee")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class RequestsHolder {
   @SerializedName("requests")
   private List<Object> requests = new ArrayList<>();

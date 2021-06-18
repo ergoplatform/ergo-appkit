@@ -24,7 +24,7 @@ import java.util.List;
  * Amount of Ergo tokens and assets
  */
 @Schema(description = "Amount of Ergo tokens and assets")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class BalancesSnapshot {
   @SerializedName("height")
   private Integer height = null;

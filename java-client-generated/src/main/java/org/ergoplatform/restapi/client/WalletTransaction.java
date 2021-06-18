@@ -24,7 +24,7 @@ import java.util.List;
  * Transaction augmented with some useful information
  */
 @Schema(description = "Transaction augmented with some useful information")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class WalletTransaction {
   @SerializedName("id")
   private String id = null;

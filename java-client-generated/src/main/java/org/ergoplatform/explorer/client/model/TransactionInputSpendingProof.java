@@ -25,7 +25,7 @@ import java.io.IOException;
  * Spending proof for transaction input
  */
 @Schema(description = "Spending proof for transaction input")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class TransactionInputSpendingProof {
   @SerializedName("proofBytes")
   private String proofBytes = null;

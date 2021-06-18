@@ -28,7 +28,7 @@ import org.ergoplatform.explorer.client.model.Asset;
  * FullAddressTransactions
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class FullAddressTransactions {
   @SerializedName("confirmed")
   private Integer confirmed = null;

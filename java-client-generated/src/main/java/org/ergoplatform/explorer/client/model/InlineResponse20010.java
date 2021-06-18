@@ -25,7 +25,7 @@ import java.io.IOException;
  * InlineResponse20010
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class InlineResponse20010 {
   @SerializedName("timestamp")
   private Integer timestamp = null;

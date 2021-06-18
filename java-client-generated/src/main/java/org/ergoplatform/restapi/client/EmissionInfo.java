@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Emssion info for height
  */
 @Schema(description = "Emssion info for height")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class EmissionInfo {
   @SerializedName("minerReward")
   private Long minerReward = null;

@@ -25,7 +25,7 @@ import java.io.IOException;
  * Resulted transaction id
  */
 @Schema(description = "Resulted transaction id")
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-12-09T08:14:50.203Z[GMT]")
+
 public class TransactionIdResponse {
   @SerializedName("id")
   private String id = null;

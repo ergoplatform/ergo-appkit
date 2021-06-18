@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * InlineResponse2005
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2019-10-19T14:53:04.559Z[GMT]")
+
 public class InlineResponse2005 {
   @SerializedName("tree")
   private String tree = null;
