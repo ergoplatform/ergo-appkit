@@ -20,11 +20,20 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
   }
 
   property("Address fromMnemonic") {
-    val mnemonic = SecretString.create("slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet")
     val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic, SecretString.empty())
     addr.toString shouldBe addrStr
     val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
     addr2.toString shouldNot be (addrStr)
+  }
+
+  property("Address createEip3Address") {
+    val addr = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
+    val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, mnemonic, SecretString.empty())
+    firstEip3Addr.toString shouldBe firstEip3AddrStr
+    addr.toString shouldNot be (firstEip3AddrStr)
+
+    val secondEip3Addr = Address.createEip3Address(1, NetworkType.MAINNET, mnemonic, SecretString.empty())
+    secondEip3Addr.toString shouldBe secondEip3AddrStr
   }
 
   property("create Address from ErgoTree with DHT") {

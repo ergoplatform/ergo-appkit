@@ -5,6 +5,8 @@ import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.Pay2SAddress;
+import org.ergoplatform.wallet.secrets.DerivationPath;
+import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
 import scala.util.Try;
 import scorex.util.encode.Base58;
@@ -130,11 +132,51 @@ public class Address {
         return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
     }
 
+    /**
+     * Creates an {@link Address} from the given mnemonic using `m / 0` derivation path
+     * (corresponds to master key). The returned address is not compliant with
+     * <a href="https://github.com/ergoplatform/eips/blob/master/eip-0003.md">EIP-3</a>.
+     *
+     * @param networkType  mainnet or testnet network
+     * @param mnemonic     mnemonic (e.g. 15 words) phrase
+     * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
+     *                     necessary to know in order to restore the secrets
+     */
     public static Address fromMnemonic(
         NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
         DLogProtocol.ProveDlog pk = masterKey.publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk,
+            networkType.networkPrefix);
+        return new Address(p2pkAddress);
+    }
+
+    /**
+     * Creates an {@link Address} from the given mnemonic using <a
+     * href="https://github.com/ergoplatform/eips/blob/master/eip-0003.md">EIP-3</a>
+     * derivation path (`m / 44' / 429' / 0' / 0 / 0`)
+     * The returned address is compliant with EIP-3.
+     *
+     * @param index        the last index in the path (zero based)
+     * @param networkType  mainnet or testnet network
+     * @param mnemonic     mnemonic (e.g. 15 words) phrase
+     * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
+     *                     necessary to know in order to restore the secrets
+     */
+    public static Address createEip3Address(
+        int index,
+        NetworkType networkType,
+        SecretString mnemonic,
+        SecretString mnemonicPass) {
+        ExtendedSecretKey rootSecret = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
+
+        // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
+        // is BIP-44 for Ergo)
+        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index);
+        ExtendedSecretKey secretKey = (ExtendedSecretKey)rootSecret.derive(path);
+        ExtendedPublicKey pubkey = secretKey.publicKey();
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
+            pubkey.key(),
             networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
