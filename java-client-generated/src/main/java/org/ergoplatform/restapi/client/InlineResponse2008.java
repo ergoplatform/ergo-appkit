@@ -13,39 +13,35 @@
 package org.ergoplatform.restapi.client;
 
 import java.util.Objects;
-import java.util.Arrays;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
+
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.IOException;
+
 /**
  * InlineResponse2008
  */
 
 
 public class InlineResponse2008 {
-  @SerializedName("tree")
-  private String tree = null;
+  @SerializedName("bytes")
+  private String bytes = null;
 
-  public InlineResponse2008 tree(String tree) {
-    this.tree = tree;
+  public InlineResponse2008 bytes(String bytes) {
+    this.bytes = bytes;
     return this;
   }
 
    /**
    * Base16-encoded bytes
-   * @return tree
+   * @return tree bytes
   **/
   @Schema(example = "0e0710010101d17300", description = "Base16-encoded bytes")
-  public String getTree() {
-    return tree;
+  public String getBytes() {
+    return bytes;
   }
 
-  public void setTree(String tree) {
-    this.tree = tree;
+  public void setBytes(String bytes) {
+    this.bytes = bytes;
   }
 
 
@@ -58,12 +54,12 @@ public class InlineResponse2008 {
       return false;
     }
     InlineResponse2008 inlineResponse2008 = (InlineResponse2008) o;
-    return Objects.equals(this.tree, inlineResponse2008.tree);
+    return Objects.equals(this.bytes, inlineResponse2008.bytes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tree);
+    return Objects.hash(bytes);
   }
 
 
@@ -72,7 +68,7 @@ public class InlineResponse2008 {
     StringBuilder sb = new StringBuilder();
     sb.append("class InlineResponse2008 {\n");
     
-    sb.append("    tree: ").append(toIndentedString(tree)).append("\n");
+    sb.append("    bytes: ").append(toIndentedString(bytes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
