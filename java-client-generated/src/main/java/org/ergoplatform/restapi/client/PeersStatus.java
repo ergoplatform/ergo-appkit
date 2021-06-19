@@ -28,12 +28,12 @@ import java.io.IOException;
 
 public class PeersStatus {
   @SerializedName("lastIncomingMessage")
-  private Integer lastIncomingMessage = null;
+  private Long lastIncomingMessage = null;
 
   @SerializedName("currentNetworkTime")
-  private Integer currentNetworkTime = null;
+  private Long currentNetworkTime = null;
 
-  public PeersStatus lastIncomingMessage(Integer lastIncomingMessage) {
+  public PeersStatus lastIncomingMessage(Long lastIncomingMessage) {
     this.lastIncomingMessage = lastIncomingMessage;
     return this;
   }
@@ -43,15 +43,15 @@ public class PeersStatus {
    * @return lastIncomingMessage
   **/
   @Schema(description = "")
-  public Integer getLastIncomingMessage() {
+  public Long getLastIncomingMessage() {
     return lastIncomingMessage;
   }
 
-  public void setLastIncomingMessage(Integer lastIncomingMessage) {
+  public void setLastIncomingMessage(Long lastIncomingMessage) {
     this.lastIncomingMessage = lastIncomingMessage;
   }
 
-  public PeersStatus currentNetworkTime(Integer currentNetworkTime) {
+  public PeersStatus currentNetworkTime(Long currentNetworkTime) {
     this.currentNetworkTime = currentNetworkTime;
     return this;
   }
@@ -61,11 +61,11 @@ public class PeersStatus {
    * @return currentNetworkTime
   **/
   @Schema(required = true, description = "")
-  public Integer getCurrentNetworkTime() {
+  public Long getCurrentNetworkTime() {
     return currentNetworkTime;
   }
 
-  public void setCurrentNetworkTime(Integer currentNetworkTime) {
+  public void setCurrentNetworkTime(Long currentNetworkTime) {
     this.currentNetworkTime = currentNetworkTime;
   }
 

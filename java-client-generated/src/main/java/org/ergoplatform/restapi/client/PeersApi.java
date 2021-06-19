@@ -9,6 +9,7 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 import org.ergoplatform.restapi.client.ApiError;
+import org.ergoplatform.restapi.client.BlacklistedPeers;
 import org.ergoplatform.restapi.client.Peer;
 import org.ergoplatform.restapi.client.PeersStatus;
 
@@ -40,10 +41,10 @@ public interface PeersApi {
   /**
    * Get blacklisted peers
    * 
-   * @return Call&lt;java.util.List&lt;String&gt;&gt;
+   * @return Call&lt;BlacklistedPeers&gt;
    */
   @GET("peers/blacklisted")
-  Call<java.util.List<String>> getBlacklistedPeers();
+  Call<BlacklistedPeers> getBlacklistedPeers();
     
 
   /**
