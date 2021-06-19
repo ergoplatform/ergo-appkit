@@ -1,20 +1,15 @@
 package org.ergoplatform.explorer.client;
 
-import org.ergoplatform.explorer.client.ExplorerApiClient;
-import org.ergoplatform.explorer.client.model.BadRequest;
+import org.ergoplatform.ApiTestBase;
 import org.ergoplatform.explorer.client.model.Balance;
 import org.ergoplatform.explorer.client.model.BlockSummary;
 import org.ergoplatform.explorer.client.model.BoxQuery;
 import org.ergoplatform.explorer.client.model.EpochParameters;
 import org.ergoplatform.explorer.client.model.ItemsA;
-import org.ergoplatform.explorer.client.model.ListOutputInfo;
-import org.ergoplatform.explorer.client.model.NotFound;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.explorer.client.model.TokenInfo;
 import org.ergoplatform.explorer.client.model.TotalBalance;
 import org.ergoplatform.explorer.client.model.TransactionInfo;
-import org.ergoplatform.explorer.client.model.UnknownErr;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +21,7 @@ import static org.junit.Assert.*;
 /**
  * API tests for DefaultApi
  */
-public class DefaultApiTest {
+public class DefaultApiTest extends ApiTestBase {
     private DefaultApi api;
 
     @Before
@@ -34,19 +29,6 @@ public class DefaultApiTest {
         api = new ExplorerApiClient("https://api.ergoplatform.com")
             .createService(DefaultApi.class);
     }
-
-    String address = "9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K";
-
-    /** NFT: Blockchain whales #02 */
-    String tokenId = "7970bba36de5d4d6b9c24c20dc65d764ebf7d4aeb5eeb01bbe94221aa03fee45";
-
-    String blockId = "78a76fb6c8ac11e7e9da01f2c916b82dd1220a370d7fcfe2df94caa675c21926";
-
-    String ergoTree = "0008cd036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a12";
-
-    String boxId = "a7e33955a4d84fcfdfe9268a2950ad897772209a1f84fec9f206731918ac57d6";
-
-    String txId = "95faa1a6582adb7e5d482cdfd765ea63b92fc13c18538f1211f6e551e9c38875";
 
     @Test
     public void getApiV1AddressesP1BalanceConfirmedTest() throws IOException {

@@ -28,7 +28,7 @@ public class PeerFinder {
                 ApiClient client = new ApiClient(hostUrl);
                 InfoApi api = client.createService(InfoApi.class);
                 NodeInfo response = api.getNodeInfo().execute().body();
-                System.out.println(response);
+//                System.out.println(response);
                 if (response.getAppVersion().contains(appVersion))
                     if (returnFirstFound) return client;
                     else res = client;
