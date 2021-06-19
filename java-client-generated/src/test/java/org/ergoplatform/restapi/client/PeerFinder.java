@@ -1,6 +1,8 @@
 package org.ergoplatform.restapi.client;
 
-public class PeerFinder {
+import org.ergoplatform.ApiTestBase;
+
+public class PeerFinder extends ApiTestBase {
     public final String appVersion = "4.0.12";
 
     String[] knownPeers = {
