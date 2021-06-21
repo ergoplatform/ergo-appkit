@@ -364,8 +364,8 @@ object JavaHelpers {
 
     val gen = new PKCS5S2ParametersGenerator(new SHA512Digest)
     gen.init(
-      normalizedMnemonic.getBytes(Constants.Encoding),
-      normalizedPass.getBytes(Constants.Encoding),
+      normalizedMnemonic.getBytes(org.ergoplatform.wallet.Constants.Encoding),
+      normalizedPass.getBytes(org.ergoplatform.wallet.Constants.Encoding),
       Pbkdf2Iterations)
     val dk = gen.generateDerivedParameters(Pbkdf2KeyLength).asInstanceOf[KeyParameter].getKey
     dk
