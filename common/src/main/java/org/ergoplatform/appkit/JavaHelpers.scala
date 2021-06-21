@@ -26,6 +26,7 @@ import java.text.Normalizer.Form.NFKD
 import java.text.Normalizer.normalize
 import java.util.{Map => JMap, List => JList}
 
+import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
 import org.ergoplatform.wallet.{Constants, TokensMap}
