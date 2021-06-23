@@ -17,8 +17,8 @@ public class RestApiErgoClient implements ErgoClient {
     private final String _explorerUrl;
     private final ExplorerApiClient _explorer;
 
-    public static String defaultMainnetExplorerUrl = "https://api.ergoplatform.com";
-    public static String defaultTestnetExplorerUrl = "https://api-testnet.ergoplatform.com";
+    public final static String defaultMainnetExplorerUrl = "https://api.ergoplatform.com";
+    public final static String defaultTestnetExplorerUrl = "https://api-testnet.ergoplatform.com";
 
     /**
      * Create and initialize a new instance.
