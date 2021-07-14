@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
@@ -27,25 +29,21 @@ public class RestApiErgoClient implements ErgoClient {
      *                    `https://host[:port]` where port is optional.
      * @param networkType type of network (mainnet, testnet) the Ergo node is part of
      * @param apiKey      api key to authenticate this client
-     * @param explorerUrl http url to Ergo Explorer REST API endpoint of the
+     * @param explorerUrl Optional http url to Ergo Explorer REST API endpoint of the
      *                    form `https://host[:port]` where port is optional.
+     *                    If `null` or empty string passed then the Explorer client is not
+     *                    initialized and the client works in the `node only` mode.
      */
     RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl) {
         _nodeUrl = nodeUrl;
         _networkType = networkType;
         _client = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
-        if (explorerUrl == null) {
-            switch (networkType) {
-            case MAINNET:
-                _explorerUrl = defaultMainnetExplorerUrl;
-                break;
-            default:
-                _explorerUrl = defaultTestnetExplorerUrl;
-            }
+        _explorerUrl = explorerUrl;
+        if (Strings.isNullOrEmpty(_explorerUrl)) {
+            _explorer = new ExplorerApiClient(_explorerUrl);
         } else {
-            _explorerUrl = explorerUrl;
+            _explorer = null;
         }
-        _explorer = new ExplorerApiClient(_explorerUrl);
     }
 
     @Override
@@ -53,6 +51,18 @@ public class RestApiErgoClient implements ErgoClient {
         BlockchainContext ctx = new BlockchainContextBuilderImpl(_client, _explorer, _networkType).build();
         T res = action.apply(ctx);
         return res;
+    }
+
+    /**
+     * Returns the default URL for the given network type.
+     */
+    public static String getDefaultExplorerUrl(NetworkType networkType) {
+        switch (networkType) {
+        case MAINNET:
+            return defaultMainnetExplorerUrl;
+        default:
+            return defaultTestnetExplorerUrl;
+        }
     }
 
     /**
@@ -89,6 +99,7 @@ public class RestApiErgoClient implements ErgoClient {
      * Get underlying Ergo Network Explorer REST API typed client.
      */
     ExplorerApiClient getExplorerApiClient() {
+        Preconditions.checkNotNull(_explorer, ErgoClient.explorerUrlNotSpecifiedMessage);
         return _explorer;
     }
 

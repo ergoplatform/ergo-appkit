@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
@@ -160,6 +161,7 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public List<InputBox> getUnspentBoxesFor(Address address) {
+        Preconditions.checkNotNull(_retrofitExplorer, ErgoClient.explorerUrlNotSpecifiedMessage);
         List<OutputInfo> boxes = ExplorerFacade
                 .transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
         return getInputBoxes(boxes);
