@@ -66,11 +66,25 @@ public class RestApiErgoClient implements ErgoClient {
     }
 
     /**
+     * Creates a new {@link ErgoClient} instance in the `node-only` mode, i.e. connected
+     * to a given node of the given network type and not connected to explorer.
+     *
+     * @param nodeUrl     http url to Ergo node REST API endpoint of the form `https://host:port/`
+     * @param networkType type of network (mainnet, testnet) the Ergo node is part of
+     * @param apiKey      api key to authenticate this client
+     * @return a new instance of {@link ErgoClient} connected to a given node
+     */
+    public static ErgoClient createWithoutExplorer(String nodeUrl, NetworkType networkType, String apiKey) {
+        return new RestApiErgoClient(nodeUrl, networkType, apiKey, null);
+    }
+
+    /**
      * Creates a new {@link ErgoClient} instance connected to a given node of the given network type.
      *
      * @param nodeUrl     http url to Ergo node REST API endpoint of the form `https://host:port/`
      * @param networkType type of network (mainnet, testnet) the Ergo node is part of
      * @param apiKey      api key to authenticate this client
+     * @param explorerUrl http url to Explorer REST API endpoint of the form `https://host:port/`
      * @return a new instance of {@link ErgoClient} connected to a given node
      */
     public static ErgoClient create(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl) {
