@@ -79,12 +79,17 @@ public class RestApiErgoClient implements ErgoClient {
     }
 
     /**
-     * Creates a new {@link ErgoClient} instance connected to a given node of the given network type.
+     * Creates a new {@link ErgoClient} instance connected to a given node of the given
+     *  network type.
      *
-     * @param nodeUrl     http url to Ergo node REST API endpoint of the form `https://host:port/`
+     * @param nodeUrl     http url to Ergo node REST API endpoint of the form
+     * `https://host:port/`
      * @param networkType type of network (mainnet, testnet) the Ergo node is part of
      * @param apiKey      api key to authenticate this client
-     * @param explorerUrl http url to Explorer REST API endpoint of the form `https://host:port/`
+     * @param explorerUrl optional http url to Explorer REST API endpoint of the form
+     *                    `https://host:port/`. If null or empty, then explorer connection
+     *                    is not initialized so that the resulting {@link ErgoClient} can
+     *                    work in `node-only` mode.
      * @return a new instance of {@link ErgoClient} connected to a given node
      */
     public static ErgoClient create(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl) {
@@ -92,7 +97,14 @@ public class RestApiErgoClient implements ErgoClient {
     }
 
     /**
-     * Create a new {@link ErgoClient} instance using node configuration parameters.
+     * Create a new {@link ErgoClient} instance using node configuration parameters and
+     * optional explorerUrl.
+     *
+     * @param nodeConf    parameters of Ergo node used by ErgoClient.
+     * @param explorerUrl optional http url to Explorer REST API endpoint of the form
+     *                    `https://host:port/`. If null or empty, then explorer connection
+     *                    is not initialized so that the resulting {@link ErgoClient} can
+     *                    work in `node-only` mode.
      */
     public static ErgoClient create(ErgoNodeConfig nodeConf, String explorerUrl) {
         return RestApiErgoClient.create(
