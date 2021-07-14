@@ -23,7 +23,6 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
     private Retrofit _retrofit;
     private NodeInfo _nodeInfo;
     private List<BlockHeader> _headers;
-    private OkHttpClient _okExplorer;
     private Retrofit _retrofitExplorer;
 
     public BlockchainContextBuilderImpl(
@@ -40,10 +39,13 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
         _retrofit = _client.getAdapterBuilder()
                 .client(_ok)
                 .build();
-        _okExplorer = _explorer.getOkBuilder().build();
-        _retrofitExplorer = _explorer.getAdapterBuilder()
-                .client(_ok)
+
+        if (_explorer != null) {
+            OkHttpClient okExplorer = _explorer.getOkBuilder().build();
+            _retrofitExplorer = _explorer.getAdapterBuilder()
+                .client(okExplorer)
                 .build();
+        }
 
         _nodeInfo  = ErgoNodeFacade.getNodeInfo(_retrofit);
         _headers  = ErgoNodeFacade.getLastHeaders(_retrofit, BigDecimal.valueOf(NUM_LAST_HEADERS));

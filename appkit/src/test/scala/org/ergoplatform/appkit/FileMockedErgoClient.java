@@ -18,10 +18,12 @@ public class FileMockedErgoClient implements MockedErgoClient {
 
     private final List<String> _nodeResponses;
     private final List<String> _explorerResponses;
+    private final boolean _nodeOnlyMode;
 
-    public FileMockedErgoClient(List<String> nodeResponses, List<String> explorerResponses) {
+    public FileMockedErgoClient(List<String> nodeResponses, List<String> explorerResponses, boolean nodeOnlyMode) {
         _nodeResponses = nodeResponses;
         _explorerResponses = explorerResponses;
+        _nodeOnlyMode = nodeOnlyMode;
     }
 
     @Override
@@ -62,8 +64,10 @@ public class FileMockedErgoClient implements MockedErgoClient {
         HttpUrl explorerBaseUrl = explorer.url("/");
         ExplorerApiClient explorerClient = new ExplorerApiClient(explorerBaseUrl.toString());
 
-        BlockchainContext ctx =
-                new BlockchainContextBuilderImpl(client, explorerClient, NetworkType.MAINNET).build();
+        BlockchainContext ctx = new BlockchainContextBuilderImpl(
+            client,
+            _nodeOnlyMode ? null : explorerClient,
+            NetworkType.MAINNET).build();
 
         T res = action.apply(ctx);
 

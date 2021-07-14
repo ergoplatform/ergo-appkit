@@ -37,7 +37,10 @@ trait CommandsTesting extends ConsoleTesting { self: Matchers =>
           loadNodeResponse("response_NodeInfo.json"),
           loadNodeResponse("response_LastHeaders.json")) ++ data.nodeResponses
         val ers: IndexedSeq[String] = data.explorerResponses.toIndexedSeq
-        new FileMockedErgoClient(nrs.convertTo[JList[JString]], ers.convertTo[JList[JString]])
+        new FileMockedErgoClient(
+          nrs.convertTo[JList[JString]],
+          ers.convertTo[JList[JString]],
+          false)
       }
     })
   }

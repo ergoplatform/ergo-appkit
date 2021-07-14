@@ -9,13 +9,15 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
+import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
 class AnonymousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
     with AppkitTesting
-    with HttpClientTesting {
+    with HttpClientTesting
+    with NegativeTesting {
 
   val data = MockData(
     Seq(
@@ -33,6 +35,18 @@ class AnonymousAccessSpec extends PropSpec with Matchers
     }
     boxes.forEach { b: InputBox =>
       println(b.toJson(true))
+    }
+  }
+
+  property("Node-only mode (without explorer)") {
+    val ergoClient = createMockedErgoClient(data, nodeOnlyMode = true)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      ctx shouldNot be (null)
+      assertExceptionThrown(
+        ctx.getUnspentBoxesFor(Address.create(addr1)),
+        exceptionLike[NullPointerException](ErgoClient.explorerUrlNotSpecifiedMessage)
+      )
     }
   }
 

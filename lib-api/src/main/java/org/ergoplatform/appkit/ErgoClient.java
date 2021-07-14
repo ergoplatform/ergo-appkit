@@ -22,5 +22,10 @@ public interface ErgoClient {
      * blockchain and passed as the argument of the action.
      */
     <T> T execute(Function<BlockchainContext, T> action);
+
+    /**
+     * This message is used whenever the explorer is requested in "node-only" mode.
+     */
+    String explorerUrlNotSpecifiedMessage = "Explorer URL is not specified when RestApiErgoClient.create() is called.";
 }
 
