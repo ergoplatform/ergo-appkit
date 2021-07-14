@@ -3,7 +3,7 @@ package org.ergoplatform.appkit.config;
 import org.ergoplatform.appkit.NetworkType;
 
 /**
- * Parameters of Ergo node used by ErgoTool.
+ * Parameters of Ergo node used by ErgoClient.
  */
 public class ErgoNodeConfig {
     private ApiConfig nodeApi;

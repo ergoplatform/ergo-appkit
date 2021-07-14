@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
@@ -27,25 +29,21 @@ public class RestApiErgoClient implements ErgoClient {
      *                    `https://host[:port]` where port is optional.
      * @param networkType type of network (mainnet, testnet) the Ergo node is part of
      * @param apiKey      api key to authenticate this client
-     * @param explorerUrl http url to Ergo Explorer REST API endpoint of the
+     * @param explorerUrl Optional http url to Ergo Explorer REST API endpoint of the
      *                    form `https://host[:port]` where port is optional.
+     *                    If `null` or empty string passed then the Explorer client is not
+     *                    initialized and the client works in the `node only` mode.
      */
     RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl) {
         _nodeUrl = nodeUrl;
         _networkType = networkType;
         _client = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
-        if (explorerUrl == null) {
-            switch (networkType) {
-            case MAINNET:
-                _explorerUrl = defaultMainnetExplorerUrl;
-                break;
-            default:
-                _explorerUrl = defaultTestnetExplorerUrl;
-            }
+        _explorerUrl = explorerUrl;
+        if (Strings.isNullOrEmpty(_explorerUrl)) {
+            _explorer = new ExplorerApiClient(_explorerUrl);
         } else {
-            _explorerUrl = explorerUrl;
+            _explorer = null;
         }
-        _explorer = new ExplorerApiClient(_explorerUrl);
     }
 
     @Override
@@ -56,11 +54,42 @@ public class RestApiErgoClient implements ErgoClient {
     }
 
     /**
-     * Creates a new {@link ErgoClient} instance connected to a given node of the given network type.
+     * Returns the default URL for the given network type.
+     */
+    public static String getDefaultExplorerUrl(NetworkType networkType) {
+        switch (networkType) {
+        case MAINNET:
+            return defaultMainnetExplorerUrl;
+        default:
+            return defaultTestnetExplorerUrl;
+        }
+    }
+
+    /**
+     * Creates a new {@link ErgoClient} instance in the `node-only` mode, i.e. connected
+     * to a given node of the given network type and not connected to explorer.
      *
      * @param nodeUrl     http url to Ergo node REST API endpoint of the form `https://host:port/`
      * @param networkType type of network (mainnet, testnet) the Ergo node is part of
      * @param apiKey      api key to authenticate this client
+     * @return a new instance of {@link ErgoClient} connected to a given node
+     */
+    public static ErgoClient createWithoutExplorer(String nodeUrl, NetworkType networkType, String apiKey) {
+        return new RestApiErgoClient(nodeUrl, networkType, apiKey, null);
+    }
+
+    /**
+     * Creates a new {@link ErgoClient} instance connected to a given node of the given
+     *  network type.
+     *
+     * @param nodeUrl     http url to Ergo node REST API endpoint of the form
+     * `https://host:port/`
+     * @param networkType type of network (mainnet, testnet) the Ergo node is part of
+     * @param apiKey      api key to authenticate this client
+     * @param explorerUrl optional http url to Explorer REST API endpoint of the form
+     *                    `https://host:port/`. If null or empty, then explorer connection
+     *                    is not initialized so that the resulting {@link ErgoClient} can
+     *                    work in `node-only` mode.
      * @return a new instance of {@link ErgoClient} connected to a given node
      */
     public static ErgoClient create(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl) {
@@ -68,7 +97,14 @@ public class RestApiErgoClient implements ErgoClient {
     }
 
     /**
-     * Create a new {@link ErgoClient} instance using node configuration parameters.
+     * Create a new {@link ErgoClient} instance using node configuration parameters and
+     * optional explorerUrl.
+     *
+     * @param nodeConf    parameters of Ergo node used by ErgoClient.
+     * @param explorerUrl optional http url to Explorer REST API endpoint of the form
+     *                    `https://host:port/`. If null or empty, then explorer connection
+     *                    is not initialized so that the resulting {@link ErgoClient} can
+     *                    work in `node-only` mode.
      */
     public static ErgoClient create(ErgoNodeConfig nodeConf, String explorerUrl) {
         return RestApiErgoClient.create(
@@ -89,6 +125,7 @@ public class RestApiErgoClient implements ErgoClient {
      * Get underlying Ergo Network Explorer REST API typed client.
      */
     ExplorerApiClient getExplorerApiClient() {
+        Preconditions.checkNotNull(_explorer, ErgoClient.explorerUrlNotSpecifiedMessage);
         return _explorer;
     }
 
