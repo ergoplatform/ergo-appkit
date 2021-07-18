@@ -39,7 +39,7 @@ public class RestApiErgoClient implements ErgoClient {
         _networkType = networkType;
         _client = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
         _explorerUrl = explorerUrl;
-        if (Strings.isNullOrEmpty(_explorerUrl)) {
+        if (!Strings.isNullOrEmpty(_explorerUrl)) {
             _explorer = new ExplorerApiClient(_explorerUrl);
         } else {
             _explorer = null;
