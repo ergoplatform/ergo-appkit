@@ -22,7 +22,7 @@ public class ExplorerFacade extends ApiFacade {
      * @param id  address string (required)
      * @param offset  optional zero based offset of the first box in the list, default = 0
      * @param limit  optional number of boxes to retrive (default = 20)
-     * @return TransactionOutput
+     * @return list of requested outputs
      */
     static public List<OutputInfo> transactionsBoxesByAddressUnspentIdGet(
             Retrofit r, String id, Integer offset, Integer limit) throws ErgoClientException {

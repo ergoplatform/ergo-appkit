@@ -98,7 +98,7 @@ public class BoxOperations {
      * @param ctx             the blockchain context to use for loading
      * @param senderAddresses the addresses which owns the boxes
      * @param amount          how much NanoErg the boxes should cover
-     * @return a `limit` number of boxes starting from `offset`
+     * @return a list of boxes covering the given amount
      */
     public static List<InputBox> loadTop(
         BlockchainContext ctx,
