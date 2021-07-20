@@ -72,22 +72,60 @@ public class BoxOperations {
         return signed.toJson(true);
     }
 
-    public static List<InputBox> loadTop(BlockchainContext ctx, Address sender, long amount) {
-        List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-        List<InputBox> selected = selectTop(unspent, amount);
+    /**
+     * Load boxes for the given sender address covering the given amount of NanoErgs.
+     * The given page of boxes is loaded and selected for the resulting list.
+     *
+     * @param ctx    the blockchain context to use for loading
+     * @param sender the address which owns the boxes
+     * @param amount how much NanoErg the boxes should cover
+     * @return a `limit` number of boxes starting from `offset`
+     */
+    public static List<InputBox> loadTop(
+        BlockchainContext ctx,
+        Address sender, long amount) {
+        CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, amount);
+        List<InputBox> selected = selectTop(unspent.getBoxes(), amount);
         return selected;
     }
 
-    public static List<InputBox> loadTop(BlockchainContext ctx, List<Address> senderAddresses, long amount) {
+    /**
+     * Load boxes for the given sender addresses covering the given amount of NanoErgs.
+     * The given page of boxes is loaded from each address and concatenated to a single
+     *  list.
+     * The list is then used to select covering boxes.
+     *
+     * @param ctx             the blockchain context to use for loading
+     * @param senderAddresses the addresses which owns the boxes
+     * @param amount          how much NanoErg the boxes should cover
+     * @return a `limit` number of boxes starting from `offset`
+     */
+    public static List<InputBox> loadTop(
+        BlockchainContext ctx,
+        List<Address> senderAddresses, long amount) {
         List<InputBox> unspentBoxes = new ArrayList<>();
+        long remaining = amount;
         for (Address sender : senderAddresses) {
-            List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-            unspentBoxes.addAll(unspent);
+            CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, remaining);
+            for (InputBox b : unspent.getBoxes()) {
+                unspentBoxes.add(b);
+                remaining -= b.getValue();
+                if (remaining <= 0) {
+                    // collected enough boxes to cover the amount
+                    break;
+                }
+            }
+            if (remaining <= 0) break;
         }
         List<InputBox> selected = selectTop(unspentBoxes, amount);
         return selected;
     }
 
+    /**
+     * Creates a new {@link SignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The address of the given senderProver is used to collect
+     * boxes for spending.
+     */
     public static SignedTransaction putToContractTx(
             BlockchainContext ctx,
             ErgoProver senderProver, boolean useEip3Addresses,
