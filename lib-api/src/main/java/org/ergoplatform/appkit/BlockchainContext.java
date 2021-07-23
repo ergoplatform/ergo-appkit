@@ -77,7 +77,7 @@ public interface BlockchainContext {
 
     ErgoContract compileContract(Constants constants, String ergoScript);
 
-    /** Default size of the chuck (aka page size) used in API requests. */
+    /** Default size of the chunk (aka page size) used in API requests. */
     int DEFAULT_LIMIT_FOR_API = 20;
 
     /**
