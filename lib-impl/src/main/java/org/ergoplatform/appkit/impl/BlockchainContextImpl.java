@@ -160,11 +160,39 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public List<InputBox> getUnspentBoxesFor(Address address) {
+    public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
         Preconditions.checkNotNull(_retrofitExplorer, ErgoClient.explorerUrlNotSpecifiedMessage);
         List<OutputInfo> boxes = ExplorerFacade
-                .transactionsBoxesByAddressUnspentIdGet(_retrofitExplorer, address.toString());
+                .transactionsBoxesByAddressUnspentIdGet(
+                    _retrofitExplorer, address.toString(), offset, limit);
         return getInputBoxes(boxes);
+    }
+
+    @Override
+    public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend) {
+        Preconditions.checkArgument(amountToSpend > 0, "amountToSpend should be > 0");
+        ArrayList<InputBox> res = new ArrayList<>();
+        long remainToCollect = amountToSpend;
+        int offset = 0;
+        while (true) {
+            List<InputBox> chunk = getUnspentBoxesFor(address, offset, DEFAULT_LIMIT_FOR_API);
+            for (InputBox b : chunk) {
+              res.add(b);
+              remainToCollect -= b.getValue();
+              if (remainToCollect <= 0)
+                return new CoveringBoxes(amountToSpend, res);
+            }
+            // this chunk is not enough, go to the next (if any)
+            if (chunk.size() < DEFAULT_LIMIT_FOR_API) {
+                // this was the last chunk, but still remain to collect
+                assert remainToCollect > 0;
+                // cannot satisfy the request, but still return cb, with cb.isCovered == false
+                CoveringBoxes cb =  new CoveringBoxes(amountToSpend, res);
+                return cb;
+            }
+            // step to next chunk
+            offset += DEFAULT_LIMIT_FOR_API;
+        }
     }
 }
 
