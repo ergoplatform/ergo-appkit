@@ -7,7 +7,7 @@ import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicChecksumExce
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{Matchers, PropSpec}
 
-import scala.collection.JavaConverters.seqAsJavaList
+import scala.collection.JavaConversions.seqAsJavaList
 
 class MnemonicSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
