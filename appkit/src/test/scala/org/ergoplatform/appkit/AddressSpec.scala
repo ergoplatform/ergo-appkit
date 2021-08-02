@@ -42,6 +42,22 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
     addr.toString shouldBe addrStr
   }
 
+  property("construct P2S Address") {
+    implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder(ErgoAddressEncoder.TestnetNetworkPrefix);
+    val ergoAddr = encoder.fromString("Ms7smJwLGbUAjuWQ").get
+    val addr = new Address(ergoAddr)
+    addr.isP2S shouldBe true
+    addr.getErgoAddress.script.constants.size shouldBe 1
+  }
+
+  property("construct P2SH Address") {
+    implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder(ErgoAddressEncoder.TestnetNetworkPrefix);
+    val ergoAddr = encoder.fromString("rbcrmKEYduUvADj9Ts3dSVSG27h54pgrq5fPuwB").get
+    val addr = new Address(ergoAddr)
+    addr.isP2S shouldBe false
+    addr.isP2PK shouldBe false
+  }
+
   property("Address createEip3Address") {
     val addr = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
     val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, mnemonic, SecretString.empty())

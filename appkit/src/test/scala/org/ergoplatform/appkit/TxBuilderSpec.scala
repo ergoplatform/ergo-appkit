@@ -5,6 +5,7 @@ import java.math.BigInteger
 import java.util.Arrays
 
 import org.ergoplatform.ErgoScriptPredef
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
@@ -218,7 +219,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val pkContract = ErgoContracts.sendToPK(ctx, recipient)
+      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
       val signed = BoxOperations.putToContractTx(ctx,
           senderProver, false, pkContract, amountToSend)
       assert(signed != null)
