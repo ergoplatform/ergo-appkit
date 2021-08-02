@@ -1,10 +1,10 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.ergoplatform.appkit.Parameters.MinFee;
@@ -65,9 +65,9 @@ public class BoxOperations {
         ErgoProver senderProver, boolean useEip3Addresses,
         Address recipient, long amountToSend) {
 
-        ErgoContract pkContract = ErgoContracts.sendToPK(ctx, recipient);
+        ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script());
         SignedTransaction signed = putToContractTx(ctx, senderProver, useEip3Addresses,
-            pkContract, amountToSend);
+            contract, amountToSend);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }
@@ -162,13 +162,13 @@ public class BoxOperations {
             UnsignedTransactionBuilder txB,
             List<InputBox> boxes,
             ErgoProver sender, Address recipient, long amount, long fee) {
-        OutBox aliceBox = txB.outBoxBuilder()
+        OutBox newBox = txB.outBoxBuilder()
                 .value(amount)
-                .contract(ErgoContracts.sendToPK(ctx, recipient))
+                .contract(new ErgoTreeContract(recipient.getErgoAddress().script()))
                 .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
-                .outputs(aliceBox)
+                .outputs(newBox)
                 .fee(fee)
                 .sendChangeTo(sender.getP2PKAddress())
                 .build();
