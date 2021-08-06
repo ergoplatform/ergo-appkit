@@ -9,11 +9,12 @@ import org.ergoplatform.appkit.Iso;
 import org.ergoplatform.appkit.SignedInput;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.restapi.client.ErgoTransaction;
+import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
@@ -53,10 +54,10 @@ public class SignedTransactionImpl implements SignedTransaction {
     public String toJson(boolean prettyPrint, boolean formatJson) {
     	ErgoTransaction tx = ScalaBridge.isoErgoTransaction().from(_tx);
     	if (prettyPrint) {
-    		tx.getOutputs().forEach(o -> {
-    			Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
-    			o.ergoTree(tree.toString());
-    		});
+            for (ErgoTransactionOutput o : tx.getOutputs()) {
+                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+                o.ergoTree(tree.toString());
+            }
     	}
     	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
     	String json = gson.toJson(tx);
@@ -66,16 +67,20 @@ public class SignedTransactionImpl implements SignedTransaction {
     @Override
     public List<SignedInput> getSignedInputs() {
         List<Input> inputs = Iso.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
-        List<SignedInput> res = inputs.stream()
-                .map(input -> (SignedInput)new SignedInputImpl(this, input)).collect(Collectors.toList());
+        List<SignedInput> res = new ArrayList<>(inputs.size());
+        for (Input input : inputs) {
+            res.add(new SignedInputImpl(this, input));
+        }
         return res;
     }
 
     @Override
     public List<InputBox> getOutputsToSpend() {
         List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
-        List<InputBox> res = outputs.stream()
-          .map(ergoBox -> (InputBox)new InputBoxImpl(_ctx, ergoBox)).collect(Collectors.toList());
+        List<InputBox> res = new ArrayList<>(outputs.size());
+        for (ErgoBox ergoBox : outputs) {
+            res.add(new InputBoxImpl(_ctx, ergoBox));
+        }
         return res;
     }
 
