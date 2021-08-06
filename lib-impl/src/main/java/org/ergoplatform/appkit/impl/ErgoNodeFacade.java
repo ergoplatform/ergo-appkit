@@ -94,7 +94,8 @@ public class ErgoNodeFacade extends ApiFacade {
                 new Object[]{tx}).execute();
 
             if (!response.isSuccessful()) {
-                throw new ErgoClientException(response.body(), null);
+                throw new ErgoClientException(response.code() + ": " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Server returned error"), null);
             } else {
                 return response.body();
             }
