@@ -141,7 +141,7 @@ public class BoxOperations {
         }
         List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee);
 
-        P2PKAddress changeAddress = (useEip3Addresses) ? senderProver.getEip3Addresses().get(0).asP2PK() : senderProver.getP2PKAddress();
+        P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
         OutBox newBox = txB.outBoxBuilder()
                 .value(amountToSend)
