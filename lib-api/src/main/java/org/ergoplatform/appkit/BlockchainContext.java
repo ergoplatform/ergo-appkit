@@ -98,8 +98,9 @@ public interface BlockchainContext {
      *
      * @param address owner of the boxes to be retrieved
      * @param amountToSpend amount of NanoErgs to be covered
+     * @param tokensToSpend ErgoToken to spent
      * @return a new instance of {@link CoveringBoxes} set
      */
-    CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend);
+    CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend);
 }
 
