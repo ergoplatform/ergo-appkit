@@ -170,10 +170,11 @@ public class BlockchainContextImpl implements BlockchainContext {
 
     @Override
     public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend) {
-        Preconditions.checkArgument(amountToSpend > 0, "amountToSpend should be > 0");
+        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
+        Preconditions.checkArgument(amountToSpend > 0 ||
+            !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
         ArrayList<InputBox> result = new ArrayList<>();
         long remainToCollect = amountToSpend;
-        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
         int offset = 0;
         while (true) {
             List<InputBox> chunk = getUnspentBoxesFor(address, offset, DEFAULT_LIMIT_FOR_API);
