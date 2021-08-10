@@ -4,7 +4,8 @@ import java.util.List;
 
 /**
  * Represents a collection of boxes covering the given amount of NanoErgs to spend.
- * If the amount is not covered in full, then isCovered() returns false.
+ * If the amount is not covered in full, then isCovered() returns false. Tokens are not taken into
+ * account.
  * Thus, this class allows to represent partial coverage, which is useful to collect boxes
  * in many steps.
  */
@@ -19,9 +20,11 @@ public class CoveringBoxes {
 
     /** The amount covered by the boxes in this set. */
     public long getCoveredAmount() {
-        return _boxes.stream()
-            .map(InputBox::getValue)
-            .reduce(0L, Long::sum);
+        long value = 0;
+        for (InputBox box : _boxes) {
+            value = value + box.getValue();
+        }
+        return value;
     }
 
     /** Returns true if the amount is covered by the boxes in this set, false otherwise. */
