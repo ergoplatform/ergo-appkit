@@ -79,7 +79,7 @@ public class BoxOperations {
      * @param ctx    the blockchain context to use for loading
      * @param sender the address which owns the boxes
      * @param amount how much NanoErg the boxes should cover
-     * @param tokensToSpend   list auf ErgoToken to spent. Make sure every token is listed only once
+     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
      * @return a `limit` number of boxes starting from `offset`
      */
     public static List<InputBox> loadTop(
@@ -100,7 +100,7 @@ public class BoxOperations {
      * @param ctx             the blockchain context to use for loading
      * @param senderAddresses the addresses which owns the boxes
      * @param amount          how much NanoErg the boxes should cover
-     * @param tokensToSpend   list auf ErgoToken to spent. Make sure every token is listed only once
+     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
      * @return a list of boxes covering the given amount
      */
     public static List<InputBox> loadTop(
