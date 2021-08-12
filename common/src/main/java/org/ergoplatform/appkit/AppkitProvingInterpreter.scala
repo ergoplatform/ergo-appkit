@@ -11,12 +11,16 @@ import sigmastate.basics.{SigmaProtocol, SigmaProtocolPrivateInput, SigmaProtoco
 import org.ergoplatform._
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext, TransactionContext}
+import sigmastate.Values.ErgoTree
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.ProverInterpreter
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
+import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
+import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.utxo.CostTable
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
+import sigmastate.utils.Helpers._
+
 import scala.collection.mutable
 
 object Helpers {
@@ -61,7 +65,7 @@ class AppkitProvingInterpreter(
     newCost
   }
 
-  /**
+  /** Reduces and signs the given transaction.
    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
    * @param baseCost the cost accumulated before this transaction
    * @return a new signed transaction with all inputs signed and the cost of this transaction
@@ -72,6 +76,32 @@ class AppkitProvingInterpreter(
            dataBoxes: IndexedSeq[ErgoBox],
            stateContext: ErgoLikeStateContext,
            baseCost: Int): Try[(ErgoLikeTransaction, Int)] = Try {
+    val maxCost = params.maxBlockCost
+    var currentCost: Long = baseCost
+
+    val (reducedTx, txCost) = reduceTransaction(unsignedTx, boxesToSpend, dataBoxes, stateContext, baseCost)
+    currentCost = addCostLimited(currentCost, txCost, maxCost, msg = reducedTx.toString())
+
+    val (signedTx, cost) = signReduced(reducedTx, currentCost.toInt)
+    (signedTx, txCost + cost)
+  }
+
+  /** Reduce inputs of the given unsigned transaction to provable sigma propositions using
+    * the given context. See [[ReducedTransaction]] for details.
+    *
+    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
+    * @param baseCost the cost accumulated so far and before this operation
+    * @return a new reduced transaction with all inputs reduced and the cost of this transaction
+    *         The returned cost doesn't include (so they need to be added back to get the total cost):
+    *         1) `baseCost`
+    *         2) reduction cost for each input.
+    */
+  def reduceTransaction(
+        unsignedTx: UnsignedErgoLikeTransaction,
+        boxesToSpend: IndexedSeq[ExtendedInputBox],
+        dataBoxes: IndexedSeq[ErgoBox],
+        stateContext: ErgoLikeStateContext,
+        baseCost: Int): (ReducedTransaction, Int) = {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
     if (unsignedTx.dataInputs.length != dataBoxes.length) throw new Exception("Not enough data boxes")
 
@@ -88,8 +118,6 @@ class AppkitProvingInterpreter(
 
     val transactionContext = TransactionContext(boxesToSpend.map(_.box), dataBoxes, unsignedTx)
 
-    var currentCost = startCost
-
     val (outAssets, outAssetsNum) = JavaHelpers.extractAssets(unsignedTx.outputCandidates)
     val (inAssets, inAssetsNum) = JavaHelpers.extractAssets(boxesToSpend.map(_.box))
 
@@ -98,11 +126,13 @@ class AppkitProvingInterpreter(
       Math.addExact(
         Math.multiplyExact(Math.addExact(outAssetsNum, inAssetsNum), tokenAccessCost),
         Math.multiplyExact(Math.addExact(inAssets.size, outAssets.size), tokenAccessCost))
-    currentCost = addCostLimited(currentCost,
+
+    val txCost = addCostLimited(startCost,
       delta = totalAssetsAccessCost,
       limit = maxCost, msg = s"when adding assets cost of $totalAssetsAccessCost")
 
-    val provedInputs = mutable.ArrayBuilder.make[Input]()
+    var currentCost = txCost
+    val reducedInputs = mutable.ArrayBuilder.make[ReducedInputData]()
 
     for ((inputBox, boxIdx) <- boxesToSpend.zipWithIndex) {
       val unsignedInput = unsignedTx.inputs(boxIdx)
@@ -123,7 +153,41 @@ class AppkitProvingInterpreter(
         activatedScriptVersion = (params.blockVersion - 1).toByte
       )
 
-      val proverResult = prove(inputBox.box.ergoTree, context, unsignedTx.messageToSign).getOrThrow
+      val reducedInput = reduce(Interpreter.emptyEnv, inputBox.box.ergoTree, context)
+
+      currentCost = addCostLimited(currentCost,
+        reducedInput.reductionResult.cost, limit = maxCost, msg = inputBox.toString())
+
+      reducedInputs += reducedInput
+    }
+
+    val reducedTx = ReducedTransaction(unsignedTx, reducedInputs.result())
+    val txReductionCost = txCost.toInt - baseCost
+    (reducedTx, txReductionCost)
+  }
+
+  /** Signs the given transaction (i.e. providing spending proofs) for each input so that
+   * the resulting transaction can be submitted to the blockchain.
+   * Note, this method doesn't require context to generate proofs (aka signatures).
+   *
+   * @param reducedTx unsigend transaction augmented with reduced
+   * @param baseCost the cost accumulated so far and before this operation
+   * @return a new signed transaction with all inputs signed and the cost of this transaction
+   *         The returned cost includes all the costs of the reduced inputs, but not baseCost
+   */
+  def signReduced(
+        reducedTx: ReducedTransaction,
+        baseCost: Int): (ErgoLikeTransaction, Int) = {
+    val provedInputs = mutable.ArrayBuilder.make[Input]()
+    val unsignedTx = reducedTx.unsignedTx
+
+    val maxCost = params.maxBlockCost
+    var currentCost: Long = baseCost
+
+    for ((reducedInput, boxIdx) <- reducedTx.reducedInputs.zipWithIndex ) {
+      val unsignedInput = unsignedTx.inputs(boxIdx)
+
+      val proverResult = proveReduced(reducedInput, unsignedTx.messageToSign)
       val signedInput = Input(unsignedInput.boxId, proverResult)
 
       currentCost = addCostLimited(currentCost, proverResult.cost, maxCost, msg = signedInput.toString())
@@ -131,9 +195,65 @@ class AppkitProvingInterpreter(
       provedInputs += signedInput
     }
 
-    val signedTx = new ErgoLikeTransaction(provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
+    val signedTx = new ErgoLikeTransaction(
+      provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
     val txCost = currentCost.toInt - baseCost
     (signedTx, txCost)
   }
 
+  // TODO pull this method up to the base class and reuse in `prove`
+  /** Reduces the given ErgoTree in the given context to the sigma proposition.
+   *
+   * @param env      script environment (use Interpreter.emptyEnv as default)
+   * @param ergoTree input ErgoTree expression to reduce
+   * @param context  context used in reduction
+   * @return data object containing enough data to sign a transaction without Context.
+   */
+  def reduce(env: ScriptEnv,
+            ergoTree: ErgoTree,
+            context: CTX): ReducedInputData = {
+    val initCost = ergoTree.complexity + context.initCost
+    val remainingLimit = context.costLimit - initCost
+    if (remainingLimit <= 0)
+      throw new CostLimitException(initCost,
+        s"Estimated execution cost $initCost exceeds the limit ${context.costLimit}", None)
+
+    val ctxUpdInitCost = context.withInitCost(initCost).asInstanceOf[CTX]
+
+    val res = fullReduction(ergoTree, ctxUpdInitCost, env)
+    ReducedInputData(res, ctxUpdInitCost.extension)
+  }
+
+  // TODO pull this method up to the base class and reuse in `prove`
+  /** Generates proof (aka signature) for the given message using secrets of this prover.
+    * All the necessary secrets should be configured in this prover to satisfy the given
+    * sigma proposition in the reducedInput.
+    */
+  def proveReduced(
+        reducedInput: ReducedInputData,
+        message: Array[Byte],
+        hintsBag: HintsBag = HintsBag.empty): CostedProverResult = {
+    val proof = generateProof(reducedInput.reductionResult.value, message, hintsBag)
+    CostedProverResult(proof, reducedInput.extension, reducedInput.reductionResult.cost)
+  }
+
 }
+
+/** Represents data necessary to sign an input of an unsigend transaction.
+  * @param reductionResult result of reducing input script to a sigma proposition
+  * @param extension context extensions (aka context variables) used by script and which
+  *                  are also necessary to verify the transaction on-chain. Extensions are
+  *                  included in tx bytes, which are signed.
+  */
+case class ReducedInputData(reductionResult: ReductionResult, extension: ContextExtension)
+
+/** Represent `reduced` transaction, i.e. unsigned transaction where each unsigned input
+  * is augmented with [[ReducedInputData]] which contains a script reduction result.
+  * After an unsigned transaction is reduced it can be signed without context.
+  * Thus, it can be serialized and transferred for example to Cold Wallet and signed
+  * in an environment where secrets are known.
+  */
+case class ReducedTransaction(
+  unsignedTx: UnsignedErgoLikeTransaction,
+  reducedInputs: Seq[ReducedInputData]
+)
