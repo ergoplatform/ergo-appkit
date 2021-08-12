@@ -87,7 +87,7 @@ class AppkitProvingInterpreter(
   }
 
   /** Reduce inputs of the given unsigned transaction to provable sigma propositions using
-    * the given context. See [[ReducedTransaction]] for details.
+    * the given context. See [[ReducedErgoLikeTransaction]] for details.
     *
     * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
     * @param baseCost the cost accumulated so far and before this operation
@@ -101,7 +101,7 @@ class AppkitProvingInterpreter(
         boxesToSpend: IndexedSeq[ExtendedInputBox],
         dataBoxes: IndexedSeq[ErgoBox],
         stateContext: ErgoLikeStateContext,
-        baseCost: Int): (ReducedTransaction, Int) = {
+        baseCost: Int): (ReducedErgoLikeTransaction, Int) = {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
     if (unsignedTx.dataInputs.length != dataBoxes.length) throw new Exception("Not enough data boxes")
 
@@ -161,7 +161,7 @@ class AppkitProvingInterpreter(
       reducedInputs += reducedInput
     }
 
-    val reducedTx = ReducedTransaction(unsignedTx, reducedInputs.result())
+    val reducedTx = ReducedErgoLikeTransaction(unsignedTx, reducedInputs.result())
     val txReductionCost = txCost.toInt - baseCost
     (reducedTx, txReductionCost)
   }
@@ -176,8 +176,8 @@ class AppkitProvingInterpreter(
    *         The returned cost includes all the costs of the reduced inputs, but not baseCost
    */
   def signReduced(
-        reducedTx: ReducedTransaction,
-        baseCost: Int): (ErgoLikeTransaction, Int) = {
+          reducedTx: ReducedErgoLikeTransaction,
+          baseCost: Int): (ErgoLikeTransaction, Int) = {
     val provedInputs = mutable.ArrayBuilder.make[Input]()
     val unsignedTx = reducedTx.unsignedTx
 
@@ -253,7 +253,7 @@ case class ReducedInputData(reductionResult: ReductionResult, extension: Context
   * Thus, it can be serialized and transferred for example to Cold Wallet and signed
   * in an environment where secrets are known.
   */
-case class ReducedTransaction(
+case class ReducedErgoLikeTransaction(
   unsignedTx: UnsignedErgoLikeTransaction,
   reducedInputs: Seq[ReducedInputData]
 )

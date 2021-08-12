@@ -199,16 +199,16 @@ class TxBuilderSpec extends PropSpec with Matchers
     }
   }
 
-  property("send to recipient (non EIP-3)") {
-    val data = MockData(
-      Seq(
-        loadNodeResponse("response_Box1.json"),
-        loadNodeResponse("response_Box2.json"),
-        loadNodeResponse("response_Box3.json"),
-        "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
-      Seq(
-        loadExplorerResponse("response_boxesByAddressUnspent.json")))
+  val data = MockData(
+    Seq(
+      loadNodeResponse("response_Box1.json"),
+      loadNodeResponse("response_Box2.json"),
+      loadNodeResponse("response_Box3.json"),
+      "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
+    Seq(
+      loadExplorerResponse("response_boxesByAddressUnspent.json")))
 
+  property("send to recipient (non EIP-3)") {
     val ergoClient = createMockedErgoClient(data)
 
     ergoClient.execute { ctx: BlockchainContext =>
@@ -224,6 +224,31 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signed = BoxOperations.putToContractTx(ctx,
           senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
       assert(signed != null)
+    }
+  }
+
+  property("reduce transaction") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val storage = SecretStorage.loadFrom("storage/E2.json")
+      storage.unlock("abc")
+
+      val recipient = Address.fromMnemonic(
+            NetworkType.MAINNET,
+            Mnemonic.create(mnemonic, SecretString.empty()))
+
+      val amountToSend = 1000000
+      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+      val unsigned = BoxOperations.putToContractTxUnsigned(ctx,
+        senders, pkContract, amountToSend,
+        new util.ArrayList[ErgoToken]())
+
+      val prover = ctx.newProverBuilder.build // prover without secrets
+      val reduced = prover.reduce(unsigned)
+      reduced shouldBe null
     }
   }
 

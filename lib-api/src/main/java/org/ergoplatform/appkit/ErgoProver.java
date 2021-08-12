@@ -62,5 +62,7 @@ public interface ErgoProver {
      * proofs
      */
     SignedTransaction sign(UnsignedTransaction tx, int baseCost);
+
+    ReducedTransaction reduce(UnsignedTransaction tx);
 }
 

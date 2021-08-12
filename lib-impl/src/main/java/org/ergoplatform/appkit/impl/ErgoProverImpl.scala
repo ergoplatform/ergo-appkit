@@ -45,5 +45,9 @@ class ErgoProverImpl(_ctx: BlockchainContextImpl,
     val (signed, cost) = _prover.sign(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost).getOrThrow
     new SignedTransactionImpl(_ctx, signed, cost)
   }
+
+  override def reduce(tx: UnsignedTransaction): ReducedTransaction = {
+    null
+  }
 }
 
