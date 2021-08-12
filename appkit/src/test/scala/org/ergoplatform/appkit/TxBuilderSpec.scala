@@ -262,7 +262,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
     val coldClient = new ColdErgoClient(NetworkType.MAINNET, blockchainParams)
 
-    coldClient.execute { ctx =>
+    coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold
       assertExceptionThrown(ctx.getHeight, exceptionLike[NotImplementedError]())
       assertExceptionThrown(
