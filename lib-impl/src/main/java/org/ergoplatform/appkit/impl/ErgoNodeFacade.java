@@ -2,6 +2,8 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.restapi.client.*;
+
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
@@ -88,9 +90,15 @@ public class ErgoNodeFacade extends ApiFacade {
             Retrofit r, ErgoTransaction tx) throws ErgoClientException {
         return execute(r, () -> {
             Method method = TransactionsApi.class.getMethod("sendTransaction", ErgoTransaction.class);
-            String txId = RetrofitUtil.<String>invokeServiceMethod(r, method,
-                    new Object[]{tx}).execute().body();
-            return txId;
+            Response<String> response = RetrofitUtil.<String>invokeServiceMethod(r, method,
+                new Object[]{tx}).execute();
+
+            if (!response.isSuccessful()) {
+                throw new ErgoClientException(response.code() + ": " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Server returned error"), null);
+            } else {
+                return response.body();
+            }
         });
     }
 

@@ -2,13 +2,14 @@ package org.ergoplatform.appkit
 
 import java.io.File
 import java.math.BigInteger
+import java.util
 import java.util.Arrays
 
 import org.ergoplatform.ErgoScriptPredef
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 
@@ -221,7 +222,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val amountToSend = 1000000
       val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
       val signed = BoxOperations.putToContractTx(ctx,
-          senderProver, false, pkContract, amountToSend)
+          senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
       assert(signed != null)
     }
   }

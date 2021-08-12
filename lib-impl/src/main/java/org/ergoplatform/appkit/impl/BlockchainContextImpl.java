@@ -169,26 +169,30 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend) {
-        Preconditions.checkArgument(amountToSpend > 0, "amountToSpend should be > 0");
-        ArrayList<InputBox> res = new ArrayList<>();
+    public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend) {
+        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
+        Preconditions.checkArgument(amountToSpend > 0 ||
+            !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
+        ArrayList<InputBox> result = new ArrayList<>();
         long remainToCollect = amountToSpend;
         int offset = 0;
         while (true) {
             List<InputBox> chunk = getUnspentBoxesFor(address, offset, DEFAULT_LIMIT_FOR_API);
             for (InputBox b : chunk) {
-              res.add(b);
-              remainToCollect -= b.getValue();
-              if (remainToCollect <= 0)
-                return new CoveringBoxes(amountToSpend, res);
+                boolean usefulTokens = tokensRemaining.foundNewTokens(b.getTokens());
+                if (usefulTokens || remainToCollect > 0) {
+                    result.add(b);
+                    remainToCollect -= b.getValue();
+                }
+                if (remainToCollect <= 0 && tokensRemaining.areTokensCovered())
+                    return new CoveringBoxes(amountToSpend, result);
             }
             // this chunk is not enough, go to the next (if any)
             if (chunk.size() < DEFAULT_LIMIT_FOR_API) {
                 // this was the last chunk, but still remain to collect
-                assert remainToCollect > 0;
+                assert remainToCollect > 0 || !tokensRemaining.areTokensCovered();
                 // cannot satisfy the request, but still return cb, with cb.isCovered == false
-                CoveringBoxes cb =  new CoveringBoxes(amountToSpend, res);
-                return cb;
+                return new CoveringBoxes(amountToSpend, result);
             }
             // step to next chunk
             offset += DEFAULT_LIMIT_FOR_API;
