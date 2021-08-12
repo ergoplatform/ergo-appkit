@@ -8,8 +8,9 @@ import java.util.Arrays
 import org.ergoplatform.ErgoScriptPredef
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.restapi.client
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.{PropSpec, Matchers}
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 
@@ -230,7 +231,7 @@ class TxBuilderSpec extends PropSpec with Matchers
   property("reduce transaction") {
     val ergoClient = createMockedErgoClient(data)
 
-    ergoClient.execute { ctx: BlockchainContext =>
+    val reduced = ergoClient.execute { ctx: BlockchainContext =>
       val storage = SecretStorage.loadFrom("storage/E2.json")
       storage.unlock("abc")
 
@@ -249,6 +250,34 @@ class TxBuilderSpec extends PropSpec with Matchers
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
       reduced should not be(null)
+      reduced
+    }
+
+    // TODO implement serialization/deserialization of ReducedTransaction
+
+    // the only necessary parameter can either be hard-coded or passed
+    // together with ReducedTransaction
+    val blockchainParams = new client.Parameters()
+      .maxBlockCost(Integer.valueOf(1000000))
+
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET, blockchainParams)
+
+    coldClient.execute { ctx =>
+      // test that context is cold
+      assertExceptionThrown(ctx.getHeight, exceptionLike[NotImplementedError]())
+      assertExceptionThrown(
+        ctx.getBoxesById("d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328"),
+        exceptionLike[NotImplementedError]())
+
+      // create prover with secrets in the cold context
+      val prover = BoxOperations.createProver(ctx,
+        new File("storage/E2.json").getPath, "abc")
+        .build
+
+      // sign with the cold prover
+      val signed = prover.signReduced(reduced, 0)
+
+      signed should not be(null)
     }
   }
 

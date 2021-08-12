@@ -15,14 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BlockchainContextImpl implements BlockchainContext {
-
+public class BlockchainContextImpl extends BlockchainContextBase {
     private final ApiClient _client;
     private final Retrofit _retrofit;
     final PreHeaderImpl _preHeader;
     private ExplorerApiClient _explorer;
     private Retrofit _retrofitExplorer;
-    private final NetworkType _networkType;
     private final NodeInfo _nodeInfo;
     private final List<BlockHeader> _headers;
     private ErgoWalletImpl _wallet;
@@ -32,11 +30,11 @@ public class BlockchainContextImpl implements BlockchainContext {
             ExplorerApiClient explorer, Retrofit retrofitExplorer,
             NetworkType networkType,
             NodeInfo nodeInfo, List<BlockHeader> headers) {
+        super(networkType);
         _client = client;
         _retrofit = retrofit;
         _explorer = explorer;
         _retrofitExplorer = retrofitExplorer;
-        _networkType = networkType;
         _nodeInfo = nodeInfo;
         _headers = headers;
         Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
@@ -81,11 +79,6 @@ public class BlockchainContextImpl implements BlockchainContext {
     }
 
     @Override
-    public NetworkType getNetworkType() {
-        return _networkType;
-    }
-
-    @Override
     public int getHeight() { return _headers.get(0).getHeight(); }
 
     /*=====  Package-private methods accessible from other Impl classes. =====*/
@@ -94,6 +87,7 @@ public class BlockchainContextImpl implements BlockchainContext {
         return _retrofit;
     }
 
+    @Override
     ApiClient getApiClient() {
         return _client;
     }
@@ -109,6 +103,7 @@ public class BlockchainContextImpl implements BlockchainContext {
         }).collect(Collectors.toList());
     }
 
+    @Override
     public NodeInfo getNodeInfo() {
         return _nodeInfo;
     }
@@ -147,16 +142,6 @@ public class BlockchainContextImpl implements BlockchainContext {
             _wallet.setContext(this);
         }
         return _wallet;
-    }
-
-    @Override
-    public ErgoContract newContract(Values.ErgoTree ergoTree) {
-        return new ErgoTreeContract(ergoTree);
-    }
-
-    @Override
-    public ErgoContract compileContract(Constants constants, String ergoScript) {
-        return ErgoScriptContract.create(constants, ergoScript, _networkType);
     }
 
     @Override

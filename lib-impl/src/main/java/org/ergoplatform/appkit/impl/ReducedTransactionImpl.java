@@ -4,12 +4,12 @@ import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
 import org.ergoplatform.appkit.ReducedTransaction;
 
 public class ReducedTransactionImpl implements ReducedTransaction {
-    private final BlockchainContextImpl _ctx;
+    private final BlockchainContextBase _ctx;
     private final ReducedErgoLikeTransaction _tx;
     private final int _txCost;
 
     public ReducedTransactionImpl(
-            BlockchainContextImpl ctx,
+            BlockchainContextBase ctx,
             ReducedErgoLikeTransaction tx, int txCost) {
         _ctx = ctx;
         _tx = tx;

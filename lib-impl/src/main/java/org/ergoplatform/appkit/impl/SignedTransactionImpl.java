@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
-    private final BlockchainContextImpl _ctx;
+    private final BlockchainContextBase _ctx;
     private final ErgoLikeTransaction _tx;
     private final int _txCost;
 
-    public SignedTransactionImpl(BlockchainContextImpl ctx, ErgoLikeTransaction tx, int txCost) {
+    public SignedTransactionImpl(BlockchainContextBase ctx, ErgoLikeTransaction tx, int txCost) {
         _ctx = ctx;
         _tx = tx;
         _txCost = txCost;

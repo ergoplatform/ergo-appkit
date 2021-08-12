@@ -14,13 +14,13 @@ import java.util.stream.Stream;
 import sigmastate.interpreter.ContextExtension;
 
 public class InputBoxImpl implements InputBox {
-    private final BlockchainContextImpl _ctx;
+    private final BlockchainContextBase _ctx;
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
     private final ErgoTransactionOutput _boxData;
     private ContextExtension _extension;
 
-    public InputBoxImpl(BlockchainContextImpl ctx, ErgoTransactionOutput boxData) {
+    public InputBoxImpl(BlockchainContextBase ctx, ErgoTransactionOutput boxData) {
         _ctx = ctx;
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
@@ -28,7 +28,7 @@ public class InputBoxImpl implements InputBox {
         _extension = ContextExtension.empty();
     }
 
-    public InputBoxImpl(BlockchainContextImpl ctx, ErgoBox ergoBox) {
+    public InputBoxImpl(BlockchainContextBase ctx, ErgoBox ergoBox) {
         _ctx = ctx;
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
