@@ -46,8 +46,12 @@ class ErgoProverImpl(_ctx: BlockchainContextImpl,
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
-  override def reduce(tx: UnsignedTransaction): ReducedTransaction = {
-    null
+  override def reduce(tx: UnsignedTransaction, baseCost: Int): ReducedTransaction = {
+    val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
+    val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
+    val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
+    val (reduced, cost) = _prover.reduceTransaction(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost)
+    new ReducedTransactionImpl(_ctx, reduced, cost)
   }
 }
 

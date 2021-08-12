@@ -247,8 +247,8 @@ class TxBuilderSpec extends PropSpec with Matchers
         new util.ArrayList[ErgoToken]())
 
       val prover = ctx.newProverBuilder.build // prover without secrets
-      val reduced = prover.reduce(unsigned)
-      reduced shouldBe null
+      val reduced = prover.reduce(unsigned, 0)
+      reduced should not be(null)
     }
   }
 
