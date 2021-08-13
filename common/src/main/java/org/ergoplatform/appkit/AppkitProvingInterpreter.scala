@@ -6,21 +6,26 @@ import sigmastate.basics.DLogProtocol.{ProveDlog, DLogProverInput}
 import java.util
 import java.util.{List => JList}
 
+import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocol, SigmaProtocolPrivateInput, SigmaProtocolCommonInput, DiffieHellmanTupleProverInput}
 import org.ergoplatform._
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext, TransactionContext}
-import sigmastate.Values.ErgoTree
+import scorex.crypto.authds.ADKey
+import sigmastate.Values.{ErgoTree, SigmaBoolean}
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
 import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
 import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
+import sigmastate.serialization.SigmaSerializer
 import sigmastate.utxo.CostTable
 import sigmastate.utils.Helpers._
-
+import sigmastate.utils.{SigmaByteReader, SigmaByteWriter}
+import spire.syntax.all.cfor
+import scalan.util.Extensions.LongOps
 import scala.collection.mutable
 
 object Helpers {
@@ -256,4 +261,53 @@ case class ReducedInputData(reductionResult: ReductionResult, extension: Context
 case class ReducedErgoLikeTransaction(
   unsignedTx: UnsignedErgoLikeTransaction,
   reducedInputs: Seq[ReducedInputData]
-)
+) {
+  require(unsignedTx.inputs.length == reducedInputs.length)
+}
+
+/** HOTSPOT: don't beautify the code */
+object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoLikeTransaction, ReducedErgoLikeTransaction] {
+
+  override def serialize(tx: ReducedErgoLikeTransaction, w: SigmaByteWriter): Unit = {
+    val msg = tx.unsignedTx.messageToSign
+    w.putUInt(msg.length)  // size of the tx bytes to restore tx reliably
+    w.putBytes(msg)
+
+    // serialize sigma propositions for each input
+    val nInputs = tx.reducedInputs.length
+    // no need to save nInputs because it is known from unsignedTx.inputs
+    cfor(0)(_ < nInputs, _ + 1) { i =>
+      val input = tx.reducedInputs(i)
+      SigmaBoolean.serializer.serialize(input.reductionResult.value, w)
+      w.putULong(input.reductionResult.cost)
+      // Note, we don't need to save extension because it has already been saved in msg
+    }
+  }
+
+  override def parse(r: SigmaByteReader): ReducedErgoLikeTransaction = {
+    val nBytes = r.getUInt()
+    val msg = r.getBytes(nBytes.toIntExact)
+
+    // here we read ErgoLikeTransaction which is used below as raw data for
+    // the new UnsignedErgoLikeTransaction
+    val tx = ErgoLikeTransactionSerializer.parse(SigmaSerializer.startReader(msg))
+
+    // serialize sigma propositions for each input
+    val nInputs = tx.inputs.length
+    val reducedInputs = new Array[ReducedInputData](nInputs)
+    val unsignedInputs = new Array[UnsignedInput](nInputs)
+    cfor(0)(_ < nInputs, _ + 1) { i =>
+      val sb = SigmaBoolean.serializer.parse(r)
+      val cost = r.getULong()
+      val input = tx.inputs(i)
+      val extension = input.extension
+      reducedInputs(i) = ReducedInputData(ReductionResult(sb, cost), extension)
+      unsignedInputs(i) = new UnsignedInput(input.boxId, extension)
+    }
+
+    val unsignedTx = UnsignedErgoLikeTransaction(unsignedInputs, tx.dataInputs, tx.outputCandidates)
+    ReducedErgoLikeTransaction(unsignedTx, reducedInputs)
+  }
+
+}
+
