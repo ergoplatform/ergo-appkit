@@ -149,7 +149,21 @@ public class BoxOperations {
         } else {
             senders.add(senderProver.getAddress());
         }
-        List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee, tokensToSpend);
+
+        List<InputBox> boxesToSpend;
+        try {
+            boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee, tokensToSpend);
+        } catch (InputBoxesSelectionException.NotEnoughCoinsForChangeException e) {
+            // we can work around the exception by selecting more inboxes, if there are more
+            // add a second MinFee amount is save to use
+            try {
+                boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee + MinFee, tokensToSpend);
+            } catch (Throwable t) {
+                // looks like the aren't any more inboxes, throw the original error message to the
+                // user and don't confuse him with the second one
+                throw e;
+            }
+        }
 
         P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
