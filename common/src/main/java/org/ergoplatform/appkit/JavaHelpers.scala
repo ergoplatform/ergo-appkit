@@ -455,7 +455,7 @@ object JavaHelpers {
       box.additionalTokens.foreach { case (assetId, amount) =>
         val aiWrapped = assetId: Seq[Byte]
         val total = map.getOrElse(aiWrapped, 0L)
-        map.put(aiWrapped, Math.addExact(total, amount))
+        map.put(aiWrapped, java7.compat.Math.addExact(total, amount))
       }
       acc + box.additionalTokens.size
     }

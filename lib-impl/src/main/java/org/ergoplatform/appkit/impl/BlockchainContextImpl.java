@@ -13,7 +13,6 @@ import special.sigma.Header;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BlockchainContextImpl implements BlockchainContext {
 
@@ -102,11 +101,15 @@ public class BlockchainContextImpl implements BlockchainContext {
      * This method should be private. No classes of HTTP client should ever leak into interfaces.
      */
     private List<InputBox> getInputBoxes(List<OutputInfo> boxes) {
-        return boxes.stream().map(box -> {
+        ArrayList<InputBox> returnList = new ArrayList<>(boxes.size());
+
+        for (OutputInfo box : boxes) {
             String boxId = box.getBoxId();
             ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            return new InputBoxImpl(this, boxInfo);
-        }).collect(Collectors.toList());
+            returnList.add(new InputBoxImpl(this, boxInfo));
+        }
+
+        return returnList;
     }
 
     public NodeInfo getNodeInfo() {
