@@ -3,13 +3,17 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.ErgoLikeTransactionSerializer$;
 import org.ergoplatform.Input;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.JSON;
 import sigmastate.Values;
+import sigmastate.serialization.SigmaSerializer$;
+import sigmastate.utils.SigmaByteWriter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SignedTransactionImpl implements SignedTransaction {
@@ -79,5 +83,27 @@ public class SignedTransactionImpl implements SignedTransaction {
     @Override
     public int getCost() {
         return _txCost;
+    }
+
+    @Override
+    public byte[] toBytes() {
+        SigmaByteWriter w = SigmaSerializer$.MODULE$.startWriter();
+        ErgoLikeTransactionSerializer$.MODULE$.serialize(_tx, w);
+        w.putUInt(_txCost);
+        return w.toBytes();
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * _tx.hashCode() + _txCost;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SignedTransactionImpl) {
+            SignedTransactionImpl that = (SignedTransactionImpl)obj;
+            return Objects.equals(that._tx, this._tx) && that._txCost == this._txCost;
+        }
+        return false;
     }
 }

@@ -105,7 +105,14 @@ public interface BlockchainContext {
 
     /**
      * Deserializes the transaction from the serialized bytes of a ReducedErgoLikeTransaction.
+     * Note, the cost is also parsed in addition to the transaction bytes.
      */
     ReducedTransaction parseReducedTransaction(byte[] txBytes);
+
+    /**
+     * Deserializes the transaction from the serialized bytes of a ErgoLikeTransaction.
+     * Note, the cost is also parsed in addition to the transaction bytes.
+     */
+    SignedTransaction parseSignedTransaction(byte[] txBytes);
 }
 

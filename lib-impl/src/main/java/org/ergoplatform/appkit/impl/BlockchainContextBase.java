@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit.impl;
 
+import org.ergoplatform.ErgoLikeTransaction;
+import org.ergoplatform.ErgoLikeTransactionSerializer$;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.restapi.client.NodeInfo;
@@ -39,5 +41,13 @@ public abstract class BlockchainContextBase implements BlockchainContext {
         ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer$.MODULE$.parse(r);
         int cost = (int)r.getUInt(); // TODO use java7.compat.Math.toIntExact when it will available in Sigma
         return new ReducedTransactionImpl(this, tx, cost);
+    }
+
+    @Override
+    public SignedTransaction parseSignedTransaction(byte[] txBytes) {
+        SigmaByteReader r = SigmaSerializer$.MODULE$.startReader(txBytes, 0);
+        ErgoLikeTransaction tx = ErgoLikeTransactionSerializer$.MODULE$.parse(r);
+        int cost = (int)r.getUInt(); // TODO use java7.compat.Math.toIntExact when it will available in Sigma
+        return new SignedTransactionImpl(this, tx, cost);
     }
 }

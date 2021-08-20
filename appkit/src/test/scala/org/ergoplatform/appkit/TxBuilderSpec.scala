@@ -281,6 +281,8 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signed = prover.signReduced(deserializedTx, 0)
 
       signed should not be(null)
+      val deserializedSignedTx = ctx.parseSignedTransaction(signed.toBytes)
+      deserializedSignedTx shouldBe signed
     }
   }
 
