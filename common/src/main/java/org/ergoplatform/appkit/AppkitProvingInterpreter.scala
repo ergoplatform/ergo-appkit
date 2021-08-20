@@ -64,7 +64,7 @@ class AppkitProvingInterpreter(
     .map(_.asInstanceOf[DLogProverInput].publicImage)
 
   def addCostLimited(currentCost: Long, delta: Long, limit: Long, msg: => String): Long = {
-    val newCost = Math.addExact(currentCost, delta)
+    val newCost = java7.compat.Math.addExact(currentCost, delta)
     if (newCost > limit)
       throw new Exception(s"Cost of transaction $newCost exceeds limit $limit: $msg")
     newCost
@@ -114,9 +114,9 @@ class AppkitProvingInterpreter(
     // and also iterate through all outputs to check rules
     val initialCost = ArithUtils.addExact(
       CostTable.interpreterInitCost,
-      Math.multiplyExact(boxesToSpend.size, params.inputCost),
-      Math.multiplyExact(dataBoxes.size, params.dataInputCost),
-      Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
+      java7.compat.Math.multiplyExact(boxesToSpend.size, params.inputCost),
+      java7.compat.Math.multiplyExact(dataBoxes.size, params.dataInputCost),
+      java7.compat.Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
     )
     val maxCost = params.maxBlockCost
     val startCost = addCostLimited(baseCost, initialCost, maxCost, msg = unsignedTx.toString())
@@ -128,9 +128,9 @@ class AppkitProvingInterpreter(
 
     val tokenAccessCost = params.tokenAccessCost
     val totalAssetsAccessCost =
-      Math.addExact(
-        Math.multiplyExact(Math.addExact(outAssetsNum, inAssetsNum), tokenAccessCost),
-        Math.multiplyExact(Math.addExact(inAssets.size, outAssets.size), tokenAccessCost))
+      java7.compat.Math.addExact(
+        java7.compat.Math.multiplyExact(java7.compat.Math.addExact(outAssetsNum, inAssetsNum), tokenAccessCost),
+        java7.compat.Math.multiplyExact(java7.compat.Math.addExact(inAssets.size, outAssets.size), tokenAccessCost))
 
     val txCost = addCostLimited(startCost,
       delta = totalAssetsAccessCost,
