@@ -8,7 +8,6 @@ import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.restapi.client.*;
 import retrofit2.Retrofit;
-import sigmastate.Values;
 import special.sigma.Header;
 
 import java.util.ArrayList;

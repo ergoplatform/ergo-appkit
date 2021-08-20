@@ -280,7 +280,8 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
       val input = tx.reducedInputs(i)
       SigmaBoolean.serializer.serialize(input.reductionResult.value, w)
       w.putULong(input.reductionResult.cost)
-      // Note, we don't need to save extension because it has already been saved in msg
+      // Note, we don't need to save `extension` field because it has already
+      // been saved in msg
     }
   }
 

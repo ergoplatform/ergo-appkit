@@ -102,5 +102,10 @@ public interface BlockchainContext {
      * @return a new instance of {@link CoveringBoxes} set
      */
     CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend);
+
+    /**
+     * Deserializes the transaction from the serialized bytes of a ReducedErgoLikeTransaction.
+     */
+    ReducedTransaction parseReducedTransaction(byte[] txBytes);
 }
 

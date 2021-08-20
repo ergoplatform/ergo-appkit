@@ -231,7 +231,7 @@ class TxBuilderSpec extends PropSpec with Matchers
   property("reduce transaction") {
     val ergoClient = createMockedErgoClient(data)
 
-    val reduced = ergoClient.execute { ctx: BlockchainContext =>
+    val reducedTx: ReducedTransaction = ergoClient.execute { ctx: BlockchainContext =>
       val storage = SecretStorage.loadFrom("storage/E2.json")
       storage.unlock("abc")
 
@@ -253,9 +253,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       reduced
     }
 
-    // TODO implement serialization/deserialization of ReducedTransaction
-    val reducedTx = reduced.asInstanceOf[ReducedTransactionImpl].getTx
-    val reducedTxBytes = ReducedErgoLikeTransactionSerializer.toBytes(reducedTx)
+    val reducedTxBytes = reducedTx.toBytes
 
     // the only necessary parameter can either be hard-coded or passed
     // together with ReducedTransaction
@@ -277,13 +275,10 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build
 
       // sign with the cold prover
-      val deserializedTx = ReducedErgoLikeTransactionSerializer.fromBytes(reducedTxBytes)
+      val deserializedTx = ctx.parseReducedTransaction(reducedTxBytes)
       deserializedTx shouldBe reducedTx
 
-      val reduced = new ReducedTransactionImpl(
-        ctx.asInstanceOf[BlockchainContextBase],
-        deserializedTx, 0)
-      val signed = prover.signReduced(reduced, 0)
+      val signed = prover.signReduced(deserializedTx, 0)
 
       signed should not be(null)
     }

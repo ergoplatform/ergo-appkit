@@ -36,6 +36,7 @@ class ReducedErgoLikeTransactionSpec extends PropSpec
     // using default sigma reader/writer
     val bytes = serializer.toBytes(v)
     bytes.nonEmpty shouldBe true
+    println(bytes.length)
     val r = SigmaSerializer.startReader(bytes)
     val positionLimitBefore = r.positionLimit
     serializer.parse(r) shouldBe v
@@ -44,6 +45,7 @@ class ReducedErgoLikeTransactionSpec extends PropSpec
 
   property("serialization roundtrip") {
     forAll { reducedTx: ReducedErgoLikeTransaction =>
+      println(s"Ins: ${reducedTx.unsignedTx.inputs.size}; Outs: ${reducedTx.unsignedTx.outputCandidates.length}")
       roundTripTest(reducedTx)(ReducedErgoLikeTransactionSerializer)
     }
   }

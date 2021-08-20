@@ -1,12 +1,11 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.appkit.BlockchainContext;
-import org.ergoplatform.appkit.Constants;
-import org.ergoplatform.appkit.ErgoContract;
-import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.restapi.client.NodeInfo;
 import sigmastate.Values;
+import sigmastate.serialization.SigmaSerializer$;
+import sigmastate.utils.SigmaByteReader;
 
 public abstract class BlockchainContextBase implements BlockchainContext {
     protected final NetworkType _networkType;
@@ -33,4 +32,12 @@ public abstract class BlockchainContextBase implements BlockchainContext {
     abstract ApiClient getApiClient();
 
     public abstract NodeInfo getNodeInfo();
+
+    @Override
+    public ReducedTransaction parseReducedTransaction(byte[] txBytes) {
+        SigmaByteReader r = SigmaSerializer$.MODULE$.startReader(txBytes, 0);
+        ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer$.MODULE$.parse(r);
+        int cost = (int)r.getUInt(); // TODO use java7.compat.Math.toIntExact when it will available in Sigma
+        return new ReducedTransactionImpl(this, tx, cost);
+    }
 }
