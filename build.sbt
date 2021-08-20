@@ -77,6 +77,7 @@ val mockitoScalaVerstion = "1.11.4"
 
 lazy val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  "org.scalactic" %% "scalactic" % "3.0.+" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
   "com.lihaoyi" %% "pprint" % "0.5.4" % "test",  // the last version with Scala 2.11 support
   (sigmaState % Test).classifier("tests")

@@ -140,6 +140,22 @@ public class BoxOperations {
             ErgoProver senderProver, boolean useEip3Addresses,
             ErgoContract contract, long amountToSend,
             List<ErgoToken> tokensToSpend) {
+        UnsignedTransaction tx = putToContractTxUnsigned(ctx,
+            senderProver, useEip3Addresses, contract, amountToSend, tokensToSpend);
+        SignedTransaction signed = senderProver.sign(tx);
+        return signed;
+    }
+
+    /**
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The address of the given senderProver is used to collect
+     * boxes for spending.
+     */
+    public static UnsignedTransaction putToContractTxUnsigned(
+            BlockchainContext ctx,
+            ErgoProver senderProver, boolean useEip3Addresses,
+            ErgoContract contract, long amountToSend,
+            List<ErgoToken> tokensToSpend) {
         List<Address> senders = new ArrayList<>();
         if (useEip3Addresses) {
             List<Address> eip3Addresses = senderProver.getEip3Addresses();
@@ -149,6 +165,19 @@ public class BoxOperations {
         } else {
             senders.add(senderProver.getAddress());
         }
+        return putToContractTxUnsigned(ctx, senders, contract, amountToSend, tokensToSpend);
+    }
+
+    /**
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The addresses of the given senders are used to collect
+     * boxes for spending.
+     */
+    public static UnsignedTransaction putToContractTxUnsigned(
+            BlockchainContext ctx,
+            List<Address> senders,
+            ErgoContract contract, long amountToSend,
+            List<ErgoToken> tokensToSpend) {
         List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee, tokensToSpend);
 
         P2PKAddress changeAddress = senders.get(0).asP2PK();
@@ -166,9 +195,7 @@ public class BoxOperations {
                 .fee(Parameters.MinFee)
                 .sendChangeTo(changeAddress)
                 .build();
-
-        SignedTransaction signed = senderProver.sign(tx);
-        return signed;
+        return tx;
     }
 
     public static SignedTransaction spendBoxesTx(

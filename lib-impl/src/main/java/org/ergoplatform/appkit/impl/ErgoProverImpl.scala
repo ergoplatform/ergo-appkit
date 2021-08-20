@@ -10,7 +10,7 @@ import special.sigma.BigInt
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import JavaHelpers._
 
-class ErgoProverImpl(_ctx: BlockchainContextImpl,
+class ErgoProverImpl(_ctx: BlockchainContextBase,
                      _prover: AppkitProvingInterpreter) extends ErgoProver {
   private def networkPrefix = _ctx.getNetworkType.networkPrefix
 
@@ -43,6 +43,19 @@ class ErgoProverImpl(_ctx: BlockchainContextImpl,
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
     val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
     val (signed, cost) = _prover.sign(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost).getOrThrow
+    new SignedTransactionImpl(_ctx, signed, cost)
+  }
+
+  override def reduce(tx: UnsignedTransaction, baseCost: Int): ReducedTransaction = {
+    val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
+    val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
+    val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
+    val (reduced, cost) = _prover.reduceTransaction(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost)
+    new ReducedTransactionImpl(_ctx, reduced, cost)
+  }
+
+  override def signReduced(tx: ReducedTransaction, baseCost: Int): SignedTransaction = {
+    val (signed, cost) = _prover.signReduced(tx.getTx, baseCost)
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 }

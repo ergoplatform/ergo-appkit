@@ -10,7 +10,7 @@ import java.util
 import JavaHelpers._
 import scala.collection.mutable.ArrayBuffer
 
-class ErgoProverBuilderImpl(_ctx: BlockchainContextImpl) extends ErgoProverBuilder {
+class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuilder {
   private var _masterKey: ExtendedSecretKey = _
 
   /** Generated EIP-3 secret keys paired with their derivation path index. */

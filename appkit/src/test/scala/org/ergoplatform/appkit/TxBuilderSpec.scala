@@ -6,10 +6,11 @@ import java.util
 import java.util.Arrays
 
 import org.ergoplatform.ErgoScriptPredef
-import org.ergoplatform.appkit.impl.ErgoTreeContract
+import org.ergoplatform.appkit.impl.{ErgoTreeContract, ReducedTransactionImpl, BlockchainContextBase}
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.restapi.client
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.{PropSpec, Matchers}
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 
@@ -199,16 +200,16 @@ class TxBuilderSpec extends PropSpec with Matchers
     }
   }
 
-  property("send to recipient (non EIP-3)") {
-    val data = MockData(
-      Seq(
-        loadNodeResponse("response_Box1.json"),
-        loadNodeResponse("response_Box2.json"),
-        loadNodeResponse("response_Box3.json"),
-        "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
-      Seq(
-        loadExplorerResponse("response_boxesByAddressUnspent.json")))
+  val data = MockData(
+    Seq(
+      loadNodeResponse("response_Box1.json"),
+      loadNodeResponse("response_Box2.json"),
+      loadNodeResponse("response_Box3.json"),
+      "21f84cf457802e66fb5930fb5d45fbe955933dc16a72089bf8980797f24e2fa1"),
+    Seq(
+      loadExplorerResponse("response_boxesByAddressUnspent.json")))
 
+  property("send to recipient (non EIP-3)") {
     val ergoClient = createMockedErgoClient(data)
 
     ergoClient.execute { ctx: BlockchainContext =>
@@ -224,6 +225,64 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signed = BoxOperations.putToContractTx(ctx,
           senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
       assert(signed != null)
+    }
+  }
+
+  property("reduce transaction") {
+    val ergoClient = createMockedErgoClient(data)
+
+    val reducedTx: ReducedTransaction = ergoClient.execute { ctx: BlockchainContext =>
+      val storage = SecretStorage.loadFrom("storage/E2.json")
+      storage.unlock("abc")
+
+      val recipient = Address.fromMnemonic(
+            NetworkType.MAINNET,
+            Mnemonic.create(mnemonic, SecretString.empty()))
+
+      val amountToSend = 1000000
+      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+      val unsigned = BoxOperations.putToContractTxUnsigned(ctx,
+        senders, pkContract, amountToSend,
+        new util.ArrayList[ErgoToken]())
+
+      val prover = ctx.newProverBuilder.build // prover without secrets
+      val reduced = prover.reduce(unsigned, 0)
+      reduced should not be(null)
+      reduced
+    }
+
+    val reducedTxBytes = reducedTx.toBytes
+
+    // the only necessary parameter can either be hard-coded or passed
+    // together with ReducedTransaction
+    val blockchainParams = new client.Parameters()
+      .maxBlockCost(Integer.valueOf(1000000))
+
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET, blockchainParams)
+
+    coldClient.execute { ctx: BlockchainContext =>
+      // test that context is cold
+      assertExceptionThrown(ctx.getHeight, exceptionLike[NotImplementedError]())
+      assertExceptionThrown(
+        ctx.getBoxesById("d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328"),
+        exceptionLike[NotImplementedError]())
+
+      // create prover with secrets in the cold context
+      val prover = BoxOperations.createProver(ctx,
+        new File("storage/E2.json").getPath, "abc")
+        .build
+
+      // sign with the cold prover
+      val deserializedTx = ctx.parseReducedTransaction(reducedTxBytes)
+      deserializedTx shouldBe reducedTx
+
+      val signed = prover.signReduced(deserializedTx, 0)
+
+      signed should not be(null)
+      val deserializedSignedTx = ctx.parseSignedTransaction(signed.toBytes)
+      deserializedSignedTx shouldBe signed
     }
   }
 
