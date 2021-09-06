@@ -401,6 +401,8 @@ object JavaHelpers {
 
   def AvlTreeRType: RType[special.sigma.AvlTree] = special.sigma.AvlTreeRType
 
+  def BoxRType: RType[special.sigma.Box] = special.sigma.BoxRType
+
   def SigmaDsl: CostingSigmaDslBuilder = sigmastate.eval.SigmaDsl
 
   def collFrom(arr: Array[Byte]): Coll[Byte] = {

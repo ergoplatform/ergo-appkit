@@ -5,13 +5,14 @@ import java.math.BigInteger
 import java.util
 import java.util.Arrays
 
-import org.ergoplatform.ErgoScriptPredef
+import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.ergoplatform.appkit.impl.{ErgoTreeContract, ReducedTransactionImpl, BlockchainContextBase}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
-import sigmastate.eval.CBigInt
+import scorex.util.ModifierId
+import sigmastate.eval.{CBigInt, CostingBox}
 import sigmastate.helpers.NegativeTesting
 
 class TxBuilderSpec extends PropSpec with Matchers
@@ -22,20 +23,23 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   val mockTxId = "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809"
 
-  def createTestInput(ctx: BlockchainContext): InputBox = {
+  def createTestInput(ctx: BlockchainContext, amount: Long, script: String): InputBox = {
     val out = ctx.newTxBuilder.outBoxBuilder
-      .value(30000000)
-      .contract(ctx.compileContract(
-        ConstantsBuilder.empty(),
-        """{
-         |  val v1 = getVar[Int](1).get
-         |  val v10 = getVar[BigInt](10).get
-         |  sigmaProp(v1.toBigInt == v10)
-         |}""".stripMargin))
+      .value(amount)
+      .contract(ctx.compileContract(ConstantsBuilder.empty(), script))
       .build()
 
     out.getCreationHeight shouldBe ctx.getHeight
     out.convertToInputWith(mockTxId, 0)
+  }
+
+  def createTestInput(ctx: BlockchainContext): InputBox = {
+    createTestInput(ctx, 30000000,
+      """{
+       |  val v1 = getVar[Int](1).get
+       |  val v10 = getVar[BigInt](10).get
+       |  sigmaProp(v1.toBigInt == v10)
+       |}""".stripMargin)
   }
 
   property("ContextVar id should be in range") {
@@ -235,9 +239,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val storage = SecretStorage.loadFrom("storage/E2.json")
       storage.unlock("abc")
 
-      val recipient = Address.fromMnemonic(
-            NetworkType.MAINNET,
-            Mnemonic.create(mnemonic, SecretString.empty()))
+      val recipient = address
 
       val amountToSend = 1000000
       val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
@@ -283,6 +285,46 @@ class TxBuilderSpec extends PropSpec with Matchers
       signed should not be(null)
       val deserializedSignedTx = ctx.parseSignedTransaction(signed.toBytes)
       deserializedSignedTx shouldBe signed
+    }
+  }
+
+  property("Special tx building cases") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val ergsInBox = 10
+      val ebox = new ErgoBox(
+        value = ergsInBox,
+        ergoTree = truePropContract(ctx).getErgoTree,
+        transactionId = ModifierId @@ mockTxId,
+        index = 0,
+        creationHeight = 100000
+      )
+      val contextVars = Seq(
+        ContextVar.of(1.toByte, ebox)  // the Box as a context variable
+      )
+      val input = createTestInput(ctx, amount = 30000000,
+        script = // check that the variable and the register is accessible
+          s"""
+           |sigmaProp(
+           |  getVar[Box](1).get.value == $ergsInBox &&
+           |  OUTPUTS(0).R4[Box].get.id == getVar[Box](1).get.id)
+           |""".stripMargin)
+        .withContextVars(contextVars:_*)
+      val txB = ctx.newTxBuilder()
+      val output = txB.outBoxBuilder()
+        .value(15000000)
+        .registers(ErgoValue.of(ebox)) // the Box as a register value
+        .contract(truePropContract(ctx))
+        .build()
+
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output)
+        .fee(1000000)
+        .sendChangeTo(address.getErgoAddress)
+        .build()
+
+      val prover = ctx.newProverBuilder().build()
+      prover.sign(unsigned)
     }
   }
 

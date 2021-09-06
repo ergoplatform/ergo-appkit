@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
+import org.ergoplatform.ErgoBox;
 import sigmastate.AvlTreeData;
 import sigmastate.Values;
 import special.sigma.GroupElement;
@@ -94,6 +95,10 @@ public class ContextVar {
     }
 
     static public ContextVar of(byte id, AvlTreeData value) {
+        return new ContextVar(id, ErgoValue.of(value));
+    }
+
+    static public ContextVar of(byte id, ErgoBox value) {
         return new ContextVar(id, ErgoValue.of(value));
     }
 
