@@ -18,4 +18,9 @@ trait AppkitTestingCommon {
    * (i.e. `m/44'/429'/0'/0/1` derivation path).
    */
   val secondEip3AddrStr = "9iBhwkjzUAVBkdxWvKmk7ab7nFgZRFbGpXA9gP6TAoakFnLNomk"
+
+  /** The address which corresponds to master key of the `mnemonic`. */
+  val address = Address.fromMnemonic(
+    NetworkType.MAINNET,
+    Mnemonic.create(mnemonic, SecretString.empty()))
 }
