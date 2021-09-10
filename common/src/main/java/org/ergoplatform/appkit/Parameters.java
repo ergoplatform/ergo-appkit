@@ -8,7 +8,8 @@ public class Parameters {
      * A number of blocks a miner should wait before he/she can spend block reward.
      * This is part of Ergo protocol and cannot be changed.
      */
-    public static final int MinerRewardDelay = 720;
+    public static final int MinerRewardDelay_Mainnet = 720;
+    public static final int MinerRewardDelay_Testnet = 72;
 
     /**
      * One Erg is 10^9 NanoErg

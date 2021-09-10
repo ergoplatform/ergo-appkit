@@ -28,6 +28,7 @@ project/plugins/project/
 
 # IntelliJ Idea 
 .idea/
+*.iml
 
 # file system
 
