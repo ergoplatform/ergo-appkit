@@ -182,8 +182,10 @@ public class Address {
     }
 
     public static Address fromErgoTree(Values.ErgoTree ergoTree, NetworkType networkType) {
-        Pay2SAddress p2sAddress = JavaHelpers.createP2SAddress(ergoTree, networkType.networkPrefix);
-        return new Address(p2sAddress);
+        ErgoAddressEncoder encoder =
+            ErgoAddressEncoder.apply(networkType.networkPrefix);
+        ErgoAddress ergoAddress = encoder.fromProposition(ergoTree).get();
+        return new Address(ergoAddress);
     }
 
     @Override

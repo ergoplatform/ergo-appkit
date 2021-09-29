@@ -32,6 +32,9 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
 
     val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
     addr2.toString shouldNot be (addrStr)
+
+    val addr3 = Address.fromErgoTree(addr.getErgoAddress.script, NetworkType.TESTNET)
+    addr3 shouldBe addr
   }
 
   property("Address from ErgoAddress") {
@@ -72,7 +75,7 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
     val tree = "100207036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a120400d805d601db6a01ddd6027300d603b2a5730100d604e4c672030407d605e4c672030507eb02ce7201720272047205ce7201720472027205"
     implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder.apply(NetworkType.MAINNET.networkPrefix);
     val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
-    val addr = Pay2SAddress.apply(ergoTree)
+    val addr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
     val addr2 = encoder.fromProposition(ergoTree).get
     val addr3 = encoder.fromProposition(ergoTree.proposition).get
     addr shouldBe addr2
