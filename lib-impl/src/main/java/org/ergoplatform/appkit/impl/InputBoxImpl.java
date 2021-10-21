@@ -47,6 +47,11 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
+    public int getCreationHeight() {
+      return _ergoBox.creationHeight();
+    }
+
+    @Override
     public List<ErgoToken> getTokens() {
         List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
         return tokens;

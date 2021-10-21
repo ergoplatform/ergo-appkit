@@ -25,6 +25,12 @@ public interface InputBox {
     Long getValue();
 
     /**
+     * The height (block number) when the transaction containing this output box was
+     * created.
+     */
+    int getCreationHeight();
+
+    /**
      * Returns the tokens stored in this box.
      */
     List<ErgoToken> getTokens();
