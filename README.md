@@ -363,4 +363,5 @@ libraries, Apps and tools. Here is the list of projects which use Appkit.
 - [ergo-jde](https://github.com/ergoplatform/ergo-jde) - JSON dApp Environment (JDE)
 - [Kiosk](https://github.com/scalahub/Kiosk) - a library on top of Ergo-Appkit for interacting with the Ergo Blockchain
 - [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo) - a non-interactive (and non-custodial) mixing scheme on top of the Ergo Platform blockchain
+- [ergo-subpooling](https://github.com/K-Singh/ergo-subpooling) - a smart contract based mining pool for smaller miners and groups of friends
 - Add your project here by creating a PR
