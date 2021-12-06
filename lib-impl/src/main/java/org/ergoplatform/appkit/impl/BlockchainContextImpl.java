@@ -160,26 +160,38 @@ public class BlockchainContextImpl extends BlockchainContextBase {
         SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
         Preconditions.checkArgument(amountToSpend > 0 ||
             !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
-        ArrayList<InputBox> result = new ArrayList<>();
-        long remainToCollect = amountToSpend;
+        ArrayList<InputBox> selectedCoveringBoxes = new ArrayList<>();
+        long remainingAmountToCover = amountToSpend;
         int offset = 0;
         while (true) {
             List<InputBox> chunk = getUnspentBoxesFor(address, offset, DEFAULT_LIMIT_FOR_API);
-            for (InputBox b : chunk) {
-                boolean usefulTokens = tokensRemaining.foundNewTokens(b.getTokens());
-                if (usefulTokens || remainToCollect > 0) {
-                    result.add(b);
-                    remainToCollect -= b.getValue();
+            for (InputBox boxCandidate : chunk) {
+                // on rare occasions, chunk can include entries that we already had received on a
+                // previous chunk page. We make sure we don't add any duplicate entries.
+                boolean alreadyAdded = false;
+                for (InputBox coveringBox : selectedCoveringBoxes) {
+                    if (coveringBox.getId().equals(boxCandidate.getId())) {
+                        alreadyAdded = true;
+                        break;
+                    }
                 }
-                if (remainToCollect <= 0 && tokensRemaining.areTokensCovered())
-                    return new CoveringBoxes(amountToSpend, result);
+
+                if (!alreadyAdded) {
+                    boolean usefulTokens = tokensRemaining.foundNewTokens(boxCandidate.getTokens());
+                    if (usefulTokens || remainingAmountToCover > 0) {
+                        selectedCoveringBoxes.add(boxCandidate);
+                        remainingAmountToCover -= boxCandidate.getValue();
+                    }
+                    if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
+                        return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
+                }
             }
             // this chunk is not enough, go to the next (if any)
             if (chunk.size() < DEFAULT_LIMIT_FOR_API) {
                 // this was the last chunk, but still remain to collect
-                assert remainToCollect > 0 || !tokensRemaining.areTokensCovered();
+                assert remainingAmountToCover > 0 || !tokensRemaining.areTokensCovered();
                 // cannot satisfy the request, but still return cb, with cb.isCovered == false
-                return new CoveringBoxes(amountToSpend, result);
+                return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
             }
             // step to next chunk
             offset += DEFAULT_LIMIT_FOR_API;
