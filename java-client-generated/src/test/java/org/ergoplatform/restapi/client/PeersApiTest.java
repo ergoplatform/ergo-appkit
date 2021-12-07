@@ -57,7 +57,6 @@ public class PeersApiTest extends PeerFinder {
     public void getBlacklistedPeersTest() throws IOException {
         BlacklistedPeers response = api.getBlacklistedPeers().execute().body();
         assertNotNull(response);
-        assertTrue(response.getAddresses().size() > 0);
     }
 
     /**
