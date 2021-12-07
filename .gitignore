@@ -12,7 +12,9 @@
 docs/spec/out/
 test-out/
 flamegraphs/
+
 # sbt specific
+.bsp/
 .cache
 .lib/
 dist/*
