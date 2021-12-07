@@ -12,6 +12,7 @@
 
 package org.ergoplatform.restapi.client;
 
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Arrays;
 import com.google.gson.TypeAdapter;
@@ -32,7 +33,10 @@ public class WorkMessage {
   private String msg = null;
 
   @SerializedName("b")
-  private Integer b = null;
+  private BigInteger b = null;
+
+  @SerializedName("h")
+  private Integer h = null;
 
   @SerializedName("pk")
   private String pk = null;
@@ -58,7 +62,7 @@ public class WorkMessage {
     this.msg = msg;
   }
 
-  public WorkMessage b(Integer b) {
+  public WorkMessage b(BigInteger b) {
     this.b = b;
     return this;
   }
@@ -68,12 +72,30 @@ public class WorkMessage {
    * @return b
   **/
   @Schema(example = "987654321", required = true, description = "Work target value")
-  public Integer getB() {
+  public BigInteger getB() {
     return b;
   }
 
-  public void setB(Integer b) {
+  public void setB(BigInteger b) {
     this.b = b;
+  }
+
+  public WorkMessage h(Integer h) {
+    this.h = h;
+    return this;
+  }
+
+   /**
+   * Work target value
+   * @return b
+  **/
+  @Schema(example = "987654321", required = true, description = "Work target value")
+  public Integer getH() {
+    return h;
+  }
+
+  public void setH(Integer h) {
+    this.h = h;
   }
 
   public WorkMessage pk(String pk) {
