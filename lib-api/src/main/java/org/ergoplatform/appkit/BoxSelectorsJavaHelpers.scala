@@ -42,7 +42,7 @@ object BoxSelectorsJavaHelpers {
           hm.put(elem._1.base16, elem._2)
           hm
         })
-        throw new NotEnoughTokensException("err.message", tokensHm)
+        throw new NotEnoughTokensException(err.message, tokensHm)
       }
       case Left(err) =>
         throw new InputBoxesSelectionException(
