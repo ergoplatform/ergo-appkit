@@ -6,6 +6,8 @@ import org.ergoplatform.P2PKAddress
 import org.ergoplatform.appkit._
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.eval.CostingSigmaDslBuilder
+import sigmastate.Values.{SigmaBoolean}
+import sigmastate.interpreter.HintsBag
 import special.sigma.BigInt
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import JavaHelpers._
@@ -46,6 +48,11 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
+  def signMessage(sigmaTree: SigmaBoolean, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
+    _prover.signMessage(sigmaTree, message, hintsBag).getOrThrow
+  }
+
+
   override def reduce(tx: UnsignedTransaction, baseCost: Int): ReducedTransaction = {
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
@@ -58,5 +65,10 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val (signed, cost) = _prover.signReduced(tx.getTx, baseCost)
     new SignedTransactionImpl(_ctx, signed, cost)
   }
+
+  override def verifySignature(sigmaTree: SigmaBoolean, message: Array[Byte], signedMessage: Array[Byte]): Boolean = {
+    _prover.verifySignature(sigmaTree, message, signedMessage)
+  }
+
 }
 

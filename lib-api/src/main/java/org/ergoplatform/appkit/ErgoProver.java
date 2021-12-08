@@ -4,6 +4,9 @@ import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import special.sigma.BigInt;
 
+import sigmastate.Values.SigmaBoolean;
+import sigmastate.interpreter.HintsBag;
+
 import java.util.List;
 
 /**
@@ -63,8 +66,12 @@ public interface ErgoProver {
      */
     SignedTransaction sign(UnsignedTransaction tx, int baseCost);
 
+    byte[] signMessage(SigmaBoolean sigmaTree, byte[] message, HintsBag hintsBag);
+
     ReducedTransaction reduce(UnsignedTransaction tx, int baseCost);
 
     SignedTransaction signReduced(ReducedTransaction tx, int baseCost);
+
+    boolean verifySignature(SigmaBoolean tx, byte[] message, byte[] signedMessage);
 }
 
