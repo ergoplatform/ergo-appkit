@@ -41,7 +41,8 @@ public class BlockchainContextImplTest extends ApiTestBase {
 
     private ErgoTransactionOutput getMockBox(long nanoErgs) {
         ErgoTransactionOutput output = new ErgoTransactionOutput();
-        output.boxId(boxId).ergoTree(ergoTree).assets(new ArrayList<>()).additionalRegisters(new Registers()).index(10).value(nanoErgs);
+        output.boxId(boxId).ergoTree(ergoTree).assets(new ArrayList<>())
+            .additionalRegisters(new Registers()).index(10).value(nanoErgs).creationHeight(667);
         return output;
     }
 
