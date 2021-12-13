@@ -67,8 +67,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             }
             list.add(new InputBoxImpl(this, boxData));
         }
-        InputBox[] inputs = list.toArray(new InputBox[0]);
-        return inputs;
+        return list.toArray(new InputBox[0]);
     }
 
     @Override
@@ -132,8 +131,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
                 .dataInputs(dataInputsData)
                 .inputs(inputsData)
                 .outputs(outputsData);
-        String txId = ErgoNodeFacade.sendTransaction(_retrofit, txData);
-        return txId;
+        return ErgoNodeFacade.sendTransaction(_retrofit, txData);
     }
 
     @Override
@@ -168,15 +166,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             for (InputBox boxCandidate : chunk) {
                 // on rare occasions, chunk can include entries that we already had received on a
                 // previous chunk page. We make sure we don't add any duplicate entries.
-                boolean alreadyAdded = false;
-                for (InputBox coveringBox : selectedCoveringBoxes) {
-                    if (coveringBox.getId().equals(boxCandidate.getId())) {
-                        alreadyAdded = true;
-                        break;
-                    }
-                }
-
-                if (!alreadyAdded) {
+                if (!isAlreadyAdded(selectedCoveringBoxes, boxCandidate)) {
                     boolean usefulTokens = tokensRemaining.foundNewTokens(boxCandidate.getTokens());
                     if (usefulTokens || remainingAmountToCover > 0) {
                         selectedCoveringBoxes.add(boxCandidate);
@@ -196,6 +186,20 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             // step to next chunk
             offset += DEFAULT_LIMIT_FOR_API;
         }
+    }
+
+    /**
+     * @return true when boxCandidate is already added to selectedBoxes list
+     */
+    private boolean isAlreadyAdded(ArrayList<InputBox> selectedBoxes, InputBox boxCandidate) {
+        boolean alreadyAdded = false;
+        for (InputBox coveringBox : selectedBoxes) {
+            if (coveringBox.getId().equals(boxCandidate.getId())) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        return alreadyAdded;
     }
 }
 
