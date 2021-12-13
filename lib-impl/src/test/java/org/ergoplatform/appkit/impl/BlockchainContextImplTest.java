@@ -54,7 +54,8 @@ public class BlockchainContextImplTest extends ApiTestBase {
         powSolutions.d(BigInteger.ZERO);
         BlockHeader firstHeader = new BlockHeader().height(667).nBits(19857408L).difficulty(BigInteger.TEN)
             .id(blockId).parentId(blockId).adProofsRoot(blockId).stateRoot(blockId).transactionsRoot(blockId)
-            .extensionHash(blockId).powSolutions(powSolutions).votes("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
+            .version(2).extensionHash(blockId).powSolutions(powSolutions)
+            .votes("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
         headers.add(firstHeader);
         return headers;
     }
