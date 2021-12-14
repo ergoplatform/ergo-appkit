@@ -52,6 +52,9 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     _prover.signMessage(sigmaTree, message, hintsBag).getOrThrow
   }
 
+  def signMessage(addr: P2PKAddress, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
+    _prover.signMessage(addr.pubkey, message, hintsBag).getOrThrow
+  }
 
   override def reduce(tx: UnsignedTransaction, baseCost: Int): ReducedTransaction = {
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
@@ -68,6 +71,10 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
 
   override def verifySignature(sigmaTree: SigmaBoolean, message: Array[Byte], signedMessage: Array[Byte]): Boolean = {
     _prover.verifySignature(sigmaTree, message, signedMessage)
+  }
+
+  override def verifySignature(addr: P2PKAddress, message: Array[Byte], signedMessage: Array[Byte]): Boolean = {
+    _prover.verifySignature(addr.pubkey, message, signedMessage)
   }
 
 }

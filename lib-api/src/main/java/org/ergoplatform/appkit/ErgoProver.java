@@ -68,10 +68,14 @@ public interface ErgoProver {
 
     byte[] signMessage(SigmaBoolean sigmaTree, byte[] message, HintsBag hintsBag);
 
+    byte[] signMessage(P2PKAddress addr, byte[] message, HintsBag hintsBag);
+
     ReducedTransaction reduce(UnsignedTransaction tx, int baseCost);
 
     SignedTransaction signReduced(ReducedTransaction tx, int baseCost);
 
-    boolean verifySignature(SigmaBoolean tx, byte[] message, byte[] signedMessage);
+    boolean verifySignature(SigmaBoolean sigmaTree, byte[] message, byte[] signedMessage);
+    
+    boolean verifySignature(P2PKAddress addr, byte[] message, byte[] signedMessage);
 }
 
