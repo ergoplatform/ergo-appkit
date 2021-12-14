@@ -1,0 +1,8 @@
+generatorName: "java"
+outputDir : "java-client-generated"
+modelPackage: "org.ergoplatform.restapi.client"
+packageName: "org.ergoplatform.restapi.client"
+apiPackage: "org.ergoplatform.restapi.client"
+invokerPackage: "org.ergoplatform.restapi.client"
+additionalProperties:
+  library: "retrofit2"

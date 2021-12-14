@@ -148,17 +148,20 @@ libraryDependencies ++= Seq(
 
 val apiClientDeps = Seq(
   "com.squareup.okhttp3" % "okhttp" % "3.12.0",
-  "com.google.code.findbugs" % "jsr305" % "3.0.2",
-  "io.gsonfire" % "gson-fire" % "1.8.3" % "compile",
-  "io.swagger.core.v3" % "swagger-annotations" % "2.0.0",
+  "io.swagger" % "swagger-annotations" % "1.5.21" % "compile",
+  "org.apache.oltu.oauth2" % "org.apache.oltu.oauth2.client" % "1.0.1" % "compile",
+  "org.threeten" % "threetenbp" % "1.4.0" % "compile",
+  "io.gsonfire" % "gson-fire" % "1.8.0" % "compile",
+   "javax.annotation" % "javax.annotation-api" % "1.3.2" % "compile",
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2",
-  "junit" % "junit" % "4.12" % "test",
-  "com.novocode" % "junit-interface" % "0.11" % Test
+  "junit" % "junit" % "4.13.1" % "test",
+  "com.novocode" % "junit-interface" % "0.11" % "test"
 )
 
 lazy val javaClientGenerated = (project in file("java-client-generated"))
+    .enablePlugins(OpenApiGeneratorPlugin)
     .settings(
       commonSettings,
       name := "java-client-generated",
@@ -166,7 +169,10 @@ lazy val javaClientGenerated = (project in file("java-client-generated"))
       libraryDependencies ++= apiClientDeps,
       testOptions += Tests.Argument(TestFrameworks.JUnit),
       publishArtifact in (Compile, packageDoc) := false,
-      publish / skip := true
+      publish / skip := true,
+      openApiValidateSpec := SettingDisabled,
+      openApiInputSpec := "openapi-node.yml",
+      openApiConfigFile := "openapi-config.yml"
     )
 
 lazy val common = (project in file("common"))
