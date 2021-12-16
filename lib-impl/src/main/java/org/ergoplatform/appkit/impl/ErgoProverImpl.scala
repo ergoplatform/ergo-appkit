@@ -48,11 +48,11 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
-  def signMessage(sigmaTree: SigmaBoolean, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
+  override def signMessage(sigmaTree: SigmaBoolean, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
     _prover.signMessage(sigmaTree, message, hintsBag).getOrThrow
   }
 
-  def signMessage(addr: P2PKAddress, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
+  override def signMessage(addr: P2PKAddress, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
     _prover.signMessage(addr.pubkey, message, hintsBag).getOrThrow
   }
 
