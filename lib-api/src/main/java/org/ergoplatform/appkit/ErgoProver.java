@@ -4,6 +4,9 @@ import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
 import special.sigma.BigInt;
 
+import sigmastate.Values.SigmaBoolean;
+import sigmastate.interpreter.HintsBag;
+
 import java.util.List;
 
 /**
@@ -63,8 +66,50 @@ public interface ErgoProver {
      */
     SignedTransaction sign(UnsignedTransaction tx, int baseCost);
 
+    /**
+     * Signs an arbitrary message under a key representing a 
+     * statement provable via a sigma-protocol.
+     *
+     * @param sigmaTree public key
+     * @param message message to sign
+     * @param hintsBag additional hints for a signer (useful for distributed signing)
+     * @return signed message
+     */
+    byte[] signMessage(SigmaBoolean sigmaTree, byte[] message, HintsBag hintsBag);
+
+    /**
+     * Signs an arbitrary message using a p2k address
+     *
+     * @param addr address whose public key will be used to sign message
+     * @param message message to sign
+     * @param hintsBag additional hints for a signer (useful for distributed signing)
+     * @return signed message
+     */
+    byte[] signMessage(P2PKAddress addr, byte[] message, HintsBag hintsBag);
+
     ReducedTransaction reduce(UnsignedTransaction tx, int baseCost);
 
     SignedTransaction signReduced(ReducedTransaction tx, int baseCost);
+
+    /**
+     * Verifies a signature on given (arbitrary) message for a given public key.
+     *
+     * @param sigmaTree public key (represented as a tree)
+     * @param message message to verify
+     * @param signedMessage signature for the message
+     * @return whether signature is valid or not
+     */
+    boolean verifySignature(SigmaBoolean sigmaTree, byte[] message, byte[] signedMessage);
+
+    /**
+     * Verifies a signature on given (arbitrary) message for a 
+     * using an address' public key.
+     *
+     * @param addr address whose public key will be used to verify message
+     * @param message message to verify
+     * @param signedMessage signature for the message
+     * @return whether signature is valid or not
+     */
+    boolean verifySignature(P2PKAddress addr, byte[] message, byte[] signedMessage);
 }
 

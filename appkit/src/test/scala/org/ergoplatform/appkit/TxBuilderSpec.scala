@@ -11,9 +11,11 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{PropSpec, Matchers}
+import org.scalacheck.Gen
 import scorex.util.ModifierId
 import sigmastate.eval.{CBigInt, CostingBox}
 import sigmastate.helpers.NegativeTesting
+import sigmastate.interpreter.HintsBag
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -57,6 +59,33 @@ class TxBuilderSpec extends PropSpec with Matchers
 
     for (id <- Byte.MinValue to -1) {
       checkFailed(id)
+    }
+  }
+
+ property("Sign and Verify a message round trip") {
+  forAll(Gen.alphaNumStr){ msg =>
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil)) 
+    ergoClient.execute { ctx: BlockchainContext =>
+      val proverA = BoxOperations.createProver(ctx,
+           new File("storage/E2.json").getPath, "abc")
+           .build
+
+      val proverB = BoxOperations.createProver(ctx,
+          new File("storage/E1.json").getPath, "abc")
+         .build
+
+      val signedMessage = proverA.signMessage(proverA.getP2PKAddress,
+        msg.getBytes, HintsBag.empty)
+
+      proverA.verifySignature(proverA.getP2PKAddress,
+        msg.getBytes, signedMessage) shouldBe true
+
+      proverB.verifySignature(proverA.getP2PKAddress,
+        msg.getBytes, signedMessage) shouldBe true
+
+      proverB.verifySignature(proverB.getP2PKAddress,
+        msg.getBytes, signedMessage) shouldBe false
+      }
     }
   }
 
