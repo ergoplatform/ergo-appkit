@@ -91,7 +91,7 @@ public interface ErgoProver {
 
     SignedTransaction signReduced(ReducedTransaction tx, int baseCost);
 
-     /**
+    /**
      * Verifies a signature on given (arbitrary) message for a given public key.
      *
      * @param sigmaTree public key (represented as a tree)
