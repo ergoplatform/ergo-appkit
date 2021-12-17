@@ -101,7 +101,7 @@ public interface ErgoProver {
      */
     boolean verifySignature(SigmaBoolean sigmaTree, byte[] message, byte[] signedMessage);
 
-     /**
+    /**
      * Verifies a signature on given (arbitrary) message for a 
      * using an address' public key.
      *
