@@ -49,31 +49,36 @@ public class SecretStorage {
     }
 
     public void unlock(SecretString encryptionPass) {
-        unlock(encryptionPass.toStringUnsecure());
-    }
-
-    public void unlock(String encryptionPass) {
-        Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass);
+        Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass.toInterface4JSecretString());
         if (resTry.isFailure()) {
             Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
         }
     }
 
+    public void unlock(String encryptionPass) {
+        unlock(SecretString.create(encryptionPass));
+    }
+
     public static SecretStorage createFromMnemonicIn(
             String secretDir, Mnemonic mnemonic, SecretString encryptionPassword) {
-        return createFromMnemonicIn(secretDir, mnemonic, encryptionPassword.toStringUnsecure());
+        SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
+
+        SecretString password = mnemonic.getPassword();
+
+        JsonSecretStorage jsonStorage = JsonSecretStorage
+            .restore(mnemonic.getPhrase().toInterface4JSecretString(),
+                JavaHelpers.secretStringToOption(password != null ?
+                    password.toInterface4JSecretString() : null),
+                encryptionPassword.toInterface4JSecretString(),
+                settings);
+
+        return new SecretStorage(jsonStorage);
     }
 
     public static SecretStorage createFromMnemonicIn(
             String secretDir, Mnemonic mnemonic, String encryptionPassword) {
-        Option<String> passOpt = Iso.arrayCharToOptionString().to(mnemonic.getPassword());
-        SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
-
-        JsonSecretStorage jsonStorage = JsonSecretStorage
-                .restore(mnemonic.getPhrase().toStringUnsecure(), passOpt, encryptionPassword, settings);
-
-        return new SecretStorage(jsonStorage);
+        return createFromMnemonicIn(secretDir, mnemonic, SecretString.create(encryptionPassword));
     }
 
     public static SecretStorage loadFrom(String storageFileName) {

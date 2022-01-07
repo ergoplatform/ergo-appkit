@@ -57,7 +57,7 @@ class JavaHelpersSpec extends PropSpec with Matchers
     // original Java8-based implementation
     forAll(MinSuccessful(50)) { (mnemonic: String, passOpt: Option[String]) =>
       val seed = JavaHelpers.mnemonicToSeed(mnemonic, passOpt)
-      val expSeed = WMnemonic.toSeed(mnemonic, passOpt)
+      val expSeed = WMnemonic.toSeed(org.ergoplatform.wallet.interface4j.SecretString.create(mnemonic), passOpt.map(a => org.ergoplatform.wallet.interface4j.SecretString.create(a)))
       seed shouldBe expSeed
       println(s"Mnemonic: $mnemonic, Password: $passOpt")
     }

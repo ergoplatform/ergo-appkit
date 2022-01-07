@@ -40,12 +40,12 @@ public class Mnemonic {
         org.ergoplatform.wallet.mnemonic.Mnemonic mnemonic =
                 new org.ergoplatform.wallet.mnemonic.Mnemonic(languageId
                         , strength);
-        Try<String> resTry = mnemonic.toMnemonic(entropy);
+        Try<org.ergoplatform.wallet.interface4j.SecretString> resTry = mnemonic.toMnemonic(entropy);
         if (resTry.isFailure())
             throw new RuntimeException(
                     String.format("Cannot create mnemonic for languageId: %s, strength: %d", languageId,
                             strength));
-        return resTry.get();
+        return resTry.get().toStringUnsecure();
     }
 
     /**
