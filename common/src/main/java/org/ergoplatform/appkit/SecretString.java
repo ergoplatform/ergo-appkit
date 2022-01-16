@@ -93,4 +93,8 @@ public final class SecretString {
     public String toStringUnsecure() {
         return String.valueOf(_data);
     }
+
+    public org.ergoplatform.wallet.interface4j.SecretString toInterface4JSecretString() {
+        return org.ergoplatform.wallet.interface4j.SecretString.create(_data.clone());
+    }
 }

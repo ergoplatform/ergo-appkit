@@ -371,6 +371,10 @@ object JavaHelpers {
     dk
   }
 
+  def secretStringToOption(secretString: org.ergoplatform.wallet.interface4j.SecretString): Option[org.ergoplatform.wallet.interface4j.SecretString] = {
+    if (secretString == null || secretString.isEmpty) None else Some(secretString)
+  }
+
   def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
     val seed = mnemonicToSeed(seedPhrase.toStringUnsecure, passOpt)

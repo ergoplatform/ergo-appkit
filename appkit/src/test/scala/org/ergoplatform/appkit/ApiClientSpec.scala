@@ -27,9 +27,9 @@ class ApiClientSpec
     println(tree)
     val newBytes = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
       treeBytes, positions = Array(1), newVals = Array(SigmaPropConstant(masterKey.publicImage)))
-    val newTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+    val newTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes._1)
     println(newTree)
-    println(ErgoAlgos.encode(newBytes))
+    println(ErgoAlgos.encode(newBytes._1))
   }
 
   property("BlockchainContext") {
