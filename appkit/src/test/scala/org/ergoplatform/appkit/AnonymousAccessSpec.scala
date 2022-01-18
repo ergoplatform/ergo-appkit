@@ -3,19 +3,21 @@ package org.ergoplatform.appkit
 import java.util
 
 import org.ergoplatform.appkit.BoxOperations.{createProver, loadTop, putToContractTx}
-import org.ergoplatform.appkit.ErgoContracts.sendToPK
 import org.ergoplatform.appkit.Parameters.MinFee
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
+import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
 class AnonymousAccessSpec extends PropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
     with AppkitTesting
-    with HttpClientTesting {
+    with HttpClientTesting
+    with NegativeTesting {
 
   val data = MockData(
     Seq(
@@ -29,10 +31,22 @@ class AnonymousAccessSpec extends PropSpec with Matchers
     val ergoClient = createMockedErgoClient(data)
 
     val boxes: java.util.List[InputBox] = ergoClient.execute { ctx: BlockchainContext =>
-      ctx.getUnspentBoxesFor(Address.create(addr1))
+      ctx.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API)
     }
     boxes.forEach { b: InputBox =>
       println(b.toJson(true))
+    }
+  }
+
+  property("Node-only mode (without explorer)") {
+    val ergoClient = createMockedErgoClient(data, nodeOnlyMode = true)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      ctx shouldNot be (null)
+      assertExceptionThrown(
+        ctx.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API),
+        exceptionLike[NullPointerException](ErgoClient.explorerUrlNotSpecifiedMessage)
+      )
     }
   }
 
@@ -105,7 +119,7 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = putToContractTx(ctx, sender, false, contract, amountToSend)
+    val dhtBoxCreationTx = putToContractTx(ctx, sender, false, contract, amountToSend, new util.ArrayList[ErgoToken]())
     dhtBoxCreationTx
   }
 
@@ -113,11 +127,11 @@ object DhtUtils {
     val txB = ctx.newTxBuilder
     val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
-        .contract(sendToPK(ctx, receiver))
+        .contract(new ErgoTreeContract(receiver.getErgoAddress.script))
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
-    val boxesToPayFee = loadTop(ctx, sender.getAddress, MinFee)
+    val boxesToPayFee = loadTop(ctx, sender.getAddress, MinFee, new util.ArrayList[ErgoToken]())
 
     val inputs = new util.ArrayList[InputBox]()
     inputs.add(dhtBox)

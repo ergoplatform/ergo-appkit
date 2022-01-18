@@ -12,7 +12,9 @@
 docs/spec/out/
 test-out/
 flamegraphs/
+
 # sbt specific
+.bsp/
 .cache
 .lib/
 dist/*
@@ -28,6 +30,7 @@ project/plugins/project/
 
 # IntelliJ Idea 
 .idea/
+*.iml
 
 # file system
 

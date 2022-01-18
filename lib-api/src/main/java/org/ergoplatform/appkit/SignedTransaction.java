@@ -47,5 +47,10 @@ public interface SignedTransaction {
      * the transaction is picked up into a block candidate.
      */
     int getCost();
+
+    /**
+     * Returns the serialized bytes of this transaction.
+     */
+    byte[] toBytes();
 }
 

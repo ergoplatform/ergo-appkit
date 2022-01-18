@@ -29,6 +29,7 @@ examples](https://ergoplatform.org/docs/AdvancedErgoScriptTutorial.pdf)):
  secure and easy to use. A simple way to sell or buy Ergo's tokens, artworks,
  NFTs, etc.
 - [ErgoDex](https://ergodex.io/) - Decentralized exchange on Ergo and Cardano
+- [ErgoGravity](https://github.com/ErgoGravity) - ErgoGravity provides the required tools for Ergo platform to be integrated with Gravity network, a blockchain-agnostic protocol that handles communication of blockchain networks with each other.
 - [CrowdFunding](https://ergoplatform.org/en/blog/2019_09_06_crowdfund/) - a way of raising capital through the collective efforts of individuals
 - [Interest-Free Loan
 Contract](https://www.ergoforum.org/t/interest-free-loan-contract/67) etc.
@@ -357,8 +358,10 @@ libraries, Apps and tools. Here is the list of projects which use Appkit.
 - [ergo-android](https://github.com/aslesarenko/ergo-android) - Example Android application 
 - [ErgoMixer](https://github.com/ergoMixer/ergoMixBack) - a web application for mixing ergs and tokens based on Ergo platform
 - [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds) - Run contracts + off-chain code in the browser
-- [Gravity-Ergo-Proxy](https://github.com/mhssamadani/Gravity-Ergo-Proxy) - Wrapper of Ergo Node to work with Gravity.tech
+- [ErgoGravity](https://github.com/ErgoGravity) - provides the required tools for Ergo platform to be integrated with Gravity network (`gateway-proxy`, `ergo-susy-proxy`, `ergo-luport-executor`, `startup-script`)
+- [ergo-faucet](https://github.com/zargarzadehm/ergo-faucet) - A tool for gain some test tokens or Erg in mainnet or testnet network - ErgoFaucet is available [here](https://ergofaucet.org) 
 - [ergo-jde](https://github.com/ergoplatform/ergo-jde) - JSON dApp Environment (JDE)
 - [Kiosk](https://github.com/scalahub/Kiosk) - a library on top of Ergo-Appkit for interacting with the Ergo Blockchain
 - [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo) - a non-interactive (and non-custodial) mixing scheme on top of the Ergo Platform blockchain
+- [ergo-subpooling](https://github.com/K-Singh/ergo-subpooling) - a smart contract based mining pool for smaller miners and groups of friends
 - Add your project here by creating a PR

@@ -2,6 +2,7 @@ package org.ergoplatform.restapi.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonElement;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -20,6 +21,8 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.net.Proxy;
 
 public class ApiClient {
 
@@ -95,6 +98,24 @@ public class ApiClient {
   public void createDefaultAdapter() {
     json = new JSON();
     okBuilder = new OkHttpClient.Builder();
+
+    if (!_hostUrl.endsWith("/"))
+      _hostUrl = _hostUrl + "/";
+
+    adapterBuilder = new Retrofit
+      .Builder()
+      .baseUrl(_hostUrl)
+      .addConverterFactory(ScalarsConverterFactory.create())
+      .addConverterFactory(GsonCustomConverterFactory.create(json.getGson()));
+  }
+
+  public void createDefaultAdapter(Proxy proxy) {
+    json = new JSON();
+    okBuilder = new OkHttpClient.Builder();
+
+    if (proxy != null) {
+        okBuilder.proxy(proxy);
+    }
 
     if (!_hostUrl.endsWith("/"))
       _hostUrl = _hostUrl + "/";

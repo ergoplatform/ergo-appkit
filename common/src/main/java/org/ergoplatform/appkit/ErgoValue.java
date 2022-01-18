@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
+import org.ergoplatform.ErgoBox;
 import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
@@ -8,10 +9,7 @@ import sigmastate.Values;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
-import special.sigma.AvlTree;
-import special.sigma.BigInt;
-import special.sigma.GroupElement;
-import special.sigma.SigmaProp;
+import special.sigma.*;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -99,6 +97,10 @@ public class ErgoValue<T> {
 
     static public ErgoValue<AvlTree> of(AvlTreeData value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
+    }
+
+    static public ErgoValue<Box> of(ErgoBox value) {
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().Box(value), ErgoType.boxType());
     }
 
     static public ErgoValue<Coll<scala.Byte>> of(byte[] arr) {

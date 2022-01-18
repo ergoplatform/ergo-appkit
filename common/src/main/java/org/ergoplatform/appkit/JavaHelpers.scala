@@ -22,18 +22,24 @@ import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
 import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
 import java.math.BigInteger
+import java.text.Normalizer.Form.NFKD
+import java.text.Normalizer.normalize
 import java.util.{Map => JMap, List => JList}
 
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.TokensMap
+import org.ergoplatform.wallet.{Constants, TokensMap}
+import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2KeyLength, Pbkdf2Iterations}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
 import sigmastate.interpreter.CryptoConstants.EcPointType
 import scorex.util.{idToBytes, bytesToId, ModifierId}
 import sigmastate.interpreter.ContextExtension
+import org.bouncycastle.crypto.digests.SHA512Digest
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
+import org.bouncycastle.crypto.params.KeyParameter
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -349,9 +355,29 @@ object JavaHelpers {
     new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)
   }
 
+  /** Converts mnemonic phrase to seed it was derived from.
+    * This method should be equivalent to [[org.ergoplatform.wallet.mnemonic.Mnemonic.toSeed()]].
+    */
+  def mnemonicToSeed(mnemonic: String, passOpt: Option[String] = None): Array[Byte] = {
+    val normalizedMnemonic = normalize(mnemonic.toCharArray, NFKD)
+    val normalizedPass = normalize(s"mnemonic${passOpt.getOrElse("")}", NFKD)
+
+    val gen = new PKCS5S2ParametersGenerator(new SHA512Digest)
+    gen.init(
+      normalizedMnemonic.getBytes(org.ergoplatform.wallet.Constants.Encoding),
+      normalizedPass.getBytes(org.ergoplatform.wallet.Constants.Encoding),
+      Pbkdf2Iterations)
+    val dk = gen.generateDerivedParameters(Pbkdf2KeyLength).asInstanceOf[KeyParameter].getKey
+    dk
+  }
+
+  def secretStringToOption(secretString: org.ergoplatform.wallet.interface4j.SecretString): Option[org.ergoplatform.wallet.interface4j.SecretString] = {
+    if (secretString == null || secretString.isEmpty) None else Some(secretString)
+  }
+
   def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
-    val seed = WMnemonic.toSeed(seedPhrase.toStringUnsecure, passOpt)
+    val seed = mnemonicToSeed(seedPhrase.toStringUnsecure, passOpt)
     val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
     masterKey
   }
@@ -378,6 +404,8 @@ object JavaHelpers {
   def SigmaPropRType: RType[special.sigma.SigmaProp] = special.sigma.SigmaPropRType
 
   def AvlTreeRType: RType[special.sigma.AvlTree] = special.sigma.AvlTreeRType
+
+  def BoxRType: RType[special.sigma.Box] = special.sigma.BoxRType
 
   def SigmaDsl: CostingSigmaDslBuilder = sigmastate.eval.SigmaDsl
 
@@ -433,7 +461,7 @@ object JavaHelpers {
       box.additionalTokens.foreach { case (assetId, amount) =>
         val aiWrapped = assetId: Seq[Byte]
         val total = map.getOrElse(aiWrapped, 0L)
-        map.put(aiWrapped, Math.addExact(total, amount))
+        map.put(aiWrapped, java7.compat.Math.addExact(total, amount))
       }
       acc + box.additionalTokens.size
     }

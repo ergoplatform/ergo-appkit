@@ -1,10 +1,10 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.ergoplatform.appkit.Parameters.MinFee;
@@ -65,33 +65,97 @@ public class BoxOperations {
         ErgoProver senderProver, boolean useEip3Addresses,
         Address recipient, long amountToSend) {
 
-        ErgoContract pkContract = ErgoContracts.sendToPK(ctx, recipient);
+        ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script());
         SignedTransaction signed = putToContractTx(ctx, senderProver, useEip3Addresses,
-            pkContract, amountToSend);
+            contract, amountToSend, new ArrayList<>());
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }
 
-    public static List<InputBox> loadTop(BlockchainContext ctx, Address sender, long amount) {
-        List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-        List<InputBox> selected = selectTop(unspent, amount);
+    /**
+     * Load boxes for the given sender address covering the given amount of NanoErgs.
+     * The given page of boxes is loaded and selected for the resulting list.
+     *
+     * @param ctx    the blockchain context to use for loading
+     * @param sender the address which owns the boxes
+     * @param amount how much NanoErg the boxes should cover
+     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
+     * @return a `limit` number of boxes starting from `offset`
+     */
+    public static List<InputBox> loadTop(
+        BlockchainContext ctx,
+        Address sender, long amount,
+        List<ErgoToken> tokensToSpend) {
+        CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, amount, tokensToSpend);
+        List<InputBox> selected = selectTop(unspent.getBoxes(), amount);
         return selected;
     }
 
-    public static List<InputBox> loadTop(BlockchainContext ctx, List<Address> senderAddresses, long amount) {
+    /**
+     * Load boxes for the given sender addresses covering the given amount of NanoErgs.
+     * The given page of boxes is loaded from each address and concatenated to a single
+     *  list.
+     * The list is then used to select covering boxes.
+     *
+     * @param ctx             the blockchain context to use for loading
+     * @param senderAddresses the addresses which owns the boxes
+     * @param amount          how much NanoErg the boxes should cover
+     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
+     * @return a list of boxes covering the given amount
+     */
+    public static List<InputBox> loadTop(
+        BlockchainContext ctx,
+        List<Address> senderAddresses, long amount,
+        List<ErgoToken> tokensToSpend) {
         List<InputBox> unspentBoxes = new ArrayList<>();
+        long remainingAmount = amount;
+        SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
+        List<ErgoToken> remainingTokens = tokensToSpend;
+
         for (Address sender : senderAddresses) {
-            List<InputBox> unspent = ctx.getUnspentBoxesFor(sender);
-            unspentBoxes.addAll(unspent);
+            CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, remainingAmount, remainingTokens);
+            for (InputBox b : unspent.getBoxes()) {
+                unspentBoxes.add(b);
+                tokensHelper.foundNewTokens(b.getTokens());
+                remainingAmount -= b.getValue();
+                if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) {
+                    // collected enough boxes to cover the amount
+                    break;
+                }
+            }
+            if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) break;
+            remainingTokens = tokensHelper.getRemainingTokenList();
         }
-        List<InputBox> selected = selectTop(unspentBoxes, amount);
+        List<InputBox> selected = selectTop(unspentBoxes, amount, tokensToSpend);
         return selected;
     }
 
+    /**
+     * Creates a new {@link SignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The address of the given senderProver is used to collect
+     * boxes for spending.
+     */
     public static SignedTransaction putToContractTx(
             BlockchainContext ctx,
             ErgoProver senderProver, boolean useEip3Addresses,
-            ErgoContract contract, long amountToSend) {
+            ErgoContract contract, long amountToSend,
+            List<ErgoToken> tokensToSpend) {
+        UnsignedTransaction tx = putToContractTxUnsigned(ctx,
+            senderProver, useEip3Addresses, contract, amountToSend, tokensToSpend);
+        SignedTransaction signed = senderProver.sign(tx);
+        return signed;
+    }
+
+    /**
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The address of the given senderProver is used to collect
+     * boxes for spending.
+     */
+    public static UnsignedTransaction putToContractTxUnsigned(
+            BlockchainContext ctx,
+            ErgoProver senderProver, boolean useEip3Addresses,
+            ErgoContract contract, long amountToSend,
+            List<ErgoToken> tokensToSpend) {
         List<Address> senders = new ArrayList<>();
         if (useEip3Addresses) {
             List<Address> eip3Addresses = senderProver.getEip3Addresses();
@@ -101,22 +165,37 @@ public class BoxOperations {
         } else {
             senders.add(senderProver.getAddress());
         }
-        List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee);
+        return putToContractTxUnsigned(ctx, senders, contract, amountToSend, tokensToSpend);
+    }
 
-        P2PKAddress changeAddress = (useEip3Addresses) ? senderProver.getEip3Addresses().get(0).asP2PK() : senderProver.getP2PKAddress();
+    /**
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
+     * to the given contract. The addresses of the given senders are used to collect
+     * boxes for spending.
+     */
+    public static UnsignedTransaction putToContractTxUnsigned(
+            BlockchainContext ctx,
+            List<Address> senders,
+            ErgoContract contract, long amountToSend,
+            List<ErgoToken> tokensToSpend) {
+        List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee, tokensToSpend);
+
+        P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
-        OutBox newBox = txB.outBoxBuilder()
-                .value(amountToSend)
-                .contract(contract)
-                .build();
+
+        OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
+            .value(amountToSend)
+            .contract(contract);
+        if (!tokensToSpend.isEmpty())
+            outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
+        OutBox newBox = outBoxBuilder.build();
+
         UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
                 .outputs(newBox)
                 .fee(Parameters.MinFee)
                 .sendChangeTo(changeAddress)
                 .build();
-
-        SignedTransaction signed = senderProver.sign(tx);
-        return signed;
+        return tx;
     }
 
     public static SignedTransaction spendBoxesTx(
@@ -124,13 +203,13 @@ public class BoxOperations {
             UnsignedTransactionBuilder txB,
             List<InputBox> boxes,
             ErgoProver sender, Address recipient, long amount, long fee) {
-        OutBox aliceBox = txB.outBoxBuilder()
+        OutBox newBox = txB.outBoxBuilder()
                 .value(amount)
-                .contract(ErgoContracts.sendToPK(ctx, recipient))
+                .contract(new ErgoTreeContract(recipient.getErgoAddress().script()))
                 .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
-                .outputs(aliceBox)
+                .outputs(newBox)
                 .fee(fee)
                 .sendChangeTo(sender.getP2PKAddress())
                 .build();

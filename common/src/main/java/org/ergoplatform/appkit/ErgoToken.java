@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 /**
- * Represents ergo token (aka assert) paired with its value.
+ * Represents ergo token (aka asset) paired with its value.
  * Implements equality and can be used as keys for maps and sets.
  */
 public class ErgoToken {

@@ -77,14 +77,42 @@ public interface BlockchainContext {
 
     ErgoContract compileContract(Constants constants, String ergoScript);
 
-    /**
-     * Get unspent boxes owned by the given address
-     */
-    List<InputBox> getUnspentBoxesFor(Address address);
+    /** Default size of the chunk (aka page size) used in API requests. */
+    int DEFAULT_LIMIT_FOR_API = 20;
 
     /**
-     * Get unspent boxes protected by given ergo tree template
+     * Get unspent boxes owned by the given address starting from the given offset up to
+     * the given limit (basically one page of the boxes).
+     *
+     * @param address owner of the boxes to be retrieved
+     * @param offset  optional zero based offset of the first box in the list,
+     *                default = 0
+     * @param limit   optional number of boxes to retrive (default = 20)
+     * @return a requested chunk of boxes owned by the address
      */
-    List<InputBox> getUnspentBoxesForErgoTreeTemplate(ErgoTreeTemplate template);
+    List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
+
+    /**
+     * Get unspent boxes owned by the given address starting from the given offset up to
+     * the given limit (basically one page of the boxes).
+     *
+     * @param address owner of the boxes to be retrieved
+     * @param amountToSpend amount of NanoErgs to be covered
+     * @param tokensToSpend ErgoToken to spent
+     * @return a new instance of {@link CoveringBoxes} set
+     */
+    CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend);
+
+    /**
+     * Deserializes the transaction from the serialized bytes of a ReducedErgoLikeTransaction.
+     * Note, the cost is also parsed in addition to the transaction bytes.
+     */
+    ReducedTransaction parseReducedTransaction(byte[] txBytes);
+
+    /**
+     * Deserializes the transaction from the serialized bytes of a ErgoLikeTransaction.
+     * Note, the cost is also parsed in addition to the transaction bytes.
+     */
+    SignedTransaction parseSignedTransaction(byte[] txBytes);
 }
 

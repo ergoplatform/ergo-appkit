@@ -120,7 +120,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       inputs = inputBoxesSeq, dataInputs = dataInputs, outputCandidates = outputCandidatesSeq,
       currentHeight = _ctx.getHeight, createFeeOutput = _feeAmount,
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
-      minerRewardDelay = Parameters.MinerRewardDelay, burnTokens = burnTokens,
+      minerRewardDelay =
+        if (_ctx.getNetworkType == NetworkType.MAINNET) Parameters.MinerRewardDelay_Mainnet
+        else Parameters.MinerRewardDelay_Testnet,
+      burnTokens = burnTokens,
       boxSelector = DefaultBoxSelector).get
     val stateContext = createErgoLikeStateContext
     new UnsignedTransactionImpl(tx, boxesToSpend, dataInputBoxes, stateContext)

@@ -2,13 +2,20 @@ package org.ergoplatform.appkit
 
 import scala.collection.mutable
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughCoinsForChangeBoxesError
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughErgsError
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughTokensError
+
 import java.util.{List => JList, Map => JMap}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.Iso._
 import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.ErgoBoxAssets
 import org.ergoplatform.ErgoBoxAssetsHolder
-import scorex.util.{bytesToId, ModifierId}
+import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
+import scorex.util.{ModifierId, bytesToId}
+
+import java.util
 
 
 object BoxSelectorsJavaHelpers {
@@ -20,14 +27,25 @@ object BoxSelectorsJavaHelpers {
   }
 
   def selectBoxes(unspentBoxes: JList[InputBox],
-                  amountToSpend: Long, 
+                  amountToSpend: Long,
                   tokensToSpend: JList[ErgoToken]): JList[InputBox] = {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
       .map(InputBoxWrapper.apply).toIterator
     val targetAssets = tokensToSpend.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
     val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets) match {
-      case Left(err) => 
-        throw new RuntimeException(
+      case Left(err: NotEnoughCoinsForChangeBoxesError) =>
+          throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
+      case Left(err: NotEnoughErgsError) =>
+          throw new NotEnoughErgsException(err.message, err.balanceFound)
+      case Left(err: NotEnoughTokensError) => {
+        val tokensHm = err.tokensFound.foldLeft(new util.HashMap[String, java.lang.Long])((hm, elem) => {
+          hm.put(elem._1.base16, elem._2)
+          hm
+        })
+        throw new NotEnoughTokensException(err.message, tokensHm)
+      }
+      case Left(err) =>
+        throw new InputBoxesSelectionException(
           s"Not enough funds in boxes to pay $amountToSpend nanoERGs, \ntokens: $tokensToSpend, \nreason: $err")
       case Right(v) => v.boxes.map(_.inputBox).toIndexedSeq
     }
