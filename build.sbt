@@ -39,7 +39,10 @@ lazy val commonSettings = Seq(
   publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
-  publishTo := sonatypePublishToBundle.value
+  publishTo := sonatypePublishToBundle.value,
+  scmInfo := Some(
+    ScmInfo(url("https://github.com/ergoplatform/ergo-appkit"), "scm:git@github.com:ergoplatform/ergo-appkit.git")
+  )
 )
 
 enablePlugins(GitVersioning)
