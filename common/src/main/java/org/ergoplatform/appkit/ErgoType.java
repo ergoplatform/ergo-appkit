@@ -17,6 +17,7 @@ public class ErgoType<T> {
     private static ErgoType<scala.Short> _short = new ErgoType(RType.ShortType());
     private static ErgoType<scala.Int> _integer = new ErgoType(RType.IntType());
     private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
+    private static ErgoType<scala.Boolean> _boolean = new ErgoType(RType.BooleanType());
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
     private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
     private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
@@ -55,6 +56,8 @@ public class ErgoType<T> {
     static public ErgoType<scala.Int> integerType() { return _integer; }
 
     static public ErgoType<scala.Long> longType() { return _long; }
+
+    static public ErgoType<scala.Boolean> booleanType() { return _boolean; }
 
     static public ErgoType<BigInt> bigIntType() { return _bigInt; }
 
