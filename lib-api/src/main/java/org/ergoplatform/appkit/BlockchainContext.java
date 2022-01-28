@@ -87,7 +87,8 @@ public interface BlockchainContext {
      * @param address owner of the boxes to be retrieved
      * @param offset  optional zero based offset of the first box in the list,
      *                default = 0
-     * @param limit   optional number of boxes to retrive (default = 20)
+     * @param limit   optional number of boxes to retrieve. Note that returned list might
+     *                contain less elements if data for some boxes couldn't be retrieved
      * @return a requested chunk of boxes owned by the address
      */
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);

@@ -98,7 +98,11 @@ public class BlockchainContextImpl extends BlockchainContextBase {
         for (OutputInfo box : boxes) {
             String boxId = box.getBoxId();
             ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            returnList.add(new InputBoxImpl(this, boxInfo));
+            // can be null if node does not know about the box (yet)
+            // instead of throwing an error, we continue with the boxes actually known
+            if (boxInfo != null) {
+                returnList.add(new InputBoxImpl(this, boxInfo));
+            }
         }
 
         return returnList;
@@ -177,7 +181,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
                 }
             }
             // this chunk is not enough, go to the next (if any)
-            if (chunk.size() < DEFAULT_LIMIT_FOR_API) {
+            if (chunk.size() == 0) {
                 // this was the last chunk, but still remain to collect
                 assert remainingAmountToCover > 0 || !tokensRemaining.areTokensCovered();
                 // cannot satisfy the request, but still return cb, with cb.isCovered == false
