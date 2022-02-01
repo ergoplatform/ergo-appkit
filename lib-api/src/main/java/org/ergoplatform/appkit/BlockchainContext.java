@@ -40,7 +40,7 @@ public interface BlockchainContext {
      * @param boxIds array of string encoded ids of the boxes in the UTXO.
      * @return an array of requested boxes suitable for spending in transactions
      * created using this context.
-     * @throws ErgoClientException if some boxes are not avaliable.
+     * @throws ErgoClientException if some boxes are not available.
      */
     InputBox[] getBoxesById(String... boxIds) throws ErgoClientException;
 
