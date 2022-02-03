@@ -87,7 +87,7 @@ public class BoxOperations {
         Address sender, long amount,
         List<ErgoToken> tokensToSpend) {
         CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, amount, tokensToSpend);
-        List<InputBox> selected = selectTop(unspent.getBoxes(), amount);
+        List<InputBox> selected = selectTop(unspent.getBoxes(), amount, tokensToSpend);
         return selected;
     }
 
