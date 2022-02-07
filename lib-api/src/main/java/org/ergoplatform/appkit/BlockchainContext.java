@@ -40,7 +40,7 @@ public interface BlockchainContext {
      * @param boxIds array of string encoded ids of the boxes in the UTXO.
      * @return an array of requested boxes suitable for spending in transactions
      * created using this context.
-     * @throws ErgoClientException if some boxes are not available.
+     * @throws ErgoClientException if some boxes are not avaliable.
      */
     InputBox[] getBoxesById(String... boxIds) throws ErgoClientException;
 
@@ -87,8 +87,7 @@ public interface BlockchainContext {
      * @param address owner of the boxes to be retrieved
      * @param offset  optional zero based offset of the first box in the list,
      *                default = 0
-     * @param limit   optional number of boxes to retrieve. Note that returned list might
-     *                contain less elements if data for some boxes couldn't be retrieved
+     * @param limit   optional number of boxes to retrive (default = 20)
      * @return a requested chunk of boxes owned by the address
      */
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
