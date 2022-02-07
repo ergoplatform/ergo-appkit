@@ -173,13 +173,11 @@ public class Address {
 
         // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
         // is BIP-44 for Ergo)
-        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index);
+        DerivationPath path = JavaHelpers.eip3DerivationParent();
         ExtendedSecretKey secretKey = (ExtendedSecretKey) rootSecret.derive(path);
         ExtendedPublicKey pubkey = secretKey.publicKey();
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
-            pubkey.key(),
-            networkType.networkPrefix);
-        return new Address(p2pkAddress);
+
+        return createEip3Address(index, networkType, pubkey);
     }
 
     /**

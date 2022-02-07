@@ -37,21 +37,20 @@ public class Bip32Serialization {
             throw new IllegalArgumentException("Master key expected for serialization");
         }
 
-        DerivationPath eip3Path = Constants.eip3DerivationPath();
-        ExtendedPublicKey eip3Parent = ((ExtendedSecretKey) masterKey.derive(
-            new DerivationPath((Seq) eip3Path.decodedPath().dropRight(1),
-                masterKey.path().publicBranch()))).publicKey();
+        DerivationPath eip3ParentPath = JavaHelpers.eip3DerivationParent();
+        ExtendedPublicKey eip3ParentKey = ((ExtendedSecretKey) masterKey.derive(eip3ParentPath)).publicKey();
         // we need the parent's parent for its fingerprint
-        ExtendedPublicKey eip3ParentParent = ((ExtendedSecretKey) masterKey.derive(new DerivationPath((Seq) eip3Path.decodedPath().dropRight(2),
-            masterKey.path().publicBranch()))).publicKey();
+        ExtendedPublicKey eip3ParentParent = ((ExtendedSecretKey) masterKey.derive(
+            new DerivationPath((Seq) eip3ParentPath.decodedPath().dropRight(1),
+                masterKey.path().publicBranch()))).publicKey();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(getPublicHeader(networkType), 0, 4);
-        out.write((byte) (eip3Parent.path().depth() - 1));
+        out.write((byte) (eip3ParentKey.path().depth() - 1));
         out.write(calculateFingerPrint(eip3ParentParent.keyBytes()), 0, 4);
         out.write(new byte[]{0, 0, 0, 0}, 0, 4);
-        out.write(eip3Parent.chainCode(), 0, 32);
-        out.write(eip3Parent.keyBytes(), 0, 33);
+        out.write(eip3ParentKey.chainCode(), 0, 32);
+        out.write(eip3ParentKey.keyBytes(), 0, 33);
         return out.toByteArray();
     }
 
