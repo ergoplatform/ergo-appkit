@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BlockchainContextImplTest extends ApiTestBase {
@@ -71,7 +72,10 @@ public class BlockchainContextImplTest extends ApiTestBase {
 
         @Override
         public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
-            return unspentBoxesMock;
+            if (offset >= limit)
+                return Collections.emptyList();
+            else
+                return unspentBoxesMock;
         }
     }
 }
