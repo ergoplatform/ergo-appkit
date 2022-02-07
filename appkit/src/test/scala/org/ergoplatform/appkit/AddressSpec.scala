@@ -81,4 +81,15 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
     addr shouldBe addr2
     addr shouldBe addr3
   }
+
+  property("Address address from xpub key") {
+    val xPubKey = Bip32Serialization.parseExtendedPublicKeyFromHex("0488b21e04220c2217000000009216e49a70865823eff5381d6fd33ac96743af1f3051dc4cc8edd66a29a740860326cfc301b0c8d4d815ac721e0551304417e6133c2c9137f9f22c33895a3e1650", NetworkType.MAINNET)
+
+    val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, xPubKey)
+    firstEip3Addr.toString shouldBe "9hQ352ipFLWNA96FjCXPFidQrwp8gF4i9JUkrnxw6b4buVBFjVg"
+
+    val secondEip3Addr = Address.createEip3Address(1, NetworkType.MAINNET, xPubKey)
+    secondEip3Addr.toString shouldBe "9fzV11eLdVS1Mxzz59V7ewoar5FTLx7Eqfwh9XDfbL68DYTyfTv"
+  }
+
 }

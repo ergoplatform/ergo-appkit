@@ -8,6 +8,7 @@ import org.ergoplatform.Pay2SAddress;
 import org.ergoplatform.wallet.secrets.DerivationPath;
 import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.Values;
@@ -45,7 +46,7 @@ public class Address {
         if (res.isFailure())
             throw new RuntimeException(
                 "Invalid address encoding, expected base58 string: " + base58String,
-                (Throwable)new Helpers.TryOps(res).toEither().left().get());
+                (Throwable) new Helpers.TryOps(res).toEither().left().get());
         _addrBytes = res.get();
         ErgoAddressEncoder encoder =
             ErgoAddressEncoder.apply(getNetworkType().networkPrefix);
@@ -53,7 +54,7 @@ public class Address {
         if (addrTry.isFailure())
             throw new RuntimeException(
                 "Invalid address encoding, expected base58 string: " + base58String,
-                (Throwable)new Helpers.TryOps(addrTry).toEither().left().get());
+                (Throwable) new Helpers.TryOps(addrTry).toEither().left().get());
         _address = addrTry.get();
     }
 
@@ -81,7 +82,7 @@ public class Address {
      */
     public P2PKAddress asP2PK() {
         checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
-        return (P2PKAddress)_address;
+        return (P2PKAddress) _address;
     }
 
     /**
@@ -95,7 +96,7 @@ public class Address {
      */
     public Pay2SAddress asP2S() {
         checkArgument(isP2S(), "This instance %s is not Pay2SAddress", this);
-        return (Pay2SAddress)_address;
+        return (Pay2SAddress) _address;
     }
 
     /**
@@ -172,9 +173,28 @@ public class Address {
 
         // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
         // is BIP-44 for Ergo)
-        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index);
-        ExtendedSecretKey secretKey = (ExtendedSecretKey)rootSecret.derive(path);
+        DerivationPath path = JavaHelpers.eip3DerivationParent();
+        ExtendedSecretKey secretKey = (ExtendedSecretKey) rootSecret.derive(path);
         ExtendedPublicKey pubkey = secretKey.publicKey();
+
+        return createEip3Address(index, networkType, pubkey);
+    }
+
+    /**
+     * Creates an {@link Address} from the given extended public key using <a
+     * href="https://github.com/ergoplatform/eips/blob/master/eip-0003.md">EIP-3</a>
+     * derivation path (`m / 44' / 429' / 0' / 0 / 0`)
+     * The returned address is compliant with EIP-3.
+     * <p>
+     * Use this with a key deserialized by {@link Bip32Serialization#parseExtendedPublicKey(byte[], NetworkType)}
+     */
+    public static Address createEip3Address(
+        int index,
+        NetworkType networkType,
+        ExtendedPublicKey extendedPublicKey) {
+
+        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
+        ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path);
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
             pubkey.key(),
             networkType.networkPrefix);
@@ -201,7 +221,7 @@ public class Address {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Address) {
-            return _address.equals(((Address)obj)._address);
+            return _address.equals(((Address) obj)._address);
         }
         return false;
     }

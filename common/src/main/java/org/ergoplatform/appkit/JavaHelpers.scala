@@ -480,6 +480,14 @@ object JavaHelpers {
     val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1) :+ index, firstPath.publicBranch)
   }
+
+  /** Creates a new EIP-3 derivation parent path.
+    * The resulting path is the `m/44'/429'/0'/0` path.
+    */
+  def eip3DerivationParent() = {
+    val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
+    DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
+  }
 }
 
 
