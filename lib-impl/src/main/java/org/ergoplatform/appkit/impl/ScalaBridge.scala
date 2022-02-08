@@ -1,15 +1,14 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.explorer.client.model.{AssetInfo => EAsset, AdditionalRegisters => ERegisters}
+import org.ergoplatform.explorer.client.model.{AdditionalRegister, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
 
 import java.util
-import java.util.{List}
+import java.util.List
 import java.lang.{Byte => JByte}
-
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoLikeTransaction, ErgoBox, Input}
-import org.ergoplatform.appkit.{Iso, ErgoToken}
+import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input}
+import org.ergoplatform.appkit.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
 import scorex.crypto.authds.{ADDigest, ADKey}
@@ -19,7 +18,7 @@ import scorex.util.ModifierId
 import sigmastate.SType
 import sigmastate.Values.{ErgoTree, EvaluatedValue}
 import sigmastate.eval.{CAvlTree, CHeader, Colls}
-import sigmastate.interpreter.{ProverResult, ContextExtension}
+import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
@@ -126,7 +125,7 @@ object ScalaBridge {
     override def to(regs: ERegisters): AdditionalRegisters = {
       JavaConversions.mapAsScalaMap(regs).map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
-        val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
+        val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2.serializedValue))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
       }.toMap
     }
@@ -135,7 +134,9 @@ object ScalaBridge {
       ergoRegs.foreach { case (id, value) =>
         val name = id.toString()
         val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
-        res.put(name, v)
+        val reg = new AdditionalRegister
+        reg.serializedValue = v
+        res.put(name, reg)
       }
       res
     }

@@ -12,17 +12,12 @@
 
 package org.ergoplatform.explorer.client.model;
 
-import java.util.Objects;
-import java.util.Arrays;
-import com.google.gson.TypeAdapter;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+
+import java.util.HashMap;
+import java.util.Objects;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.IOException;
-import org.ergoplatform.explorer.client.model.AdditionalRegisters;
-import org.ergoplatform.explorer.client.model.AssetInstanceInfo;
 /**
  * OutputInfo
  */
@@ -59,8 +54,8 @@ public class OutputInfo {
   @SerializedName("assets")
   private java.util.List<AssetInstanceInfo> assets = null;
 
-//  @SerializedName("additionalRegisters")
-//  private AdditionalRegisters additionalRegisters = null;
+  @SerializedName("additionalRegisters")
+  private AdditionalRegisters additionalRegisters = null;
 
   @SerializedName("spentTransactionId")
   private String spentTransactionId = null;
@@ -256,23 +251,23 @@ public class OutputInfo {
     this.assets = assets;
   }
 
-//  public OutputInfo additionalRegisters(AdditionalRegisters additionalRegisters) {
-//    this.additionalRegisters = additionalRegisters;
-//    return this;
-//  }
+  public OutputInfo additionalRegisters(AdditionalRegisters additionalRegisters) {
+    this.additionalRegisters = additionalRegisters;
+    return this;
+  }
 
-//   /**
-//   * Get additionalRegisters
-//   * @return additionalRegisters
-//  **/
-//  @Schema(required = true, description = "")
-//  public AdditionalRegisters getAdditionalRegisters() {
-//    return additionalRegisters;
-//  }
-//
-//  public void setAdditionalRegisters(AdditionalRegisters additionalRegisters) {
-//    this.additionalRegisters = additionalRegisters;
-//  }
+   /**
+   * Get additionalRegisters
+   * @return additionalRegisters
+  **/
+  @Schema(required = true, description = "")
+  public AdditionalRegisters getAdditionalRegisters() {
+    return additionalRegisters;
+  }
+
+  public void setAdditionalRegisters(AdditionalRegisters additionalRegisters) {
+    this.additionalRegisters = additionalRegisters;
+  }
 
   public OutputInfo spentTransactionId(String spentTransactionId) {
     this.spentTransactionId = spentTransactionId;
