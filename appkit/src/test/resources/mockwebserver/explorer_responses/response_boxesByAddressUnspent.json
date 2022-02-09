@@ -10,7 +10,38 @@
       "ergoTree": "0008cd036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a12",
       "address": "9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K",
       "assets": [],
-      "additionalRegisters": {},
+      "additionalRegisters": {
+        "R5": {
+          "serializedValue": "0e5e50696374757265206f66204d72537461686c66656c6765207c20436f6d6d697373696f6e6564206279204d72537461686c66656c67652050696374757265206f66204d72537461686c66656c6765207c20427920466f656e6963756c756d",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "50696374757265206f66204d72537461686c66656c6765207c20436f6d6d697373696f6e6564206279204d72537461686c66656c67652050696374757265206f66204d72537461686c66656c6765207c20427920466f656e6963756c756d"
+        },
+        "R6": {
+          "serializedValue": "0e0130",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "30"
+        },
+        "R8": {
+          "serializedValue": "0e2013d1cebcc24a02ea368859a8a3bf833b886fa3d7dd16237165a8bbc0ccd62f90",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "13d1cebcc24a02ea368859a8a3bf833b886fa3d7dd16237165a8bbc0ccd62f90"
+        },
+        "R7": {
+          "serializedValue": "0e020101",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "0101"
+        },
+        "R9": {
+          "serializedValue": "0e42697066733a2f2f6261667962656965737778777036687a753336707537707a6e777962636e6f706c3477777266736e7934616734623672776b636d3772706a657971",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "697066733a2f2f6261667962656965737778777036687a753336707537707a6e777962636e6f706c3477777266736e7934616734623672776b636d3772706a657971"
+        },
+        "R4": {
+          "serializedValue": "0e0c4d72537461686c66656c6765",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "4d72537461686c66656c6765"
+        }
+      },
       "spentTransactionId": null,
       "mainChain": true
     },

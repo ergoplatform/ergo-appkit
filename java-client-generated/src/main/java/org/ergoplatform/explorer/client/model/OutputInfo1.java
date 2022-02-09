@@ -54,7 +54,7 @@ public class OutputInfo1 {
   private java.util.List<AssetInstanceInfo> assets = null;
 
   @SerializedName("additionalRegisters")
-  private AdditionalRegisters additionalRegisters = null;
+  private AdditionalRegisters1 additionalRegisters = null;
 
   @SerializedName("spentTransactionId")
   private String spentTransactionId = null;
@@ -214,7 +214,7 @@ public class OutputInfo1 {
     this.assets = assets;
   }
 
-  public OutputInfo1 additionalRegisters(AdditionalRegisters additionalRegisters) {
+  public OutputInfo1 additionalRegisters(AdditionalRegisters1 additionalRegisters) {
     this.additionalRegisters = additionalRegisters;
     return this;
   }
@@ -224,11 +224,11 @@ public class OutputInfo1 {
    * @return additionalRegisters
   **/
   @Schema(required = true, description = "")
-  public AdditionalRegisters getAdditionalRegisters() {
+  public AdditionalRegisters1 getAdditionalRegisters() {
     return additionalRegisters;
   }
 
-  public void setAdditionalRegisters(AdditionalRegisters additionalRegisters) {
+  public void setAdditionalRegisters(AdditionalRegisters1 additionalRegisters) {
     this.additionalRegisters = additionalRegisters;
   }
 

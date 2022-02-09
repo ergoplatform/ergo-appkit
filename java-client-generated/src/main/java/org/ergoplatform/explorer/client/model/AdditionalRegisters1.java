@@ -19,10 +19,10 @@ import java.util.Objects;
  */
 
 
-public class AdditionalRegisters extends java.util.HashMap<String, AdditionalRegister> {
+public class AdditionalRegisters1 extends java.util.HashMap<String, String> {
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -51,7 +51,7 @@ public class AdditionalRegisters extends java.util.HashMap<String, AdditionalReg
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(java.lang.Object o) {
+  private String toIndentedString(Object o) {
     if (o == null) {
       return "null";
     }
