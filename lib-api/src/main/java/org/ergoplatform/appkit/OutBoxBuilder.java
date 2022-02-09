@@ -41,7 +41,7 @@ public interface OutBoxBuilder {
      * Mints new token according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md
      *
      * @param token token to mint
-     * @see Eip4Token
+     * @see Eip4Token and Eip4TokenBuilder
      */
     OutBoxBuilder mintToken(Eip4Token token);
 

@@ -40,8 +40,10 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
 
     // optional registers, but either all of them or none
-    if (token.getMintingBoxR7 != null && token.getMintingBoxR8 != null && token.getMintingBoxR9 != null) {
-      _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8, token.getMintingBoxR9)
+    if (token.getMintingBoxR7 != null && token.getMintingBoxR8 != null) {
+      _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8)
+      if (token.getMintingBoxR9 != null)
+        _registers += token.getMintingBoxR9
     }
 
     _tokens += token
@@ -64,8 +66,8 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
-        _value, tree, _tokens, _registers,
-        creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
+      _value, tree, _tokens, _registers,
+      creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
     new OutBoxImpl(_ctx, ergoBoxCandidate)
   }
 }

@@ -2,6 +2,8 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
+
+import scala.Tuple2;
 import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
@@ -111,6 +113,11 @@ public class ErgoValue<T> {
         Coll value = JavaHelpers.collFrom(arr);
         ErgoType<Coll<scala.Byte>> type = ErgoType.collType(ErgoType.byteType());
         return new ErgoValue<Coll<scala.Byte>>(value, type);
+    }
+
+    static public ErgoValue<Tuple2> pairOf(ErgoValue val1, ErgoValue val2) {
+        return new ErgoValue<Tuple2>(new Tuple2(val1.getValue(), val2.getValue()),
+            ErgoType.pairType(val1.getType(), val2.getType()));
     }
 
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {

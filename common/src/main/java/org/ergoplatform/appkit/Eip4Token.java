@@ -2,10 +2,12 @@ package org.ergoplatform.appkit;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import scala.Tuple2;
 import special.collection.Coll;
 
 /**
@@ -48,8 +50,8 @@ public class Eip4Token extends ErgoToken {
         this.description = description;
         this.decimals = decimals;
 
-        // these can be nullable, but either all of them or none
-        if (!(r7 != null && r8 != null && r9 != null || r7 == null && r8 == null && r9 == null)) {
+        // these can be nullable, but either all of them or R7 and R8 defined
+        if (!(r7 != null && r8 != null || r7 == null && r8 == null && r9 == null)) {
             throw new IllegalArgumentException("Either define all of R7 to R9 or none of them");
         }
 
@@ -92,21 +94,14 @@ public class Eip4Token extends ErgoToken {
             return AssetType.NONE;
         } else if (assetType == null) {
             return AssetType.UNKNOWN;
-        } else if (isNftAssetType()) {
-            // NFT
-            switch (assetType[1]) {
-                case 1:
-                    return AssetType.NFT_PICTURE;
-                case 2:
-                    return AssetType.NFT_AUDIO;
-                case 3:
-                    return AssetType.NFT_VIDEO;
-                default:
-                    return AssetType.UNKNOWN;
-            }
-        } else if (assetType.length == 2 && assetType[0] == 2 && assetType[1] == 1) {
-            return AssetType.MEMBERSHIP_THRESHOLD_SIG;
         } else {
+            for (AssetType type : AssetType.values()) {
+                byte[] r7EntryForType = type.getR7ByteArrayForType();
+
+                if (r7EntryForType != null && Arrays.equals(r7EntryForType, assetType))
+                    return type;
+            }
+
             return AssetType.UNKNOWN;
         }
     }
@@ -146,6 +141,35 @@ public class Eip4Token extends ErgoToken {
         }
     }
 
+    /**
+     * @return content link for NFT types if available, otherwise null
+     */
+    public String getNftContentLink() {
+        if (r9 != null && isNftAssetType()) {
+            // if r9 ErgoValue is Coll[Byte], we have the direct link here
+            if (r9.getValue() instanceof Coll) {
+                return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r9.getValue()),
+                    StandardCharsets.UTF_8);
+            } else if (r9.getValue() instanceof Tuple2) {
+                return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._1),
+                    StandardCharsets.UTF_8);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return cover image link for NFT types if available, otherwise null
+     */
+    public String getNftCoverImageLink() {
+        if (r9 != null && isNftAssetType() && r9.getValue() instanceof Tuple2) {
+            return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._2),
+                StandardCharsets.UTF_8);
+        } else {
+            return null;
+        }
+    }
+
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR4() {
         return ErgoValue.of(name.getBytes(StandardCharsets.UTF_8));
     }
@@ -170,5 +194,22 @@ public class Eip4Token extends ErgoToken {
         return r9;
     }
 
-    public enum AssetType {NONE, NFT_PICTURE, NFT_AUDIO, NFT_VIDEO, MEMBERSHIP_THRESHOLD_SIG, UNKNOWN}
+    public enum AssetType {
+        NONE, NFT_PICTURE, NFT_AUDIO, NFT_VIDEO, MEMBERSHIP_THRESHOLD_SIG, UNKNOWN;
+
+        public byte[] getR7ByteArrayForType() {
+            switch (this) {
+                case NFT_PICTURE:
+                    return new byte[]{1, 1};
+                case NFT_AUDIO:
+                    return new byte[]{1, 2};
+                case NFT_VIDEO:
+                    return new byte[]{1, 3};
+                case MEMBERSHIP_THRESHOLD_SIG:
+                    return new byte[]{2, 1};
+                default:
+                    return null;
+            }
+        }
+    }
 }
