@@ -418,6 +418,10 @@ object JavaHelpers {
     Colls.fromArray(arr)
   }
 
+  def collToByteArray(in: Coll[Byte]): Array[Byte] = {
+    in.toArray
+  }
+
   def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
     val r = SigmaSerializer.startReader(ergoTree.bytes)
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4
