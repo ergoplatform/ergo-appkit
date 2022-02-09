@@ -112,21 +112,33 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       s"When fee amount is defined it should be >= $MinFee, got ${_feeAmount.get}")
     val changeAddress = getDefined(_changeAddress, "Change address is not defined")
     val outputCandidatesSeq = JavaHelpers.toIndexedSeq(outputCandidates)
-    val inputBoxesSeq = JavaHelpers.toIndexedSeq(boxesToSpend.map(eb => eb.box))
+    val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
+    val inputBoxesSeq = boxesToSpendSeq.map(eb => eb.box)
     val burnTokens = JavaHelpers.createTokensMap(
-      Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn.getOrElse(new ArrayList[ErgoToken]))
-    )
+      Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn.getOrElse(new ArrayList[ErgoToken])))
+    val rewardDelay = if (_ctx.getNetworkType == NetworkType.MAINNET)
+      Parameters.MinerRewardDelay_Mainnet
+    else
+      Parameters.MinerRewardDelay_Testnet
+
     val tx = TransactionBuilder.buildUnsignedTx(
       inputs = inputBoxesSeq, dataInputs = dataInputs, outputCandidates = outputCandidatesSeq,
       currentHeight = _ctx.getHeight, createFeeOutput = _feeAmount,
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
-      minerRewardDelay =
-        if (_ctx.getNetworkType == NetworkType.MAINNET) Parameters.MinerRewardDelay_Mainnet
-        else Parameters.MinerRewardDelay_Testnet,
+      minerRewardDelay = rewardDelay,
       burnTokens = burnTokens,
       boxSelector = DefaultBoxSelector).get
+
+    // the method above don't accept ContextExtension along with inputs, thus, after the
+    // transaction has been built we need to zip with the extensions that have been
+    // attached to the inputBoxes
+    val txWithExtensions = new UnsignedErgoLikeTransaction(
+      inputs = boxesToSpendSeq.map(_.toUnsignedInput),
+      tx.dataInputs, tx.outputCandidates
+    )
+
     val stateContext = createErgoLikeStateContext
-    new UnsignedTransactionImpl(tx, boxesToSpend, dataInputBoxes, stateContext)
+    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, stateContext)
   }
 
   private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
