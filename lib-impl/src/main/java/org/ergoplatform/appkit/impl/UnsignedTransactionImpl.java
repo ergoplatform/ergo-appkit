@@ -23,7 +23,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _stateContext = stateContext;
     }
 
-    UnsignedErgoLikeTransaction getTx() {
+    public UnsignedErgoLikeTransaction getTx() {
         return _tx;
     }
 

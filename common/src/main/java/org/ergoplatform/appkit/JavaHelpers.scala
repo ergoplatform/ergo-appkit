@@ -330,7 +330,7 @@ object JavaHelpers {
   }
 
   /** Extracts registers as a list of ErgoValue instances (containing type descriptors). */
-  def getBoxRegisters(ergoBox: ErgoBox): JList[ErgoValue[_]] = {
+  def getBoxRegisters(ergoBox: ErgoBoxCandidate): JList[ErgoValue[_]] = {
     val size = ergoBox.additionalRegisters.size
     val res = new util.ArrayList[ErgoValue[_]](size)
     for ((r, v: EvaluatedValue[_]) <- ergoBox.additionalRegisters.toIndexedSeq.sortBy(_._1.number)) {

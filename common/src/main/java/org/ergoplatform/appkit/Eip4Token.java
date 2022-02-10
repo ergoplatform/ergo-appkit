@@ -63,6 +63,7 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return EIP-4 token verbose name (R4)
      */
+    @Nonnull
     public String getTokenName() {
         return name;
     }
@@ -70,6 +71,7 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return EIP-4 token description (R5)
      */
+    @Nonnull
     public String getTokenDescription() {
         return description;
     }
@@ -84,10 +86,12 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return token amount taking decimals into account
      */
+    @Nonnull
     public String getAmountFormatted() {
         return BigDecimal.valueOf(getValue()).movePointLeft(decimals).toPlainString();
     }
 
+    @Nonnull
     public AssetType getAssetType() {
         byte[] assetType = getR7ByteArrayOrNull();
         if (r7 == null) {
@@ -106,6 +110,7 @@ public class Eip4Token extends ErgoToken {
         }
     }
 
+    @Nullable
     private byte[] getR7ByteArrayOrNull() {
         // r7 specifies the asset type and should be Coll<Byte>
         if (r7 != null && r7.getValue() instanceof Coll) {
@@ -133,6 +138,7 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return Sha256 content hash for NFT types, or null for non-NFT types
      */
+    @Nullable
     public byte[] getNftContentHash() {
         if (isNftAssetType()) {
             return JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r8.getValue());
@@ -144,6 +150,7 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return content link for NFT types if available, otherwise null
      */
+    @Nullable
     public String getNftContentLink() {
         if (r9 != null && isNftAssetType()) {
             // if r9 ErgoValue is Coll[Byte], we have the direct link here
@@ -161,6 +168,7 @@ public class Eip4Token extends ErgoToken {
     /**
      * @return cover image link for NFT types if available, otherwise null
      */
+    @Nullable
     public String getNftCoverImageLink() {
         if (r9 != null && isNftAssetType() && r9.getValue() instanceof Tuple2) {
             return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._2),
@@ -170,26 +178,32 @@ public class Eip4Token extends ErgoToken {
         }
     }
 
+    @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR4() {
         return ErgoValue.of(name.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR5() {
         return ErgoValue.of(description.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR6() {
         return ErgoValue.of(Integer.toString(decimals).getBytes(StandardCharsets.UTF_8));
     }
 
+    @Nullable
     public ErgoValue<?> getMintingBoxR7() {
         return r7;
     }
 
+    @Nullable
     public ErgoValue<?> getMintingBoxR8() {
         return r8;
     }
 
+    @Nullable
     public ErgoValue<?> getMintingBoxR9() {
         return r9;
     }

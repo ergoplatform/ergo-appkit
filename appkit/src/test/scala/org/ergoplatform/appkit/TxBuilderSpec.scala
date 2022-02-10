@@ -4,13 +4,12 @@ import java.io.File
 import java.math.BigInteger
 import java.util
 import java.util.Arrays
-
 import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
-import org.ergoplatform.appkit.impl.{ErgoTreeContract, ReducedTransactionImpl, BlockchainContextBase}
+import org.ergoplatform.appkit.impl.{BlockchainContextBase, Eip4TokenBuilder, ErgoTreeContract, ReducedTransactionImpl}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import org.scalacheck.Gen
 import scorex.util.ModifierId
 import sigmastate.eval.{CBigInt, CostingBox}
@@ -354,6 +353,33 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val prover = ctx.newProverBuilder().build()
       prover.sign(unsigned)
+    }
+  }
+
+  property("Mint a token and rebuild it from BoxCandidate") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val input = createTestInput(ctx)
+      val txB = ctx.newTxBuilder()
+      val output = txB.outBoxBuilder()
+        .value(15000000)
+        .mintToken(new Eip4Token(input.getId.toString, 1, "Test name", "Test desc", 0))
+        .contract(truePropContract(ctx))
+        .build()
+
+      val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output)
+        .fee(1000000)
+        .sendChangeTo(changeAddr)
+        .build()
+
+      val eip4Token = Eip4TokenBuilder.buildFromErgoBoxCandidate(input.getId.toString, unsigned.getTx.outputCandidates.apply(0))
+
+      eip4Token.getId shouldBe input.getId
+      eip4Token.getDecimals shouldBe 0
+      eip4Token.getValue shouldBe 1
+      eip4Token.getTokenName shouldBe "Test name"
     }
   }
 

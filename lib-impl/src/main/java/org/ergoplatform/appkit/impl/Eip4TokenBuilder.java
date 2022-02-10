@@ -1,7 +1,11 @@
 package org.ergoplatform.appkit.impl;
 
+import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.appkit.Eip4Token;
+import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
+import org.ergoplatform.appkit.Iso;
+import org.ergoplatform.appkit.JavaHelpers;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.model.AdditionalRegister;
 import org.ergoplatform.explorer.client.model.AdditionalRegisters;
@@ -27,6 +31,7 @@ public class Eip4TokenBuilder {
      * @param amount              token amount
      * @param additionalRegisters list of registers R4-R9, deserialized to byte[]. Must at least contain R4-R6.
      */
+    @Nonnull
     public static Eip4Token buildFromRegisters(@Nonnull String id, long amount,
                                                @Nonnull List<String> additionalRegisters) {
         if (additionalRegisters.size() < 3) {
@@ -56,6 +61,7 @@ public class Eip4TokenBuilder {
      * @param amount    token amount
      * @param registers list of registers R4-R9 as returned by Explorer Transactions API
      */
+    @Nonnull
     public static Eip4Token buildFromRegisters(@Nonnull String id, long amount,
                                                @Nonnull AdditionalRegisters registers) {
 
@@ -76,6 +82,7 @@ public class Eip4TokenBuilder {
     /**
      * @return Eip4Token for given tokenId, or null of not available
      */
+    @Nullable
     public static Eip4Token buildFromExplorerByTokenId(DefaultApi explorerApiClient, String tokenId) throws IOException {
         Response<TokenInfo> tokenInfo = explorerApiClient.getApiV1TokensP1(tokenId).execute();
 
@@ -83,13 +90,14 @@ public class Eip4TokenBuilder {
             return null;
         }
 
-        return buildFromExplorerByIssueingBox(explorerApiClient, tokenId, tokenInfo.body().getBoxId());
+        return buildFromExplorerByIssuingBox(explorerApiClient, tokenId, tokenInfo.body().getBoxId());
 
     }
 
-    public static Eip4Token buildFromExplorerByIssueingBox(DefaultApi explorerApiClient,
-                                                           String tokenId, String issueingBoxId) throws IOException {
-        OutputInfo boxInfo = explorerApiClient.getApiV1BoxesP1(issueingBoxId).execute().body();
+    @Nullable
+    public static Eip4Token buildFromExplorerByIssuingBox(DefaultApi explorerApiClient,
+                                                          String tokenId, String issuingBoxId) throws IOException {
+        OutputInfo boxInfo = explorerApiClient.getApiV1BoxesP1(issuingBoxId).execute().body();
 
         if (boxInfo == null) {
             return null;
@@ -102,10 +110,33 @@ public class Eip4TokenBuilder {
         }
 
         if (tokenInfo == null) {
-            throw new IllegalArgumentException("Token with id " + tokenId + " not found in box " + issueingBoxId);
+            throw new IllegalArgumentException("Token with id " + tokenId + " not found in box " + issuingBoxId);
         }
 
         return buildFromRegisters(tokenId, tokenInfo.getAmount(), boxInfo.getAdditionalRegisters());
+    }
+
+    @Nullable
+    public static Eip4Token buildFromErgoBoxCandidate(@Nonnull String tokenId, @Nonnull ErgoBoxCandidate boxCandidate) {
+        ErgoToken foundToken = null;
+        for (ErgoToken token : Iso.isoTokensListToPairsColl().from(boxCandidate.additionalTokens())) {
+            if (token.getId().toString().equals(tokenId))
+                foundToken = token;
+        }
+
+        if (foundToken == null) {
+            throw new IllegalArgumentException("Token with id " + tokenId + " not found in box");
+        }
+
+        List<ErgoValue<?>> boxRegisters = JavaHelpers.getBoxRegisters(boxCandidate);
+
+        return new Eip4Token(tokenId, foundToken.getValue(),
+            (ErgoValue<Coll<Object>>) boxRegisters.get(0),
+            (ErgoValue<Coll<Object>>) boxRegisters.get(1),
+            (ErgoValue<Coll<Object>>) boxRegisters.get(2),
+            boxRegisters.size() > 3 ? boxRegisters.get(3) : null,
+            boxRegisters.size() > 4 ? boxRegisters.get(4) : null,
+            boxRegisters.size() > 5 ? boxRegisters.get(5) : null);
     }
 
     private static String getSerializedErgoValueForRegister(AdditionalRegisters registers, String registerId) {
