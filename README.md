@@ -136,7 +136,7 @@ Next we connect to the running testnet node from our Java application by creatin
 `ErgoClient` instance.
 ```java
 ErgoNodeConfig nodeConf = conf.getNode();
-ErgoClient ergoClient = RestApiErgoClient.create(nodeConf);
+ErgoClient ergoClient = RestApiErgoClient.create(nodeConf, null);
 ```
 
 Using `ErgoClient` we can
@@ -171,8 +171,8 @@ if (!boxes.isPresent())
 // the prover should be configured with secrets, which are nessesary to generate signatures (aka proofs)
 ErgoProver prover = ctx.newProverBuilder()
     .withMnemonic(
-            nodeConf.getWallet().getMnemonic(),
-            nodeConf.getWallet().getPassword())
+            SecretString.create(nodeConf.getWallet().getMnemonic()),
+            SecretString.create(nodeConf.getWallet().getMnemonicPassword()))
     .build();
 ```
 

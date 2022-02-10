@@ -36,5 +36,11 @@ class MnemonicSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
       seqAsJavaList("walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice earth".split(' ')))
     an[MnemonicEmptyException] should be thrownBy Mnemonic.checkEnglishMnemonic(new util.ArrayList[String]())
   }
+
+  property("serializeExtendedPublicKey") {
+    val masterKey = JavaHelpers.seedToMasterKey(SecretString.create("lens stadium egg cage hollow noble gate belt impulse vicious middle endless angry buzz crack"), SecretString.empty())
+
+    Bip32Serialization.serializeExtendedPublicKeyToHex(masterKey, NetworkType.MAINNET) shouldBe "0488b21e04220c2217000000009216e49a70865823eff5381d6fd33ac96743af1f3051dc4cc8edd66a29a740860326cfc301b0c8d4d815ac721e0551304417e6133c2c9137f9f22c33895a3e1650"
+  }
 }
 

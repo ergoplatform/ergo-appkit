@@ -78,6 +78,10 @@ public class ContextVar {
         return new ContextVar(id, ErgoValue.of(value));
     }
 
+    static public ContextVar of(byte id, boolean value) {
+        return new ContextVar(id, ErgoValue.of(value));
+    }
+
     static public ContextVar of(byte id, BigInteger value) {
         return new ContextVar(id, ErgoValue.of(value));
     }

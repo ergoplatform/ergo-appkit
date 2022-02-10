@@ -20,7 +20,7 @@ import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDsl
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
-import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
+import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString, Boolean => JBoolean}
 import java.math.BigInteger
 import java.text.Normalizer.Form.NFKD
 import java.text.Normalizer.normalize
@@ -97,6 +97,11 @@ object Iso extends LowPriorityIsos {
   implicit val jlongToLong: Iso[JLong, Long] = new Iso[JLong, Long] {
     override def to(b: JLong): Long = b
     override def from(a: Long): JLong = a
+  }
+
+  implicit val jboolToBool: Iso[JBoolean, Boolean] = new Iso[JBoolean, Boolean] {
+    override def to(b: JBoolean): Boolean = b
+    override def from(a: Boolean): JBoolean = a
   }
 
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
@@ -474,6 +479,14 @@ object JavaHelpers {
   def eip3DerivationWithLastIndex(index: Int) = {
     val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1) :+ index, firstPath.publicBranch)
+  }
+
+  /** Creates a new EIP-3 derivation parent path.
+    * The resulting path is the `m/44'/429'/0'/0` path.
+    */
+  def eip3DerivationParent() = {
+    val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
+    DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
   }
 }
 

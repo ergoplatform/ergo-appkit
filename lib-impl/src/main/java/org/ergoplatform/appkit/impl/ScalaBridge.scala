@@ -1,16 +1,14 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.explorer.client.model.{AssetInfo => EAsset, AdditionalRegisters => ERegisters}
+import org.ergoplatform.explorer.client.model.{AdditionalRegister, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
 
 import java.util
-import java.util.stream.Collectors
-import java.util.{List, ArrayList}
-
+import java.util.List
+import java.lang.{Byte => JByte}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoLikeTransaction, ErgoBox, Input}
-import org.ergoplatform.appkit.{Iso, ErgoToken, JavaHelpers}
-import org.ergoplatform.explorer.client.model.OutputInfo
+import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input}
+import org.ergoplatform.appkit.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
 import scorex.crypto.authds.{ADDigest, ADKey}
@@ -20,7 +18,7 @@ import scorex.util.ModifierId
 import sigmastate.SType
 import sigmastate.Values.{ErgoTree, EvaluatedValue}
 import sigmastate.eval.{CAvlTree, CHeader, Colls}
-import sigmastate.interpreter.{ProverResult, ContextExtension}
+import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
@@ -33,12 +31,26 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      new ProverResult(proof, ContextExtension.empty)
+      val vars = JavaConversions.mapAsScalaMap(spendingProof.getExtension).map { case (k, v) =>
+        val id = JByte.parseByte(k, 10)
+        val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
+        (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
+      }
+      new ProverResult(proof, ContextExtension(vars.toMap))
     }
 
     override def from(proverResult: ProverResult): SpendingProof = {
       val proof = ErgoAlgos.encode(proverResult.proof)
-      new SpendingProof().proofBytes(proof)
+      val vars = proverResult.extension.values
+      val extension = new util.HashMap[String, String](vars.size)
+      vars.foreach { case (varId, value) =>
+        val name = varId.toString
+        val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
+        extension.put(name, v)
+      }
+      new SpendingProof()
+        .proofBytes(proof)
+        .extension(extension)
     }
   }
 
@@ -113,7 +125,7 @@ object ScalaBridge {
     override def to(regs: ERegisters): AdditionalRegisters = {
       JavaConversions.mapAsScalaMap(regs).map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
-        val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
+        val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2.serializedValue))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
       }.toMap
     }
@@ -122,7 +134,9 @@ object ScalaBridge {
       ergoRegs.foreach { case (id, value) =>
         val name = id.toString()
         val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
-        res.put(name, v)
+        val reg = new AdditionalRegister
+        reg.serializedValue = v
+        res.put(name, reg)
       }
       res
     }
