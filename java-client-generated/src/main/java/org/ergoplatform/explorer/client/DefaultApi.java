@@ -198,7 +198,7 @@ public interface DefaultApi {
    */
   @GET("api/v1/boxes/unspent/byAddress/{p1}")
   Call<ItemsA> getApiV1BoxesUnspentByaddressP1(
-            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit                
+            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit,     @retrofit2.http.Query("sortDirection") String sortDirection
   );
 
   /**

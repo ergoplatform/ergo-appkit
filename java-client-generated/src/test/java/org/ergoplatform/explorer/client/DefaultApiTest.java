@@ -139,7 +139,7 @@ public class DefaultApiTest extends ApiTestBase {
     public void getApiV1BoxesUnspentByaddressP1Test() throws IOException {
         Integer offset = 0;
         Integer limit = 10;
-        ItemsA response = api.getApiV1BoxesUnspentByaddressP1(address, offset, limit).execute().body();
+        ItemsA response = api.getApiV1BoxesUnspentByaddressP1(address, offset, limit, "asc").execute().body();
         assertTrue(response.getItems().size() > 0);
     }
 
