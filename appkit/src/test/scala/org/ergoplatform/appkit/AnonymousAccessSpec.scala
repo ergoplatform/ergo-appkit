@@ -2,7 +2,7 @@ package org.ergoplatform.appkit
 
 import java.util
 
-import org.ergoplatform.appkit.BoxOperations.{createProver, loadTop, putToContractTx}
+import org.ergoplatform.appkit.BoxOperations.{createProver}
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
@@ -119,7 +119,7 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = putToContractTx(ctx, sender, false, contract, amountToSend, new util.ArrayList[ErgoToken]())
+    val dhtBoxCreationTx = new BoxOperations(sender, false).withAmountToSpend(amountToSend).putToContractTx(ctx, contract)
     dhtBoxCreationTx
   }
 
@@ -131,7 +131,7 @@ object DhtUtils {
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
-    val boxesToPayFee = loadTop(ctx, sender.getAddress, MinFee, new util.ArrayList[ErgoToken]())
+    val boxesToPayFee = new BoxOperations(sender.getAddress).loadTop(ctx)
 
     val inputs = new util.ArrayList[InputBox]()
     inputs.add(dhtBox)

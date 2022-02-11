@@ -1,133 +1,145 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.P2PKAddress;
-import org.ergoplatform.appkit.impl.ErgoTreeContract;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-
 import static com.google.common.base.Preconditions.checkState;
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
 import com.google.common.base.Preconditions;
 
-import scala.Function1;
-import scala.collection.Iterator;
-import scala.collection.immutable.Map;
+import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
 
 /**
- * A collection of utility operations implemented in terms of abstract Appkit interfaces.
+ * A collection of utility operations for selecting boxes and building transactions
  */
 public class BoxOperations {
+    private final List<Address> senders;
+    private final ErgoProver senderProver;
+    private long amountToSpend = 0;
+    private List<ErgoToken> tokensToSpend = Collections.emptyList();
+    private long feeAmount = MinFee;
 
     /**
-     * @see #selectTop(List, long, List)
-     */
-    public static List<InputBox> selectTop(
-            List<InputBox> unspentBoxes,
-            long amountToSpend) {
-        return selectTop(unspentBoxes, amountToSpend, new ArrayList<>());
-    }
-
-    /**
-     * Helper method calling {@link org.ergoplatform.wallet.boxes.BoxSelector#select(Iterator, long, Map)}
+     * Construct BoxOperations with a single sender address
      *
-     * @see org.ergoplatform.wallet.boxes.BoxSelector#select(Iterator, Function1, long, Map)
+     * @param sender sender the following methods should use
      */
-    public static List<InputBox> selectTop(
-            List<InputBox> unspentBoxes,
-            long amountToSpend,
-            List<ErgoToken> tokensToSpend) {
-        List<InputBox> found = BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, amountToSpend, tokensToSpend);
-        return found;
+    public BoxOperations(Address sender) {
+        this(Collections.singletonList(sender));
     }
 
+    /**
+     * Construct BoxOperations with a list of sender addresses
+     *
+     * @param senders lsit of senders the following methods should use
+     */
+    public BoxOperations(List<Address> senders) {
+        this.senders = senders;
+        senderProver = null;
+    }
+
+    /**
+     * Construct BoxOperations with a prover, deriving list of senders from prover from either the
+     * MASTER address of the given prover or from the EIP-3 addresses.
+     * All the derived EIP-3 addresses of the prover can be used to collect unspent boxes.
+     */
+    public BoxOperations(ErgoProver senderProver, boolean useEip3Addresses) {
+        if (useEip3Addresses) {
+            List<Address> eip3Addresses = senderProver.getEip3Addresses();
+            checkState(eip3Addresses.size() > 0,
+                "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
+            this.senders = eip3Addresses;
+        } else {
+            this.senders = Collections.singletonList(senderProver.getAddress());
+        }
+        this.senderProver = senderProver;
+    }
+
+    public BoxOperations withAmountToSpend(long amountToSpend) {
+        if (amountToSpend < 0) {
+            throw new IllegalArgumentException("Amount to send must be >= 0");
+        }
+
+        this.amountToSpend = amountToSpend;
+        return this;
+    }
+
+    public BoxOperations withTokensToSpend(@Nonnull List<ErgoToken> tokensToSpend) {
+        this.tokensToSpend = tokensToSpend;
+        return this;
+    }
+
+    public BoxOperations withFeeAmount(long feeAmount) {
+        if (feeAmount < MinFee) {
+            throw new IllegalArgumentException("Amount to send must be >= " + MinFee);
+        }
+
+        this.feeAmount = feeAmount;
+        return this;
+    }
+
+    @Deprecated
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()
-                .withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword())
-                .build();
+            .withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword())
+            .build();
         return prover;
     }
 
+    @Deprecated
     public static ErgoProverBuilder createProver(BlockchainContext ctx, String storageFile, SecretString storagePass) {
         return createProver(ctx, storageFile, storagePass.toStringUnsecure());
     }
 
+    @Deprecated
     public static ErgoProverBuilder createProver(
-            BlockchainContext ctx, String storageFile, String storagePass) {
+        BlockchainContext ctx, String storageFile, String storagePass) {
         SecretStorage storage = SecretStorage.loadFrom(storageFile);
         storage.unlock(storagePass);
         ErgoProverBuilder proverB = ctx.newProverBuilder()
-                .withSecretStorage(storage);
+            .withSecretStorage(storage);
         return proverB;
     }
 
     /**
-     * Send the given `amountToSend` to the recipient from either the MASTER address of the
-     * given prover or from the EIP-3 addresses.
-     * All the derived EIP-3 addresses of the prover can be used to collect unspent boxes.
+     * Send the specified amountToSpend and tokens to the recipient.
      *
-     * @param ctx              blockchain context obtained from {@link ErgoClient}
-     * @param senderProver     prover which is used to sign transaction
-     * @param useEip3Addresses true if EIP-3 addresses of the prover should be used to
-     *                         withdraw funds (use false for backwards compatibility)
-     * @param recipient        the recipient address
-     * @param amountToSend     amount of NanoErgs to send
+     * @param ctx       blockchain context obtained from {@link ErgoClient}
+     * @param recipient the recipient address
      */
-    public static String send(
+    public String send(
         BlockchainContext ctx,
-        ErgoProver senderProver, boolean useEip3Addresses,
-        Address recipient, long amountToSend) {
+        Address recipient) {
 
         ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script());
-        SignedTransaction signed = putToContractTx(ctx, senderProver, useEip3Addresses,
-            contract, amountToSend, new ArrayList<>());
+        SignedTransaction signed = putToContractTx(ctx, contract);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }
 
     /**
-     * Load boxes for the given sender address covering the given amount of NanoErgs.
-     * The given page of boxes is loaded and selected for the resulting list.
-     *
-     * @param ctx    the blockchain context to use for loading
-     * @param sender the address which owns the boxes
-     * @param amount how much NanoErg the boxes should cover
-     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
-     * @return a `limit` number of boxes starting from `offset`
-     */
-    public static List<InputBox> loadTop(
-        BlockchainContext ctx,
-        Address sender, long amount,
-        List<ErgoToken> tokensToSpend) {
-        CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, amount, tokensToSpend);
-        List<InputBox> selected = selectTop(unspent.getBoxes(), amount, tokensToSpend);
-        return selected;
-    }
-
-    /**
-     * Load boxes for the given sender addresses covering the given amount of NanoErgs.
+     * Load boxes for the given sender addresses covering the given amount of NanoErgs, fee and tokens.
      * The given page of boxes is loaded from each address and concatenated to a single
-     *  list.
+     * list.
      * The list is then used to select covering boxes.
      *
-     * @param ctx             the blockchain context to use for loading
-     * @param senderAddresses the addresses which owns the boxes
-     * @param amount          how much NanoErg the boxes should cover
-     * @param tokensToSpend   list of ErgoToken to spent. Make sure every token is listed only once
+     * @param ctx the blockchain context to use for loading
      * @return a list of boxes covering the given amount
      */
-    public static List<InputBox> loadTop(
-        BlockchainContext ctx,
-        List<Address> senderAddresses, long amount,
-        List<ErgoToken> tokensToSpend) {
+    public List<InputBox> loadTop(BlockchainContext ctx) {
         List<InputBox> unspentBoxes = new ArrayList<>();
-        long remainingAmount = amount;
+        long grossAmount = amountToSpend + feeAmount;
+        long remainingAmount = grossAmount;
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
         List<ErgoToken> remainingTokens = tokensToSpend;
 
-        for (Address sender : senderAddresses) {
+        for (Address sender : senders) {
             CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, remainingAmount, remainingTokens);
             for (InputBox b : unspent.getBoxes()) {
                 unspentBoxes.add(b);
@@ -141,75 +153,50 @@ public class BoxOperations {
             if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) break;
             remainingTokens = tokensHelper.getRemainingTokenList();
         }
-        List<InputBox> selected = selectTop(unspentBoxes, amount, tokensToSpend);
+        List<InputBox> selected = BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, grossAmount, tokensToSpend);
         return selected;
     }
 
     /**
-     * Creates a new {@link SignedTransaction} which sends the given amount of NanoErgs
-     * to the given contract. The address of the given senderProver is used to collect
-     * boxes for spending.
+     * Creates a new {@link SignedTransaction} which sends the given amount of NanoErgs and tokens
+     * to the given contract.
      */
-    public static SignedTransaction putToContractTx(
-            BlockchainContext ctx,
-            ErgoProver senderProver, boolean useEip3Addresses,
-            ErgoContract contract, long amountToSend,
-            List<ErgoToken> tokensToSpend) {
-        UnsignedTransaction tx = putToContractTxUnsigned(ctx,
-            senderProver, useEip3Addresses, contract, amountToSend, tokensToSpend);
+    public SignedTransaction putToContractTx(
+        BlockchainContext ctx,
+        ErgoContract contract) {
+        if (senderProver == null) {
+            throw new IllegalStateException("Call this only when prover is set");
+        }
+
+        UnsignedTransaction tx = putToContractTxUnsigned(ctx, contract);
         SignedTransaction signed = senderProver.sign(tx);
         return signed;
     }
 
     /**
-     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
-     * to the given contract. The address of the given senderProver is used to collect
-     * boxes for spending.
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs and tokens
+     * to the given contract.
      */
-    public static UnsignedTransaction putToContractTxUnsigned(
-            BlockchainContext ctx,
-            ErgoProver senderProver, boolean useEip3Addresses,
-            ErgoContract contract, long amountToSend,
-            List<ErgoToken> tokensToSpend) {
-        List<Address> senders = new ArrayList<>();
-        if (useEip3Addresses) {
-            List<Address> eip3Addresses = senderProver.getEip3Addresses();
-            checkState(eip3Addresses.size() > 0,
-              "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
-            senders.addAll(eip3Addresses);
-        } else {
-            senders.add(senderProver.getAddress());
-        }
-        return putToContractTxUnsigned(ctx, senders, contract, amountToSend, tokensToSpend);
-    }
-
-    /**
-     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs
-     * to the given contract. The addresses of the given senders are used to collect
-     * boxes for spending.
-     */
-    public static UnsignedTransaction putToContractTxUnsigned(
-            BlockchainContext ctx,
-            List<Address> senders,
-            ErgoContract contract, long amountToSend,
-            List<ErgoToken> tokensToSpend) {
-        List<InputBox> boxesToSpend = loadTop(ctx, senders, amountToSend + MinFee, tokensToSpend);
+    public UnsignedTransaction putToContractTxUnsigned(
+        BlockchainContext ctx,
+        ErgoContract contract) {
+        List<InputBox> boxesToSpend = loadTop(ctx);
 
         P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
         OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
-            .value(amountToSend)
+            .value(amountToSpend)
             .contract(contract);
         if (!tokensToSpend.isEmpty())
             outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
         OutBox newBox = outBoxBuilder.build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
-                .outputs(newBox)
-                .fee(Parameters.MinFee)
-                .sendChangeTo(changeAddress)
-                .build();
+            .outputs(newBox)
+            .fee(Parameters.MinFee)
+            .sendChangeTo(changeAddress)
+            .build();
         return tx;
     }
 
@@ -235,7 +222,7 @@ public class BoxOperations {
     /**
      * Get unspent boxes from a paged boxes source and selects the top ones needed to spent
      * to satisfy amountToSpend and tokensToSpend.
-     *
+     * <p>
      * inputBoxesLoader must satisfy the following needs:
      * - receives a 0-based integer, the page that should be loaded
      * - returns a list of {@link InputBox} to select from. First items are preferred to be selected

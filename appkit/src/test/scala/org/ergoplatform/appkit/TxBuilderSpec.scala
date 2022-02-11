@@ -254,9 +254,8 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
-      val signed = BoxOperations.putToContractTx(ctx,
-          senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
+      val signed = new BoxOperations(senderProver, false).withAmountToSpend(amountToSend)
+        .send(ctx, recipient)
       assert(signed != null)
     }
   }
@@ -274,9 +273,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-      val unsigned = BoxOperations.putToContractTxUnsigned(ctx,
-        senders, pkContract, amountToSend,
-        new util.ArrayList[ErgoToken]())
+      val unsigned = new BoxOperations(senders).withAmountToSpend(amountToSend).putToContractTxUnsigned(ctx, pkContract)
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
