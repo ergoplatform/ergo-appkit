@@ -28,9 +28,9 @@ public class ExplorerFacade extends ApiFacade {
             Retrofit r, String id, Integer offset, Integer limit) throws ErgoClientException {
         return execute(r, () -> {
             Method method = DefaultApi.class.getMethod(
-              "getApiV1BoxesUnspentByaddressP1", String.class, Integer.class, Integer.class);
+              "getApiV1BoxesUnspentByaddressP1", String.class, Integer.class, Integer.class, String.class);
             ItemsA res =
-                    RetrofitUtil.<ItemsA>invokeServiceMethod(r, method, new Object[]{id, offset, limit})
+                    RetrofitUtil.<ItemsA>invokeServiceMethod(r, method, new Object[]{id, offset, limit, "asc"})
                             .execute().body();
             return res.getItems();
         });
