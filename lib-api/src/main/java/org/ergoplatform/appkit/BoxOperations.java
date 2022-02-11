@@ -5,21 +5,36 @@ import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.ergoplatform.appkit.Parameters.MinFee;
+
+import com.google.common.base.Preconditions;
+
+import scala.Function1;
+import scala.collection.Iterator;
+import scala.collection.immutable.Map;
 
 /**
  * A collection of utility operations implemented in terms of abstract Appkit interfaces.
  */
 public class BoxOperations {
 
+    /**
+     * @see #selectTop(List, long, List)
+     */
     public static List<InputBox> selectTop(
             List<InputBox> unspentBoxes,
             long amountToSpend) {
         return selectTop(unspentBoxes, amountToSpend, new ArrayList<>());
     }
 
+    /**
+     * Helper method calling {@link org.ergoplatform.wallet.boxes.BoxSelector#select(Iterator, long, Map)}
+     *
+     * @see org.ergoplatform.wallet.boxes.BoxSelector#select(Iterator, Function1, long, Map)
+     */
     public static List<InputBox> selectTop(
             List<InputBox> unspentBoxes,
             long amountToSpend,
@@ -217,5 +232,69 @@ public class BoxOperations {
         return signed;
     }
 
+    /**
+     * Get unspent boxes from a paged boxes source and selects the top ones needed to spent
+     * to satisfy amountToSpend and tokensToSpend.
+     *
+     * inputBoxesLoader must satisfy the following needs:
+     * - receives a 0-based integer, the page that should be loaded
+     * - returns a list of {@link InputBox} to select from. First items are preferred to be selected
+     * - must not return null
+     * - returning an empty list means the source of input boxes is drained and no further page will
+     *   be loaded
+     *
+     * @param amountToSpend amount of NanoErgs to be covered
+     * @param tokensToSpend ErgoToken to spent
+     * @param inputBoxesLoader method returning paged sets of InputBoxes, see above
+     * @return a new instance of {@link CoveringBoxes} set
+     */
+    public static CoveringBoxes getCoveringBoxesFor(long amountToSpend,
+                                                    List<ErgoToken> tokensToSpend,
+                                                    Function<Integer, List<InputBox>> inputBoxesLoader) {
+        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
+        Preconditions.checkArgument(amountToSpend > 0 ||
+            !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
+        ArrayList<InputBox> selectedCoveringBoxes = new ArrayList<>();
+        long remainingAmountToCover = amountToSpend;
+        int page = 0;
+        while (true) {
+            List<InputBox> chunk = inputBoxesLoader.apply(page);
+            for (InputBox boxCandidate : chunk) {
+                // on rare occasions, chunk can include entries that we already had received on a
+                // previous chunk page. We make sure we don't add any duplicate entries.
+                if (!isAlreadyAdded(selectedCoveringBoxes, boxCandidate)) {
+                    boolean usefulTokens = tokensRemaining.foundNewTokens(boxCandidate.getTokens());
+                    if (usefulTokens || remainingAmountToCover > 0) {
+                        selectedCoveringBoxes.add(boxCandidate);
+                        remainingAmountToCover -= boxCandidate.getValue();
+                    }
+                    if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
+                        return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
+                }
+            }
+            // this chunk is not enough, go to the next (if any)
+            if (chunk.size() == 0) {
+                // this was the last chunk, but still remain to collect
+                assert remainingAmountToCover > 0 || !tokensRemaining.areTokensCovered();
+                // cannot satisfy the request, but still return cb, with cb.isCovered == false
+                return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
+            }
+            // step to next chunk
+            page++;
+        }
+    }
 
+    /**
+     * @return true when boxCandidate is already added to selectedBoxes list
+     */
+    private static boolean isAlreadyAdded(ArrayList<InputBox> selectedBoxes, InputBox boxCandidate) {
+        boolean alreadyAdded = false;
+        for (InputBox coveringBox : selectedBoxes) {
+            if (coveringBox.getId().equals(boxCandidate.getId())) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        return alreadyAdded;
+    }
 }
