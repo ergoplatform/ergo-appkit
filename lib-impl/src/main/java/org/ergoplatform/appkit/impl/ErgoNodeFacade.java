@@ -101,6 +101,21 @@ public class ErgoNodeFacade extends ApiFacade {
             }
         });
     }
+    static public Transactions getUnconfirmedTransactions(
+            Retrofit r, int limit, int offset) throws ErgoClientException {
+        return execute(r, () -> {
+            Method method = TransactionsApi.class.getMethod("getUnconfirmedTransactions", Integer.class, Integer.class);
+            Response<Transactions> response = RetrofitUtil.<Transactions>invokeServiceMethod(r, method,
+                new Object[]{limit, offset}).execute();
+
+            if (!response.isSuccessful()) {
+                throw new ErgoClientException(response.code() + ": " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Server returned error"), null);
+            } else {
+                return response.body();
+            }
+        });
+    }
 
 }
 

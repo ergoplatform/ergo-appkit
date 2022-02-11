@@ -39,7 +39,7 @@ public class BoxOperations {
     /**
      * Construct BoxOperations with a list of sender addresses
      *
-     * @param senders lsit of senders the following methods should use
+     * @param senders list of senders the following methods should use
      */
     public BoxOperations(List<Address> senders) {
         this.senders = senders;
@@ -310,6 +310,38 @@ public class BoxOperations {
     interface IUnspentBoxesLoader {
         @Nonnull
         List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer integer);
+    }
+
+    /**
+     * Add a checker method for boxes that should be omitted when loading boxes from Explorer API
+     */
+    public abstract static class ExplorerApiWithCheckerLoader extends ExplorerApiUnspentLoader {
+        protected abstract boolean canUseBox(InputBox box);
+
+        @Override
+        @Nonnull
+        public List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer page) {
+            List<InputBox> boxes = super.loadBoxesPage(ctx, sender, page);
+
+            List<InputBox> returnedBoxes = new ArrayList<>(boxes.size());
+            int pageOffset = 0;
+            while (!boxes.isEmpty() && returnedBoxes.isEmpty()) {
+                for (InputBox boxToCheck : boxes) {
+                    if (canUseBox(boxToCheck))
+                        returnedBoxes.add(boxToCheck);
+                }
+
+                // edge case: we had boxes loaded from Explorer, but all were blacklisted...
+                // load next page!
+                // This will make return the same set on next call by getCoveringBoxes, but
+                // getCoveringBoxes handles duplicates so we just have a call too often
+                if (returnedBoxes.isEmpty()) {
+                    pageOffset++;
+                    boxes = super.loadBoxesPage(ctx, sender, page + pageOffset);
+                }
+            }
+            return returnedBoxes;
+        }
     }
 
     /**
