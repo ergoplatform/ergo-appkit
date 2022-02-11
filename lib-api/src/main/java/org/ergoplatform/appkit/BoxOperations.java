@@ -307,13 +307,14 @@ public class BoxOperations {
      * - must not return null
      * - returning an empty list means the source of input boxes is drained and no further page will be loaded
      */
-    interface IUnspentBoxesLoader {
+    public interface IUnspentBoxesLoader {
         @Nonnull
         List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer integer);
     }
 
     /**
-     * Add a checker method for boxes that should be omitted when loading boxes from Explorer API
+     * Adds a checker method to {@link ExplorerApiUnspentLoader} for boxes that should be omitted
+     * when loading boxes from Explorer API
      */
     public abstract static class ExplorerApiWithCheckerLoader extends ExplorerApiUnspentLoader {
         protected abstract boolean canUseBox(InputBox box);
