@@ -100,11 +100,14 @@ public interface BlockchainContext {
      * Uses {@link BoxOperations#getCoveringBoxesFor(long, List, Function)} with
      * Explorer API as data source.
      *
+     * Deprecated - call {@link BoxOperations#getCoveringBoxesFor(long, List, Function)} directly
+     *
      * @param address owner of the boxes to be retrieved
      * @param amountToSpend amount of NanoErgs to be covered
      * @param tokensToSpend ErgoToken to spent
      * @return a new instance of {@link CoveringBoxes} set
      */
+    @Deprecated
     CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend);
 
     /**

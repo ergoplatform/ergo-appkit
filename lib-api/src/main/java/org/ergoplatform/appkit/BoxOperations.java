@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.ergoplatform.appkit.BlockchainContext.DEFAULT_LIMIT_FOR_API;
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
 import com.google.common.base.Preconditions;
@@ -24,6 +25,7 @@ public class BoxOperations {
     private long amountToSpend = 0;
     private List<ErgoToken> tokensToSpend = Collections.emptyList();
     private long feeAmount = MinFee;
+    private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
 
     /**
      * Construct BoxOperations with a single sender address
@@ -84,6 +86,16 @@ public class BoxOperations {
         return this;
     }
 
+    /**
+     * @param inputBoxesSource to use for {@link #getCoveringBoxesFor(long, List, Function)}
+     *                         See {@link IUnspentBoxesLoader for more information}
+     *                         Default is {@link ExplorerApiUnspentLoader}
+     */
+    public BoxOperations withInputBoxesLoader(@Nonnull IUnspentBoxesLoader inputBoxesSource) {
+        this.inputBoxesLoader = inputBoxesSource;
+        return this;
+    }
+
     @Deprecated
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()
@@ -140,7 +152,8 @@ public class BoxOperations {
         List<ErgoToken> remainingTokens = tokensToSpend;
 
         for (Address sender : senders) {
-            CoveringBoxes unspent = ctx.getCoveringBoxesFor(sender, remainingAmount, remainingTokens);
+            CoveringBoxes unspent = getCoveringBoxesFor(remainingAmount, remainingTokens,
+                page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page));
             for (InputBox b : unspent.getBoxes()) {
                 unspentBoxes.add(b);
                 tokensHelper.foundNewTokens(b.getTokens());
@@ -230,8 +243,8 @@ public class BoxOperations {
      * - returning an empty list means the source of input boxes is drained and no further page will
      *   be loaded
      *
-     * @param amountToSpend amount of NanoErgs to be covered
-     * @param tokensToSpend ErgoToken to spent
+     * @param amountToSpend    amount of NanoErgs to be covered
+     * @param tokensToSpend    ErgoToken to spent
      * @param inputBoxesLoader method returning paged sets of InputBoxes, see above
      * @return a new instance of {@link CoveringBoxes} set
      */
@@ -283,5 +296,30 @@ public class BoxOperations {
             }
         }
         return alreadyAdded;
+    }
+
+    /**
+     * Use this interface to adapt behaviour of unspent boxes loading.
+     * <p>
+     * inputBoxesLoader must satisfy the following needs:
+     * - receives a 0-based integer, the page that should be loaded
+     * - returns a list of InputBox to select from. First items are preferred to be selected
+     * - must not return null
+     * - returning an empty list means the source of input boxes is drained and no further page will be loaded
+     */
+    interface IUnspentBoxesLoader {
+        @Nonnull
+        List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer integer);
+    }
+
+    /**
+     * Default loader for unspent boxes. Loads unspent boxes for an address directly from Explorer API
+     */
+    public static class ExplorerApiUnspentLoader implements IUnspentBoxesLoader {
+        @Override
+        @Nonnull
+        public List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer page) {
+            return ctx.getUnspentBoxesFor(sender, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API);
+        }
     }
 }
