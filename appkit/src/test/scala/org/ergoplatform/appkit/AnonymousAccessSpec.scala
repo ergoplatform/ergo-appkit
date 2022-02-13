@@ -119,7 +119,7 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = new BoxOperations(sender, false).withAmountToSpend(amountToSend).putToContractTx(ctx, contract)
+    val dhtBoxCreationTx = BoxOperations.createForProver(sender).withAmountToSpend(amountToSend).putToContractTx(ctx, contract)
     dhtBoxCreationTx
   }
 
@@ -131,7 +131,7 @@ object DhtUtils {
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
-    val boxesToPayFee = new BoxOperations(sender.getAddress).loadTop(ctx)
+    val boxesToPayFee = BoxOperations.createForSender(sender.getAddress).loadTop(ctx)
 
     val inputs = new util.ArrayList[InputBox]()
     inputs.add(dhtBox)

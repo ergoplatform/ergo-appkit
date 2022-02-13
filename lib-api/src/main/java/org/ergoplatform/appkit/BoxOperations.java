@@ -15,9 +15,10 @@ import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * A collection of utility operations for selecting boxes and building transactions
+ * A collection of utility operations implemented in terms of abstract Appkit interfaces.
  */
 public class BoxOperations {
     private final List<Address> senders;
@@ -27,13 +28,18 @@ public class BoxOperations {
     private long feeAmount = MinFee;
     private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
 
+    private BoxOperations(List<Address> senders, @Nullable ErgoProver senderProver) {
+        this.senders = senders;
+        this.senderProver = senderProver;
+    }
+
     /**
      * Construct BoxOperations with a single sender address
      *
      * @param sender sender the following methods should use
      */
-    public BoxOperations(Address sender) {
-        this(Collections.singletonList(sender));
+    public static BoxOperations createForSender(Address sender) {
+        return createForSenders(Collections.singletonList(sender));
     }
 
     /**
@@ -41,26 +47,28 @@ public class BoxOperations {
      *
      * @param senders list of senders the following methods should use
      */
-    public BoxOperations(List<Address> senders) {
-        this.senders = senders;
-        senderProver = null;
+    public static BoxOperations createForSenders(List<Address> senders) {
+        return new BoxOperations(senders, null);
+    }
+
+    /**
+     * Construct BoxOperations with a prover, deriving list of senders from prover from the
+     * EIP-3 addresses.
+     * All the derived EIP-3 addresses of the prover can be used to collect unspent boxes.
+     */
+    public static BoxOperations createForEip3Prover(ErgoProver senderProver) {
+        List<Address> eip3Addresses = senderProver.getEip3Addresses();
+        checkState(eip3Addresses.size() > 0,
+            "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
+        return new BoxOperations(eip3Addresses, senderProver);
     }
 
     /**
      * Construct BoxOperations with a prover, deriving list of senders from prover from either the
-     * MASTER address of the given prover or from the EIP-3 addresses.
-     * All the derived EIP-3 addresses of the prover can be used to collect unspent boxes.
+     * MASTER address of the given prover.
      */
-    public BoxOperations(ErgoProver senderProver, boolean useEip3Addresses) {
-        if (useEip3Addresses) {
-            List<Address> eip3Addresses = senderProver.getEip3Addresses();
-            checkState(eip3Addresses.size() > 0,
-                "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
-            this.senders = eip3Addresses;
-        } else {
-            this.senders = Collections.singletonList(senderProver.getAddress());
-        }
-        this.senderProver = senderProver;
+    public static BoxOperations createForProver(ErgoProver senderProver) {
+        return new BoxOperations(Collections.singletonList(senderProver.getAddress()), senderProver);
     }
 
     public BoxOperations withAmountToSpend(long amountToSpend) {
@@ -124,6 +132,7 @@ public class BoxOperations {
      *
      * @param ctx       blockchain context obtained from {@link ErgoClient}
      * @param recipient the recipient address
+     * @return json of the signed transaction
      */
     public String send(
         BlockchainContext ctx,
@@ -151,7 +160,10 @@ public class BoxOperations {
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
         List<ErgoToken> remainingTokens = tokensToSpend;
 
+        inputBoxesLoader.prepare(ctx, senders, grossAmount, tokensToSpend);
+
         for (Address sender : senders) {
+            inputBoxesLoader.prepareForAddress(sender);
             CoveringBoxes unspent = getCoveringBoxesFor(remainingAmount, remainingTokens,
                 page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page));
             for (InputBox b : unspent.getBoxes()) {
@@ -300,16 +312,38 @@ public class BoxOperations {
 
     /**
      * Use this interface to adapt behaviour of unspent boxes loading.
-     * <p>
-     * inputBoxesLoader must satisfy the following needs:
-     * - receives a 0-based integer, the page that should be loaded
-     * - returns a list of InputBox to select from. First items are preferred to be selected
-     * - must not return null
-     * - returning an empty list means the source of input boxes is drained and no further page will be loaded
      */
     public interface IUnspentBoxesLoader {
+        /**
+         * Called before first call to {@link #loadBoxesPage(BlockchainContext, Address, Integer)} is done
+         * Called before first call to {@link #prepareForAddress(Address)}
+         *
+         * @param ctx           {@link BlockchainContext} to work with, if needed
+         * @param addresses     addresses boxes will be fetched for
+         * @param grossAmount   overall amount of nanoergs needed to satisfy the caller
+         * @param tokensToSpend overall amount of tokens needed to satisfy the caller
+         */
+        void prepare(@Nonnull BlockchainContext ctx, List<Address> addresses, long grossAmount,
+                     @Nonnull List<ErgoToken> tokensToSpend);
+
+        /**
+         * Called before first call to {@link #loadBoxesPage(BlockchainContext, Address, Integer)}
+         * for a single address.
+         *
+         * @param address address that will be fetched next
+         */
+        void prepareForAddress(Address address);
+
+        /**
+         * @param ctx     {@link BlockchainContext} to work with, if needed
+         * @param address p2pk address unspent boxes list should be fetched for
+         * @param integer page that should be loaded, 0-based integer
+         * @return a list of InputBox to select from. First items are preferred to be selected.
+         * Returning an empty list means the source of input boxes is drained and no further
+         * page should be loaded
+         */
         @Nonnull
-        List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer integer);
+        List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address address, @Nonnull Integer integer);
     }
 
     /**
@@ -350,9 +384,19 @@ public class BoxOperations {
      */
     public static class ExplorerApiUnspentLoader implements IUnspentBoxesLoader {
         @Override
+        public void prepare(@Nonnull BlockchainContext ctx, List<Address> addresses, long grossAmount, @Nonnull List<ErgoToken> tokensToSpend) {
+            // not needed
+        }
+
+        @Override
+        public void prepareForAddress(Address address) {
+            // not needed
+        }
+
+        @Override
         @Nonnull
-        public List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address sender, @Nonnull Integer page) {
-            return ctx.getUnspentBoxesFor(sender, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API);
+        public List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address address, @Nonnull Integer page) {
+            return ctx.getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API);
         }
     }
 }
