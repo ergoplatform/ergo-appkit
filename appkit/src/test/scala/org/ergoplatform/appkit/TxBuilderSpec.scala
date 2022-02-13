@@ -324,6 +324,9 @@ class TxBuilderSpec extends PropSpec with Matchers
         loadNodeResponse("response_Box3.json")),
       Seq(
         loadExplorerResponse("response_boxesByAddressUnspent.json"),
+        // fake an empty last page
+        "{ \"items\": [ ], \"total\": 0\n}",
+        // fake an empty mempool tx list
         "{ \"items\": [ ], \"total\": 0\n}")))
 
     a[NotEnoughErgsException] shouldBe thrownBy {

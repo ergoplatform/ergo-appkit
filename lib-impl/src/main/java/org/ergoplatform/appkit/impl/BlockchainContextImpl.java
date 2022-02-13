@@ -84,6 +84,10 @@ public class BlockchainContextImpl extends BlockchainContextBase {
         return _retrofit;
     }
 
+    Retrofit getRetrofitExplorer() {
+        return _retrofitExplorer;
+    }
+
     @Override
     ApiClient getApiClient() {
         return _client;
