@@ -83,7 +83,7 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
                 // now check if we have boxes on the address
                 for (TransactionInfo tx : mempoolTx) {
                     for (OutputInfo output : tx.getOutputs()) {
-                        if (output.getAddress().equals(senderAddress)) {
+                        if (output.getAddress().equals(senderAddress) && output.getSpentTransactionId() == null) {
                             // we have an unconfirmed box - get info from node for it
                             ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxWithPoolById(((BlockchainContextImpl) ctx).getRetrofit(), output.getBoxId());
                             if (boxInfo != null) {
