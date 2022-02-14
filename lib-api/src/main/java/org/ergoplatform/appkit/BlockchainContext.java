@@ -3,6 +3,7 @@ package org.ergoplatform.appkit;
 import sigmastate.Values;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * This interface represent a specific context of blockchain for execution
@@ -96,12 +97,17 @@ public interface BlockchainContext {
     /**
      * Get unspent boxes owned by the given address starting from the given offset up to
      * the given limit (basically one page of the boxes).
+     * Uses {@link BoxOperations#getCoveringBoxesFor(long, List, Function)} with
+     * Explorer API as data source.
+     *
+     * Deprecated - call {@link BoxOperations#getCoveringBoxesFor(long, List, Function)} directly
      *
      * @param address owner of the boxes to be retrieved
      * @param amountToSpend amount of NanoErgs to be covered
      * @param tokensToSpend ErgoToken to spent
      * @return a new instance of {@link CoveringBoxes} set
      */
+    @Deprecated
     CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend);
 
     /**

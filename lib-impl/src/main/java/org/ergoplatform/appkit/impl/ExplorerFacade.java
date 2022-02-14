@@ -2,8 +2,11 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.explorer.client.DefaultApi;
+import org.ergoplatform.explorer.client.model.Items;
 import org.ergoplatform.explorer.client.model.ItemsA;
 import org.ergoplatform.explorer.client.model.OutputInfo;
+import org.ergoplatform.explorer.client.model.TransactionInfo;
+
 import retrofit2.Retrofit;
 import retrofit2.RetrofitUtil;
 
@@ -32,6 +35,17 @@ public class ExplorerFacade extends ApiFacade {
             ItemsA res =
                     RetrofitUtil.<ItemsA>invokeServiceMethod(r, method, new Object[]{id, offset, limit, "asc"})
                             .execute().body();
+            return res.getItems();
+        });
+    }
+
+    public static List<TransactionInfo> getApiV1MempoolTransactionsByaddressP1(Retrofit r, String address, int offset, int limit) {
+        return execute(r, () -> {
+            Method method = DefaultApi.class.getMethod(
+                "getApiV1MempoolTransactionsByaddressP1", String.class, Integer.class, Integer.class);
+            Items res =
+                RetrofitUtil.<Items<TransactionInfo>>invokeServiceMethod(r, method, new Object[]{address, offset, limit})
+                    .execute().body();
             return res.getItems();
         });
     }

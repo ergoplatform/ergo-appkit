@@ -1,12 +1,13 @@
 package org.ergoplatform.appkit.impl;
 
 import com.google.common.base.Preconditions;
-import org.ergoplatform.appkit.BoxOperations;
+
+import org.ergoplatform.appkit.BoxSelectorsJavaHelpers;
 import org.ergoplatform.appkit.ErgoWallet;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.restapi.client.WalletBox;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class ErgoWalletImpl implements ErgoWallet {
             }).collect(Collectors.toList());
         }
 
-        List<InputBox> selected = BoxOperations.selectTop(_unspentBoxes, amountToSpend);
+        List<InputBox> selected = BoxSelectorsJavaHelpers.selectBoxes(_unspentBoxes, amountToSpend, Collections.emptyList());
         if (selected == null) return Optional.empty();
         return Optional.of(selected);
     }
