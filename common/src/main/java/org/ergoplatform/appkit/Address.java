@@ -184,8 +184,8 @@ public class Address {
         ).toAddress();
     }
 
-    public static Address fromMnemonic(NetworkType networkType, Mnemonic mnemonic) {
-        return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
+    public static Address fromMnemonic(NetworkType networkType, Mnemonic mnemonic, Boolean usePre1627KeyDerivation) {
+        return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword(), usePre1627KeyDerivation);
     }
 
     /**
@@ -197,10 +197,12 @@ public class Address {
      * @param mnemonic     mnemonic (e.g. 15 words) phrase
      * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
      *                     necessary to know in order to restore the secrets
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
+     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address fromMnemonic(
-        NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass) {
-        ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
+            NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
+        ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
         DLogProtocol.ProveDlog pk = masterKey.publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk,
             networkType.networkPrefix);
@@ -218,13 +220,16 @@ public class Address {
      * @param mnemonic     mnemonic (e.g. 15 words) phrase
      * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
      *                     necessary to know in order to restore the secrets
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
+     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address createEip3Address(
         int index,
         NetworkType networkType,
         SecretString mnemonic,
-        SecretString mnemonicPass) {
-        ExtendedSecretKey rootSecret = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass);
+        SecretString mnemonicPass, 
+        Boolean usePre1627KeyDerivation) {
+        ExtendedSecretKey rootSecret = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
 
         // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
         // is BIP-44 for Ergo)
