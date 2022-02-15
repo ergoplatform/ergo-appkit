@@ -13,8 +13,8 @@ public interface ErgoProverBuilder {
      *
      * @param mnemonicPhrase secret seed phrase to be used in prover for generating proofs.
      * @param mnemonicPass   password to protect secret seed phrase.
-     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
-     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+     * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     ErgoProverBuilder withMnemonic(SecretString mnemonicPhrase, SecretString mnemonicPass, Boolean usePre1627KeyDerivation);
 

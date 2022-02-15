@@ -197,8 +197,8 @@ public class Address {
      * @param mnemonic     mnemonic (e.g. 15 words) phrase
      * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
      *                     necessary to know in order to restore the secrets
-     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
-     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+     * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address fromMnemonic(
             NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
@@ -220,8 +220,8 @@ public class Address {
      * @param mnemonic     mnemonic (e.g. 15 words) phrase
      * @param mnemonicPass optional (i.e. it can be empty) mnemonic password which is
      *                     necessary to know in order to restore the secrets
-     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
-     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+     * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address createEip3Address(
         int index,
