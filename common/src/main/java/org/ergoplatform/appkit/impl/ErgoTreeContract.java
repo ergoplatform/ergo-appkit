@@ -1,7 +1,10 @@
 package org.ergoplatform.appkit.impl;
 
+import org.ergoplatform.ErgoAddress;
+import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.Constants;
 import org.ergoplatform.appkit.ErgoContract;
+import org.ergoplatform.appkit.NetworkType;
 import sigmastate.Values;
 
 public class ErgoTreeContract implements ErgoContract {
@@ -30,4 +33,8 @@ public class ErgoTreeContract implements ErgoContract {
     public Values.ErgoTree getErgoTree() {
         return _ergoTree;
     }
+
+    @Override
+    public Address getAddress(NetworkType networkType) { return Address.fromErgoTree(_ergoTree, networkType); }
+
 }

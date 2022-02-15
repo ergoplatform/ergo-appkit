@@ -25,4 +25,9 @@ public interface ErgoContract {
     ErgoContract substConstant(String name, Object value);
 
     Values.ErgoTree getErgoTree();
+
+    /**
+     * Get the base58 encoded address that represents this contract for the given NetworkType
+     */
+    Address getAddress(NetworkType networkType);
 }

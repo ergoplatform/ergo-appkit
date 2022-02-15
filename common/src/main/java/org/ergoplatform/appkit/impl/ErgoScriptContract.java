@@ -1,9 +1,6 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.appkit.Constants;
-import org.ergoplatform.appkit.ErgoContract;
-import org.ergoplatform.appkit.JavaHelpers;
-import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.*;
 import sigmastate.Values;
 
 
@@ -49,4 +46,18 @@ public class ErgoScriptContract implements ErgoContract {
                 _constants, _code, _networkType.networkPrefix);
         return ergoTree;
     }
+
+    /**
+     * Gets address associated with this contract for the given NetworkType
+     */
+    @Override
+    public Address getAddress(NetworkType networkType) {
+        return Address.fromErgoTree(getErgoTree(), networkType);
+    }
+
+
+    public Address getAddress() {
+        return Address.fromErgoTree(getErgoTree(), _networkType);
+    }
+
 }
