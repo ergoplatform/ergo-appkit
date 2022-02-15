@@ -1,26 +1,19 @@
 package org.ergoplatform.explorer.client;//retrofit2
 
-import org.ergoplatform.explorer.client.CollectionFormats.*;
-
 import retrofit2.Call;
 import retrofit2.http.*;
 
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-
-import org.ergoplatform.explorer.client.model.BadRequest;
 import org.ergoplatform.explorer.client.model.Balance;
 import org.ergoplatform.explorer.client.model.BlockSummary;
 import org.ergoplatform.explorer.client.model.BoxQuery;
 import org.ergoplatform.explorer.client.model.EpochParameters;
+import org.ergoplatform.explorer.client.model.Items;
 import org.ergoplatform.explorer.client.model.ItemsA;
 import org.ergoplatform.explorer.client.model.ListOutputInfo;
-import org.ergoplatform.explorer.client.model.NotFound;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.explorer.client.model.TokenInfo;
 import org.ergoplatform.explorer.client.model.TotalBalance;
 import org.ergoplatform.explorer.client.model.TransactionInfo;
-import org.ergoplatform.explorer.client.model.UnknownErr;
 
 
 public interface DefaultApi {
@@ -56,8 +49,21 @@ public interface DefaultApi {
    * @return Call&lt;ItemsA&gt;
    */
   @GET("api/v1/addresses/{p1}/transactions")
-  Call<ItemsA> getApiV1AddressesP1Transactions(
+  Call<Items<TransactionInfo>> getApiV1AddressesP1Transactions(
             @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit                
+  );
+
+  /**
+   *
+   *
+   * @param p1  (required)
+   * @param offset  (optional)
+   * @param limit  (optional)
+   * @return Call&lt;ItemsA&gt;
+   */
+  @GET("api/v1/mempool/transactions/byAddress/{p1}")
+  Call<Items<TransactionInfo>> getApiV1MempoolTransactionsByaddressP1(
+            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit
   );
 
   /**
@@ -198,7 +204,7 @@ public interface DefaultApi {
    */
   @GET("api/v1/boxes/unspent/byAddress/{p1}")
   Call<ItemsA> getApiV1BoxesUnspentByaddressP1(
-            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit                
+            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit,     @retrofit2.http.Query("sortDirection") String sortDirection
   );
 
   /**

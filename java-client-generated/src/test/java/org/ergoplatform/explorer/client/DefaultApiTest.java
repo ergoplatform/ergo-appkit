@@ -5,6 +5,7 @@ import org.ergoplatform.explorer.client.model.Balance;
 import org.ergoplatform.explorer.client.model.BlockSummary;
 import org.ergoplatform.explorer.client.model.BoxQuery;
 import org.ergoplatform.explorer.client.model.EpochParameters;
+import org.ergoplatform.explorer.client.model.Items;
 import org.ergoplatform.explorer.client.model.ItemsA;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.explorer.client.model.TokenInfo;
@@ -48,8 +49,17 @@ public class DefaultApiTest extends ApiTestBase {
     public void getApiV1AddressesP1TransactionsTest() throws IOException {
         Integer offset = 0;
         Integer limit = 10;
-        ItemsA response = api.getApiV1AddressesP1Transactions(address, offset, limit).execute().body();
+        Items<TransactionInfo> response = api.getApiV1AddressesP1Transactions(address, offset, limit).execute().body();
         assertTrue(response.getItems().size() > 0);
+        assertNotNull(response.getItems().get(0).getId());
+    }
+
+    @Test
+    public void getApiV1MempoolTransactionsByaddressP1Test() throws IOException {
+        Integer offset = 0;
+        Integer limit = 10;
+        Items<TransactionInfo> response = api.getApiV1MempoolTransactionsByaddressP1(address, offset, limit).execute().body();
+        assertEquals(response.getTotal(), Integer.valueOf(response.getItems().size()));
     }
 
     @Test
@@ -139,7 +149,7 @@ public class DefaultApiTest extends ApiTestBase {
     public void getApiV1BoxesUnspentByaddressP1Test() throws IOException {
         Integer offset = 0;
         Integer limit = 10;
-        ItemsA response = api.getApiV1BoxesUnspentByaddressP1(address, offset, limit).execute().body();
+        ItemsA response = api.getApiV1BoxesUnspentByaddressP1(address, offset, limit, "asc").execute().body();
         assertTrue(response.getItems().size() > 0);
     }
 

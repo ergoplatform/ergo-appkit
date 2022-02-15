@@ -1,20 +1,21 @@
 package org.ergoplatform.appkit
 
-import java.io.File
-import java.math.BigInteger
-import java.util
-import java.util.Arrays
-import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
-import org.ergoplatform.appkit.impl.{BlockchainContextBase, Eip4TokenBuilder, ErgoTreeContract, ReducedTransactionImpl}
+import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract, ExplorerAndPoolUnspentBoxesLoader}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
+import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
+import org.scalatest.{Matchers, PropSpec}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scorex.util.ModifierId
-import sigmastate.eval.{CBigInt, CostingBox}
+import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.HintsBag
+
+import java.io.File
+import java.math.BigInteger
+import java.util.Arrays
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -253,9 +254,8 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
-      val signed = BoxOperations.putToContractTx(ctx,
-          senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
+      val signed = BoxOperations.createForProver(senderProver).withAmountToSpend(amountToSend)
+        .send(ctx, recipient)
       assert(signed != null)
     }
   }
@@ -273,9 +273,8 @@ class TxBuilderSpec extends PropSpec with Matchers
       val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-      val unsigned = BoxOperations.putToContractTxUnsigned(ctx,
-        senders, pkContract, amountToSend,
-        new util.ArrayList[ErgoToken]())
+      val unsigned = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+        .putToContractTxUnsigned(ctx, pkContract)
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
@@ -314,6 +313,44 @@ class TxBuilderSpec extends PropSpec with Matchers
       val deserializedSignedTx = ctx.parseSignedTransaction(signed.toBytes)
       deserializedSignedTx shouldBe signed
     }
+  }
+
+  property("omit mempool boxes") {
+    val ergoClient = createMockedErgoClient(MockData(
+      Seq(
+        loadNodeResponse("response_mempool.json"),
+        loadNodeResponse("response_Box1.json"),
+        loadNodeResponse("response_Box2.json"),
+        loadNodeResponse("response_Box3.json")),
+      Seq(
+        loadExplorerResponse("response_boxesByAddressUnspent.json"),
+        // fake an empty last page
+        "{ \"items\": [ ], \"total\": 0\n}",
+        // fake an empty mempool tx list
+        "{ \"items\": [ ], \"total\": 0\n}")))
+
+    a[NotEnoughErgsException] shouldBe thrownBy {
+      ergoClient.execute { ctx: BlockchainContext =>
+        val storage = SecretStorage.loadFrom("storage/E2.json")
+        storage.unlock("abc")
+
+        val recipient = address
+
+        val amountToSend = 1000000
+        val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+
+        val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+        val unsigned = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+          .withInputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
+          .putToContractTxUnsigned(ctx, pkContract)
+
+        val prover = ctx.newProverBuilder.build // prover without secrets
+        val reduced = prover.reduce(unsigned, 0)
+        reduced should not be (null)
+        reduced
+      }
+    }
+
   }
 
   property("Special tx building cases") {
