@@ -430,8 +430,8 @@ object JavaHelpers {
    *
    * @param seedPhrase secret seed phrase to be used in prover for generating proofs.
    * @param pass   password to protect secret seed phrase.
-   * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
-   * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+   * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+   * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
    */
   def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null, usePre1627KeyDerivation: java.lang.Boolean): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
