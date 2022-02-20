@@ -7,7 +7,7 @@ import sigmastate.Values;
 public class ErgoScriptContract implements ErgoContract {
     final private Constants _constants;
     final private String _code;
-    private NetworkType _networkType;
+    private final NetworkType _networkType;
 
     private ErgoScriptContract(Constants constants, String code, NetworkType networkType) {
         _constants = constants;

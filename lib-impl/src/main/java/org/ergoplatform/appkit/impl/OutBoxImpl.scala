@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
-import org.ergoplatform.appkit.{ErgoToken, ErgoValue, Iso, OutBox}
+import org.ergoplatform.appkit.{ErgoToken, ErgoValue, InputBox, Iso, OutBox}
 import scorex.util.ModifierId
 import sigmastate.Values
 
@@ -19,13 +19,13 @@ class OutBoxImpl(_ctx: BlockchainContextImpl, _ergoBoxCandidate: ErgoBoxCandidat
     Iso.JListToIndexedSeq(Iso.isoErgoValueToSValue).from(registers)
   }
 
-  override def getBytesWithoutRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
+  override def getBytesWithNoRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
 
   override def getErgoTree: Values.ErgoTree = _ergoBoxCandidate.ergoTree
 
   private[impl] def getErgoBoxCandidate: ErgoBoxCandidate = _ergoBoxCandidate
 
-  override def convertToInputWith(txId: String, boxIndex: Short) = {
+  override def convertToInputWith(txId: String, boxIndex: Short): InputBox = {
     val box = _ergoBoxCandidate.toBox(ModifierId @@ txId, boxIndex)
     new InputBoxImpl(_ctx, box)
   }
