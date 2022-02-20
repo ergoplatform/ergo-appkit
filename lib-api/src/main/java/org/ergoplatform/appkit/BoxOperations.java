@@ -138,7 +138,7 @@ public class BoxOperations {
         BlockchainContext ctx,
         Address recipient) {
 
-        ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script());
+        ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script(), recipient.getNetworkType());
         SignedTransaction signed = putToContractTx(ctx, contract);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
@@ -232,7 +232,7 @@ public class BoxOperations {
             ErgoProver sender, Address recipient, long amount, long fee) {
         OutBox newBox = txB.outBoxBuilder()
                 .value(amount)
-                .contract(new ErgoTreeContract(recipient.getErgoAddress().script()))
+                .contract(new ErgoTreeContract(recipient.getErgoAddress().script(), recipient.getNetworkType()))
                 .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)

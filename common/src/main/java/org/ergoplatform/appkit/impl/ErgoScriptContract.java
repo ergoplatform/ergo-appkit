@@ -47,15 +47,7 @@ public class ErgoScriptContract implements ErgoContract {
         return ergoTree;
     }
 
-    /**
-     * Gets address associated with this contract for the given NetworkType
-     */
     @Override
-    public Address getAddress(NetworkType networkType) {
-        return Address.fromErgoTree(getErgoTree(), networkType);
-    }
-
-
     public Address getAddress() {
         return Address.fromErgoTree(getErgoTree(), _networkType);
     }

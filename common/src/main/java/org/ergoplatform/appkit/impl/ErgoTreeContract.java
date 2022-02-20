@@ -9,9 +9,10 @@ import sigmastate.Values;
 
 public class ErgoTreeContract implements ErgoContract {
     private final Values.ErgoTree _ergoTree;
-
-    public ErgoTreeContract(Values.ErgoTree ergoTree) {
+    private final NetworkType _networkType;
+    public ErgoTreeContract(Values.ErgoTree ergoTree, NetworkType networkType) {
         _ergoTree = ergoTree;
+        _networkType = networkType;
     }
 
     @Override
@@ -35,6 +36,6 @@ public class ErgoTreeContract implements ErgoContract {
     }
 
     @Override
-    public Address getAddress(NetworkType networkType) { return Address.fromErgoTree(_ergoTree, networkType); }
+    public Address getAddress() { return Address.fromErgoTree(_ergoTree, _networkType); }
 
 }

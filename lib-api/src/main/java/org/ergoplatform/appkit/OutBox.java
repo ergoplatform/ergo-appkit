@@ -43,7 +43,7 @@ public interface OutBox {
     /**
      * Returns the serialized bytes of this output box without any transaction reference data.
      */
-    byte[] getBytes();
+    byte[] getBytesWithoutRef();
 
     /**
      * Converts this box candidate into a new instance of {@link InputBox} by
