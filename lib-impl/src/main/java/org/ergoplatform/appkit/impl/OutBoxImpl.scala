@@ -1,7 +1,6 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
-import org.ergoplatform.appkit.JavaHelpers.UniversalConverter
 import org.ergoplatform.appkit.{ErgoToken, ErgoValue, Iso, OutBox}
 import scorex.util.ModifierId
 import sigmastate.Values
@@ -13,10 +12,11 @@ class OutBoxImpl(_ctx: BlockchainContextImpl, _ergoBoxCandidate: ErgoBoxCandidat
 
   override def getCreationHeight: Int = _ergoBoxCandidate.creationHeight
 
-  override def getTokens: util.List[ErgoToken] = _ergoBoxCandidate.additionalTokens.convertTo(util.List[ErgoToken])
+  override def getTokens: util.List[ErgoToken] = Iso.isoTokensListToPairsColl.from(_ergoBoxCandidate.additionalTokens)
 
   override def getRegisters: util.List[ErgoValue[_]] = {
-    _ergoBoxCandidate.convertTo(util.List[ErgoValue[_]])
+    val registers = _ergoBoxCandidate.additionalRegisters.values.toIndexedSeq
+    Iso.JListToIndexedSeq(Iso.isoErgoValueToSValue).from(registers)
   }
 
   override def getBytesWithoutRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
