@@ -205,24 +205,37 @@ public class BoxOperations {
     public UnsignedTransaction putToContractTxUnsigned(
         BlockchainContext ctx,
         ErgoContract contract) {
+
+        return buildTxWithTransactionBuilder(ctx, txB -> {
+            OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
+                .value(amountToSpend)
+                .contract(contract);
+            if (!tokensToSpend.isEmpty())
+                outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
+            OutBox newBox = outBoxBuilder.build();
+            txB.outputs(newBox);
+            return txB;
+        });
+    }
+
+    /**
+     * Creates a new {@link UnsignedTransaction} preparing inputs, fee and change address.
+     * The given outputBuilder is used to prepare and add outboxes to the resulting transaction.
+     *
+     * See {@link #putToContractTxUnsigned(BlockchainContext, ErgoContract)} how to use.
+     */
+    public UnsignedTransaction buildTxWithTransactionBuilder(BlockchainContext ctx,
+                                                             Function<UnsignedTransactionBuilder, UnsignedTransactionBuilder> outputBuilder) {
         List<InputBox> boxesToSpend = loadTop(ctx);
 
         P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
-        OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
-            .value(amountToSpend)
-            .contract(contract);
-        if (!tokensToSpend.isEmpty())
-            outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
-        OutBox newBox = outBoxBuilder.build();
+        UnsignedTransactionBuilder unsignedTransactionBuilder = txB.boxesToSpend(boxesToSpend)
+            .fee(MinFee)
+            .sendChangeTo(changeAddress);
 
-        UnsignedTransaction tx = txB.boxesToSpend(boxesToSpend)
-            .outputs(newBox)
-            .fee(Parameters.MinFee)
-            .sendChangeTo(changeAddress)
-            .build();
-        return tx;
+        return outputBuilder.apply(unsignedTransactionBuilder).build();
     }
 
     public static SignedTransaction spendBoxesTx(

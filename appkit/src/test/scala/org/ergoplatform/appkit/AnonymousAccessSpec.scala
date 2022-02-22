@@ -124,23 +124,16 @@ object DhtUtils {
   }
 
   def spendDhtBox(ctx: BlockchainContext, g_y: GroupElement, g_xy: GroupElement, sender: ErgoProver, dhtBox: InputBox, receiver: Address): SignedTransaction = {
-    val txB = ctx.newTxBuilder
-    val outBox = txB.outBoxBuilder
+    val tx = BoxOperations.createForSender(sender.getAddress).buildTxWithTransactionBuilder(ctx, { txB =>
+      val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
         .contract(new ErgoTreeContract(receiver.getErgoAddress.script))
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
-    val boxesToPayFee = BoxOperations.createForSender(sender.getAddress).loadTop(ctx)
-
-    val inputs = new util.ArrayList[InputBox]()
-    inputs.add(dhtBox)
-    inputs.addAll(boxesToPayFee)
-
-    val tx = txB.boxesToSpend(inputs)
-        .outputs(outBox)
-        .fee(MinFee)
-        .sendChangeTo(sender.getP2PKAddress).build
+      txB.outputs(outBox)
+      txB
+    })
 
     sender.sign(tx)
   }
