@@ -32,7 +32,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _ctx = ctx;
     }
 
-    UnsignedErgoLikeTransaction getTx() {
+    public UnsignedErgoLikeTransaction getTx() {
         return _tx;
     }
 
