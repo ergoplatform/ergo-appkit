@@ -353,6 +353,43 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   }
 
+  property("consider changebox amount") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val storage = SecretStorage.loadFrom("storage/E2.json")
+      storage.unlock("abc")
+
+      val recipient = address
+
+      // send 1 ERG
+      val amountToSend = 1000L * 1000 * 1000
+      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+
+      // first box: 1 ERG + tx fee + token that will cause a change
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee)
+        .contract(pkContract)
+        .tokens(new ErgoToken(mockTxId, 2))
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: enough ERG for the change box
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val operations = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
+      val inputsSelected = operations.loadTop(ctx)
+
+      // both boxes should be selected
+      inputsSelected.size() shouldBe 2
+    }
+
+  }
+
   property("Special tx building cases") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>

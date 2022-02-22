@@ -10,6 +10,7 @@ import java.util.Map;
  */
 public class SelectTokensHelper {
     private final HashMap<String, Long> tokensLeft;
+    private boolean changeBoxNeeded;
 
     public SelectTokensHelper(Iterable<ErgoToken> tokensToSpent) {
         tokensLeft = new HashMap<>();
@@ -17,12 +18,17 @@ public class SelectTokensHelper {
         for (ErgoToken ergoToken : tokensToSpent) {
             tokensLeft.put(ergoToken.getId().toString(), ergoToken.getValue());
         }
+
+        changeBoxNeeded = false;
     }
 
     /**
+     * Checks if the given tokens are needed to fulfill the tokens to
+     * spend
+     *
      * @return if the found tokens were needed to fill the tokens left
      */
-    public boolean foundNewTokens(Iterable<ErgoToken> foundTokens) {
+    public boolean areTokensNeeded(Iterable<ErgoToken> foundTokens) {
         boolean tokensNeeded = false;
         for (ErgoToken foundToken : foundTokens) {
             String tokenId = foundToken.getId().toString();
@@ -30,11 +36,32 @@ public class SelectTokensHelper {
                 Long currentValue = tokensLeft.get(tokenId);
                 if (currentValue > 0) {
                     tokensNeeded = true;
+                    break;
                 }
-                tokensLeft.put(tokenId, currentValue - foundToken.getValue());
             }
         }
         return tokensNeeded;
+    }
+
+    /**
+     * Marks the given tokens as needed, subtracting the amount from the remaining amount of
+     * tokens to find.
+     * Also updates if a change box is needed
+     */
+    public void useTokens(Iterable<ErgoToken> foundTokens) {
+        for (ErgoToken foundToken : foundTokens) {
+            String tokenId = foundToken.getId().toString();
+            if (tokensLeft.containsKey(tokenId)) {
+                Long currentValue = tokensLeft.get(tokenId);
+                long newValue = currentValue - foundToken.getValue();
+                tokensLeft.put(tokenId, newValue);
+                if (newValue < 0) {
+                    changeBoxNeeded = true;
+                }
+            } else {
+                changeBoxNeeded = true;
+            }
+        }
     }
 
     public boolean areTokensCovered() {
@@ -57,5 +84,9 @@ public class SelectTokensHelper {
             }
         }
         return result;
+    }
+
+    public boolean isChangeBoxNeeded() {
+        return changeBoxNeeded;
     }
 }
