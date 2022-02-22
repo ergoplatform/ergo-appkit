@@ -93,6 +93,8 @@ public class InputBoxImpl implements InputBox {
     	String json = gson.toJson(data);
     	return json;
     }
+    @Override
+    public byte[] getBytes() { return _ergoBox.bytes(); }
 
     public ErgoBox getErgoBox() {
         return _ergoBox;
