@@ -124,7 +124,7 @@ object DhtUtils {
   }
 
   def spendDhtBox(ctx: BlockchainContext, g_y: GroupElement, g_xy: GroupElement, sender: ErgoProver, dhtBox: InputBox, receiver: Address): SignedTransaction = {
-    val tx = BoxOperations.createForSender(sender.getAddress).buildTxWithTransactionBuilder(ctx, { txB =>
+    val tx = BoxOperations.createForSender(sender.getAddress).buildTxWithTransactionBuilder(ctx, { txB: UnsignedTransactionBuilder =>
       val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
         .contract(new ErgoTreeContract(receiver.getErgoAddress.script))
