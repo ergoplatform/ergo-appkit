@@ -376,7 +376,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build().convertToInputWith(mockTxId, 0)
       // second box: enough ERG for the change box
       val input2 = ctx.newTxBuilder.outBoxBuilder
-        .value(amountToSend)
+        .value(Parameters.MinFee)
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
