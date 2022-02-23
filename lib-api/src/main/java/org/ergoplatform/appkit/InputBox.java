@@ -78,5 +78,10 @@ public interface InputBox {
      */
     String toJson(boolean prettyPrint, boolean formatJson);
 
+    /**
+     * Returns the serialized bytes representing this InputBox, including transaction reference data
+     */
+    byte[] getBytes();
+
 }
 

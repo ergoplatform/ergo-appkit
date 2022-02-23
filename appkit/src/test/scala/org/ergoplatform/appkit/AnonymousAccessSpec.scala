@@ -127,7 +127,7 @@ object DhtUtils {
     val tx = BoxOperations.createForSender(sender.getAddress).buildTxWithTransactionBuilder(ctx, { txB: UnsignedTransactionBuilder =>
       val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
-        .contract(new ErgoTreeContract(receiver.getErgoAddress.script))
+        .contract(new ErgoTreeContract(receiver.getErgoAddress.script, receiver.getNetworkType))
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
