@@ -28,6 +28,8 @@ public class BoxOperations {
     private long feeAmount = MinFee;
     private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
 
+    private static final long CHANGE_BOX_NANOERG = MinFee;
+
     private BoxOperations(List<Address> senders, @Nullable ErgoProver senderProver) {
         this.senders = senders;
         this.senderProver = senderProver;
@@ -95,7 +97,7 @@ public class BoxOperations {
     }
 
     /**
-     * @param inputBoxesSource to use for {@link #getCoveringBoxesFor(long, List, Function)}
+     * @param inputBoxesSource to use for {@link #getCoveringBoxesFor(long, List, boolean, Function)}
      *                         See {@link IUnspentBoxesLoader for more information}
      *                         Default is {@link ExplorerApiUnspentLoader}
      */
@@ -157,6 +159,7 @@ public class BoxOperations {
         List<InputBox> unspentBoxes = new ArrayList<>();
         long grossAmount = amountToSpend + feeAmount;
         long remainingAmount = grossAmount;
+        boolean changeBoxConsidered = false;
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
         List<ErgoToken> remainingTokens = tokensToSpend;
 
@@ -164,11 +167,19 @@ public class BoxOperations {
 
         for (Address sender : senders) {
             inputBoxesLoader.prepareForAddress(sender);
-            CoveringBoxes unspent = getCoveringBoxesFor(remainingAmount, remainingTokens,
+            CoveringBoxes addressUnspentBoxes = getCoveringBoxesFor(remainingAmount, remainingTokens,
+                changeBoxConsidered,
                 page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page));
-            for (InputBox b : unspent.getBoxes()) {
+
+            // when a change box needed it needs some extra nanoergs to be sent
+            if (!changeBoxConsidered && addressUnspentBoxes.isChangeBoxNeeded()) {
+                changeBoxConsidered = true;
+                remainingAmount = remainingAmount + CHANGE_BOX_NANOERG;
+            }
+
+            for (InputBox b : addressUnspentBoxes.getBoxes()) {
                 unspentBoxes.add(b);
-                tokensHelper.foundNewTokens(b.getTokens());
+                tokensHelper.useTokens(b.getTokens());
                 remainingAmount -= b.getValue();
                 if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) {
                     // collected enough boxes to cover the amount
@@ -255,13 +266,16 @@ public class BoxOperations {
      * - returning an empty list means the source of input boxes is drained and no further page will
      *   be loaded
      *
-     * @param amountToSpend    amount of NanoErgs to be covered
-     * @param tokensToSpend    ErgoToken to spent
-     * @param inputBoxesLoader method returning paged sets of InputBoxes, see above
+     * @param amountToSpend       amount of NanoErgs to be covered
+     * @param tokensToSpend       ErgoToken to spent
+     * @param changeBoxConsidered true if CHANGE_BOX_NANOERG amount for a change box is already
+     *                            included in amountToSpend and does not need to be added any more
+     * @param inputBoxesLoader    method returning paged sets of InputBoxes, see above
      * @return a new instance of {@link CoveringBoxes} set
      */
     public static CoveringBoxes getCoveringBoxesFor(long amountToSpend,
                                                     List<ErgoToken> tokensToSpend,
+                                                    boolean changeBoxConsidered,
                                                     Function<Integer, List<InputBox>> inputBoxesLoader) {
         SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
         Preconditions.checkArgument(amountToSpend > 0 ||
@@ -275,13 +289,22 @@ public class BoxOperations {
                 // on rare occasions, chunk can include entries that we already had received on a
                 // previous chunk page. We make sure we don't add any duplicate entries.
                 if (!isAlreadyAdded(selectedCoveringBoxes, boxCandidate)) {
-                    boolean usefulTokens = tokensRemaining.foundNewTokens(boxCandidate.getTokens());
+                    boolean usefulTokens = tokensRemaining.areTokensNeeded(boxCandidate.getTokens());
                     if (usefulTokens || remainingAmountToCover > 0) {
                         selectedCoveringBoxes.add(boxCandidate);
                         remainingAmountToCover -= boxCandidate.getValue();
+                        tokensRemaining.useTokens(boxCandidate.getTokens());
+
+                        // if we haven't accounted for a change box so far, but now a change box is
+                        // needed, we have to search for a little more amount to cover the change
+                        if (!changeBoxConsidered && tokensRemaining.isChangeBoxNeeded()) {
+                            changeBoxConsidered = true;
+                            remainingAmountToCover = remainingAmountToCover + CHANGE_BOX_NANOERG;
+                            amountToSpend = amountToSpend + CHANGE_BOX_NANOERG;
+                        }
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
-                        return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
+                        return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
                 }
             }
             // this chunk is not enough, go to the next (if any)
@@ -289,7 +312,7 @@ public class BoxOperations {
                 // this was the last chunk, but still remain to collect
                 assert remainingAmountToCover > 0 || !tokensRemaining.areTokensCovered();
                 // cannot satisfy the request, but still return cb, with cb.isCovered == false
-                return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
+                return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
             }
             // step to next chunk
             page++;
@@ -337,13 +360,13 @@ public class BoxOperations {
         /**
          * @param ctx     {@link BlockchainContext} to work with, if needed
          * @param address p2pk address unspent boxes list should be fetched for
-         * @param integer page that should be loaded, 0-based integer
+         * @param page    page that should be loaded, 0-based integer
          * @return a list of InputBox to select from. First items are preferred to be selected.
          * Returning an empty list means the source of input boxes is drained and no further
          * page should be loaded
          */
         @Nonnull
-        List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address address, @Nonnull Integer integer);
+        List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address address, @Nonnull Integer page);
     }
 
     /**

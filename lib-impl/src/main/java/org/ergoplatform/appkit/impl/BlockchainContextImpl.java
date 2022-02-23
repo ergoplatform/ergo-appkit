@@ -163,7 +163,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     @Override
     public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend) {
-        return BoxOperations.getCoveringBoxesFor(amountToSpend, tokensToSpend,
+        return BoxOperations.getCoveringBoxesFor(amountToSpend, tokensToSpend, false,
             page -> getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API));
     }
 }
