@@ -18,7 +18,7 @@ public abstract class BlockchainContextBase implements BlockchainContext {
 
     @Override
     public ErgoContract newContract(Values.ErgoTree ergoTree) {
-        return new ErgoTreeContract(ergoTree);
+        return new ErgoTreeContract(ergoTree, _networkType);
     }
 
     @Override
