@@ -171,7 +171,7 @@ public class BoxOperations {
                 changeBoxConsidered,
                 page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page));
 
-            // change box needed but not considered yet?
+            // when a change box needed it needs some extra nanoergs to be sent
             if (!changeBoxConsidered && addressUnspentBoxes.isChangeBoxNeeded()) {
                 changeBoxConsidered = true;
                 remainingAmount = remainingAmount + CHANGE_BOX_NANOERG;
@@ -268,7 +268,8 @@ public class BoxOperations {
      *
      * @param amountToSpend       amount of NanoErgs to be covered
      * @param tokensToSpend       ErgoToken to spent
-     * @param changeBoxConsidered true if change box is already considered by amountToSpend
+     * @param changeBoxConsidered true if CHANGE_BOX_NANOERG amount for a change box is already
+     *                            included in amountToSpend and does not need to be added any more
      * @param inputBoxesLoader    method returning paged sets of InputBoxes, see above
      * @return a new instance of {@link CoveringBoxes} set
      */

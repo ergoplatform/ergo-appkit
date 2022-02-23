@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class to keep track of amount of tokens to spend and amount of tokens already found
+ * Helper class to keep track of amount of tokens to spend and tokens already covered by boxes.
+ * Used to determine if more and which boxes need to be selected, and if a change box is needed.
  */
 public class SelectTokensHelper {
     private final HashMap<String, Long> tokensLeft;
@@ -44,16 +45,17 @@ public class SelectTokensHelper {
     }
 
     /**
-     * Marks the given tokens as needed, subtracting the amount from the remaining amount of
-     * tokens to find.
-     * Also updates if a change box is needed
+     * Marks the given tokens as selected, subtracting the amount values from the remaining amount
+     * of tokens needed to fulfill the initial tokens to spend.
+     * Also keeps track if a change box is needed in case we selected to many tokens, see
+     * {@link #isChangeBoxNeeded()}
      */
-    public void useTokens(Iterable<ErgoToken> foundTokens) {
-        for (ErgoToken foundToken : foundTokens) {
-            String tokenId = foundToken.getId().toString();
+    public void useTokens(Iterable<ErgoToken> selectedTokens) {
+        for (ErgoToken selectedToken : selectedTokens) {
+            String tokenId = selectedToken.getId().toString();
             if (tokensLeft.containsKey(tokenId)) {
                 Long currentValue = tokensLeft.get(tokenId);
-                long newValue = currentValue - foundToken.getValue();
+                long newValue = currentValue - selectedToken.getValue();
                 tokensLeft.put(tokenId, newValue);
                 if (newValue < 0) {
                     changeBoxNeeded = true;
@@ -64,6 +66,9 @@ public class SelectTokensHelper {
         }
     }
 
+    /**
+     * @return true if currently selected tokens can fulfill the initial tokens to spend
+     */
     public boolean areTokensCovered() {
         boolean success = true;
         for (Long value : tokensLeft.values()) {
@@ -86,6 +91,10 @@ public class SelectTokensHelper {
         return result;
     }
 
+    /**
+     * @return true if a change box is needed. This is the case if more tokens were selected
+     * than needed to spend.
+     */
     public boolean isChangeBoxNeeded() {
         return changeBoxNeeded;
     }
