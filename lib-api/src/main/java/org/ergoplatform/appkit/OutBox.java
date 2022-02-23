@@ -1,6 +1,9 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.ErgoBoxCandidate;
+import sigmastate.Values;
+
+import java.util.List;
 
 /**
  * This interface is used to represent output boxes on newly created transactions.
@@ -23,9 +26,24 @@ public interface OutBox {
     int getCreationHeight();
 
     /**
-     * Returns a token with the given id.
+     * Returns list of tokens held in R2 of the current OutBox.
      */
-    ErgoToken token(ErgoId id);
+    List<ErgoToken> getTokens();
+
+    /**
+     * Returns list of additional registers that were set in this OutBox
+     */
+    List<ErgoValue<?>> getRegisters();
+
+    /**
+     * Returns the ErgoTree of the script guarding the box
+     */
+    Values.ErgoTree getErgoTree();
+
+    /**
+     * Returns the serialized bytes of this output box without any transaction reference data.
+     */
+    byte[] getBytesWithNoRef();
 
     /**
      * Converts this box candidate into a new instance of {@link InputBox} by
