@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
  * A collection of utility operations implemented in terms of abstract Appkit interfaces.
  */
 public class BoxOperations {
+    private final BlockchainContext ctx;
     private final List<Address> senders;
     private final ErgoProver senderProver;
     private long amountToSpend = 0;
@@ -30,7 +31,8 @@ public class BoxOperations {
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
 
-    private BoxOperations(List<Address> senders, @Nullable ErgoProver senderProver) {
+    private BoxOperations(BlockchainContext ctx, List<Address> senders, @Nullable ErgoProver senderProver) {
+        this.ctx = ctx;
         this.senders = senders;
         this.senderProver = senderProver;
     }
@@ -40,8 +42,8 @@ public class BoxOperations {
      *
      * @param sender sender the following methods should use
      */
-    public static BoxOperations createForSender(Address sender) {
-        return createForSenders(Collections.singletonList(sender));
+    public static BoxOperations createForSender(Address sender, BlockchainContext ctx) {
+        return createForSenders(Collections.singletonList(sender), ctx);
     }
 
     /**
@@ -49,8 +51,8 @@ public class BoxOperations {
      *
      * @param senders list of senders the following methods should use
      */
-    public static BoxOperations createForSenders(List<Address> senders) {
-        return new BoxOperations(senders, null);
+    public static BoxOperations createForSenders(List<Address> senders, BlockchainContext ctx) {
+        return new BoxOperations(ctx, senders, null);
     }
 
     /**
@@ -58,19 +60,19 @@ public class BoxOperations {
      * EIP-3 addresses.
      * All the derived EIP-3 addresses of the prover can be used to collect unspent boxes.
      */
-    public static BoxOperations createForEip3Prover(ErgoProver senderProver) {
+    public static BoxOperations createForEip3Prover(ErgoProver senderProver, BlockchainContext ctx) {
         List<Address> eip3Addresses = senderProver.getEip3Addresses();
         checkState(eip3Addresses.size() > 0,
             "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
-        return new BoxOperations(eip3Addresses, senderProver);
+        return new BoxOperations(ctx, eip3Addresses, senderProver);
     }
 
     /**
      * Construct BoxOperations with a prover, deriving list of senders from prover from either the
      * MASTER address of the given prover.
      */
-    public static BoxOperations createForProver(ErgoProver senderProver) {
-        return new BoxOperations(Collections.singletonList(senderProver.getAddress()), senderProver);
+    public static BoxOperations createForProver(ErgoProver senderProver, BlockchainContext ctx) {
+        return new BoxOperations(ctx, Collections.singletonList(senderProver.getAddress()), senderProver);
     }
 
     public BoxOperations withAmountToSpend(long amountToSpend) {
@@ -132,16 +134,13 @@ public class BoxOperations {
     /**
      * Send the specified amountToSpend and tokens to the recipient.
      *
-     * @param ctx       blockchain context obtained from {@link ErgoClient}
      * @param recipient the recipient address
      * @return json of the signed transaction
      */
-    public String send(
-        BlockchainContext ctx,
-        Address recipient) {
+    public String send(Address recipient) {
 
         ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script(), recipient.getNetworkType());
-        SignedTransaction signed = putToContractTx(ctx, contract);
+        SignedTransaction signed = putToContractTx(contract);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
     }
@@ -152,10 +151,9 @@ public class BoxOperations {
      * list.
      * The list is then used to select covering boxes.
      *
-     * @param ctx the blockchain context to use for loading
      * @return a list of boxes covering the given amount
      */
-    public List<InputBox> loadTop(BlockchainContext ctx) {
+    public List<InputBox> loadTop() {
         List<InputBox> unspentBoxes = new ArrayList<>();
         long grossAmount = amountToSpend + feeAmount;
         long remainingAmount = grossAmount;
@@ -198,13 +196,12 @@ public class BoxOperations {
      * to the given contract.
      */
     public SignedTransaction putToContractTx(
-        BlockchainContext ctx,
         ErgoContract contract) {
         if (senderProver == null) {
             throw new IllegalStateException("Call this only when prover is set");
         }
 
-        UnsignedTransaction tx = putToContractTxUnsigned(ctx, contract);
+        UnsignedTransaction tx = putToContractTxUnsigned(contract);
         SignedTransaction signed = senderProver.sign(tx);
         return signed;
     }
@@ -214,10 +211,9 @@ public class BoxOperations {
      * to the given contract.
      */
     public UnsignedTransaction putToContractTxUnsigned(
-        BlockchainContext ctx,
         ErgoContract contract) {
 
-        return buildTxWithTransactionBuilder(ctx, txB -> {
+        return buildTxWithDefaultInputs(txB -> {
             OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
                 .value(amountToSpend)
                 .contract(contract);
@@ -233,11 +229,10 @@ public class BoxOperations {
      * Creates a new {@link UnsignedTransaction} preparing inputs, fee and change address.
      * The given outputBuilder is used to prepare and add outboxes to the resulting transaction.
      *
-     * See {@link #putToContractTxUnsigned(BlockchainContext, ErgoContract)} how to use.
+     * See {@link #putToContractTxUnsigned(ErgoContract)} how to use.
      */
-    public UnsignedTransaction buildTxWithTransactionBuilder(BlockchainContext ctx,
-                                                             Function<UnsignedTransactionBuilder, UnsignedTransactionBuilder> outputBuilder) {
-        List<InputBox> boxesToSpend = loadTop(ctx);
+    public UnsignedTransaction buildTxWithDefaultInputs(Function<UnsignedTransactionBuilder, UnsignedTransactionBuilder> outputBuilder) {
+        List<InputBox> boxesToSpend = loadTop();
 
         P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();

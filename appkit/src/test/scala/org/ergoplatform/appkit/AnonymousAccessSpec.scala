@@ -119,12 +119,12 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = BoxOperations.createForProver(sender).withAmountToSpend(amountToSend).putToContractTx(ctx, contract)
+    val dhtBoxCreationTx = BoxOperations.createForProver(sender, ctx).withAmountToSpend(amountToSend).putToContractTx(contract)
     dhtBoxCreationTx
   }
 
   def spendDhtBox(ctx: BlockchainContext, g_y: GroupElement, g_xy: GroupElement, sender: ErgoProver, dhtBox: InputBox, receiver: Address): SignedTransaction = {
-    val tx = BoxOperations.createForSender(sender.getAddress).buildTxWithTransactionBuilder(ctx, { txB: UnsignedTransactionBuilder =>
+    val tx = BoxOperations.createForSender(sender.getAddress, ctx).buildTxWithDefaultInputs { txB: UnsignedTransactionBuilder =>
       val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
         .contract(new ErgoTreeContract(receiver.getErgoAddress.script, receiver.getNetworkType))
@@ -133,7 +133,7 @@ object DhtUtils {
 
       txB.outputs(outBox)
       txB
-    })
+    }
 
     sender.sign(tx)
   }
