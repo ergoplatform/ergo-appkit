@@ -381,6 +381,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build().convertToInputWith(mockTxId, 1)
 
       val operations = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 1)))
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val inputsSelected = operations.loadTop(ctx)
 
