@@ -1,11 +1,9 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.appkit.Eip4Token;
+import org.ergoplatform.appkit.IErgoBox;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
-import org.ergoplatform.appkit.Iso;
-import org.ergoplatform.appkit.JavaHelpers;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.model.AdditionalRegister;
 import org.ergoplatform.explorer.client.model.AdditionalRegisters;
@@ -117,9 +115,9 @@ public class Eip4TokenBuilder {
     }
 
     @Nullable
-    public static Eip4Token buildFromErgoBoxCandidate(@Nonnull String tokenId, @Nonnull ErgoBoxCandidate boxCandidate) {
+    public static Eip4Token buildFromErgoBox(@Nonnull String tokenId, @Nonnull IErgoBox ergoBox) {
         ErgoToken foundToken = null;
-        for (ErgoToken token : Iso.isoTokensListToPairsColl().from(boxCandidate.additionalTokens())) {
+        for (ErgoToken token : ergoBox.getTokens()) {
             if (token.getId().toString().equals(tokenId))
                 foundToken = token;
         }
@@ -128,7 +126,7 @@ public class Eip4TokenBuilder {
             throw new IllegalArgumentException("Token with id " + tokenId + " not found in box");
         }
 
-        List<ErgoValue<?>> boxRegisters = JavaHelpers.getBoxRegisters(boxCandidate);
+        List<ErgoValue<?>> boxRegisters = ergoBox.getRegisters();
 
         return new Eip4Token(tokenId, foundToken.getValue(),
             (ErgoValue<Coll<Object>>) boxRegisters.get(0),

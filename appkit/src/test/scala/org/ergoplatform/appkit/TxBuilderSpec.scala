@@ -449,7 +449,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .sendChangeTo(changeAddr)
         .build()
 
-      val eip4Token = Eip4TokenBuilder.buildFromErgoBoxCandidate(input.getId.toString, unsigned.getTx.outputCandidates.apply(0))
+      val eip4Token = Eip4TokenBuilder.buildFromErgoBox(input.getId.toString, unsigned.getOutputs.get(0))
 
       eip4Token.getId shouldBe input.getId
       eip4Token.getDecimals shouldBe 0

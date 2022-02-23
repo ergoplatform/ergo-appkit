@@ -16,14 +16,6 @@ import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
  * @see SignedTransaction
  */
 public interface UnsignedTransaction {
-    UnsignedErgoLikeTransaction getTx();
-
-    List<ExtendedInputBox> getBoxesToSpend();
-
-    List<ErgoBox> getDataBoxes();
-
-    ErgoLikeStateContext getStateContext();
-
     /**
      * Gets unsigned input boxes that will be used in this transaction
      */
