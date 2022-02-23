@@ -364,7 +364,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       // send 1 ERG
       val amountToSend = 1000L * 1000 * 1000
-      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script, recipient.getNetworkType)
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
