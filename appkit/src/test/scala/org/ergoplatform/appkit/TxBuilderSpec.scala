@@ -254,8 +254,8 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val signed = BoxOperations.createForProver(senderProver).withAmountToSpend(amountToSend)
-        .send(ctx, recipient)
+      val signed = BoxOperations.createForProver(senderProver, ctx).withAmountToSpend(amountToSend)
+        .send(recipient)
       assert(signed != null)
     }
   }
@@ -273,8 +273,8 @@ class TxBuilderSpec extends PropSpec with Matchers
       val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script, recipient.getNetworkType)
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-      val unsigned = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
-        .putToContractTxUnsigned(ctx, pkContract)
+      val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+        .putToContractTxUnsigned(pkContract)
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
@@ -340,9 +340,9 @@ class TxBuilderSpec extends PropSpec with Matchers
         val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script, recipient.getNetworkType)
 
         val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-        val unsigned = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+        val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
           .withInputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
-          .putToContractTxUnsigned(ctx, pkContract)
+          .putToContractTxUnsigned(pkContract)
 
         val prover = ctx.newProverBuilder.build // prover without secrets
         val reduced = prover.reduce(unsigned, 0)
@@ -380,10 +380,10 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
-      val operations = BoxOperations.createForSenders(senders).withAmountToSpend(amountToSend)
+      val operations = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
         .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 1)))
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
-      val inputsSelected = operations.loadTop(ctx)
+      val inputsSelected = operations.loadTop()
 
       // both boxes should be selected
       inputsSelected.size() shouldBe 2
