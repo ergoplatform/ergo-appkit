@@ -1,9 +1,6 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.ErgoBoxCandidate;
-import sigmastate.Values;
-
-import java.util.List;
 
 /**
  * This interface is used to represent output boxes on newly created transactions.
@@ -12,7 +9,7 @@ import java.util.List;
  *
  * @see OutBoxBuilder
  */
-public interface OutBox extends IErgoBox {
+public interface OutBox extends TransactionBox {
 
     /**
      * Returns the serialized bytes of this output box without any transaction reference data.

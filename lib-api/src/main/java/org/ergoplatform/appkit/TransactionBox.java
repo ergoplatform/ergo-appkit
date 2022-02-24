@@ -4,7 +4,13 @@ import java.util.List;
 
 import sigmastate.Values;
 
-public interface IErgoBox {
+/**
+ * This interface represents a box on a transaction, either an InputBox or an OutBox.
+ *
+ * @see InputBox
+ * @see OutBox
+ */
+public interface TransactionBox {
     /**
      * Returns the ERG value stored in this box, i.e. unspent value in UTXO.
      */
