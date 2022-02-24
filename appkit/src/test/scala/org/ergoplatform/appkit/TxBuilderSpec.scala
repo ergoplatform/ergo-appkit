@@ -432,26 +432,15 @@ class TxBuilderSpec extends PropSpec with Matchers
   }
 
   property("Mint a token and rebuild it from BoxCandidate") {
-    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    val ergoClient = createMockedErgoClient(data)
     ergoClient.execute { ctx: BlockchainContext =>
-      val input = createTestInput(ctx)
-      val txB = ctx.newTxBuilder()
-      val output = txB.outBoxBuilder()
-        .value(15000000)
-        .mintToken(new Eip4Token(input.getId.toString, 1, "Test name", "Test desc", 0))
-        .contract(truePropContract(ctx))
-        .build()
+      val unsigned = BoxOperations.createForSender(address, ctx).withAmountToSpend(15000000)
+        .mintTokenToContractTxUnsigned(new ErgoTreeContract(address.getErgoAddress.script, address.getNetworkType), { tokenId: String =>
+          new Eip4Token(tokenId, 1, "Test name", "Test desc", 0)
+        })
 
-      val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
-      val unsigned = txB.boxesToSpend(Arrays.asList(input))
-        .outputs(output)
-        .fee(1000000)
-        .sendChangeTo(changeAddr)
-        .build()
+      val eip4Token = Eip4TokenBuilder.buildFromErgoBox(unsigned.getInputs.get(0).getId.toString, unsigned.getOutputs.get(0))
 
-      val eip4Token = Eip4TokenBuilder.buildFromErgoBox(input.getId.toString, unsigned.getOutputs.get(0))
-
-      eip4Token.getId shouldBe input.getId
       eip4Token.getDecimals shouldBe 0
       eip4Token.getValue shouldBe 1
       eip4Token.getTokenName shouldBe "Test name"
