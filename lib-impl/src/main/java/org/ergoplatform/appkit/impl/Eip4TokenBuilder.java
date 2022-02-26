@@ -1,9 +1,9 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.Eip4Token;
-import org.ergoplatform.appkit.IErgoBox;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
+import org.ergoplatform.appkit.TransactionBox;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.model.AdditionalRegister;
 import org.ergoplatform.explorer.client.model.AdditionalRegisters;
@@ -115,7 +115,7 @@ public class Eip4TokenBuilder {
     }
 
     @Nullable
-    public static Eip4Token buildFromErgoBox(@Nonnull String tokenId, @Nonnull IErgoBox ergoBox) {
+    public static Eip4Token buildFromErgoBox(@Nonnull String tokenId, @Nonnull TransactionBox ergoBox) {
         ErgoToken foundToken = null;
         for (ErgoToken token : ergoBox.getTokens()) {
             if (token.getId().toString().equals(tokenId))
