@@ -119,7 +119,6 @@ public class ErgoValue<T> {
         return new ErgoValue<Tuple2>(new Tuple2(val1.getValue(), val2.getValue()),
             ErgoType.pairType(val1.getType(), val2.getType()));
     }
-
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
         Coll<T> value = JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
         return new ErgoValue<>(value, ErgoType.collType(tT));

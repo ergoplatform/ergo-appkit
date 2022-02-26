@@ -6,11 +6,12 @@ package org.ergoplatform.appkit;
  * from {@link BlockchainContext} and {@link UnsignedTransactionBuilder#boxesToSpend(java.util.List) spent}
  * as part of a new transaction.
  */
-public interface InputBox extends IErgoBox {
+public interface InputBox extends TransactionBox {
     /**
      * Returns the id of this box.
      */
     ErgoId getId();
+
 
     /**
      * Extends the given input with context variables (aka {@link

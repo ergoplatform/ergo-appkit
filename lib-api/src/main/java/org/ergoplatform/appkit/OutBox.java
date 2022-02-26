@@ -9,7 +9,7 @@ import org.ergoplatform.ErgoBoxCandidate;
  *
  * @see OutBoxBuilder
  */
-public interface OutBox extends IErgoBox {
+public interface OutBox extends TransactionBox {
 
     /**
      * Returns the serialized bytes of this output box without any transaction reference data.
