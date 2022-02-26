@@ -42,7 +42,7 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
-    public Long getValue() {
+    public long getValue() {
         return _ergoBox.value();
     }
 
