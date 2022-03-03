@@ -27,6 +27,9 @@ public class Eip4Token extends ErgoToken {
     private final ErgoValue<?> r8;
     private final ErgoValue<?> r9;
 
+    /**
+     * @see Eip4Token#Eip4Token(String, long, String, String, int, ErgoValue, ErgoValue, ErgoValue)
+     */
     public Eip4Token(@Nonnull String id, long amount, @Nonnull ErgoValue<Coll<Object>> r4,
                      @Nonnull ErgoValue<Coll<Object>> r5, @Nonnull ErgoValue<Coll<Object>> r6,
                      @Nullable ErgoValue<?> r7, @Nullable ErgoValue<?> r8, @Nullable ErgoValue<?> r9) {
@@ -37,11 +40,29 @@ public class Eip4Token extends ErgoToken {
             r7, r8, r9);
     }
 
+    /**
+     * @see Eip4Token#Eip4Token(String, long, String, String, int, ErgoValue, ErgoValue, ErgoValue)
+     */
     public Eip4Token(@Nonnull String id, long amount, @Nonnull String name,
                      @Nonnull String description, int decimals) {
         this(id, amount, name, description, decimals, null, null, null);
     }
 
+    /**
+     * Represents an EIP-4 compliant token according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md
+     * <p>
+     * Instead of using this constructor, you can use convenience methods from {@code Eip4TokenBuilder}
+     * in most cases.
+     *
+     * @param id          token id
+     * @param amount      token amount this object represents
+     * @param name        token display name
+     * @param description token description
+     * @param decimals    decimals any amounts regarding this token are formatted with
+     * @param r7          contents of register 7 (see EIP-4 specification)
+     * @param r8          contents of register 8 (see EIP-4 specification)
+     * @param r9          contents of register 9 (see EIP-4 specification)
+     */
     public Eip4Token(@Nonnull String id, long amount, @Nonnull String name,
                      @Nonnull String description, int decimals,
                      @Nullable ErgoValue<?> r7, @Nullable ErgoValue<?> r8, @Nullable ErgoValue<?> r9) {
@@ -50,7 +71,8 @@ public class Eip4Token extends ErgoToken {
         this.description = description;
         this.decimals = decimals;
 
-        // these can be nullable, but either all of them or R7 and R8 defined
+        // check if EIP4 specification is fulfilled. It defines that R7 to R9 are null, or
+        // R7 and R8 are set with R9 being optional. Other combinations are not valid.
         if (!(r7 != null && r8 != null || r7 == null && r8 == null && r9 == null)) {
             throw new IllegalArgumentException("Either define all of R7 to R9 or none of them");
         }
@@ -91,6 +113,9 @@ public class Eip4Token extends ErgoToken {
         return BigDecimal.valueOf(getValue()).movePointLeft(decimals).toPlainString();
     }
 
+    /**
+     * @return type of asset this token represents, see {@link AssetType}
+     */
     @Nonnull
     public AssetType getAssetType() {
         byte[] assetType = getR7ByteArrayOrNull();
@@ -110,6 +135,9 @@ public class Eip4Token extends ErgoToken {
         }
     }
 
+    /**
+     * @return byte content of register r7, or `null` if not set
+     */
     @Nullable
     private byte[] getR7ByteArrayOrNull() {
         // r7 specifies the asset type and should be Coll<Byte>
@@ -178,39 +206,83 @@ public class Eip4Token extends ErgoToken {
         }
     }
 
+    /**
+     * @return value of register 4 of token minting box
+     */
     @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR4() {
         return ErgoValue.of(name.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * @return value of register 5 of token minting box
+     */
     @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR5() {
         return ErgoValue.of(description.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * @return value of register 6 of token minting box
+     */
     @Nonnull
     public ErgoValue<Coll<scala.Byte>> getMintingBoxR6() {
         return ErgoValue.of(Integer.toString(decimals).getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * @return value of register 7 of token minting box, or `null` if not needed
+     */
     @Nullable
     public ErgoValue<?> getMintingBoxR7() {
         return r7;
     }
 
+    /**
+     * @return value of register 8 of token minting box, or `null` if not needed
+     */
     @Nullable
     public ErgoValue<?> getMintingBoxR8() {
         return r8;
     }
 
+    /**
+     * @return value of register 9 of token minting box, or `null` if not needed
+     */
     @Nullable
     public ErgoValue<?> getMintingBoxR9() {
         return r9;
     }
 
     public enum AssetType {
-        NONE, NFT_PICTURE, NFT_AUDIO, NFT_VIDEO, MEMBERSHIP_THRESHOLD_SIG, UNKNOWN;
+        /**
+         * Token does not represent an asset
+         */
+        NONE,
+        /**
+         * NFT - picture artwork
+         */
+        NFT_PICTURE,
+        /**
+         * NFT - audio artwork
+         */
+        NFT_AUDIO,
+        /**
+         * NFT - video artwork
+         */
+        NFT_VIDEO,
+        /**
+         * Membership token - threshold signature
+         */
+        MEMBERSHIP_THRESHOLD_SIG,
+        /**
+         * Token represents an unknown asset type
+         */
+        UNKNOWN;
 
+        /**
+         * @return magic bytes according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md#ergo-asset-types
+         */
         public byte[] getR7ByteArrayForType() {
             switch (this) {
                 case NFT_PICTURE:

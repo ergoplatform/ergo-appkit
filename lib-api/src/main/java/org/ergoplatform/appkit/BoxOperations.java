@@ -231,11 +231,11 @@ public class BoxOperations {
      *
      * @param contract     contract to send the newly minted token to
      * @param tokenBuilder receives the id of the token to mint, must return the new token
-     * @return unsigned transaxtion
+     * @return unsigned transaction
      */
     public UnsignedTransaction mintTokenToContractTxUnsigned(ErgoContract contract, Function<String, Eip4Token> tokenBuilder) {
         if (!tokensToSpend.isEmpty()) {
-            throw new IllegalArgumentException("Mint token not useable with spending tokens");
+            throw new IllegalArgumentException("Mint token not possible with spending tokens");
         }
 
         return buildTxWithDefaultInputs(txB -> {

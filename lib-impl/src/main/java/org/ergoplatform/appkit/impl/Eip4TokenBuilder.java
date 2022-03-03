@@ -23,22 +23,26 @@ import javax.annotation.Nullable;
 import retrofit2.Response;
 import special.collection.Coll;
 
+/**
+ * Convenience methods to build an {@link Eip4Token}
+ */
 public class Eip4TokenBuilder {
     /**
      * @param id                  token id
      * @param amount              token amount
-     * @param additionalRegisters list of registers R4-R9, deserialized to byte[]. Must at least contain R4-R6.
+     * @param additionalRegisters list of registers R4-R9 in hex encoding (see
+     *                            {@link ErgoValue#toHex()}). Must at least contain R4-R6.
      */
     @Nonnull
-    public static Eip4Token buildFromRegisters(@Nonnull String id, long amount,
-                                               @Nonnull List<String> additionalRegisters) {
+    public static Eip4Token buildFromHexEncodedRegisters(@Nonnull String id, long amount,
+                                                         @Nonnull List<String> additionalRegisters) {
         if (additionalRegisters.size() < 3) {
             throw new IllegalArgumentException("EIP-4 compliant minting box additionalRegisters must contain at least R4 to R6");
         }
 
-        ErgoValue<Coll<Object>> r4 = getCollByteValue(Objects.requireNonNull(additionalRegisters.get(0)));
-        ErgoValue<Coll<Object>> r5 = getCollByteValue(Objects.requireNonNull(additionalRegisters.get(1)));
-        ErgoValue<Coll<Object>> r6 = getCollByteValue(Objects.requireNonNull(additionalRegisters.get(2)));
+        ErgoValue<Coll<Object>> r4 = decodeCollByteValue(Objects.requireNonNull(additionalRegisters.get(0)));
+        ErgoValue<Coll<Object>> r5 = decodeCollByteValue(Objects.requireNonNull(additionalRegisters.get(1)));
+        ErgoValue<Coll<Object>> r6 = decodeCollByteValue(Objects.requireNonNull(additionalRegisters.get(2)));
 
         ErgoValue<?> r7 = (additionalRegisters.size() > 3 && additionalRegisters.get(3) != null) ?
             ErgoValue.fromHex(additionalRegisters.get(3)) : null;
@@ -50,7 +54,7 @@ public class Eip4TokenBuilder {
         return new Eip4Token(id, amount, r4, r5, r6, r7, r8, r9);
     }
 
-    private static ErgoValue<Coll<Object>> getCollByteValue(String serializedValue) {
+    private static ErgoValue<Coll<Object>> decodeCollByteValue(String serializedValue) {
         return (ErgoValue<Coll<Object>>) ErgoValue.fromHex(serializedValue);
     }
 
@@ -60,8 +64,8 @@ public class Eip4TokenBuilder {
      * @param registers list of registers R4-R9 as returned by Explorer Transactions API
      */
     @Nonnull
-    public static Eip4Token buildFromRegisters(@Nonnull String id, long amount,
-                                               @Nonnull AdditionalRegisters registers) {
+    public static Eip4Token buildFromAdditionalRegisters(@Nonnull String id, long amount,
+                                                         @Nonnull AdditionalRegisters registers) {
 
         ArrayList<String> additionalRegisters = new ArrayList<>();
         // required by EIP4
@@ -74,7 +78,7 @@ public class Eip4TokenBuilder {
         additionalRegisters.add(getSerializedErgoValueForRegister(registers, "R8"));
         additionalRegisters.add(getSerializedErgoValueForRegister(registers, "R9"));
 
-        return buildFromRegisters(id, amount, additionalRegisters);
+        return buildFromHexEncodedRegisters(id, amount, additionalRegisters);
     }
 
     /**
@@ -111,7 +115,7 @@ public class Eip4TokenBuilder {
             throw new IllegalArgumentException("Token with id " + tokenId + " not found in box " + issuingBoxId);
         }
 
-        return buildFromRegisters(tokenId, tokenInfo.getAmount(), boxInfo.getAdditionalRegisters());
+        return buildFromAdditionalRegisters(tokenId, tokenInfo.getAmount(), boxInfo.getAdditionalRegisters());
     }
 
     @Nullable
