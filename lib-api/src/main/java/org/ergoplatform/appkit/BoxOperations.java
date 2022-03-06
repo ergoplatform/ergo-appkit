@@ -139,7 +139,7 @@ public class BoxOperations {
      */
     public String send(Address recipient) {
 
-        ErgoContract contract = new ErgoTreeContract(recipient.getErgoAddress().script(), recipient.getNetworkType());
+        ErgoContract contract = recipient.getErgoContract();
         SignedTransaction signed = putToContractTx(contract);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
@@ -251,7 +251,7 @@ public class BoxOperations {
             ErgoProver sender, Address recipient, long amount, long fee) {
         OutBox newBox = txB.outBoxBuilder()
                 .value(amount)
-                .contract(new ErgoTreeContract(recipient.getErgoAddress().script(), recipient.getNetworkType()))
+                .contract(recipient.getErgoContract())
                 .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
