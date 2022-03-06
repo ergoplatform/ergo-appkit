@@ -49,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ergo-appkit.jar
-          path: target/**/ergo-appkit-fat-jar-*.jar
+          path: target/**/ergo-appkit-*.jar
