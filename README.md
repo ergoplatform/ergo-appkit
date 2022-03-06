@@ -77,6 +77,9 @@ Please follow the [setup instructions](#setup) to get started.
 
 ### Using from Java 
 
+Appkit is published on SonaType for 
+[convenient use from Maven and Gradle](https://github.com/ergoplatform/ergo-appkit/wiki/Tutorial-starting-with-Appkit-on-Gradle-projects). 
+
 Among other things, Appkit library allows to communicate with Ergo nodes via
 [REST API](https://github.com/ergoplatform/ergo/blob/master/src/main/resources/api/openapi.yaml). 
 Let's see how we can write ErgoTool - a simple Java console application (similar to
@@ -168,7 +171,7 @@ if (!boxes.isPresent())
         "Not enough coins in the wallet to pay " + totalToSpend, null);
     
 // create a so called prover, a special object which will be used for signing the transaction
-// the prover should be configured with secrets, which are nessesary to generate signatures (aka proofs)
+// the prover should be configured with secrets, which are necessary to generate signatures (aka proofs)
 ErgoProver prover = ctx.newProverBuilder()
     .withMnemonic(
             SecretString.create(nodeConf.getWallet().getMnemonic()),
@@ -232,10 +235,13 @@ code](https://github.com/aslesarenko/ergo-appkit-examples/blob/master/java-examp
 example.
 
 ## Using from other languages
-In additiona to Java, Appkit can be used to write Ergo applications in Scala, JavaScript,
+In addition to Java, Appkit can be used to write Ergo applications in Scala, JavaScript,
 Python and Ruby and run those applications under GraalVM, which support cross
 language interoperability.
 Please see [examples](https://github.com/aslesarenko/ergo-appkit-examples).
+
+From Python, you can also use Appkit running in JVM context. 
+[Guide how to use Appkit from Python by bridging with JPype](https://github.com/ergoplatform/ergo-appkit/wiki/Using-Appkit-from-Python)) 
 
 ## Repository organization
 
@@ -309,6 +315,16 @@ $ cd ergo-appkit
 $ sbt publishLocal 
 ```
 
+If you are working with Gradle/Maven, you might want to publish to your local Maven repository with
+
+    sbt publishM2
+
+In case you need a fat JAR (or uber JAR), you can build it with 
+
+    sbt clean assembly
+
+and find it in the target/scala-* subfolder.
+
 ## How GraalVM can be used?
 
 After many years of research and development GraalVM project has matured enough end
@@ -350,7 +366,7 @@ overhead when running scripts
 
 ## Projects that use Appkit
 
-Appkit is a foundational non-opinionated libarary which can be used to create other
+Appkit is a foundational non-opinionated library which can be used to create other
 libraries, Apps and tools. Here is the list of projects which use Appkit. 
 
 - [ergo-tool](https://github.com/ergoplatform/ergo-tool) - a Command Line Interface application for Ergo
