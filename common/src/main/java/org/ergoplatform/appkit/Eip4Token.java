@@ -144,7 +144,7 @@ public class Eip4Token extends ErgoToken {
         if (r7 != null && r7.getValue() instanceof Coll) {
             Coll<?> assetType = (Coll<?>) r7.getValue();
 
-            if (assetType.length() > 0 && assetType.apply(0) instanceof Byte) {
+            if (assetType.length() > 0 && assetType.tItem() == ErgoType.byteType().getRType()) {
                 return JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r7.getValue());
             } else {
                 return null;
@@ -254,6 +254,9 @@ public class Eip4Token extends ErgoToken {
         return r9;
     }
 
+    /**
+     * EIP-004 compliant tokens can optionally represent an asset type
+     */
     public enum AssetType {
         /**
          * Token does not represent an asset
