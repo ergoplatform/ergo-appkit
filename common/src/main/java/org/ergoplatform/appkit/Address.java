@@ -125,7 +125,7 @@ public class Address {
     /**
      * @return ErgoContract representing this address
      */
-    public ErgoContract getErgoContract() {
+    public ErgoContract toErgoContract() {
         return new ErgoTreeContract(getErgoAddress().script(), getNetworkType());
     }
 

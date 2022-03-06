@@ -7,7 +7,6 @@ import static org.ergoplatform.appkit.Parameters.MinFee;
 import com.google.common.base.Preconditions;
 
 import org.ergoplatform.P2PKAddress;
-import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -139,7 +138,7 @@ public class BoxOperations {
      */
     public String send(Address recipient) {
 
-        ErgoContract contract = recipient.getErgoContract();
+        ErgoContract contract = recipient.toErgoContract();
         SignedTransaction signed = putToContractTx(contract);
         ctx.sendTransaction(signed);
         return signed.toJson(true);
@@ -251,7 +250,7 @@ public class BoxOperations {
             ErgoProver sender, Address recipient, long amount, long fee) {
         OutBox newBox = txB.outBoxBuilder()
                 .value(amount)
-                .contract(recipient.getErgoContract())
+                .contract(recipient.toErgoContract())
                 .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)

@@ -48,7 +48,7 @@ public class ErgoScriptContract implements ErgoContract {
     }
 
     @Override
-    public Address getAddress() {
+    public Address toAddress() {
         return Address.fromErgoTree(getErgoTree(), _networkType);
     }
 

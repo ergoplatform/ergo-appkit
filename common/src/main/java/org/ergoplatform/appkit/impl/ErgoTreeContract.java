@@ -36,6 +36,6 @@ public class ErgoTreeContract implements ErgoContract {
     }
 
     @Override
-    public Address getAddress() { return Address.fromErgoTree(_ergoTree, _networkType); }
+    public Address toAddress() { return Address.fromErgoTree(_ergoTree, _networkType); }
 
 }

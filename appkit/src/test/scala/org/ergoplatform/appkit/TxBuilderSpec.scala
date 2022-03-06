@@ -270,7 +270,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val recipient = address
 
       val amountToSend = 1000000
-      val pkContract = recipient.getErgoContract
+      val pkContract = recipient.toErgoContract
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
       val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
@@ -337,7 +337,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         val recipient = address
 
         val amountToSend = 1000000
-        val pkContract = recipient.getErgoContract
+        val pkContract = recipient.toErgoContract
 
         val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
         val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
@@ -364,7 +364,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       // send 1 ERG
       val amountToSend = 1000L * 1000 * 1000
-      val pkContract = recipient.getErgoContract
+      val pkContract = recipient.toErgoContract
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
