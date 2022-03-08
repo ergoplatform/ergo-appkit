@@ -29,6 +29,12 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             NetworkType networkType,
             NodeInfo nodeInfo, List<BlockHeader> headers) {
         super(networkType);
+
+        if (nodeInfo != null && NetworkType.fromValue(nodeInfo.getNetwork()) != networkType) {
+            throw new IllegalArgumentException("Network type of NodeInfo does not match given networkType - "
+                + nodeInfo.getNetwork() + "/" + networkType.verboseName);
+        }
+
         _client = client;
         _retrofit = retrofit;
         _explorer = explorer;

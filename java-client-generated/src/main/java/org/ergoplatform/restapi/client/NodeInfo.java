@@ -53,6 +53,9 @@ public class NodeInfo {
   @SerializedName("stateRoot")
   private String stateRoot = null;
 
+  @SerializedName("network")
+  private String network = null;
+
   /**
    * Gets or Sets stateType
    */
@@ -279,6 +282,17 @@ public class NodeInfo {
   public NodeInfo stateType(StateTypeEnum stateType) {
     this.stateType = stateType;
     return this;
+  }
+
+   /**
+   * @return NetworkType: "mainnet", "testnet", "devnet"
+   */
+  public String getNetwork() {
+      return network;
+  }
+
+  public void setNetwork(String network) {
+      this.network = network;
   }
 
    /**
