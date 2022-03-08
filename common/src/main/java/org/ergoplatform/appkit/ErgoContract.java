@@ -32,5 +32,5 @@ public interface ErgoContract {
     /**
      * Get the base58 encoded address that represents this contract
      */
-    Address getAddress();
+    Address toAddress();
 }
