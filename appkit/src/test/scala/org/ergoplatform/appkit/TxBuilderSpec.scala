@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
-import org.ergoplatform.appkit.impl.{BlockchainContextImpl, ErgoTreeContract, ExplorerAndPoolUnspentBoxesLoader}
+import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract, ExplorerAndPoolUnspentBoxesLoader}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
 import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
@@ -428,6 +428,22 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val prover = ctx.newProverBuilder().build()
       prover.sign(unsigned)
+    }
+  }
+
+  property("Mint a token and rebuild it from BoxCandidate") {
+    val ergoClient = createMockedErgoClient(data)
+    ergoClient.execute { ctx: BlockchainContext =>
+      val unsigned = BoxOperations.createForSender(address, ctx).withAmountToSpend(15000000)
+        .mintTokenToContractTxUnsigned(new ErgoTreeContract(address.getErgoAddress.script, address.getNetworkType), { tokenId: String =>
+          new Eip4Token(tokenId, 1, "Test name", "Test desc", 0)
+        })
+
+      val eip4Token = Eip4TokenBuilder.buildFromErgoBox(unsigned.getInputs.get(0).getId.toString, unsigned.getOutputs.get(0))
+
+      eip4Token.getDecimals shouldBe 0
+      eip4Token.getValue shouldBe 1
+      eip4Token.getTokenName shouldBe "Test name"
     }
   }
 

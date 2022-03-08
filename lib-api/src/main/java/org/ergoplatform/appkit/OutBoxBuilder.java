@@ -41,12 +41,9 @@ public interface OutBoxBuilder {
      * Mints new token according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md
      *
      * @param token token to mint
-     * @param tokenName token verbose name
-     * @param tokenDescription token description
-     * @param tokenNumberOfDecimals number of decimals
-     * @see ErgoToken
+     * @see Eip4Token and Eip4TokenBuilder
      */
-    OutBoxBuilder mintToken(ErgoToken token, String tokenName, String tokenDescription,int tokenNumberOfDecimals);
+    OutBoxBuilder mintToken(Eip4Token token);
 
     /**
      * Configures one or more optional registers of the output box.

@@ -226,6 +226,31 @@ public class BoxOperations {
     }
 
     /**
+     * Creates a new {@link UnsignedTransaction} which sends the given amount of NanoErgs and a
+     * newly minted token to the given contract.
+     *
+     * @param contract     contract to send the newly minted token to
+     * @param tokenBuilder receives the id of the token to mint, must return the new token
+     * @return unsigned transaction
+     */
+    public UnsignedTransaction mintTokenToContractTxUnsigned(ErgoContract contract, Function<String, Eip4Token> tokenBuilder) {
+        if (!tokensToSpend.isEmpty()) {
+            throw new IllegalArgumentException("Mint token not possible with spending tokens");
+        }
+
+        return buildTxWithDefaultInputs(txB -> {
+            OutBox newBox = txB.outBoxBuilder()
+                .value(amountToSpend)
+                .contract(contract)
+                .mintToken(tokenBuilder.apply(txB.getInputBoxes().get(0).getId().toString()))
+                .build();
+
+            txB.outputs(newBox);
+            return txB;
+        });
+    }
+
+    /**
      * Creates a new {@link UnsignedTransaction} preparing inputs, fee and change address.
      * The given outputBuilder is used to prepare and add outboxes to the resulting transaction.
      *
