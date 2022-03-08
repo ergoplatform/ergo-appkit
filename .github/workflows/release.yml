@@ -9,7 +9,7 @@ env:
 
 jobs:
   publish_release:
-    name: Publish release to Sonatype
+    name: Publish release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,3 +42,11 @@ jobs:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+      - name: Build fat jar
+        run: sbt clean assembly
+      - name: Save fat jar artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ergo-appkit.jar
+          path: target/**/ergo-appkit-*.jar
