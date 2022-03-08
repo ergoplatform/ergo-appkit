@@ -2,6 +2,7 @@
 {
   "name": "mainnet-seed-node-frankfurt",
   "appVersion": "3.1.4",
+  "network": "mainnet",
   "fullHeight": 123414,
   "headersHeight": 123414,
   "bestFullHeaderId": "8d87fd4a7372877462ff7ecb52a6063207ffda2689f4de3254cc9a2877953f4f",
