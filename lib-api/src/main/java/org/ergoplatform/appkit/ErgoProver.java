@@ -74,6 +74,7 @@ public interface ErgoProver {
      * @param message message to sign
      * @param hintsBag additional hints for a signer (useful for distributed signing)
      * @return signed message
+     * @see Signature#verifySignature(SigmaBoolean, byte[], byte[])
      */
     byte[] signMessage(SigmaBoolean sigmaTree, byte[] message, HintsBag hintsBag);
 
@@ -84,32 +85,12 @@ public interface ErgoProver {
      * @param message message to sign
      * @param hintsBag additional hints for a signer (useful for distributed signing)
      * @return signed message
+     * @see Signature#verifySignature(P2PKAddress, byte[], byte[])
      */
     byte[] signMessage(P2PKAddress addr, byte[] message, HintsBag hintsBag);
 
     ReducedTransaction reduce(UnsignedTransaction tx, int baseCost);
 
     SignedTransaction signReduced(ReducedTransaction tx, int baseCost);
-
-    /**
-     * Verifies a signature on given (arbitrary) message for a given public key.
-     *
-     * @param sigmaTree public key (represented as a tree)
-     * @param message message to verify
-     * @param signedMessage signature for the message
-     * @return whether signature is valid or not
-     */
-    boolean verifySignature(SigmaBoolean sigmaTree, byte[] message, byte[] signedMessage);
-
-    /**
-     * Verifies a signature on given (arbitrary) message for a 
-     * using an address' public key.
-     *
-     * @param addr address whose public key will be used to verify message
-     * @param message message to verify
-     * @param signedMessage signature for the message
-     * @return whether signature is valid or not
-     */
-    boolean verifySignature(P2PKAddress addr, byte[] message, byte[] signedMessage);
 }
 

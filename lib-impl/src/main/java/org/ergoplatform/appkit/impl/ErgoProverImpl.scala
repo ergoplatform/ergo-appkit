@@ -69,13 +69,5 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
-  override def verifySignature(sigmaTree: SigmaBoolean, message: Array[Byte], signedMessage: Array[Byte]): Boolean = {
-    _prover.verifySignature(sigmaTree, message, signedMessage)
-  }
-
-  override def verifySignature(addr: P2PKAddress, message: Array[Byte], signedMessage: Array[Byte]): Boolean = {
-    _prover.verifySignature(addr.pubkey, message, signedMessage)
-  }
-
 }
 

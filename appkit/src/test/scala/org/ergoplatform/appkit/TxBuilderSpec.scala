@@ -77,13 +77,13 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signedMessage = proverA.signMessage(proverA.getP2PKAddress,
         msg.getBytes, HintsBag.empty)
 
-      proverA.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverA.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      proverB.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverA.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      proverB.verifySignature(proverB.getP2PKAddress,
+      Signature.verifySignature(proverB.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe false
       }
     }
