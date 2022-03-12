@@ -14,7 +14,7 @@ public class Signature {
     /**
      * Verifies a signature on given (arbitrary) message for a given public key.
      *
-     * @param sigmaTree     public key (represented as a tree)
+     * @param sigmaTree     public key (represented as a sigma proposition tree)
      * @param message       message to verify
      * @param signature signature for the message
      * @return whether signature is valid or not
@@ -24,7 +24,7 @@ public class Signature {
     }
 
     /**
-     * Verifies a signature on given (arbitrary) message for a
+     * Verifies a signature on given (arbitrary) message
      * using an address' public key.
      *
      * @param addr          address whose public key will be used to verify message
