@@ -4,6 +4,7 @@ import retrofit2.Call;
 import retrofit2.http.*;
 
 import org.ergoplatform.explorer.client.model.Balance;
+import org.ergoplatform.explorer.client.model.BlockInfo;
 import org.ergoplatform.explorer.client.model.BlockSummary;
 import org.ergoplatform.explorer.client.model.BoxQuery;
 import org.ergoplatform.explorer.client.model.EpochParameters;
@@ -103,7 +104,7 @@ public interface DefaultApi {
    * @return Call&lt;ItemsA&gt;
    */
   @GET("api/v1/blocks")
-  Call<ItemsA> getApiV1Blocks(
+  Call<Items<BlockInfo>> getApiV1Blocks(
         @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit                ,     @retrofit2.http.Query("sortBy") String sortBy                ,     @retrofit2.http.Query("sortDirection") String sortDirection                
   );
 
