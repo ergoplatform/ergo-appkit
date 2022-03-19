@@ -2,6 +2,7 @@ package org.ergoplatform.explorer.client;
 
 import org.ergoplatform.ApiTestBase;
 import org.ergoplatform.explorer.client.model.Balance;
+import org.ergoplatform.explorer.client.model.BlockInfo;
 import org.ergoplatform.explorer.client.model.BlockSummary;
 import org.ergoplatform.explorer.client.model.BoxQuery;
 import org.ergoplatform.explorer.client.model.EpochParameters;
@@ -86,7 +87,7 @@ public class DefaultApiTest extends ApiTestBase {
         Integer limit = 10;
         String sortBy = null;
         String sortDirection = null;
-        ItemsA response = api.getApiV1Blocks(offset, limit, sortBy, sortDirection).execute().body();
+        Items<BlockInfo> response = api.getApiV1Blocks(offset, limit, sortBy, sortDirection).execute().body();
         assertTrue(response.getItems().size() > 0);
     }
 
