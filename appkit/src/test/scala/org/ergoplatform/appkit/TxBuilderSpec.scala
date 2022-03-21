@@ -279,6 +279,8 @@ class TxBuilderSpec extends PropSpec with Matchers
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
       reduced should not be(null)
+      reduced.getInputBoxesIds.size() shouldBe unsigned.getInputs.size()
+      reduced.getInputBoxesIds shouldBe unsigned.getInputBoxesIds
       reduced
     }
 

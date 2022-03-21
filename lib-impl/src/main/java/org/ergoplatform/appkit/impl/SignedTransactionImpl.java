@@ -86,6 +86,26 @@ public class SignedTransactionImpl implements SignedTransaction {
     }
 
     @Override
+    public List<String> getInputBoxesIds() {
+        List<Input> inputs = Iso.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
+        List<String> res = new ArrayList<>(inputs.size());
+        for (Input input : inputs) {
+            res.add(new ErgoId(input.boxId()).toString());
+        }
+        return res;
+    }
+
+    @Override
+    public List<OutBox> getOutputs() {
+        List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
+        List<OutBox> res = new ArrayList<>(outputs.size());
+        for (ErgoBox ergoBox : outputs) {
+            res.add(new OutBoxImpl(_ctx, ergoBox));
+        }
+        return res;
+    }
+
+    @Override
     public int getCost() {
         return _txCost;
     }

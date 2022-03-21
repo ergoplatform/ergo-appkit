@@ -4,11 +4,15 @@ import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.appkit.ExtendedInputBox;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.OutBox;
+import org.ergoplatform.appkit.UnsignedTransaction;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UnsignedTransactionImpl implements UnsignedTransaction {
     private final UnsignedErgoLikeTransaction _tx;
@@ -32,6 +36,11 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _ctx = ctx;
     }
 
+    @Override
+    public String getId() {
+        return getTx().id();
+    }
+
     public UnsignedErgoLikeTransaction getTx() {
         return _tx;
     }
@@ -50,17 +59,38 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
 
     @Override
     public List<InputBox> getInputs() {
-        return _boxesToSpend.stream().map(b -> new InputBoxImpl(_ctx, b.box())).collect(Collectors.toList());
+        List<InputBox> returnVal = new ArrayList<>(_boxesToSpend.size());
+        for (ExtendedInputBox boxToSpend : _boxesToSpend) {
+            returnVal.add(new InputBoxImpl(_ctx, boxToSpend.box()));
+        }
+        return returnVal;
+    }
+
+    @Override
+    public List<String> getInputBoxesIds() {
+        List<String> returnVal = new ArrayList<>(_boxesToSpend.size());
+        for (ExtendedInputBox boxToSpend : _boxesToSpend) {
+            returnVal.add(new ErgoId(boxToSpend.box().id()).toString());
+        }
+        return returnVal;
     }
 
     @Override
     public List<OutBox> getOutputs() {
-        return _outputs.stream().map(b -> new OutBoxImpl(_ctx, b)).collect(Collectors.toList());
+        List<OutBox> returnVal = new ArrayList<>(_outputs.size());
+        for (ErgoBoxCandidate output : _outputs) {
+            returnVal.add(new OutBoxImpl(_ctx, output));
+        }
+        return returnVal;
     }
 
     @Override
     public List<InputBox> getDataInputs() {
-        return _dataBoxes.stream().map(b -> new InputBoxImpl(_ctx, b)).collect(Collectors.toList());
+        List<InputBox> returnVal = new ArrayList<>(_dataBoxes.size());
+        for (ErgoBox dataBox : _dataBoxes) {
+            returnVal.add(new InputBoxImpl(_ctx, dataBox));
+        }
+        return returnVal;
     }
 
     @Override

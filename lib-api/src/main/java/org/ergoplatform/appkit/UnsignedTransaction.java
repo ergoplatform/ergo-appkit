@@ -15,16 +15,12 @@ import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
  * @see UnsignedTransactionBuilder
  * @see SignedTransaction
  */
-public interface UnsignedTransaction {
+public interface UnsignedTransaction extends Transaction {
+
     /**
      * Gets unsigned input boxes that will be used in this transaction
      */
     List<InputBox> getInputs();
-
-    /**
-     * Gets output boxes that will be created by this transaction
-     */
-    List<OutBox> getOutputs();
 
     /**
      * Gets data inputs that will be used in this transaction

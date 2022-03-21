@@ -1,12 +1,21 @@
 package org.ergoplatform.appkit.impl;
 
+import org.ergoplatform.ErgoBox;
+import org.ergoplatform.ErgoBoxCandidate;
+import org.ergoplatform.UnsignedInput;
+import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.appkit.OutBox;
 import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
 import org.ergoplatform.appkit.ReducedErgoLikeTransactionSerializer$;
 import org.ergoplatform.appkit.ReducedTransaction;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import scala.collection.JavaConversions;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteWriter;
-
-import java.util.Objects;
 
 public class ReducedTransactionImpl implements ReducedTransaction {
     private final BlockchainContextBase _ctx;
@@ -20,6 +29,30 @@ public class ReducedTransactionImpl implements ReducedTransaction {
         _tx = tx;
         _txCost = txCost;
     }
+
+    @Override
+    public String getId() {
+        return getTx().unsignedTx().id();
+    }
+
+    @Override
+    public List<String> getInputBoxesIds() {
+        List<UnsignedInput> inputs = JavaConversions.seqAsJavaList(getTx().unsignedTx().inputs());
+        List<String> returnVal = new ArrayList<>(inputs.size());
+        for (UnsignedInput input : inputs) {
+            returnVal.add(new ErgoId(input.boxId()).toString());
+        }
+        return returnVal;
+    }
+
+    @Override
+    public List<OutBox> getOutputs() {
+        List<ErgoBox> outputs = JavaConversions.seqAsJavaList(_tx.unsignedTx().outputs());
+        List<OutBox> returnVal = new ArrayList<>(outputs.size());
+        for (ErgoBoxCandidate output : outputs) {
+            returnVal.add(new OutBoxImpl(_ctx, output));
+        }
+        return returnVal;    }
 
     /**
      * Returns underlying {@link ReducedErgoLikeTransaction}
