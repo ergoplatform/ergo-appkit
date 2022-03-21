@@ -5,7 +5,7 @@ package org.ergoplatform.appkit;
  * `UnsignedInput`.
  * Can be obtained by reducing an unsigned transaction.
  */
-public interface ReducedTransaction {
+public interface ReducedTransaction extends Transaction {
     /**
      * Returns the underlying reduced transaction data.
      */

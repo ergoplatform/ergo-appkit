@@ -7,7 +7,7 @@ import sigmastate.Values
 
 import java.util
 
-class OutBoxImpl(_ctx: BlockchainContextImpl, _ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
+class OutBoxImpl(_ctx: BlockchainContextBase, _ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
   override def getValue: Long = _ergoBoxCandidate.value
 
   override def getCreationHeight: Int = _ergoBoxCandidate.creationHeight

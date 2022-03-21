@@ -37,7 +37,7 @@ public class TransactionInfo1 {
   private String headerId = null;
 
   @SerializedName("inclusionHeight")
-  private Integer inclusionHeight = null;
+  private Long inclusionHeight = null;
 
   @SerializedName("timestamp")
   private Long timestamp = null;
@@ -93,7 +93,7 @@ public class TransactionInfo1 {
     this.headerId = headerId;
   }
 
-  public TransactionInfo1 inclusionHeight(Integer inclusionHeight) {
+  public TransactionInfo1 inclusionHeight(Long inclusionHeight) {
     this.inclusionHeight = inclusionHeight;
     return this;
   }
@@ -103,11 +103,11 @@ public class TransactionInfo1 {
    * @return inclusionHeight
   **/
   @Schema(required = true, description = "Height of the block the transaction was included in")
-  public Integer getInclusionHeight() {
+  public Long getInclusionHeight() {
     return inclusionHeight;
   }
 
-  public void setInclusionHeight(Integer inclusionHeight) {
+  public void setInclusionHeight(Long inclusionHeight) {
     this.inclusionHeight = inclusionHeight;
   }
 
