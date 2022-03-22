@@ -9,23 +9,12 @@ import org.ergoplatform.ErgoBoxCandidate;
  *
  * @see OutBoxBuilder
  */
-public interface OutBox {
+public interface OutBox extends TransactionBox {
 
     /**
-     * Returns the amount of ERG stored in this box.
+     * Returns the serialized bytes of this output box without any transaction reference data.
      */
-    long getValue();
-
-    /**
-     * The height (block number) when the transaction containing this output box was
-     * created.
-     */
-    int getCreationHeight();
-
-    /**
-     * Returns a token with the given id.
-     */
-    ErgoToken token(ErgoId id);
+    byte[] getBytesWithNoRef();
 
     /**
      * Converts this box candidate into a new instance of {@link InputBox} by

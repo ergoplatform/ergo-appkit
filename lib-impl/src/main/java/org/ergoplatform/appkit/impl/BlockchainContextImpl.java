@@ -29,6 +29,12 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             NetworkType networkType,
             NodeInfo nodeInfo, List<BlockHeader> headers) {
         super(networkType);
+
+        if (nodeInfo != null && NetworkType.fromValue(nodeInfo.getNetwork()) != networkType) {
+            throw new IllegalArgumentException("Network type of NodeInfo does not match given networkType - "
+                + nodeInfo.getNetwork() + "/" + networkType.verboseName);
+        }
+
         _client = client;
         _retrofit = retrofit;
         _explorer = explorer;
@@ -82,6 +88,10 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     Retrofit getRetrofit() {
         return _retrofit;
+    }
+
+    Retrofit getRetrofitExplorer() {
+        return _retrofitExplorer;
     }
 
     @Override
@@ -159,51 +169,8 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     @Override
     public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend) {
-        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
-        Preconditions.checkArgument(amountToSpend > 0 ||
-            !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
-        ArrayList<InputBox> selectedCoveringBoxes = new ArrayList<>();
-        long remainingAmountToCover = amountToSpend;
-        int offset = 0;
-        while (true) {
-            List<InputBox> chunk = getUnspentBoxesFor(address, offset, DEFAULT_LIMIT_FOR_API);
-            for (InputBox boxCandidate : chunk) {
-                // on rare occasions, chunk can include entries that we already had received on a
-                // previous chunk page. We make sure we don't add any duplicate entries.
-                if (!isAlreadyAdded(selectedCoveringBoxes, boxCandidate)) {
-                    boolean usefulTokens = tokensRemaining.foundNewTokens(boxCandidate.getTokens());
-                    if (usefulTokens || remainingAmountToCover > 0) {
-                        selectedCoveringBoxes.add(boxCandidate);
-                        remainingAmountToCover -= boxCandidate.getValue();
-                    }
-                    if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
-                        return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
-                }
-            }
-            // this chunk is not enough, go to the next (if any)
-            if (chunk.size() == 0) {
-                // this was the last chunk, but still remain to collect
-                assert remainingAmountToCover > 0 || !tokensRemaining.areTokensCovered();
-                // cannot satisfy the request, but still return cb, with cb.isCovered == false
-                return new CoveringBoxes(amountToSpend, selectedCoveringBoxes);
-            }
-            // step to next chunk
-            offset += DEFAULT_LIMIT_FOR_API;
-        }
-    }
-
-    /**
-     * @return true when boxCandidate is already added to selectedBoxes list
-     */
-    private boolean isAlreadyAdded(ArrayList<InputBox> selectedBoxes, InputBox boxCandidate) {
-        boolean alreadyAdded = false;
-        for (InputBox coveringBox : selectedBoxes) {
-            if (coveringBox.getId().equals(boxCandidate.getId())) {
-                alreadyAdded = true;
-                break;
-            }
-        }
-        return alreadyAdded;
+        return BoxOperations.getCoveringBoxesFor(amountToSpend, tokensToSpend, false,
+            page -> getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API));
     }
 }
 

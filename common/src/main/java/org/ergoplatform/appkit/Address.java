@@ -5,6 +5,7 @@ import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.Pay2SAddress;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
 import org.ergoplatform.wallet.secrets.DerivationPath;
 import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
@@ -119,6 +120,13 @@ public class Address {
     public GroupElement getPublicKeyGE() {
         SecP256K1Point point = getPublicKey().value();
         return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
+    }
+
+    /**
+     * @return ErgoContract representing this address
+     */
+    public ErgoContract toErgoContract() {
+        return new ErgoTreeContract(getErgoAddress().script(), getNetworkType());
     }
 
     /**

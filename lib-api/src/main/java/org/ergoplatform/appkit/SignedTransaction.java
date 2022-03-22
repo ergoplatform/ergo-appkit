@@ -11,11 +11,7 @@ import java.util.List;
  * @see ErgoProver
  * @see UnsignedTransaction
  */
-public interface SignedTransaction {
-    /**
-     * Transaction if as Base16 string.
-     */
-    String getId();
+public interface SignedTransaction extends Transaction {
 
     /**
      * Json representation of this transaction.

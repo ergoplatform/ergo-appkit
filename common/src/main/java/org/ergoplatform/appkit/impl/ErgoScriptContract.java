@@ -1,16 +1,13 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.appkit.Constants;
-import org.ergoplatform.appkit.ErgoContract;
-import org.ergoplatform.appkit.JavaHelpers;
-import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.*;
 import sigmastate.Values;
 
 
 public class ErgoScriptContract implements ErgoContract {
     final private Constants _constants;
     final private String _code;
-    private NetworkType _networkType;
+    private final NetworkType _networkType;
 
     private ErgoScriptContract(Constants constants, String code, NetworkType networkType) {
         _constants = constants;
@@ -49,4 +46,10 @@ public class ErgoScriptContract implements ErgoContract {
                 _constants, _code, _networkType.networkPrefix);
         return ergoTree;
     }
+
+    @Override
+    public Address toAddress() {
+        return Address.fromErgoTree(getErgoTree(), _networkType);
+    }
+
 }

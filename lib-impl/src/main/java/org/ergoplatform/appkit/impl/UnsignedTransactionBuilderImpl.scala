@@ -138,7 +138,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     )
 
     val stateContext = createErgoLikeStateContext
-    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, stateContext)
+    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx)
   }
 
   private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {

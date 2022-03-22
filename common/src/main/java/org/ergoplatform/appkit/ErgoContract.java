@@ -24,5 +24,13 @@ public interface ErgoContract {
      */
     ErgoContract substConstant(String name, Object value);
 
+    /**
+     * Returns the underlying ErgoTree used by this contract
+     */
     Values.ErgoTree getErgoTree();
+
+    /**
+     * Get the base58 encoded address that represents this contract
+     */
+    Address toAddress();
 }

@@ -2,7 +2,7 @@ package org.ergoplatform.appkit
 
 import java.util
 
-import org.ergoplatform.appkit.BoxOperations.{createProver, loadTop, putToContractTx}
+import org.ergoplatform.appkit.BoxOperations.{createProver}
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
@@ -119,28 +119,21 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = putToContractTx(ctx, sender, false, contract, amountToSend, new util.ArrayList[ErgoToken]())
+    val dhtBoxCreationTx = BoxOperations.createForProver(sender, ctx).withAmountToSpend(amountToSend).putToContractTx(contract)
     dhtBoxCreationTx
   }
 
   def spendDhtBox(ctx: BlockchainContext, g_y: GroupElement, g_xy: GroupElement, sender: ErgoProver, dhtBox: InputBox, receiver: Address): SignedTransaction = {
-    val txB = ctx.newTxBuilder
-    val outBox = txB.outBoxBuilder
+    val tx = BoxOperations.createForSender(sender.getAddress, ctx).buildTxWithDefaultInputs { txB: UnsignedTransactionBuilder =>
+      val outBox = txB.outBoxBuilder
         .value(dhtBox.getValue)
-        .contract(new ErgoTreeContract(receiver.getErgoAddress.script))
+        .contract(receiver.toErgoContract)
         .registers(ErgoValue.of(g_y), ErgoValue.of(g_xy))
         .build
 
-    val boxesToPayFee = loadTop(ctx, sender.getAddress, MinFee, new util.ArrayList[ErgoToken]())
-
-    val inputs = new util.ArrayList[InputBox]()
-    inputs.add(dhtBox)
-    inputs.addAll(boxesToPayFee)
-
-    val tx = txB.boxesToSpend(inputs)
-        .outputs(outBox)
-        .fee(MinFee)
-        .sendChangeTo(sender.getP2PKAddress).build
+      txB.outputs(outBox)
+      txB
+    }
 
     sender.sign(tx)
   }

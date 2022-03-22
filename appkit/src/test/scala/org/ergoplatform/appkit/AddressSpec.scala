@@ -1,9 +1,11 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.appkit.examples.RunMockedScala
+import org.ergoplatform.appkit.examples.RunMockedScala.createMockedErgoClient
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import scorex.util.encode.Base16
 import sigmastate.serialization.ErgoTreeSerializer
 
@@ -90,6 +92,22 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
 
     val secondEip3Addr = Address.createEip3Address(1, NetworkType.MAINNET, xPubKey)
     secondEip3Addr.toString shouldBe "9fzV11eLdVS1Mxzz59V7ewoar5FTLx7Eqfwh9XDfbL68DYTyfTv"
+  }
+
+  property("create address from/to contract") {
+    val addressFromString = Address.create(addrStr)
+    val contractForAddress = addressFromString.toErgoContract
+    val addressFromContract = contractForAddress.toAddress
+
+    addressFromContract shouldBe addressFromString
+
+    val ergoClient = createMockedErgoClient(RunMockedScala.MockData.empty)
+    ergoClient.execute { ctx: BlockchainContext =>
+      val addressTrue = truePropContract(ctx).toAddress
+      val contractTrue = addressTrue.toErgoContract
+
+      contractTrue.getErgoTree shouldBe truePropContract(ctx).getErgoTree
+    }
   }
 
 }

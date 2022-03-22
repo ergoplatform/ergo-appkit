@@ -1,8 +1,6 @@
 package org.ergoplatform.appkit.impl
 
 import com.google.common.base.Preconditions
-import java.nio.charset.StandardCharsets
-
 import com.google.common.base.Preconditions.checkState
 import org.ergoplatform.SigmaConstants
 import org.ergoplatform.appkit._
@@ -35,15 +33,19 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     this
   }
 
-  override def mintToken(token: ErgoToken,
-                         tokenName: String,
-                         tokenDescription: String,
-                         tokenNumberOfDecimals: Int): OutBoxBuilder = {
-    val utf8 = StandardCharsets.UTF_8
-    val tokenNameVal = ErgoValue.of(tokenName.getBytes(utf8))
-    val tokenDescVal = ErgoValue.of(tokenDescription.getBytes(utf8))
-    val tokenNumOfDecVal = ErgoValue.of(Integer.toString(tokenNumberOfDecimals).getBytes(utf8))
+  override def mintToken(token: Eip4Token): OutBoxBuilder = {
+    val tokenNameVal = token.getMintingBoxR4
+    val tokenDescVal = token.getMintingBoxR5
+    val tokenNumOfDecVal = token.getMintingBoxR6
     _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
+
+    // optional registers, but either all of them or none
+    if (token.getMintingBoxR7 != null && token.getMintingBoxR8 != null) {
+      _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8)
+      if (token.getMintingBoxR9 != null)
+        _registers += token.getMintingBoxR9
+    }
+
     _tokens += token
     this
   }
@@ -64,8 +66,8 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
-        _value, tree, _tokens, _registers,
-        creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
+      _value, tree, _tokens, _registers,
+      creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
     new OutBoxImpl(_ctx, ergoBoxCandidate)
   }
 }

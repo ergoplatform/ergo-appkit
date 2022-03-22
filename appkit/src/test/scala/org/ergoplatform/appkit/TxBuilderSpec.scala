@@ -1,21 +1,21 @@
 package org.ergoplatform.appkit
 
-import java.io.File
-import java.math.BigInteger
-import java.util
-import java.util.Arrays
-
-import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
-import org.ergoplatform.appkit.impl.{ErgoTreeContract, ReducedTransactionImpl, BlockchainContextBase}
+import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract, ExplorerAndPoolUnspentBoxesLoader}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
+import org.scalatest.{Matchers, PropSpec}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scorex.util.ModifierId
-import sigmastate.eval.{CBigInt, CostingBox}
+import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.HintsBag
+
+import java.io.File
+import java.math.BigInteger
+import java.util.Arrays
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -77,13 +77,13 @@ class TxBuilderSpec extends PropSpec with Matchers
       val signedMessage = proverA.signMessage(proverA.getP2PKAddress,
         msg.getBytes, HintsBag.empty)
 
-      proverA.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverA.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      proverB.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverA.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      proverB.verifySignature(proverB.getP2PKAddress,
+      Signature.verifySignature(proverB.getP2PKAddress,
         msg.getBytes, signedMessage) shouldBe false
       }
     }
@@ -182,6 +182,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
 
+      unsigned.getOutputs.size() shouldBe 2
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
@@ -254,9 +255,8 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
-      val signed = BoxOperations.putToContractTx(ctx,
-          senderProver, false, pkContract, amountToSend, new util.ArrayList[ErgoToken]())
+      val signed = BoxOperations.createForProver(senderProver, ctx).withAmountToSpend(amountToSend)
+        .send(recipient)
       assert(signed != null)
     }
   }
@@ -271,16 +271,18 @@ class TxBuilderSpec extends PropSpec with Matchers
       val recipient = address
 
       val amountToSend = 1000000
-      val pkContract = new ErgoTreeContract(recipient.getErgoAddress.script)
+      val pkContract = recipient.toErgoContract
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-      val unsigned = BoxOperations.putToContractTxUnsigned(ctx,
-        senders, pkContract, amountToSend,
-        new util.ArrayList[ErgoToken]())
+      val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+        .putToContractTxUnsigned(pkContract)
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
       reduced should not be(null)
+      reduced.getInputBoxesIds.size() shouldBe unsigned.getInputs.size()
+      reduced.getInputBoxesIds shouldBe unsigned.getInputBoxesIds
+      reduced.getOutputs.size() shouldBe unsigned.getOutputs.size()
       reduced
     }
 
@@ -315,6 +317,82 @@ class TxBuilderSpec extends PropSpec with Matchers
       val deserializedSignedTx = ctx.parseSignedTransaction(signed.toBytes)
       deserializedSignedTx shouldBe signed
     }
+  }
+
+  property("omit mempool boxes") {
+    val ergoClient = createMockedErgoClient(MockData(
+      Seq(
+        loadNodeResponse("response_mempool.json"),
+        loadNodeResponse("response_Box1.json"),
+        loadNodeResponse("response_Box2.json"),
+        loadNodeResponse("response_Box3.json")),
+      Seq(
+        loadExplorerResponse("response_boxesByAddressUnspent.json"),
+        // fake an empty last page
+        "{ \"items\": [ ], \"total\": 0\n}",
+        // fake an empty mempool tx list
+        "{ \"items\": [ ], \"total\": 0\n}")))
+
+    a[NotEnoughErgsException] shouldBe thrownBy {
+      ergoClient.execute { ctx: BlockchainContext =>
+        val storage = SecretStorage.loadFrom("storage/E2.json")
+        storage.unlock("abc")
+
+        val recipient = address
+
+        val amountToSend = 1000000
+        val pkContract = recipient.toErgoContract
+
+        val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+        val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+          .withInputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
+          .putToContractTxUnsigned(pkContract)
+
+        val prover = ctx.newProverBuilder.build // prover without secrets
+        val reduced = prover.reduce(unsigned, 0)
+        reduced should not be (null)
+        reduced
+      }
+    }
+
+  }
+
+  property("consider changebox amount") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val storage = SecretStorage.loadFrom("storage/E2.json")
+      storage.unlock("abc")
+
+      val recipient = address
+
+      // send 1 ERG
+      val amountToSend = 1000L * 1000 * 1000
+      val pkContract = recipient.toErgoContract
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+
+      // first box: 1 ERG + tx fee + token that will cause a change
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee)
+        .contract(pkContract)
+        .tokens(new ErgoToken(mockTxId, 2))
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: enough ERG for the change box
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.MinFee)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val operations = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 1)))
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
+      val inputsSelected = operations.loadTop()
+
+      // both boxes should be selected
+      inputsSelected.size() shouldBe 2
+    }
+
   }
 
   property("Special tx building cases") {
@@ -353,7 +431,25 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val prover = ctx.newProverBuilder().build()
-      prover.sign(unsigned)
+      val signed = prover.sign(unsigned)
+
+      unsigned.getOutputs.size() shouldBe signed.getOutputsToSpend.size()
+    }
+  }
+
+  property("Mint a token and rebuild it from BoxCandidate") {
+    val ergoClient = createMockedErgoClient(data)
+    ergoClient.execute { ctx: BlockchainContext =>
+      val unsigned = BoxOperations.createForSender(address, ctx).withAmountToSpend(15000000)
+        .mintTokenToContractTxUnsigned(new ErgoTreeContract(address.getErgoAddress.script, address.getNetworkType), { tokenId: String =>
+          new Eip4Token(tokenId, 1, "Test name", "Test desc", 0)
+        })
+
+      val eip4Token = Eip4TokenBuilder.buildFromErgoBox(unsigned.getInputs.get(0).getId.toString, unsigned.getOutputs.get(0))
+
+      eip4Token.getDecimals shouldBe 0
+      eip4Token.getValue shouldBe 1
+      eip4Token.getTokenName shouldBe "Test name"
     }
   }
 
