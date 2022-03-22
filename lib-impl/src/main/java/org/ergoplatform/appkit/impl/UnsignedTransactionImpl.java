@@ -14,11 +14,13 @@ import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import scala.collection.JavaConversions;
+
 public class UnsignedTransactionImpl implements UnsignedTransaction {
     private final UnsignedErgoLikeTransaction _tx;
     private List<ExtendedInputBox> _boxesToSpend;
     private List<ErgoBox> _dataBoxes;
-    private List<ErgoBoxCandidate> _outputs;
+    private List<ErgoBox> _outputs;
     private ErgoAddress _changeAddress;
     private ErgoLikeStateContext _stateContext;
     private BlockchainContextImpl _ctx;
@@ -26,11 +28,11 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
 
     public UnsignedTransactionImpl(
         UnsignedErgoLikeTransaction tx, List<ExtendedInputBox> boxesToSpend,
-        List<ErgoBox> dataBoxes, List<ErgoBoxCandidate> outputs, ErgoAddress changeAddress, ErgoLikeStateContext stateContext, BlockchainContextImpl ctx) {
+        List<ErgoBox> dataBoxes, ErgoAddress changeAddress, ErgoLikeStateContext stateContext, BlockchainContextImpl ctx) {
         _tx = tx;
         _boxesToSpend = boxesToSpend;
         _dataBoxes = dataBoxes;
-        _outputs = outputs;
+        _outputs = JavaConversions.seqAsJavaList(_tx.outputs());
         _changeAddress = changeAddress;
         _stateContext = stateContext;
         _ctx = ctx;
