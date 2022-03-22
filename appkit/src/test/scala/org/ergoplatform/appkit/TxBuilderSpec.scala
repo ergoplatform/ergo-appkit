@@ -182,6 +182,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
 
+      unsigned.getOutputs.size() shouldBe 2
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
@@ -281,6 +282,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       reduced should not be(null)
       reduced.getInputBoxesIds.size() shouldBe unsigned.getInputs.size()
       reduced.getInputBoxesIds shouldBe unsigned.getInputBoxesIds
+      reduced.getOutputs.size() shouldBe unsigned.getOutputs.size()
       reduced
     }
 
@@ -429,7 +431,9 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val prover = ctx.newProverBuilder().build()
-      prover.sign(unsigned)
+      val signed = prover.sign(unsigned)
+
+      unsigned.getOutputs.size() shouldBe signed.getOutputsToSpend.size()
     }
   }
 
