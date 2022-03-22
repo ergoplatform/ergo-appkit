@@ -5,21 +5,18 @@ import com.google.common.base.Preconditions;
 import org.ergoplatform.appkit.BoxSelectorsJavaHelpers;
 import org.ergoplatform.appkit.ErgoWallet;
 import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.restapi.client.WalletBox;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ErgoWalletImpl implements ErgoWallet {
-    private final List<WalletBox> _unspentBoxesData;
     private BlockchainContextImpl _ctx;
     private List<InputBox> _unspentBoxes;
 
-    public ErgoWalletImpl(List<WalletBox> unspentBoxesData) {
-        Preconditions.checkNotNull(unspentBoxesData);
-        _unspentBoxesData = unspentBoxesData;
+    public ErgoWalletImpl(List<InputBox> unspentBoxes) {
+        Preconditions.checkNotNull(unspentBoxes);
+        _unspentBoxes = unspentBoxes;
     }
 
     void setContext(BlockchainContextImpl ctx) {
@@ -29,12 +26,6 @@ public class ErgoWalletImpl implements ErgoWallet {
 
     @Override
     public Optional<List<InputBox>> getUnspentBoxes(long amountToSpend) {
-        if (_unspentBoxes == null) {
-            _unspentBoxes = _unspentBoxesData.stream().map(boxInfo -> {
-                return new InputBoxImpl(_ctx, boxInfo.getBox());
-            }).collect(Collectors.toList());
-        }
-
         List<InputBox> selected = BoxSelectorsJavaHelpers.selectBoxes(_unspentBoxes, amountToSpend, Collections.emptyList());
         if (selected == null) return Optional.empty();
         return Optional.of(selected);

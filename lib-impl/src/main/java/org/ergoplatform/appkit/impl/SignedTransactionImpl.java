@@ -60,7 +60,7 @@ public class SignedTransactionImpl implements SignedTransaction {
                 o.ergoTree(tree.toString());
             }
     	}
-    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
+    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : JSON.createGson().create();
     	String json = gson.toJson(tx);
     	return json;
     }
@@ -80,7 +80,7 @@ public class SignedTransactionImpl implements SignedTransaction {
         List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
         List<InputBox> res = new ArrayList<>(outputs.size());
         for (ErgoBox ergoBox : outputs) {
-            res.add(new InputBoxImpl(_ctx, ergoBox));
+            res.add(new InputBoxImpl(ergoBox));
         }
         return res;
     }
@@ -100,7 +100,7 @@ public class SignedTransactionImpl implements SignedTransaction {
         List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
         List<OutBox> res = new ArrayList<>(outputs.size());
         for (ErgoBox ergoBox : outputs) {
-            res.add(new OutBoxImpl(_ctx, ergoBox));
+            res.add(new OutBoxImpl(ergoBox));
         }
         return res;
     }

@@ -61,7 +61,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     public List<InputBox> getInputs() {
         List<InputBox> returnVal = new ArrayList<>(_boxesToSpend.size());
         for (ExtendedInputBox boxToSpend : _boxesToSpend) {
-            returnVal.add(new InputBoxImpl(_ctx, boxToSpend.box()));
+            returnVal.add(new InputBoxImpl(boxToSpend.box()));
         }
         return returnVal;
     }
@@ -79,7 +79,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     public List<OutBox> getOutputs() {
         List<OutBox> returnVal = new ArrayList<>(_outputs.size());
         for (ErgoBoxCandidate output : _outputs) {
-            returnVal.add(new OutBoxImpl(_ctx, output));
+            returnVal.add(new OutBoxImpl(output));
         }
         return returnVal;
     }
@@ -88,7 +88,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     public List<InputBox> getDataInputs() {
         List<InputBox> returnVal = new ArrayList<>(_dataBoxes.size());
         for (ErgoBox dataBox : _dataBoxes) {
-            returnVal.add(new InputBoxImpl(_ctx, dataBox));
+            returnVal.add(new InputBoxImpl(dataBox));
         }
         return returnVal;
     }

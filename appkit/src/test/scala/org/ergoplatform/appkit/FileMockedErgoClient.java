@@ -4,6 +4,7 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
+import org.ergoplatform.appkit.impl.NodeAndExplorerDataSource;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 
@@ -64,9 +65,9 @@ public class FileMockedErgoClient implements MockedErgoClient {
         HttpUrl explorerBaseUrl = explorer.url("/");
         ExplorerApiClient explorerClient = new ExplorerApiClient(explorerBaseUrl.toString());
 
+        NodeAndExplorerDataSource dataSource = new NodeAndExplorerDataSource(client, _nodeOnlyMode ? null : explorerClient);
         BlockchainContext ctx = new BlockchainContextBuilderImpl(
-            client,
-            _nodeOnlyMode ? null : explorerClient,
+            dataSource,
             NetworkType.MAINNET).build();
 
         T res = action.apply(ctx);
@@ -78,6 +79,11 @@ public class FileMockedErgoClient implements MockedErgoClient {
             throw new ErgoClientException("Cannot shutdown server " + node.toString(), e);
         }
         return res;
+    }
+
+    @Override
+    public BlockchainDataSource getDataSource() {
+        throw new UnsupportedOperationException("");
     }
 }
 

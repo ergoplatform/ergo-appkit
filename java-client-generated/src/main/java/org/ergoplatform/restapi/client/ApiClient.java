@@ -248,10 +248,6 @@ public class ApiClient {
     this.okBuilder = okClient.newBuilder();
     addAuthsToOkBuilder(this.okBuilder);
   }
-
-  public <T> T cloneDataObject(T dataObj) {
-    return (T)getGson().fromJson(getGson().toJson(dataObj), dataObj.getClass());
-  }
 }
 
 /**

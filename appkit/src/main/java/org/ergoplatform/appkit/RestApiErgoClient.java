@@ -1,9 +1,9 @@
 package org.ergoplatform.appkit;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
+import org.ergoplatform.appkit.impl.NodeAndExplorerDataSource;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 
@@ -17,9 +17,8 @@ import javax.annotation.Nullable;
 public class RestApiErgoClient implements ErgoClient {
     private final String _nodeUrl;
     private final NetworkType _networkType;
-    private final ApiClient _client;
+    private final NodeAndExplorerDataSource apiClient;
     private final String _explorerUrl;
-    private final ExplorerApiClient _explorer;
 
     public final static String defaultMainnetExplorerUrl = "https://api.ergoplatform.com";
     public final static String defaultTestnetExplorerUrl = "https://api-testnet.ergoplatform.com";
@@ -40,26 +39,29 @@ public class RestApiErgoClient implements ErgoClient {
     RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl, @Nullable Proxy proxy) {
         _nodeUrl = nodeUrl;
         _networkType = networkType;
-        _client = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
+        ApiClient nodeClient = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
         if (proxy != null) {
-            _client.createDefaultAdapter(proxy);
+            nodeClient.createDefaultAdapter(proxy);
         }
         _explorerUrl = explorerUrl;
+        ExplorerApiClient explorerClient;
         if (!Strings.isNullOrEmpty(_explorerUrl)) {
             if (proxy != null) {
-                _explorer = new ExplorerApiClient(_explorerUrl, proxy);
+                explorerClient = new ExplorerApiClient(_explorerUrl, proxy);
             }
             else {
-             _explorer = new ExplorerApiClient(_explorerUrl);
+             explorerClient = new ExplorerApiClient(_explorerUrl);
             }
         } else {
-            _explorer = null;
+            explorerClient = null;
         }
+
+        apiClient = new NodeAndExplorerDataSource(nodeClient, explorerClient);
     }
 
     @Override
     public <T> T execute(Function<BlockchainContext, T> action) {
-        BlockchainContext ctx = new BlockchainContextBuilderImpl(_client, _explorer, _networkType).build();
+        BlockchainContext ctx = new BlockchainContextBuilderImpl(apiClient, _networkType).build();
         T res = action.apply(ctx);
         return res;
     }
@@ -165,19 +167,8 @@ public class RestApiErgoClient implements ErgoClient {
             );
     }
 
-    /**
-     * Get underlying Ergo node REST API typed client.
-     */
-    ApiClient getNodeApiClient() {
-        return _client;
+    @Override
+    public BlockchainDataSource getDataSource() {
+        return apiClient;
     }
-
-    /**
-     * Get underlying Ergo Network Explorer REST API typed client.
-     */
-    ExplorerApiClient getExplorerApiClient() {
-        Preconditions.checkNotNull(_explorer, ErgoClient.explorerUrlNotSpecifiedMessage);
-        return _explorer;
-    }
-
 }

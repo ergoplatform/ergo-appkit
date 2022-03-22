@@ -1,48 +1,50 @@
 package org.ergoplatform.appkit.impl;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+
 import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.appkit.*;
-import org.ergoplatform.explorer.client.ExplorerApiClient;
-import org.ergoplatform.explorer.client.model.OutputInfo;
-import org.ergoplatform.restapi.client.*;
-import retrofit2.Retrofit;
-import special.sigma.Header;
+import org.ergoplatform.appkit.Address;
+import org.ergoplatform.appkit.BlockchainDataSource;
+import org.ergoplatform.appkit.BoxOperations;
+import org.ergoplatform.appkit.CoveringBoxes;
+import org.ergoplatform.appkit.ErgoClientException;
+import org.ergoplatform.appkit.ErgoProverBuilder;
+import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.appkit.ErgoWallet;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.PreHeaderBuilder;
+import org.ergoplatform.appkit.SignedTransaction;
+import org.ergoplatform.appkit.UnsignedTransactionBuilder;
+import org.ergoplatform.appkit.BlockchainParameters;
+import org.ergoplatform.restapi.client.ErgoTransaction;
+import org.ergoplatform.restapi.client.JSON;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlockchainContextImpl extends BlockchainContextBase {
-    private final ApiClient _client;
-    private final Retrofit _retrofit;
+    private final BlockchainDataSource _dataSource;
     final PreHeaderImpl _preHeader;
-    private ExplorerApiClient _explorer;
-    private Retrofit _retrofitExplorer;
-    private final NodeInfo _nodeInfo;
-    private final List<BlockHeader> _headers;
+    final BlockchainParameters _blockchainParameters;
+    private final List<BlockHeaderImpl> _headers;
     private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
-            ApiClient client, Retrofit retrofit,
-            ExplorerApiClient explorer, Retrofit retrofitExplorer,
+            BlockchainDataSource dataSource,
             NetworkType networkType,
-            NodeInfo nodeInfo, List<BlockHeader> headers) {
+            BlockchainParameters blockchainParameters,
+            List<BlockHeaderImpl> headers) {
         super(networkType);
 
-        if (nodeInfo != null && NetworkType.fromValue(nodeInfo.getNetwork()) != networkType) {
+        if (blockchainParameters.getNetworkType() != networkType) {
             throw new IllegalArgumentException("Network type of NodeInfo does not match given networkType - "
-                + nodeInfo.getNetwork() + "/" + networkType.verboseName);
+                + blockchainParameters.getNetworkType() + "/" + networkType.verboseName);
         }
-
-        _client = client;
-        _retrofit = retrofit;
-        _explorer = explorer;
-        _retrofitExplorer = retrofitExplorer;
-        _nodeInfo = nodeInfo;
+        _dataSource = dataSource;
+        _blockchainParameters = blockchainParameters;
         _headers = headers;
-        Header h = ScalaBridge.isoBlockHeader().to(_headers.get(0));
-        _preHeader = new PreHeaderImpl(JavaHelpers.toPreHeader(h));
+        _preHeader = headers.get(0);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     @Override
     public SignedTransaction signedTxFromJson(String json) {
-        Gson gson = getApiClient().getGson();
+        Gson gson = JSON.createGson().create();
         ErgoTransaction txData = gson.fromJson(json, ErgoTransaction.class);
         ErgoLikeTransaction tx = ScalaBridge.isoErgoTransaction().to(txData);
         return new SignedTransactionImpl(this, tx, 0);
@@ -64,14 +66,15 @@ public class BlockchainContextImpl extends BlockchainContextBase {
     }
 
     @Override
+    public BlockchainDataSource getDataSource() {
+        return _dataSource;
+    }
+
+    @Override
     public InputBox[] getBoxesById(String... boxIds) throws ErgoClientException {
         List<InputBox> list = new ArrayList<>();
         for (String id : boxIds) {
-            ErgoTransactionOutput boxData = ErgoNodeFacade.getBoxById(_retrofit, id);
-            if (boxData == null) {
-                throw new ErgoClientException("Cannot load UTXO box " + id, null);
-            }
-            list.add(new InputBoxImpl(this, boxData));
+            list.add(_dataSource.getBoxById(id));
         }
         return list.toArray(new InputBox[0]);
     }
@@ -86,72 +89,28 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     /*=====  Package-private methods accessible from other Impl classes. =====*/
 
-    Retrofit getRetrofit() {
-        return _retrofit;
-    }
-
-    Retrofit getRetrofitExplorer() {
-        return _retrofitExplorer;
-    }
-
     @Override
-    ApiClient getApiClient() {
-        return _client;
-    }
-
-    /**
-     * This method should be private. No classes of HTTP client should ever leak into interfaces.
-     */
-    private List<InputBox> getInputBoxes(List<OutputInfo> boxes) {
-        ArrayList<InputBox> returnList = new ArrayList<>(boxes.size());
-
-        for (OutputInfo box : boxes) {
-            String boxId = box.getBoxId();
-            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxById(_retrofit, boxId);
-            // can be null if node does not know about the box (yet)
-            // instead of throwing an error, we continue with the boxes actually known
-            if (boxInfo != null) {
-                returnList.add(new InputBoxImpl(this, boxInfo));
-            }
-        }
-
-        return returnList;
-    }
-
-    @Override
-    public NodeInfo getNodeInfo() {
-        return _nodeInfo;
+    public BlockchainParameters getParameters() {
+        return _blockchainParameters;
     }
 
     public org.ergoplatform.appkit.PreHeader getPreHeader() {
         return _preHeader;
     }
 
-    public List<BlockHeader> getHeaders() {
+    public List<BlockHeaderImpl> getHeaders() {
         return _headers;
     }
 
     @Override
     public String sendTransaction(SignedTransaction tx) {
-        ErgoLikeTransaction ergoTx = ((SignedTransactionImpl)tx).getTx();
-        List<ErgoTransactionDataInput> dataInputsData =
-                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionDataInput()).from(ergoTx.dataInputs());
-        List<ErgoTransactionInput> inputsData =
-                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionInput()).from(ergoTx.inputs());
-        List<ErgoTransactionOutput> outputsData =
-                Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionOutput()).from(ergoTx.outputs());
-        ErgoTransaction txData = new ErgoTransaction()
-                .id(ergoTx.id())
-                .dataInputs(dataInputsData)
-                .inputs(inputsData)
-                .outputs(outputsData);
-        return ErgoNodeFacade.sendTransaction(_retrofit, txData);
+        return _dataSource.sendTransaction(tx);
     }
 
     @Override
     public ErgoWallet getWallet() {
         if (_wallet == null) {
-            List<WalletBox> unspentBoxes = ErgoNodeFacade.getWalletUnspentBoxes(_retrofit, 0, 0);
+            List<InputBox> unspentBoxes = _dataSource.getWalletUnspentBoxes(0, 0);
             _wallet = new ErgoWalletImpl(unspentBoxes);
             _wallet.setContext(this);
         }
@@ -160,17 +119,13 @@ public class BlockchainContextImpl extends BlockchainContextBase {
 
     @Override
     public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
-        Preconditions.checkNotNull(_retrofitExplorer, ErgoClient.explorerUrlNotSpecifiedMessage);
-        List<OutputInfo> boxes = ExplorerFacade
-                .transactionsBoxesByAddressUnspentIdGet(
-                    _retrofitExplorer, address.toString(), offset, limit);
-        return getInputBoxes(boxes);
+        return _dataSource.getUnspentBoxesFor(address, offset, limit);
     }
 
     @Override
     public CoveringBoxes getCoveringBoxesFor(Address address, long amountToSpend, List<ErgoToken> tokensToSpend) {
         return BoxOperations.getCoveringBoxesFor(amountToSpend, tokensToSpend, false,
-            page -> getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API));
+            page -> _dataSource.getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API));
     }
 }
 

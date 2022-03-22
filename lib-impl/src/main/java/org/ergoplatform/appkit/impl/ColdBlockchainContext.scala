@@ -1,18 +1,17 @@
 package org.ergoplatform.appkit.impl
 
 import java.util
-
-import org.ergoplatform.appkit.{InputBox, CoveringBoxes, ErgoProverBuilder, UnsignedTransactionBuilder, Address, ErgoWallet, Constants, ErgoToken, PreHeaderBuilder, SignedTransaction, NetworkType, ErgoContract, BlockchainContext}
+import org.ergoplatform.appkit.{Address, BlockchainContext, BlockchainDataSource, BlockchainParameters, Constants, CoveringBoxes, ErgoContract, ErgoProverBuilder, ErgoToken, ErgoWallet, InputBox, NetworkType, PreHeaderBuilder, SignedTransaction, UnsignedTransactionBuilder}
 import org.ergoplatform.restapi.client.{ApiClient, NodeInfo, Parameters}
 import sigmastate.Values
 
 class ColdBlockchainContext(networkType: NetworkType, params: Parameters) extends BlockchainContextBase(networkType) {
-  override def getApiClient: ApiClient = ???
+  override def getDataSource: BlockchainDataSource = ???
 
-  private val _nodeInfo = new NodeInfo()
-    .parameters(params)
+  private val _params = new NodeInfoParameters(new NodeInfo()
+    .parameters(params))
 
-  override def getNodeInfo: NodeInfo = _nodeInfo
+  override def getParameters: BlockchainParameters = _params
 
   override def createPreHeader(): PreHeaderBuilder = ???
 

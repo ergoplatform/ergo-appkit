@@ -2,10 +2,11 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.PreHeader;
 import org.ergoplatform.appkit.PreHeaderBuilder;
+import org.ergoplatform.appkit.BlockHeader;
+
 import sigmastate.eval.CPreHeader;
 import special.collection.Coll;
 import special.sigma.GroupElement;
-import special.sigma.Header;
 
 public class PreHeaderBuilderImpl implements PreHeaderBuilder {
     private final BlockchainContextImpl _ctx;
@@ -65,15 +66,15 @@ public class PreHeaderBuilderImpl implements PreHeaderBuilder {
 
     @Override
     public PreHeader build() {
-        Header h = ScalaBridge.isoBlockHeader().to(_ctx.getHeaders().get(0));
-        byte version = _version == null ? h.version() : _version;
-        Coll<Object> parentId = _parentId == null ? h.parentId() : _parentId;
-        long timestamp = _timestamp == null ? h.timestamp() : _timestamp;
-        long nBits = _nBits == null ? h.nBits() : _nBits;
-        int height = _height == null ? h.height() : _height;
-        GroupElement minerPk = _minerPk == null ? h.minerPk() : _minerPk;
-        Coll<Object> votes = _votes == null ? h.votes() : _votes;
-        CPreHeader ph = new CPreHeader(version, parentId, timestamp, nBits, height, minerPk, votes);
+        BlockHeader h = _ctx.getHeaders().get(0);
+        byte version = _version == null ? h.getVersion() : _version;
+        Coll<Object> parentId = _parentId == null ? (Coll<Object>)(Object)h.getParentId() : _parentId;
+        long timestamp = _timestamp == null ? h.getTimestamp() : _timestamp;
+        long nBits = _nBits == null ? h.getNBits() : _nBits;
+        int height = _height == null ? h.getHeight() : _height;
+        GroupElement minerPk = _minerPk == null ? h.getMinerPk() : _minerPk;
+        Coll<Object> votes = _votes == null ? (Coll<Object>)(Object)h.getVotes() : _votes;
+        CPreHeader ph = new CPreHeader(version, (Coll<Object>)(Object)parentId, timestamp, nBits, height, minerPk, votes);
         return new PreHeaderImpl(ph);
     }
 }

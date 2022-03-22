@@ -10,4 +10,5 @@ class ColdErgoClient(networkType: NetworkType, params: client.Parameters) extend
     val res = action.apply(ctx)
     res
   }
+  override def getDataSource: BlockchainDataSource = ???
 }

@@ -1,35 +1,39 @@
 package org.ergoplatform.appkit.impl;
 
 import com.google.gson.Gson;
+
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.ContextVar;
+import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.appkit.ErgoValue;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.Iso;
+import org.ergoplatform.appkit.JavaHelpers;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
-import sigmastate.Values;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
 
 public class InputBoxImpl implements InputBox {
-    private final BlockchainContextBase _ctx;
     private final ErgoId _id;
     private final ErgoBox _ergoBox;
     private final ErgoTransactionOutput _boxData;
     private ContextExtension _extension;
 
-    public InputBoxImpl(BlockchainContextBase ctx, ErgoTransactionOutput boxData) {
-        _ctx = ctx;
+    public InputBoxImpl(ErgoTransactionOutput boxData) {
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
         _boxData = boxData;
         _extension = ContextExtension.empty();
     }
 
-    public InputBoxImpl(BlockchainContextBase ctx, ErgoBox ergoBox) {
-        _ctx = ctx;
+    public InputBoxImpl(ErgoBox ergoBox) {
         _ergoBox = ergoBox;
         _id = new ErgoId(ergoBox.id());
         _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
@@ -72,7 +76,7 @@ public class InputBoxImpl implements InputBox {
         ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
           Stream.of(variables).collect(Collectors.toList())
         );
-        InputBoxImpl res =  new InputBoxImpl(_ctx, _ergoBox);
+        InputBoxImpl res =  new InputBoxImpl(_ergoBox);
         res._extension = extension;
         return res;
     }
@@ -84,15 +88,20 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public String toJson(boolean prettyPrint, boolean formatJson) {
-    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : _ctx.getApiClient().getGson();
+    	Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : JSON.createGson().create();
     	ErgoTransactionOutput data = _boxData;
     	if (prettyPrint) {
-    		data = _ctx.getApiClient().cloneDataObject(_boxData);
+    		data = cloneDataObject(gson, _boxData);
     		data.ergoTree(_ergoBox.ergoTree().toString());
     	}
     	String json = gson.toJson(data);
     	return json;
     }
+
+    private  <T> T cloneDataObject(Gson gson, T dataObj) {
+        return (T)gson.fromJson(gson.toJson(dataObj), dataObj.getClass());
+    }
+
     @Override
     public byte[] getBytes() { return _ergoBox.bytes(); }
 

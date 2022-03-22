@@ -16,7 +16,7 @@ import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CHeader, CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -307,6 +307,11 @@ object JavaHelpers {
 
   def toPreHeader(h: Header): special.sigma.PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
+  }
+
+  def toHeader(h: Header): special.sigma.Header = {
+    CHeader(h.id, h.version, h.parentId, h.ADProofsRoot, h.stateRoot, h.transactionsRoot, h.timestamp,
+      h.nBits, h.height, h.extensionRoot, h.minerPk, h.powOnetimePk, h.powNonce, h.powDistance, h.votes)
   }
 
   def getStateDigest(tree: AvlTree): Array[Byte] = {

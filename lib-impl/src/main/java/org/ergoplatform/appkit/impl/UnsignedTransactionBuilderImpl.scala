@@ -1,7 +1,6 @@
 package org.ergoplatform.appkit.impl
 
 import java.util
-
 import org.ergoplatform._
 import org.ergoplatform.appkit.{Iso, _}
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
@@ -9,12 +8,15 @@ import org.ergoplatform.wallet.transactions.TransactionBuilder
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector
 import special.collection.Coll
 import special.sigma.Header
+
 import java.util._
 import java.util.stream.Collectors
-
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import scorex.crypto.authds.ADDigest
 import org.ergoplatform.appkit.JavaHelpers._
+import sigmastate.eval.Colls
+
+import scala.collection.JavaConversions
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
   private[impl] var _inputs: List[UnsignedInput] = _
@@ -142,9 +144,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
   }
 
   private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
-    private val _allHeaders = Iso.JListToColl(
-      ScalaBridge.isoBlockHeader,
-      ErgoType.headerType.getRType).to(_ctx.getHeaders)
+    private val _allHeaders = Colls.fromArray(JavaConversions.asScalaIterator(
+      _ctx.getHeaders.iterator).map(bh => bh.h).toArray)
 
     private val _headers = _allHeaders.slice(1, _allHeaders.length)
 

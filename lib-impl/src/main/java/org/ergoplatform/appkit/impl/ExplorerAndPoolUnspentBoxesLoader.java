@@ -3,6 +3,7 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
+import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.explorer.client.model.OutputInfo;
@@ -39,14 +40,13 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
 
     @Override
     public void prepare(@Nonnull BlockchainContext ctx, List<Address> addresses, long grossAmount, @Nonnull List<ErgoToken> tokensToSpend) {
-        if (!(ctx instanceof BlockchainContextImpl)) {
-            throw new IllegalArgumentException("This loader needs to be used with BlockchainContextImpl");
+        if (!(ctx.getDataSource() instanceof NodeAndExplorerDataSource)) {
+            throw new IllegalArgumentException("This loader needs to be used with NodeAndExplorerDataSource");
         }
 
         unconfirmedSpentBoxesIds.clear();
-
-        Transactions unconfirmedTransactions = ErgoNodeFacade.getUnconfirmedTransactions(((BlockchainContextImpl) ctx)
-            .getRetrofit(), 1000, 0);
+        NodeAndExplorerDataSource dataSource = (NodeAndExplorerDataSource) ctx.getDataSource();
+        Transactions unconfirmedTransactions = dataSource.executeCall(dataSource.getNodeTransactionsApi().getUnconfirmedTransactions(1000, 0));
         for (ErgoTransaction unconfirmedTx : unconfirmedTransactions) {
             for (ErgoTransactionInput txInput : unconfirmedTx.getInputs()) {
                 unconfirmedSpentBoxesIds.add(txInput.getBoxId());
@@ -76,18 +76,22 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
             // fetch unconfirmed transactions for this address and add its boxes as last page
             try {
                 String senderAddress = sender.toString();
-                BlockchainContextImpl ctxImpl = (BlockchainContextImpl) ctx;
-                List<TransactionInfo> mempoolTx = ExplorerFacade.getApiV1MempoolTransactionsByaddressP1(ctxImpl.getRetrofitExplorer(),
-                    senderAddress, 0, 50);
+                NodeAndExplorerDataSource dataSource = (NodeAndExplorerDataSource) ctx.getDataSource();
+                List<TransactionInfo> mempoolTx = dataSource.executeCall(dataSource.getExplorerApi().getApiV1MempoolTransactionsByaddressP1(
+                    senderAddress, 0, 50)).getItems();
 
                 // now check if we have boxes on the address
                 for (TransactionInfo tx : mempoolTx) {
                     for (OutputInfo output : tx.getOutputs()) {
                         if (output.getAddress().equals(senderAddress) && output.getSpentTransactionId() == null) {
                             // we have an unconfirmed box - get info from node for it
-                            ErgoTransactionOutput boxInfo = ErgoNodeFacade.getBoxWithPoolById(((BlockchainContextImpl) ctx).getRetrofit(), output.getBoxId());
-                            if (boxInfo != null) {
-                                inputBoxes.add(new InputBoxImpl(ctxImpl, boxInfo));
+                            try {
+                                ErgoTransactionOutput boxInfo = dataSource.executeCall(dataSource.getNodeUtxoApi().getBoxWithPoolById(output.getBoxId()));
+                                if (boxInfo != null) {
+                                    inputBoxes.add(new InputBoxImpl(boxInfo));
+                                }
+                            } catch (ErgoClientException e) {
+                                // ignore error, no box to add
                             }
                         }
                     }

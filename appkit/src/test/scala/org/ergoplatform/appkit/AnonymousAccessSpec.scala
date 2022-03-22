@@ -31,7 +31,7 @@ class AnonymousAccessSpec extends PropSpec with Matchers
     val ergoClient = createMockedErgoClient(data)
 
     val boxes: java.util.List[InputBox] = ergoClient.execute { ctx: BlockchainContext =>
-      ctx.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API)
+      ctx.getDataSource.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API)
     }
     boxes.forEach { b: InputBox =>
       println(b.toJson(true))
@@ -44,7 +44,7 @@ class AnonymousAccessSpec extends PropSpec with Matchers
     ergoClient.execute { ctx: BlockchainContext =>
       ctx shouldNot be (null)
       assertExceptionThrown(
-        ctx.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API),
+        ctx.getDataSource.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API),
         exceptionLike[NullPointerException](ErgoClient.explorerUrlNotSpecifiedMessage)
       )
     }
