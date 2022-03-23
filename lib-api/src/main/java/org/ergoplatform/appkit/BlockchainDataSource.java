@@ -29,6 +29,14 @@ public interface BlockchainDataSource {
     InputBox getBoxById(String boxId);
 
     /**
+     * Get box contents for a box by a unique identifier for use as an Input, including mempool boxes
+     *
+     * @param boxId ID of a wanted box (required)
+     * @return InputBox
+     */
+    InputBox getBoxByIdWithMemPool(String boxId);
+
+    /**
      * Send an Ergo transaction
      * Headers({ "Content-Type:application/json" })
      * POST("transactions")
@@ -50,4 +58,21 @@ public interface BlockchainDataSource {
      * @return a requested chunk of boxes owned by the address
      */
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
+    /**
+     * Get unspent boxes owned by the given address starting from the given offset up to
+     * the given limit (basically one page of the boxes), restricted to mempool.
+     *
+     * @param address owner of the boxes to be retrieved
+     * @param offset  optional zero based offset of the first box in the list,
+     *                default = 0
+     * @param limit   optional number of boxes to retrieve. Note that returned list might
+     *                contain less elements if data for some boxes couldn't be retrieved
+     * @return a requested chunk of boxes owned by the address
+     */
+    List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit);
+
+    /**
+     * @return unconfirmed transactions from mempool
+     */
+    List<Transaction> getUnconfirmedTransactions(int offset, int limit);
 }

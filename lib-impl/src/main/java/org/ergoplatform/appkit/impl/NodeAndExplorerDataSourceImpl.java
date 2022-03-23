@@ -11,10 +11,13 @@ import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.Iso;
+import org.ergoplatform.appkit.OutBox;
 import org.ergoplatform.appkit.SignedTransaction;
+import org.ergoplatform.appkit.Transaction;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.OutputInfo;
+import org.ergoplatform.explorer.client.model.TransactionInfo;
 import org.ergoplatform.restapi.client.ApiClient;
 import org.ergoplatform.restapi.client.BlocksApi;
 import org.ergoplatform.restapi.client.ErgoTransaction;
@@ -23,10 +26,10 @@ import org.ergoplatform.restapi.client.ErgoTransactionInput;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.InfoApi;
 import org.ergoplatform.restapi.client.NodeInfo;
+import org.ergoplatform.restapi.client.Transactions;
 import org.ergoplatform.restapi.client.TransactionsApi;
 import org.ergoplatform.restapi.client.UtxoApi;
 import org.ergoplatform.restapi.client.WalletApi;
-import org.ergoplatform.restapi.client.WalletBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -103,6 +106,12 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     }
 
     @Override
+    public InputBox getBoxByIdWithMemPool(String boxId) {
+        ErgoTransactionOutput boxData = executeCall(nodeUtxoApi.getBoxWithPoolById(boxId));
+        return new InputBoxImpl(boxData);
+    }
+
+    @Override
     public String sendTransaction(SignedTransaction tx) {
         ErgoLikeTransaction ergoTx = ((SignedTransactionImpl) tx).getTx();
         List<ErgoTransactionDataInput> dataInputsData =
@@ -125,6 +134,42 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
         Preconditions.checkNotNull(explorerApi, ErgoClient.explorerUrlNotSpecifiedMessage);
         List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentByaddressP1(address.toString(), offset, limit, "asc")).getItems();
         return getInputBoxes(boxes);
+    }
+
+    @Override
+    public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
+        List<InputBox> inputBoxes = new ArrayList<>();
+        String senderAddress = address.toString();
+        List<TransactionInfo> mempoolTx = executeCall(getExplorerApi().getApiV1MempoolTransactionsByaddressP1(
+            senderAddress, offset, limit)).getItems();
+
+        // now check if we have boxes on the address
+        for (TransactionInfo tx : mempoolTx) {
+            for (OutputInfo output : tx.getOutputs()) {
+                if (output.getAddress().equals(senderAddress) && output.getSpentTransactionId() == null) {
+                    // we have an unconfirmed box - get info from node for it
+                    try {
+                        InputBox boxInfo = getBoxByIdWithMemPool(output.getBoxId());
+                        if (boxInfo != null) {
+                            inputBoxes.add(boxInfo);
+                        }
+                    } catch (ErgoClientException e) {
+                        // ignore error, no box to add
+                    }
+                }
+            }
+        }
+        return inputBoxes;
+    }
+
+    @Override
+    public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
+        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(1000, 0));
+        List<Transaction> returned = new ArrayList<>(mempoolTx.size());
+        for (ErgoTransaction tx : mempoolTx) {
+            returned.add(new MempoolTransaction(tx));
+        }
+        return returned;
     }
 
     private List<InputBox> getInputBoxes(List<OutputInfo> boxes) {
@@ -186,5 +231,36 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
     public DefaultApi getExplorerApi() {
         return explorerApi;
+    }
+
+    private static class MempoolTransaction implements Transaction {
+        private final ErgoTransaction tx;
+
+        public MempoolTransaction(ErgoTransaction tx) {
+            this.tx = tx;
+        }
+
+        @Override
+        public String getId() {
+            return tx.getId();
+        }
+
+        @Override
+        public List<String> getInputBoxesIds() {
+            List<String> returnVal = new ArrayList<>(tx.getInputs().size());
+            for (ErgoTransactionInput input : tx.getInputs()) {
+                returnVal.add(input.getBoxId());
+            }
+            return returnVal;
+        }
+
+        @Override
+        public List<OutBox> getOutputs() {
+            List<OutBox> returnVal = new ArrayList<>(tx.getOutputs().size());
+            for (ErgoTransactionOutput output : tx.getOutputs()) {
+                returnVal.add(new OutBoxImpl(ScalaBridge.isoErgoTransactionOutput().to(output)));
+            }
+            return returnVal;
+        }
     }
 }

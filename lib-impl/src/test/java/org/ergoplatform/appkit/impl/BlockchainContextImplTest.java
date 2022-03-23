@@ -10,6 +10,7 @@ import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.Parameters;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.BlockchainParameters;
+import org.ergoplatform.appkit.Transaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.PowSolutions;
 import org.ergoplatform.restapi.client.Registers;
@@ -99,6 +100,21 @@ public class BlockchainContextImplTest extends ApiTestBase {
 
         @Override
         public InputBox getBoxById(String boxId) {
+            return null;
+        }
+
+        @Override
+        public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
+            return null;
+        }
+
+        @Override
+        public InputBox getBoxByIdWithMemPool(String boxId) {
+            return null;
+        }
+
+        @Override
+        public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
             return null;
         }
 
