@@ -39,16 +39,6 @@ public interface BlockchainDataSource {
     String sendTransaction(SignedTransaction tx);
 
     /**
-     * Get a list of unspent boxes for a wallet set up in data source. When data source is a node,
-     * it is the node's users wallet.
-     *
-     * @param minConfirmations   Minimal number of confirmations (optional)
-     * @param minInclusionHeight Minimal box inclusion height (optional)
-     * @return list of InputBoxes to use for a new transaction
-     */
-    List<InputBox> getWalletUnspentBoxes(int minConfirmations, int minInclusionHeight);
-
-    /**
      * Get unspent boxes owned by the given address starting from the given offset up to
      * the given limit (basically one page of the boxes).
      *

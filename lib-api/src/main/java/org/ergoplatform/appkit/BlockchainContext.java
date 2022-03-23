@@ -77,8 +77,6 @@ public interface BlockchainContext {
      */
     String sendTransaction(SignedTransaction tx);
 
-    ErgoWallet getWallet();
-
     ErgoContract newContract(Values.ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
@@ -87,7 +85,7 @@ public interface BlockchainContext {
     int DEFAULT_LIMIT_FOR_API = 20;
 
     /**
-     * @see BlockchainDataSource#getWalletUnspentBoxes(int, int) 
+     * @see BlockchainDataSource#getUnspentBoxesFor(Address, int, int)
      */
     @Deprecated
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);

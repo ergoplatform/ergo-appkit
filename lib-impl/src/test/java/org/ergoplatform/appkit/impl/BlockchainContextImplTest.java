@@ -106,11 +106,6 @@ public class BlockchainContextImplTest extends ApiTestBase {
         public String sendTransaction(SignedTransaction tx) {
             return null;
         }
-
-        @Override
-        public List<InputBox> getWalletUnspentBoxes(int minConfirmations, int minInclusionHeight) {
-            return null;
-        }
     }
 
     static class MockedParameters implements BlockchainParameters {

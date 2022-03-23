@@ -121,16 +121,6 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     }
 
     @Override
-    public List<InputBox> getWalletUnspentBoxes(int minConfirmations, int minInclusionHeight) {
-        List<WalletBox> walletBoxes = executeCall(nodeWalletApi.walletUnspentBoxes(minConfirmations, minInclusionHeight));
-        List<InputBox> retVal = new ArrayList<>(walletBoxes.size());
-        for (WalletBox walletBox : walletBoxes) {
-            retVal.add(new InputBoxImpl(walletBox.getBox()));
-        }
-        return retVal;
-    }
-
-    @Override
     public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
         Preconditions.checkNotNull(explorerApi, ErgoClient.explorerUrlNotSpecifiedMessage);
         List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentByaddressP1(address.toString(), offset, limit, "asc")).getItems();

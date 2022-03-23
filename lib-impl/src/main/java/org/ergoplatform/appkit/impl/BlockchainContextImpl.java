@@ -14,7 +14,6 @@ import org.ergoplatform.appkit.CoveringBoxes;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.ErgoProverBuilder;
 import org.ergoplatform.appkit.ErgoToken;
-import org.ergoplatform.appkit.ErgoWallet;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.PreHeaderBuilder;
@@ -30,7 +29,6 @@ public class BlockchainContextImpl extends BlockchainContextBase {
     private final BlockchainDataSource _dataSource;
     final BlockchainParameters _blockchainParameters;
     private final List<BlockHeader> _headers;
-    private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
             BlockchainDataSource dataSource,
@@ -103,16 +101,6 @@ public class BlockchainContextImpl extends BlockchainContextBase {
     @Override
     public String sendTransaction(SignedTransaction tx) {
         return _dataSource.sendTransaction(tx);
-    }
-
-    @Override
-    public ErgoWallet getWallet() {
-        if (_wallet == null) {
-            List<InputBox> unspentBoxes = _dataSource.getWalletUnspentBoxes(0, 0);
-            _wallet = new ErgoWalletImpl(unspentBoxes);
-            _wallet.setContext(this);
-        }
-        return _wallet;
     }
 
     @Override
