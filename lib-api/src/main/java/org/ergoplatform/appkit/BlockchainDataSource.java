@@ -8,12 +8,12 @@ import java.util.List;
  */
 public interface BlockchainDataSource {
     /**
-     * @return NetworkType of this data source
+     * @return blockchain parameters this data source is working with
      */
     BlockchainParameters getParameters();
 
     /**
-     * Get the last headers objects
+     * Get the last headers objects, sorted by descending order
      *
      * @param count count of a wanted block headers (required)
      * @return List&lt;BlockHeader&gt;
@@ -39,11 +39,12 @@ public interface BlockchainDataSource {
     String sendTransaction(SignedTransaction tx);
 
     /**
-     * Get a list of unspent boxes  @GET("wallet/boxes/unspent")
+     * Get a list of unspent boxes for a wallet set up in data source. When data source is a node,
+     * it is the node's users wallet.
      *
      * @param minConfirmations   Minimal number of confirmations (optional)
      * @param minInclusionHeight Minimal box inclusion height (optional)
-     * @return List&lt;WalletBox&gt;
+     * @return list of InputBoxes to use for a new transaction
      */
     List<InputBox> getWalletUnspentBoxes(int minConfirmations, int minInclusionHeight);
 

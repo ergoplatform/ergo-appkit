@@ -4,14 +4,14 @@ import com.google.common.base.Preconditions;
 
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.Address;
+import org.ergoplatform.appkit.BlockHeader;
 import org.ergoplatform.appkit.BlockchainDataSource;
+import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.Iso;
 import org.ergoplatform.appkit.SignedTransaction;
-import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.OutputInfo;
@@ -30,6 +30,7 @@ import org.ergoplatform.restapi.client.WalletBox;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jline.internal.Nullable;
@@ -37,9 +38,12 @@ import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import special.sigma.Header;
 
-public class NodeAndExplorerDataSource implements BlockchainDataSource {
+/**
+ * BlockchainDataSource implementation using Node API and Explorer API. Node API is preferred,
+ * Explorer is optional to use. Not all methods can be used without Explorer set up.
+ */
+public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     // Node
     private final InfoApi nodeInfoApi;
     private final BlocksApi nodeBlocksApi;
@@ -50,7 +54,7 @@ public class NodeAndExplorerDataSource implements BlockchainDataSource {
     // Explorer
     private final DefaultApi explorerApi;
 
-    public NodeAndExplorerDataSource(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
+    public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
 
         OkHttpClient _ok = nodeClient.getOkBuilder().build();
         Retrofit nodeRetrofit = nodeClient.getAdapterBuilder()
@@ -83,6 +87,7 @@ public class NodeAndExplorerDataSource implements BlockchainDataSource {
     @Override
     public List<BlockHeader> getLastBlockHeaders(int count) {
         List<org.ergoplatform.restapi.client.BlockHeader> headers = executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count)));
+        Collections.reverse(headers);
         List<BlockHeader> retVal = new ArrayList<>(headers.size());
         for (org.ergoplatform.restapi.client.BlockHeader header : headers) {
             retVal.add(BlockHeaderImpl.createFromRestApi(header));

@@ -145,13 +145,13 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
     private val _allHeaders = Colls.fromArray(JavaConversions.asScalaIterator(
-      _ctx.getHeaders.iterator).map(bh => bh.h).toArray)
+      _ctx.getHeaders.iterator).map(h => ScalaBridge.isoAppkitBlockHeader.to(h)).toArray)
 
     private val _headers = _allHeaders.slice(1, _allHeaders.length)
 
     private val _preHeader = _ph match {
       case Some(ph) => ph._ph
-      case _ => _ctx._preHeader._ph
+      case _ => JavaHelpers.toPreHeader(_allHeaders.apply(0))
     }
 
     override def sigmaLastHeaders: Coll[Header] = _headers
@@ -164,7 +164,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def getCtx: BlockchainContext = _ctx
 
-  override def getPreHeader: PreHeader = _ph.getOrElse(_ctx.getPreHeader)
+  override def getPreHeader: PreHeader = _ph.getOrElse(_ctx.getHeaders.get(0))
 
   override def outBoxBuilder = new OutBoxBuilderImpl(this)
 

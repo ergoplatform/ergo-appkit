@@ -221,6 +221,29 @@ object ScalaBridge {
     override def from(a: Header): BlockHeader = ???
   }
 
+  implicit val isoAppkitBlockHeader: Iso[org.ergoplatform.appkit.BlockHeader, Header] = new Iso[org.ergoplatform.appkit.BlockHeader, Header] {
+    override def to(h: org.ergoplatform.appkit.BlockHeader): Header =
+      CHeader(
+        id = h.getId.toColl,
+        version = h.getVersion,
+        parentId = h.getParentId.map(Iso.jbyteToByte.to),
+        ADProofsRoot = h.getAdProofsRoot.toColl,
+        stateRoot = h.getStateRoot,
+        transactionsRoot = h.getTransactionsRoot.toColl,
+        timestamp = h.getTimestamp,
+        nBits = h.getNBits,
+        height = h.getHeight,
+        extensionRoot = h.getExtensionHash.toColl,
+        minerPk = h.getPowSolutionsPk.toGroupElement,
+        powOnetimePk = h.getPowSolutionsW.toGroupElement,
+        powNonce = h.getPowSolutionsN.toColl,
+        powDistance = SigmaDsl.BigInt(h.getPowSolutionsD),
+        votes = h.getVotes.map(Iso.jbyteToByte.to)
+      )
+
+    override def from(a: Header): org.ergoplatform.appkit.BlockHeader = ???
+  }
+
   implicit val isoErgoTransaction: Iso[ErgoTransaction, ErgoLikeTransaction] = new Iso[ErgoTransaction, ErgoLikeTransaction] {
     override def to(apiTx: ErgoTransaction): ErgoLikeTransaction =
       new ErgoLikeTransaction(

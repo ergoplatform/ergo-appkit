@@ -71,7 +71,7 @@ public class BlockchainContextImplTest extends ApiTestBase {
         final MockedDataSource ds;
 
         public MockedBlockChainContextImpl() {
-            super(new MockedDataSource(), NetworkType.MAINNET, new MockedParameters(), getMockHeader());
+            super(new MockedDataSource(), NetworkType.MAINNET);
             ds = (MockedDataSource) getDataSource();
         }
     }

@@ -309,11 +309,6 @@ object JavaHelpers {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
   }
 
-  def toHeader(h: Header): special.sigma.Header = {
-    CHeader(h.id, h.version, h.parentId, h.ADProofsRoot, h.stateRoot, h.transactionsRoot, h.timestamp,
-      h.nBits, h.height, h.extensionRoot, h.minerPk, h.powOnetimePk, h.powNonce, h.powDistance, h.votes)
-  }
-
   def getStateDigest(tree: AvlTree): Array[Byte] = {
     tree.digest.toArray
   }

@@ -7,7 +7,7 @@ import org.ergoplatform.appkit.NetworkType;
  */
 public interface BlockchainParameters {
     /**
-     * @return NetworkType of this data source
+     * @return Network type (Mainnet, Testnet)
      */
     NetworkType getNetworkType();
 
@@ -17,7 +17,7 @@ public interface BlockchainParameters {
     int getStorageFeeFactor();
 
     /**
-     * @return cost of a transaction output, in computation unit
+     * @return Minimum value per byte of an output
      */
     int getMinValuePerByte();
 

@@ -3,7 +3,7 @@ package org.ergoplatform.appkit;
 import com.google.common.base.Strings;
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
-import org.ergoplatform.appkit.impl.NodeAndExplorerDataSource;
+import org.ergoplatform.appkit.impl.NodeAndExplorerDataSourceImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 
@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 public class RestApiErgoClient implements ErgoClient {
     private final String _nodeUrl;
     private final NetworkType _networkType;
-    private final NodeAndExplorerDataSource apiClient;
+    private final NodeAndExplorerDataSourceImpl apiClient;
     private final String _explorerUrl;
 
     public final static String defaultMainnetExplorerUrl = "https://api.ergoplatform.com";
@@ -56,7 +56,7 @@ public class RestApiErgoClient implements ErgoClient {
             explorerClient = null;
         }
 
-        apiClient = new NodeAndExplorerDataSource(nodeClient, explorerClient);
+        apiClient = new NodeAndExplorerDataSourceImpl(nodeClient, explorerClient);
     }
 
     @Override

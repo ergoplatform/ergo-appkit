@@ -6,14 +6,14 @@ import org.ergoplatform.restapi.client.{ApiClient, NodeInfo, Parameters}
 import sigmastate.Values
 
 class ColdBlockchainContext(networkType: NetworkType, params: Parameters) extends BlockchainContextBase(networkType) {
-  override def getDataSource: BlockchainDataSource = ???
+  override def getDataSource: BlockchainDataSource = throw new UnsupportedOperationException("Cold blockchain context has no data source.")
 
   private val _params = new NodeInfoParameters(new NodeInfo()
     .parameters(params))
 
   override def getParameters: BlockchainParameters = _params
 
-  override def createPreHeader(): PreHeaderBuilder = ???
+  override def createPreHeader(): PreHeaderBuilder = throw new UnsupportedOperationException("Cold blockchain context has no pre header builder.")
 
   override def signedTxFromJson(json: String): SignedTransaction = ???
 

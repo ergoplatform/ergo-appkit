@@ -40,12 +40,12 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
 
     @Override
     public void prepare(@Nonnull BlockchainContext ctx, List<Address> addresses, long grossAmount, @Nonnull List<ErgoToken> tokensToSpend) {
-        if (!(ctx.getDataSource() instanceof NodeAndExplorerDataSource)) {
+        if (!(ctx.getDataSource() instanceof NodeAndExplorerDataSourceImpl)) {
             throw new IllegalArgumentException("This loader needs to be used with NodeAndExplorerDataSource");
         }
 
         unconfirmedSpentBoxesIds.clear();
-        NodeAndExplorerDataSource dataSource = (NodeAndExplorerDataSource) ctx.getDataSource();
+        NodeAndExplorerDataSourceImpl dataSource = (NodeAndExplorerDataSourceImpl) ctx.getDataSource();
         Transactions unconfirmedTransactions = dataSource.executeCall(dataSource.getNodeTransactionsApi().getUnconfirmedTransactions(1000, 0));
         for (ErgoTransaction unconfirmedTx : unconfirmedTransactions) {
             for (ErgoTransactionInput txInput : unconfirmedTx.getInputs()) {
@@ -76,7 +76,7 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
             // fetch unconfirmed transactions for this address and add its boxes as last page
             try {
                 String senderAddress = sender.toString();
-                NodeAndExplorerDataSource dataSource = (NodeAndExplorerDataSource) ctx.getDataSource();
+                NodeAndExplorerDataSourceImpl dataSource = (NodeAndExplorerDataSourceImpl) ctx.getDataSource();
                 List<TransactionInfo> mempoolTx = dataSource.executeCall(dataSource.getExplorerApi().getApiV1MempoolTransactionsByaddressP1(
                     senderAddress, 0, 50)).getItems();
 

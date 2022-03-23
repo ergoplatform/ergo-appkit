@@ -5,11 +5,6 @@ import org.ergoplatform.appkit.BlockchainContextBuilder;
 import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.NetworkType;
-import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.BlockchainParameters;
-
-import java.util.Collections;
-import java.util.List;
 
 public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
     private final BlockchainDataSource _dataSource;
@@ -23,11 +18,7 @@ public class BlockchainContextBuilderImpl implements BlockchainContextBuilder {
     @Override
     public BlockchainContext build() throws ErgoClientException {
 
-        BlockchainParameters blockchainParameters = _dataSource.getParameters();
-        List<BlockHeader> _headers = _dataSource.getLastBlockHeaders(NUM_LAST_HEADERS);
-        Collections.reverse(_headers);
-
-        return new BlockchainContextImpl(_dataSource, _networkType, blockchainParameters, (List<BlockHeaderImpl>) (List)_headers);
+        return new BlockchainContextImpl(_dataSource, _networkType);
     }
 
 

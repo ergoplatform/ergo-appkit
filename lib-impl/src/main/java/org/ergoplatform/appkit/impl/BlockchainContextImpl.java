@@ -1,10 +1,14 @@
 package org.ergoplatform.appkit.impl;
 
+import static org.ergoplatform.appkit.BlockchainContextBuilder.NUM_LAST_HEADERS;
+
 import com.google.gson.Gson;
 
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.Address;
+import org.ergoplatform.appkit.BlockHeader;
 import org.ergoplatform.appkit.BlockchainDataSource;
+import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.CoveringBoxes;
 import org.ergoplatform.appkit.ErgoClientException;
@@ -16,7 +20,6 @@ import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.PreHeaderBuilder;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.UnsignedTransactionBuilder;
-import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.JSON;
 
@@ -25,17 +28,17 @@ import java.util.List;
 
 public class BlockchainContextImpl extends BlockchainContextBase {
     private final BlockchainDataSource _dataSource;
-    final PreHeaderImpl _preHeader;
     final BlockchainParameters _blockchainParameters;
-    private final List<BlockHeaderImpl> _headers;
+    private final List<BlockHeader> _headers;
     private ErgoWalletImpl _wallet;
 
     public BlockchainContextImpl(
             BlockchainDataSource dataSource,
-            NetworkType networkType,
-            BlockchainParameters blockchainParameters,
-            List<BlockHeaderImpl> headers) {
+            NetworkType networkType) {
         super(networkType);
+
+        BlockchainParameters blockchainParameters = dataSource.getParameters();
+        List<BlockHeader> headers = dataSource.getLastBlockHeaders(NUM_LAST_HEADERS);
 
         if (blockchainParameters.getNetworkType() != networkType) {
             throw new IllegalArgumentException("Network type of NodeInfo does not match given networkType - "
@@ -44,7 +47,6 @@ public class BlockchainContextImpl extends BlockchainContextBase {
         _dataSource = dataSource;
         _blockchainParameters = blockchainParameters;
         _headers = headers;
-        _preHeader = headers.get(0);
     }
 
     @Override
@@ -94,11 +96,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
         return _blockchainParameters;
     }
 
-    public org.ergoplatform.appkit.PreHeader getPreHeader() {
-        return _preHeader;
-    }
-
-    public List<BlockHeaderImpl> getHeaders() {
+    public List<BlockHeader> getHeaders() {
         return _headers;
     }
 
