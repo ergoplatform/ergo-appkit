@@ -3,6 +3,8 @@ package org.ergoplatform.appkit;
 import java.math.BigInteger;
 
 import special.sigma.AvlTree;
+import special.collection.Coll;
+import special.sigma.GroupElement;
 
 /**
  * Header of a block
@@ -12,17 +14,17 @@ public interface BlockHeader extends PreHeader {
 
     AvlTree getStateRoot();
 
-    String getAdProofsRoot();
+    Coll<Byte> getAdProofsRoot();
 
-    String getTransactionsRoot();
+    Coll<Byte> getTransactionsRoot();
 
-    String getExtensionHash();
+    Coll<Byte> getExtensionHash();
 
-    String getPowSolutionsPk();
+    GroupElement getPowSolutionsPk();
 
-    String getPowSolutionsW();
+    GroupElement getPowSolutionsW();
 
     BigInteger getPowSolutionsD();
 
-    String getPowSolutionsN();
+    Coll<Byte> getPowSolutionsN();
 }

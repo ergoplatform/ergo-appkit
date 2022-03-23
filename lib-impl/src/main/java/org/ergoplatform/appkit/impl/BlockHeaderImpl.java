@@ -1,11 +1,13 @@
 package org.ergoplatform.appkit.impl;
 
-import org.ergoplatform.appkit.JavaHelpers;
 import org.ergoplatform.appkit.BlockHeader;
+import org.ergoplatform.appkit.JavaHelpers;
 
 import java.math.BigInteger;
 
+import special.collection.Coll;
 import special.sigma.AvlTree;
+import special.sigma.GroupElement;
 import special.sigma.Header;
 
 public class BlockHeaderImpl extends PreHeaderImpl implements BlockHeader {
@@ -34,28 +36,28 @@ public class BlockHeaderImpl extends PreHeaderImpl implements BlockHeader {
     }
 
     @Override
-    public String getAdProofsRoot() {
-        return header.getAdProofsRoot();
+    public Coll<Byte> getAdProofsRoot() {
+        return (Coll<Byte>) (Object) sigmaHeader.ADProofsRoot();
     }
 
     @Override
-    public String getTransactionsRoot() {
-        return header.getTransactionsRoot();
+    public Coll<Byte> getTransactionsRoot() {
+        return (Coll<Byte>) (Object) sigmaHeader.transactionsRoot();
     }
 
     @Override
-    public String getExtensionHash() {
-        return header.getExtensionHash();
+    public Coll<Byte> getExtensionHash() {
+        return (Coll<Byte>) (Object) sigmaHeader.extensionRoot();
     }
 
     @Override
-    public String getPowSolutionsPk() {
-        return header.getPowSolutions().getPk();
+    public GroupElement getPowSolutionsPk() {
+        return sigmaHeader.minerPk();
     }
 
     @Override
-    public String getPowSolutionsW() {
-        return header.getPowSolutions().getW();
+    public GroupElement getPowSolutionsW() {
+        return sigmaHeader.powOnetimePk();
     }
 
     @Override
@@ -64,7 +66,7 @@ public class BlockHeaderImpl extends PreHeaderImpl implements BlockHeader {
     }
 
     @Override
-    public String getPowSolutionsN() {
-        return header.getPowSolutions().getN();
+    public Coll<Byte> getPowSolutionsN() {
+        return (Coll<Byte>) (Object) sigmaHeader.powNonce();
     }
 }

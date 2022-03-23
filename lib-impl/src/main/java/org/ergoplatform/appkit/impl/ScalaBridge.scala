@@ -221,28 +221,24 @@ object ScalaBridge {
     override def from(a: Header): BlockHeader = ???
   }
 
-  implicit val isoAppkitBlockHeader: Iso[org.ergoplatform.appkit.BlockHeader, Header] = new Iso[org.ergoplatform.appkit.BlockHeader, Header] {
-    override def to(h: org.ergoplatform.appkit.BlockHeader): Header =
+  def toSigmaHeader(h: org.ergoplatform.appkit.BlockHeader): Header =
       CHeader(
         id = h.getId.toColl,
         version = h.getVersion,
         parentId = h.getParentId.map(Iso.jbyteToByte.to),
-        ADProofsRoot = h.getAdProofsRoot.toColl,
+        ADProofsRoot = h.getAdProofsRoot.map(Iso.jbyteToByte.to),
         stateRoot = h.getStateRoot,
-        transactionsRoot = h.getTransactionsRoot.toColl,
+        transactionsRoot = h.getTransactionsRoot.map(Iso.jbyteToByte.to),
         timestamp = h.getTimestamp,
         nBits = h.getNBits,
         height = h.getHeight,
-        extensionRoot = h.getExtensionHash.toColl,
-        minerPk = h.getPowSolutionsPk.toGroupElement,
-        powOnetimePk = h.getPowSolutionsW.toGroupElement,
-        powNonce = h.getPowSolutionsN.toColl,
+        extensionRoot = h.getExtensionHash.map(Iso.jbyteToByte.to),
+        minerPk = h.getPowSolutionsPk,
+        powOnetimePk = h.getPowSolutionsW,
+        powNonce = h.getPowSolutionsN.map(Iso.jbyteToByte.to),
         powDistance = SigmaDsl.BigInt(h.getPowSolutionsD),
         votes = h.getVotes.map(Iso.jbyteToByte.to)
       )
-
-    override def from(a: Header): org.ergoplatform.appkit.BlockHeader = ???
-  }
 
   implicit val isoErgoTransaction: Iso[ErgoTransaction, ErgoLikeTransaction] = new Iso[ErgoTransaction, ErgoLikeTransaction] {
     override def to(apiTx: ErgoTransaction): ErgoLikeTransaction =
