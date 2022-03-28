@@ -451,7 +451,7 @@ public class BoxOperations {
         @Override
         @Nonnull
         public List<InputBox> loadBoxesPage(@Nonnull BlockchainContext ctx, @Nonnull Address address, @Nonnull Integer page) {
-            return ctx.getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API);
+            return ctx.getDataSource().getUnspentBoxesFor(address, page * DEFAULT_LIMIT_FOR_API, DEFAULT_LIMIT_FOR_API);
         }
     }
 }

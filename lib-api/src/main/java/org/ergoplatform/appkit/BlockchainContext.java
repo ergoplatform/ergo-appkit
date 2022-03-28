@@ -8,7 +8,7 @@ import java.util.function.Function;
 /**
  * This interface represent a specific context of blockchain for execution
  * of transaction transaction building scenario.
- * It contains methods for accessing UTXO boxes, current blockchain state,
+ * It contains methods for accessing blockchain data, current blockchain state,
  * node information etc.
  * An instance of this interface can also be used to create new builders
  * for creating new transactions and provers (used for transaction signing).
@@ -34,6 +34,11 @@ public interface BlockchainContext {
      * A new builder is created for every call.
      */
     UnsignedTransactionBuilder newTxBuilder();
+
+    /**
+     * @return blockchain data source this blockchain context was created from
+     */
+    BlockchainDataSource getDataSource();
 
     /**
      * Retrieves UTXO boxes available in this blockchain context.
@@ -72,8 +77,6 @@ public interface BlockchainContext {
      */
     String sendTransaction(SignedTransaction tx);
 
-    ErgoWallet getWallet();
-
     ErgoContract newContract(Values.ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
@@ -82,16 +85,9 @@ public interface BlockchainContext {
     int DEFAULT_LIMIT_FOR_API = 20;
 
     /**
-     * Get unspent boxes owned by the given address starting from the given offset up to
-     * the given limit (basically one page of the boxes).
-     *
-     * @param address owner of the boxes to be retrieved
-     * @param offset  optional zero based offset of the first box in the list,
-     *                default = 0
-     * @param limit   optional number of boxes to retrieve. Note that returned list might
-     *                contain less elements if data for some boxes couldn't be retrieved
-     * @return a requested chunk of boxes owned by the address
+     * @see BlockchainDataSource#getUnspentBoxesFor(Address, int, int)
      */
+    @Deprecated
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
 
     /**

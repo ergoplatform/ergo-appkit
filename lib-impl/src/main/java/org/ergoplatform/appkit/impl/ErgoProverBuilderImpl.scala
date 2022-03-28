@@ -68,7 +68,7 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
 
   override def build: ErgoProver = {
     val parameters = new ErgoLikeParameters() {
-      private[impl] val _params = _ctx.getNodeInfo.getParameters
+      private[impl] val _params = _ctx.getParameters
 
       override def storageFeeFactor: Int = _params.getStorageFeeFactor
       override def minValuePerByte: Int = _params.getMinValuePerByte
@@ -77,7 +77,7 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
       override def inputCost: Int = _params.getInputCost
       override def dataInputCost: Int = _params.getDataInputCost
       override def outputCost: Int = _params.getOutputCost
-      override def maxBlockCost: Long = _params.getMaxBlockCost.longValue()
+      override def maxBlockCost: Long = _params.getMaxBlockCost
       override def softForkStartingHeight: Option[Int] = ???
       override def softForkVotesCollected: Option[Int] = ???
       override def blockVersion: Byte = _params.getBlockVersion.byteValue

@@ -2,9 +2,16 @@ package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.ErgoLikeTransactionSerializer$;
-import org.ergoplatform.appkit.*;
-import org.ergoplatform.restapi.client.ApiClient;
-import org.ergoplatform.restapi.client.NodeInfo;
+import org.ergoplatform.appkit.BlockchainContext;
+import org.ergoplatform.appkit.Constants;
+import org.ergoplatform.appkit.ErgoContract;
+import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
+import org.ergoplatform.appkit.ReducedErgoLikeTransactionSerializer$;
+import org.ergoplatform.appkit.ReducedTransaction;
+import org.ergoplatform.appkit.SignedTransaction;
+import org.ergoplatform.appkit.BlockchainParameters;
+
 import sigmastate.Values;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteReader;
@@ -31,9 +38,7 @@ public abstract class BlockchainContextBase implements BlockchainContext {
         return _networkType;
     }
 
-    abstract ApiClient getApiClient();
-
-    public abstract NodeInfo getNodeInfo();
+    public abstract BlockchainParameters getParameters();
 
     @Override
     public ReducedTransaction parseReducedTransaction(byte[] txBytes) {

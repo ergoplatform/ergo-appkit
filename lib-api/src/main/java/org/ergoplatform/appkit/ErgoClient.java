@@ -13,9 +13,16 @@ import java.util.function.Function;
  * The {@link BlockchainContext blockchain context} is created by the specific
  * ErgoClient implementation and passed to the action.<br>
  * Some implementations may connect to network nodes, while others may use mock
- * web server to simulate connection in tests.
+ * web server to simulate connection in tests. The actual implementation to
+ * fetch the data can be accessed from the {@link BlockchainDataSource}.
  */
 public interface ErgoClient {
+
+    /**
+     * @return data source for this client
+     */
+    BlockchainDataSource getDataSource();
+
     /**
      * Execute the given action and return action's result. An instance of
      * {@link BlockchainContext} is created with the current state of the

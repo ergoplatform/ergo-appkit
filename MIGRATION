@@ -1,0 +1,2 @@
+[4.0.9]
+- ExplorerAndPoolUnspentBoxesLoader moved from package org.ergoplatform.appkit.impl to org.ergoplatform.appkit

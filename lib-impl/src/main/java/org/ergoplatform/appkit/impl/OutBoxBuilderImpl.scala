@@ -68,7 +68,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
       _value, tree, _tokens, _registers,
       creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
-    new OutBoxImpl(_ctx, ergoBoxCandidate)
+    new OutBoxImpl(ergoBoxCandidate)
   }
 }
 

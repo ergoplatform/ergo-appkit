@@ -1,20 +1,18 @@
 package org.ergoplatform.appkit.impl
 
 import java.util
-
-import org.ergoplatform.appkit.{InputBox, CoveringBoxes, ErgoProverBuilder, UnsignedTransactionBuilder, Address, ErgoWallet, Constants, ErgoToken, PreHeaderBuilder, SignedTransaction, NetworkType, ErgoContract, BlockchainContext}
-import org.ergoplatform.restapi.client.{ApiClient, NodeInfo, Parameters}
-import sigmastate.Values
+import org.ergoplatform.appkit.{Address, BlockchainDataSource, BlockchainParameters, CoveringBoxes, ErgoProverBuilder, ErgoToken, InputBox, NetworkType, PreHeaderBuilder, SignedTransaction, UnsignedTransactionBuilder}
+import org.ergoplatform.restapi.client.{NodeInfo, Parameters}
 
 class ColdBlockchainContext(networkType: NetworkType, params: Parameters) extends BlockchainContextBase(networkType) {
-  override def getApiClient: ApiClient = ???
+  override def getDataSource: BlockchainDataSource = throw new UnsupportedOperationException("Cold blockchain context has no data source.")
 
-  private val _nodeInfo = new NodeInfo()
-    .parameters(params)
+  private val _params = new NodeInfoParameters(new NodeInfo()
+    .parameters(params))
 
-  override def getNodeInfo: NodeInfo = _nodeInfo
+  override def getParameters: BlockchainParameters = _params
 
-  override def createPreHeader(): PreHeaderBuilder = ???
+  override def createPreHeader(): PreHeaderBuilder = throw new UnsupportedOperationException("Cold blockchain context has no pre header builder.")
 
   override def signedTxFromJson(json: String): SignedTransaction = ???
 
@@ -27,8 +25,6 @@ class ColdBlockchainContext(networkType: NetworkType, params: Parameters) extend
   override def getHeight: Int = ???
 
   override def sendTransaction(tx: SignedTransaction): String = ???
-
-  override def getWallet: ErgoWallet = ???
 
   override def getUnspentBoxesFor(address: Address,
                                   offset: Int,

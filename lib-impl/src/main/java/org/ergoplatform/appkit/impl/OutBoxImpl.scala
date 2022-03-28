@@ -7,7 +7,7 @@ import sigmastate.Values
 
 import java.util
 
-class OutBoxImpl(_ctx: BlockchainContextBase, _ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
+class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
   override def getValue: Long = _ergoBoxCandidate.value
 
   override def getCreationHeight: Int = _ergoBoxCandidate.creationHeight
@@ -27,7 +27,7 @@ class OutBoxImpl(_ctx: BlockchainContextBase, _ergoBoxCandidate: ErgoBoxCandidat
 
   override def convertToInputWith(txId: String, boxIndex: Short): InputBox = {
     val box = _ergoBoxCandidate.toBox(ModifierId @@ txId, boxIndex)
-    new InputBoxImpl(_ctx, box)
+    new InputBoxImpl(box)
   }
 }
 

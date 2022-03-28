@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
-import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract, ExplorerAndPoolUnspentBoxesLoader}
+import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.restapi.client
 import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
