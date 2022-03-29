@@ -2,6 +2,7 @@ package org.ergoplatform.appkit;
 
 import scala.Option;
 import scala.Tuple2;
+import scala.Unit;
 import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
@@ -19,6 +20,7 @@ public class ErgoType<T> {
     private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
     private static ErgoType<scala.Boolean> _boolean = new ErgoType(RType.BooleanType());
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
+    private static ErgoType<Unit> _unit = new ErgoType(RType.UnitType());
     private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
     private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
     private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
@@ -60,6 +62,8 @@ public class ErgoType<T> {
     static public ErgoType<scala.Boolean> booleanType() { return _boolean; }
 
     static public ErgoType<BigInt> bigIntType() { return _bigInt; }
+
+    static public ErgoType<Unit> unitType() { return _unit; }
 
     static public ErgoType<GroupElement> groupElementType() { return _groupElement; }
 

@@ -46,9 +46,14 @@ public class Eip29Attachment {
     /**
      * @return array R4-R9 to use with OutboxBuilder#registers
      */
-    public ErgoValue<?> getOutboxRegistersForAttachment() {
-        // TODO
-        return null;
+    public ErgoValue<?>[] getOutboxRegistersForAttachment() {
+        ErgoValue<?>[] registers = new ErgoValue[6];
+
+        for (int i = 0; i < registers.length - 1; i++) {
+            registers[i] = ErgoValue.unit();
+        }
+        registers[5] = getErgoValue();
+        return registers;
     }
 
     /**
@@ -56,25 +61,25 @@ public class Eip29Attachment {
      * @return object representing the attachment
      */
     public static Eip29Attachment createFromErgoValue(ErgoValue<?> r9) {
-        String illegalArgumentException = "R9 must be of pair (Coll[0x50, 0x52, 0x50], Tuple2(Int, Coll[Byte])!";
+        String illegalArgumentException = "R9 must be of pair (Coll[0x50, 0x52, 0x50], Tuple2(Int, Coll[Byte]), actual: ";
 
         if (!(r9.getValue() instanceof Tuple2)) {
-            throw new IllegalArgumentException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException + r9.getValue().getClass().getSimpleName());
         }
 
         Tuple2 attachmentWrapper = (Tuple2) r9.getValue();
         if (!(attachmentWrapper._1 instanceof Coll) || !(attachmentWrapper._2 instanceof Tuple2)) {
-            throw new IllegalArgumentException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException + r9.toHex());
         }
 
         byte[] magicBytes = JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
         if (!Arrays.equals(Eip29Attachment.MAGIC_BYTES, magicBytes)) {
-            throw new IllegalArgumentException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException + r9.toHex());
         }
 
         Tuple2 attachmentValue = (Tuple2) attachmentWrapper._2;
         if (!(attachmentValue._1 instanceof Integer) || !(attachmentValue._2 instanceof Coll)) {
-            throw new IllegalArgumentException(illegalArgumentException);
+            throw new IllegalArgumentException(illegalArgumentException + r9.toHex());
         }
 
         return createFromAttachmentTuple(attachmentValue);

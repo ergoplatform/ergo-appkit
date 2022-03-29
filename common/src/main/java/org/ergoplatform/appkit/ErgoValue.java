@@ -85,6 +85,10 @@ public class ErgoValue<T> {
         return new ErgoValue(Iso.jboolToBool().to(Boolean.valueOf(value)), ErgoType.booleanType());
     }
 
+    static public ErgoValue<?> unit() {
+        return JavaHelpers.unitErgoVal();
+    }
+
     static public ErgoValue<BigInt> of(BigInteger value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().BigInt(value), ErgoType.bigIntType());
     }

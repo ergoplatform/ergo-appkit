@@ -25,6 +25,10 @@ public class Eip29AttachmentTest {
 
         Eip29Attachment backFromHex = Eip29AttachmentBuilder.buildFromHexEncodedErgoValue("3c0e400e035052500411596f7572206c6f616e204a616e75617279");
         Assert.assertEquals(attachment.getText(), ((Eip29Attachment.PlainTextAttachment) backFromHex).getText());
+
+        ErgoValue<?>[] outboxRegistersForAttachment = backFromHex.getOutboxRegistersForAttachment();
+        Assert.assertEquals(6, outboxRegistersForAttachment.length);
+        Assert.assertEquals(ErgoValue.unit(), ErgoValue.fromHex(outboxRegistersForAttachment[0].toHex()));
     }
 
     @Test
