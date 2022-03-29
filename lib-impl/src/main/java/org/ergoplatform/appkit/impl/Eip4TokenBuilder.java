@@ -118,7 +118,6 @@ public class Eip4TokenBuilder {
         return buildFromAdditionalRegisters(tokenId, tokenInfo.getAmount(), boxInfo.getAdditionalRegisters());
     }
 
-    @Nullable
     public static Eip4Token buildFromErgoBox(@Nonnull String tokenId, @Nonnull TransactionBox ergoBox) {
         ErgoToken foundToken = null;
         for (ErgoToken token : ergoBox.getTokens()) {
@@ -141,7 +140,7 @@ public class Eip4TokenBuilder {
             boxRegisters.size() > 5 ? boxRegisters.get(5) : null);
     }
 
-    private static String getSerializedErgoValueForRegister(AdditionalRegisters registers, String registerId) {
+    static String getSerializedErgoValueForRegister(AdditionalRegisters registers, String registerId) {
         AdditionalRegister register = registers.get(registerId);
         if (register == null)
             return null;
