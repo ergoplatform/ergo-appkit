@@ -18,33 +18,48 @@ import scala.Tuple2;
 
 public class Eip29AttachmentBuilder {
 
+    /**
+     * @return EIP-29 compliant attachment built from serialized ergo value
+     */
     public static Eip29Attachment buildFromHexEncodedErgoValue(String hexEncodedErgoValue) {
         return Eip29Attachment.createFromErgoValue(ErgoValue.fromHex(hexEncodedErgoValue));
     }
 
+    /**
+     * @return EIP-29 compliant attachment, if found. null otherwise
+     */
     @Nullable
     public static Eip29Attachment buildFromAdditionalRegisters(@Nonnull AdditionalRegisters registers) {
-        String serializedErgoValue = getSerializedErgoValueForRegister(registers, "R9");
-        if (serializedErgoValue != null)
-            return buildFromHexEncodedErgoValue(serializedErgoValue);
-        else
+        try {
+            return buildFromHexEncodedErgoValue(getSerializedErgoValueForRegister(registers, "R9"));
+        } catch (Throwable t) {
             return null;
+        }
     }
 
+    /**
+     * @return EIP-29 compliant attachment, if found. null otherwise
+     */
     @Nullable
     public static Eip29Attachment buildFromTransactionBox(@Nonnull TransactionBox transactionBox) {
         List<ErgoValue<?>> boxRegisters = transactionBox.getRegisters();
-
-        if (boxRegisters.size() > 5)
+        try {
             return Eip29Attachment.createFromErgoValue(boxRegisters.get(5));
-        else
+        } catch (Throwable t) {
             return null;
+        }
     }
 
+    /**
+     * @return PlainTextAttachment for given text
+     */
     public static Eip29Attachment.PlainTextAttachment createPlainTextAttachment(String text) {
         return Eip29Attachment.PlainTextAttachment.buildForText(text);
     }
 
+    /**
+     * @return MultiAttachment for given attachment list
+     */
     public static Eip29Attachment.MultiAttachment createMultiAttachment(List<Eip29Attachment> attachments) {
         return Eip29Attachment.MultiAttachment.buildForList(attachments);
     }
