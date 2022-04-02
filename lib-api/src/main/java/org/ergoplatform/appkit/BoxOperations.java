@@ -116,11 +116,11 @@ public class BoxOperations {
     }
 
     /**
-     * @param message message to be set for outboxes as {@link org.ergoplatform.appkit.Eip29Attachment.PlainTextAttachment}
+     * @param message message to be set for outboxes as {@link org.ergoplatform.appkit.GenericEip29Attachment.PlainTextAttachment}
      */
     public BoxOperations withMessage(@Nullable String message) {
         if (message != null) {
-            withAttachment(Eip29Attachment.PlainTextAttachment.buildForText(message));
+            withAttachment(GenericEip29Attachment.PlainTextAttachment.buildForText(message));
         } else {
             withAttachment(null);
         }

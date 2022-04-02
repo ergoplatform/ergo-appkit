@@ -258,7 +258,7 @@ object JavaHelpers {
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
-  val unitErgoVal = new ErgoValue[Unit]((), ErgoType.unitType)
+  val UnitErgoVal = new ErgoValue[Unit]((), ErgoType.unitType)
 
   def Algos: ErgoAlgos = org.ergoplatform.settings.ErgoAlgos
 

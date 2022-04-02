@@ -3,6 +3,9 @@ package org.ergoplatform.appkit;
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
 
+import java.math.BigInteger;
+import java.util.Objects;
+
 import scala.Tuple2;
 import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
@@ -11,10 +14,11 @@ import sigmastate.Values;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
-import special.sigma.*;
-
-import java.math.BigInteger;
-import java.util.Objects;
+import special.sigma.AvlTree;
+import special.sigma.BigInt;
+import special.sigma.Box;
+import special.sigma.GroupElement;
+import special.sigma.SigmaProp;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -73,8 +77,8 @@ public class ErgoValue<T> {
         return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
     }
 
-    static public ErgoValue<scala.Int> of(int value) {
-        return new ErgoValue(Iso.jintToInt().to(Integer.valueOf(value)), ErgoType.integerType());
+    static public ErgoValue<Integer> of(int value) {
+        return new ErgoValue(Iso.jintToInt().to(value), ErgoType.integerType());
     }
 
     static public ErgoValue<scala.Long> of(long value) {
@@ -86,7 +90,7 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<?> unit() {
-        return JavaHelpers.unitErgoVal();
+        return JavaHelpers.UnitErgoVal();
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
@@ -119,8 +123,8 @@ public class ErgoValue<T> {
         return new ErgoValue<Coll<scala.Byte>>(value, type);
     }
 
-    static public ErgoValue<Tuple2> pairOf(ErgoValue val1, ErgoValue val2) {
-        return new ErgoValue<Tuple2>(new Tuple2(val1.getValue(), val2.getValue()),
+    static public <A, B> ErgoValue<Tuple2<A, B>> pairOf(ErgoValue<A> val1, ErgoValue<B> val2) {
+        return new ErgoValue<>(new Tuple2<>(val1.getValue(), val2.getValue()),
             ErgoType.pairType(val1.getType(), val2.getType()));
     }
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
