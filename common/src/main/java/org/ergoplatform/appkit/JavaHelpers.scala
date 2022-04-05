@@ -9,8 +9,8 @@ import scala.collection.{mutable, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.serialization.{ValueSerializer, ErgoTreeSerializer, SigmaSerializer, GroupElementSerializer}
+import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean}
+import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
@@ -179,6 +179,18 @@ object Iso extends LowPriorityIsos {
   val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
     implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
+  }
+
+  val isoSigmaBooleanToByteArray: Iso[SigmaBoolean, Array[Byte]] = new Iso[SigmaBoolean, Array[Byte]] {
+    override def to(a: SigmaBoolean): Array[Byte] = {
+      val w = SigmaSerializer.startWriter()
+      SigmaBoolean.serializer.serialize(a, w)
+      w.toBytes
+    }
+    override def from(b: Array[Byte]): SigmaBoolean ={
+      val r = SigmaSerializer.startReader(b, 0)
+      SigmaBoolean.serializer.parse(r)
+    }
   }
 
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {

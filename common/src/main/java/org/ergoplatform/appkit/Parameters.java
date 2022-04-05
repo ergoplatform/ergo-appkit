@@ -27,4 +27,9 @@ public class Parameters {
      * and `change` output in not added to the transaction.
      */
     public static final long MinChangeValue = 1000 * 1000;
+
+    /**
+     * Max block cost for Cold Client
+     */
+    public static final int ColdClientMaxBlockCost = 1000000;
 }

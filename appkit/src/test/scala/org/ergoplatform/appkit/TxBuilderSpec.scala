@@ -1,9 +1,8 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
-import org.ergoplatform.appkit.impl.{BlockchainContextImpl, Eip4TokenBuilder, ErgoTreeContract}
+import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.ergoplatform.restapi.client
 import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
 import org.scalatest.{Matchers, PropSpec}
@@ -290,10 +289,8 @@ class TxBuilderSpec extends PropSpec with Matchers
 
     // the only necessary parameter can either be hard-coded or passed
     // together with ReducedTransaction
-    val blockchainParams = new client.Parameters()
-      .maxBlockCost(Integer.valueOf(1000000))
-
-    val coldClient = new ColdErgoClient(NetworkType.MAINNET, blockchainParams)
+    val maxBlockCost = Parameters.ColdClientMaxBlockCost
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost)
 
     coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold
