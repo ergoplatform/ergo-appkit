@@ -20,7 +20,7 @@ class ErgoAuthSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
     val signedMessage = new String(Random.randomBytes(16)) + requestedMessage +
       new String(Random.randomBytes(32))
     val signature = new ColdErgoClient(address.getNetworkType, Parameters.ColdClientMaxBlockCost)
-      .execute { ctx =>
+      .execute { ctx: BlockchainContext =>
 
         val prover = ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty()).build()
         prover.signMessage(ErgoAuthUtils.deserializeSigmaBoolean(serializedSigmaBoolean),
