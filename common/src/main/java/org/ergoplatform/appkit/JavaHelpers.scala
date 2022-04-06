@@ -258,7 +258,9 @@ object JavaHelpers {
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
-  val UnitErgoVal = new ErgoValue[Unit]((), ErgoType.unitType)
+
+  /** This value must be lazy to prevent early access to uninitialized unitType value. */
+  lazy val UnitErgoVal = new ErgoValue[Unit]((), ErgoType.unitType)
 
   def Algos: ErgoAlgos = org.ergoplatform.settings.ErgoAlgos
 

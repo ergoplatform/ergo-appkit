@@ -21,7 +21,7 @@ public interface Eip29Attachment {
     /**
      * @return returns full ErgoValue for this attachment, to use for register 9 of out boxes
      */
-    ErgoValue<Tuple2<Coll<Byte>, Tuple2<Integer, Coll<Byte>>>> getErgoValue();
+    ErgoValue<Tuple2<Coll<Byte>, Tuple2<scala.Int, Coll<Byte>>>> getErgoValue();
 
     /**
      * @return array R4-R9 to use with OutboxBuilder#registers

@@ -77,7 +77,7 @@ public class ErgoValue<T> {
         return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
     }
 
-    static public ErgoValue<Integer> of(int value) {
+    static public ErgoValue<scala.Int> of(int value) {
         return new ErgoValue(Iso.jintToInt().to(value), ErgoType.integerType());
     }
 
