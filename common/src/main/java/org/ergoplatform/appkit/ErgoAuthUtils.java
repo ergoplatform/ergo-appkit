@@ -52,7 +52,7 @@ public class ErgoAuthUtils {
     }
 
     /**
-     * Verifies an ErgoAuthResponnse for a given address.
+     * Verifies an ErgoAuthResponse for a given address.
      * See {@link #verifyResponse(SigmaBoolean, String, String, byte[])} for more information.
      */
     public static boolean verifyResponse(Address address, String originalMessage,

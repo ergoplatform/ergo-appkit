@@ -1,7 +1,5 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.appkit.NetworkType;
-
 /**
  * Parameters of the blockchain
  */
