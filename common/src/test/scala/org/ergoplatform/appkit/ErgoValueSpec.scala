@@ -64,4 +64,12 @@ class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenProperty
     test(SSigmaProp)
     test(SAvlTree)
   }
+
+  property("checkTypeDeclaration") {
+    val intErgoValue = ErgoValue.of(1)
+
+    val intValue: Integer = intErgoValue.getValue
+
+    intValue shouldBe 1
+  }
 }

@@ -78,11 +78,11 @@ public class GenericEip29Attachment implements Eip29Attachment {
             throw new IllegalArgumentException(illegalArgumentException + r9.toHex());
         }
 
-        return createFromAttachmentTuple((Tuple2<Integer, Coll<Byte>>) attachmentValue);
+        return createFromAttachmentTuple((Tuple2<scala.Int, Coll<Byte>>) attachmentValue);
     }
 
-    private static Eip29Attachment createFromAttachmentTuple(Tuple2<Integer, Coll<Byte>> attachmentTuple) {
-        int typeConstant = attachmentTuple._1;
+    private static Eip29Attachment createFromAttachmentTuple(Tuple2<scala.Int, Coll<Byte>> attachmentTuple) {
+        int typeConstant = attachmentTuple._1.toInt();
         GenericEip29Attachment.Type attachmentType = GenericEip29Attachment.Type.fromTypeRawValue(typeConstant);
         byte[] attachmentContent = ScalaHelpers.collByteToByteArray(attachmentTuple._2);
 
@@ -124,7 +124,7 @@ public class GenericEip29Attachment implements Eip29Attachment {
      * Attachment containing list of attachments
      */
     public static class MultiAttachment extends GenericEip29Attachment {
-        private final Tuple2<Integer, Coll<Byte>>[] attachmentList;
+        private final Tuple2<scala.Int, Coll<Byte>>[] attachmentList;
 
         private MultiAttachment(byte[] attachmentContent) {
             super(Type.MULTI_ATTACHMENT.toTypeRawValue(), attachmentContent);
@@ -137,7 +137,7 @@ public class GenericEip29Attachment implements Eip29Attachment {
             attachmentList = (Tuple2[]) ((Coll<?>) attachmentTuples.getValue()).toArray();
         }
 
-        private MultiAttachment(byte[] attachmentContent, Tuple2<Integer, Coll<Byte>>[] attachmentList) {
+        private MultiAttachment(byte[] attachmentContent, Tuple2<scala.Int, Coll<Byte>>[] attachmentList) {
             super(Type.MULTI_ATTACHMENT.toTypeRawValue(), attachmentContent);
             this.attachmentList = attachmentList;
         }
@@ -165,8 +165,8 @@ public class GenericEip29Attachment implements Eip29Attachment {
             for (Eip29Attachment attachment : attachments) {
                 attachmentTuples.add(attachment.getErgoValue().getValue()._2);
             }
-            Tuple2<Integer, Coll<Byte>>[] tupleArray = attachmentTuples.toArray(new Tuple2[]{});
-            ErgoValue<Coll<Tuple2<Integer, Coll<Byte>>>> ergoValue = ErgoValue.of(tupleArray, ErgoType.pairType(ErgoType.integerType(), ErgoType.collType(ErgoType.byteType())));
+            Tuple2<scala.Int, Coll<Byte>>[] tupleArray = attachmentTuples.toArray(new Tuple2[]{});
+            ErgoValue<Coll<Tuple2<scala.Int, Coll<Byte>>>> ergoValue = ErgoValue.of(tupleArray, ErgoType.pairType(ErgoType.integerType(), ErgoType.collType(ErgoType.byteType())));
 
             return new MultiAttachment(ergoValue.toHex().getBytes(StandardCharsets.UTF_8), tupleArray);
         }
