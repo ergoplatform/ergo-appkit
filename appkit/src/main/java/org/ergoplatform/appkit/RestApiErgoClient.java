@@ -1,24 +1,25 @@
 package org.ergoplatform.appkit;
 
 import com.google.common.base.Strings;
+
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.appkit.impl.NodeAndExplorerDataSourceImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 
-import java.net.Proxy;
 import java.util.function.Function;
+
 import javax.annotation.Nullable;
+
+import okhttp3.OkHttpClient;
 
 /**
  * This implementation of {@link ErgoClient} uses REST API of Ergo node for communication.
  */
 public class RestApiErgoClient implements ErgoClient {
-    private final String _nodeUrl;
     private final NetworkType _networkType;
     private final NodeAndExplorerDataSourceImpl apiClient;
-    private final String _explorerUrl;
 
     public final static String defaultMainnetExplorerUrl = "https://api.ergoplatform.com";
     public final static String defaultTestnetExplorerUrl = "https://api-testnet.ergoplatform.com";
@@ -34,24 +35,26 @@ public class RestApiErgoClient implements ErgoClient {
      *                    form `https://host[:port]` where port is optional.
      *                    If `null` or empty string passed then the Explorer client is not
      *                    initialized and the client works in the `node only` mode.
-     * @param proxy       Requests are passed through this proxy (if non-null).
+     * @param httpClientBuilder Builder used to construct http client instances. If null, a new
+     *                          OkHttpClient with default parameters is used.
      */
-    RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl, @Nullable Proxy proxy) {
-        _nodeUrl = nodeUrl;
+    RestApiErgoClient(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl, @Nullable OkHttpClient.Builder httpClientBuilder) {
         _networkType = networkType;
-        ApiClient nodeClient = new ApiClient(_nodeUrl, "ApiKeyAuth", apiKey);
-        if (proxy != null) {
-            nodeClient.createDefaultAdapter(proxy);
+
+        // if no httpClientBuilder is set, we use a single one for both api clients
+        if (httpClientBuilder == null) {
+            // just using the same builder is not enough - we have to derive the builder from an
+            // actual OkHttpClient instance to share the thread pools.
+            httpClientBuilder = new OkHttpClient().newBuilder();
         }
-        _explorerUrl = explorerUrl;
+
+        ApiClient nodeClient = new ApiClient(nodeUrl, "ApiKeyAuth", apiKey);
+        nodeClient.configureFromOkClientBuilder(httpClientBuilder);
+
         ExplorerApiClient explorerClient;
-        if (!Strings.isNullOrEmpty(_explorerUrl)) {
-            if (proxy != null) {
-                explorerClient = new ExplorerApiClient(_explorerUrl, proxy);
-            }
-            else {
-             explorerClient = new ExplorerApiClient(_explorerUrl);
-            }
+        if (!Strings.isNullOrEmpty(explorerUrl)) {
+            explorerClient = new ExplorerApiClient(explorerUrl);
+            explorerClient.configureFromOkClientBuilder(httpClientBuilder);
         } else {
             explorerClient = null;
         }
@@ -121,11 +124,12 @@ public class RestApiErgoClient implements ErgoClient {
      *                    `https://host:port/`. If null or empty, then explorer connection
      *                    is not initialized so that the resulting {@link ErgoClient} can
      *                    work in `node-only` mode.
-     * @param proxy       Requests are passed through this proxy (if non-null).
+     * @param httpClientBuilder Builder used to construct http client instances. If null, a new
+     *                          OkHttpClient with default parameters is used.
      * @return a new instance of {@link ErgoClient} connected to a given node
      */
-    public static ErgoClient createWithProxy(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl, @Nullable Proxy proxy) {
-        return new RestApiErgoClient(nodeUrl, networkType, apiKey, explorerUrl, proxy);
+    public static ErgoClient createWithHttpClientBuilder(String nodeUrl, NetworkType networkType, String apiKey, String explorerUrl, @Nullable OkHttpClient.Builder httpClientBuilder) {
+        return new RestApiErgoClient(nodeUrl, networkType, apiKey, explorerUrl, httpClientBuilder);
     }
 
     /**
@@ -155,15 +159,16 @@ public class RestApiErgoClient implements ErgoClient {
      *                    `https://host:port/`. If null or empty, then explorer connection
      *                    is not initialized so that the resulting {@link ErgoClient} can
      *                    work in `node-only` mode.
-     * @param proxy       Requests are passed through this proxy (if non-null).
+     * @param httpClientBuilder Builder used to construct http client instances. If null, a new
+     *                          OkHttpClient with default parameters is used.
      */
-    public static ErgoClient createWithProxy(ErgoNodeConfig nodeConf, String explorerUrl, @Nullable Proxy proxy) {
-        return RestApiErgoClient.createWithProxy(
+    public static ErgoClient createWithHttpClientBuilder(ErgoNodeConfig nodeConf, String explorerUrl, @Nullable OkHttpClient.Builder httpClientBuilder) {
+        return RestApiErgoClient.createWithHttpClientBuilder(
                 nodeConf.getNodeApi().getApiUrl(),
                 nodeConf.getNetworkType(),
                 nodeConf.getNodeApi().getApiKey(),
                 explorerUrl,
-                proxy
+                httpClientBuilder
             );
     }
 
