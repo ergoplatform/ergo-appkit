@@ -12,6 +12,7 @@ import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
 import special.sigma.*;
+import special.sigma.SigmaProp;
 
 import java.math.BigInteger;
 import java.util.Objects;

@@ -11,31 +11,35 @@ class ErgoAuthSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
   with AppkitTestingCommon {
 
   property("ErgoAuth address roundtrip") {
-    // server side
-    val serializedSigmaBoolean = ErgoAuthUtils.serializeSigmaBoolean(address)
+    val sigmaPropFromAddress = SigmaProp.createFromAddress(address)
+    // ---- server side ----
+    val serializedSigmaBoolean = sigmaPropFromAddress.toBytes
     // message to sign should be something random and not repeating
     val requestedMessage = addrStr + System.currentTimeMillis().toString
 
-    // transferred to client, and now we are on client side
+    // ---- transferred to client, and now we are on client side ----
+
+    // EIP-28: "the wallet app adds some own bytes to the obtained message from ErgoAuthRequest"
     val signedMessage = new String(Random.randomBytes(16)) + requestedMessage +
       new String(Random.randomBytes(32))
     val signature = new ColdErgoClient(address.getNetworkType, Parameters.ColdClientMaxBlockCost)
       .execute { ctx: BlockchainContext =>
 
         val prover = ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty()).build()
-        prover.signMessage(ErgoAuthUtils.deserializeSigmaBoolean(serializedSigmaBoolean),
+        prover.signMessage(SigmaProp.parseFromBytes(serializedSigmaBoolean),
           signedMessage.getBytes(StandardCharsets.UTF_8),
           HintsBag.empty)
       }
 
-    // transferred to server...
-    ErgoAuthUtils.verifyResponse(address, requestedMessage, signedMessage, signature) shouldBe (true)
+    // ---- transferred to server... ----
+    ErgoAuthUtils.verifyResponse(sigmaPropFromAddress,
+      requestedMessage, signedMessage, signature) shouldBe true
 
     // and in case someone wanted to fool us
-    ErgoAuthUtils.verifyResponse(address,
+    ErgoAuthUtils.verifyResponse(sigmaPropFromAddress,
       requestedMessage,
       signedMessage,
-      new Array[Byte](0)) shouldBe (false)
+      new Array[Byte](0)) shouldBe false
   }
 
 }

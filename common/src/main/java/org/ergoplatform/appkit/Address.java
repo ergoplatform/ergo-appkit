@@ -130,6 +130,21 @@ public class Address {
     }
 
     /**
+     * @return true if this address is a SigmaBoolean
+     */
+    public boolean isSigmaBoolean() {
+        return isP2PK();
+    }
+
+    /**
+     * @return SigmaBoolean value of this address. Throws an error if
+     * {@link #isSigmaBoolean()} is false
+     */
+    public Values.SigmaBoolean getSigmaBoolean() {
+        return getPublicKey();
+    }
+
+    /**
      * Create Ergo Address from base58 string.
      *
      * @param base58Str base58 string representation of address bytes.

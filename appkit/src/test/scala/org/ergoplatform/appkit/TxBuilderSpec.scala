@@ -73,16 +73,17 @@ class TxBuilderSpec extends PropSpec with Matchers
           new File("storage/E1.json").getPath, "abc")
          .build
 
-      val signedMessage = proverA.signMessage(proverA.getP2PKAddress,
+      val proverASigmaPropFromAddress = SigmaProp.createFromAddress(proverA.getAddress)
+      val signedMessage = proverA.signMessage(proverASigmaPropFromAddress,
         msg.getBytes, HintsBag.empty)
 
-      Signature.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverASigmaPropFromAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      Signature.verifySignature(proverA.getP2PKAddress,
+      Signature.verifySignature(proverASigmaPropFromAddress,
         msg.getBytes, signedMessage) shouldBe true
 
-      Signature.verifySignature(proverB.getP2PKAddress,
+      Signature.verifySignature(SigmaProp.createFromAddress(proverB.getAddress),
         msg.getBytes, signedMessage) shouldBe false
       }
     }

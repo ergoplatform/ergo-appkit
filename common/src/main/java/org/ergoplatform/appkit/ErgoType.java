@@ -5,6 +5,7 @@ import scala.Tuple2;
 import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
+import special.sigma.SigmaProp;
 
 import java.util.Objects;
 
