@@ -1,9 +1,5 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.ErgoLikeInterpreter;
-
-import sigmastate.eval.CompiletimeIRContext;
-
 public class Signature {
     private Signature() {
         // prevent instantiation
@@ -18,6 +14,6 @@ public class Signature {
      * @return whether signature is valid or not
      */
     public static boolean verifySignature(SigmaProp sigmaProp, byte[] message, byte[] signature) {
-        return new ErgoLikeInterpreter((new CompiletimeIRContext())).verifySignature(sigmaProp.getSigmaBoolean(), message, signature);
+        return SigmaPropInterpreter.verifySignature(sigmaProp.getSigmaBoolean(), message, signature);
     }
 }

@@ -12,7 +12,6 @@ import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
 import special.sigma.*;
-import special.sigma.SigmaProp;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -98,7 +97,7 @@ public class ErgoValue<T> {
         return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
-    static public ErgoValue<SigmaProp> of(Values.SigmaBoolean value) {
+    static public ErgoValue<special.sigma.SigmaProp> of(Values.SigmaBoolean value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 

@@ -3,29 +3,30 @@ package org.ergoplatform.appkit
 import org.ergoplatform.validation.ValidationRules
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
 import sigmastate.basics.DLogProtocol.{ProveDlog, DLogProverInput}
+
 import java.util
 import java.util.{List => JList}
-
 import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
-import sigmastate.basics.{SigmaProtocol, SigmaProtocolPrivateInput, SigmaProtocolCommonInput, DiffieHellmanTupleProverInput}
+import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
 import org.ergoplatform.utils.ArithUtils
-import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext, TransactionContext}
+import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
 import scorex.crypto.authds.ADKey
-import sigmastate.Values.{ErgoTree, SigmaBoolean}
+import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
-import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
+import sigmastate.eval.{IRContext, CompiletimeIRContext}
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, error}
+import sigmastate.interpreter.{Interpreter, CostedProverResult, InterpreterContext, PrecompiledScriptProcessor, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
 import sigmastate.utxo.CostTable
 import sigmastate.utils.Helpers._
-import sigmastate.utils.{SigmaByteReader, SigmaByteWriter}
+import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
 import spire.syntax.all.cfor
 import scalan.util.Extensions.LongOps
+
 import scala.collection.mutable
 
 object Helpers {
@@ -33,6 +34,8 @@ object Helpers {
     def mapOrThrow[B](f: A => B): B = source.fold(t => throw t, f)
   }
 }
+
+
 
 /**
  * A class which holds secrets and can sign transactions (aka generate proofs).

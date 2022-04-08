@@ -5,7 +5,6 @@ import scala.Tuple2;
 import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
-import special.sigma.SigmaProp;
 
 import java.util.Objects;
 
@@ -21,7 +20,7 @@ public class ErgoType<T> {
     private static ErgoType<scala.Boolean> _boolean = new ErgoType(RType.BooleanType());
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
     private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
-    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
+    private static ErgoType<special.sigma.SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
     private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
     private static ErgoType<Box> _box = new ErgoType(JavaHelpers.BoxRType());
     private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
@@ -64,7 +63,7 @@ public class ErgoType<T> {
 
     static public ErgoType<GroupElement> groupElementType() { return _groupElement; }
 
-    static public ErgoType<SigmaProp> sigmaPropType() { return _sigmaProp; }
+    static public ErgoType<special.sigma.SigmaProp> sigmaPropType() { return _sigmaProp; }
 
     static public ErgoType<AvlTree> avlTreeType() { return _avlTree; }
 
