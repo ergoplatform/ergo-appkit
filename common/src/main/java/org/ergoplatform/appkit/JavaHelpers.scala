@@ -9,7 +9,7 @@ import scala.collection.{mutable, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean}
+import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean, SigmaPropConstant}
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
@@ -319,6 +319,13 @@ object JavaHelpers {
 
   def toPreHeader(h: Header): special.sigma.PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
+  }
+
+  def toSigmaBoolean(ergoTree: ErgoTree): SigmaBoolean = {
+    val prop = ergoTree.toProposition(ergoTree.isConstantSegregation)
+    prop match {
+      case SigmaPropConstant(p) => SigmaDsl.toSigmaBoolean(p)
+    }
   }
 
   def getStateDigest(tree: AvlTree): Array[Byte] = {

@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets
 class ErgoAuthSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with AppkitTestingCommon {
 
-  property("ErgoAuth address roundtrip") {
+  property("ErgoAuth address round trip") {
     val sigmaPropFromAddress = SigmaProp.createFromAddress(address)
     // ---- server side ----
     val serializedSigmaBoolean = sigmaPropFromAddress.toBytes
