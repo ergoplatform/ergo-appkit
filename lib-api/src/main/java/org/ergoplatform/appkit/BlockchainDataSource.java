@@ -58,6 +58,20 @@ public interface BlockchainDataSource {
      * @return a requested chunk of boxes owned by the address
      */
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
+
+    /**
+     * Get unspent boxes storing the given token starting from the given offset up to
+     * the given limit (basically one page of the boxes).
+     *
+     * @param token   token the boxes must store (token amount is ignored)
+     * @param offset  optional zero based offset of the first box in the list,
+     *                default = 0
+     * @param limit   optional number of boxes to retrieve. Note that returned list might
+     *                contain less elements if data for some boxes couldn't be retrieved
+     * @return a requested chunk of boxes storing the token
+     */
+    List<InputBox> getUnspentBoxesFor(ErgoToken token, int offset, int limit);
+
     /**
      * Get unspent boxes owned by the given address starting from the given offset up to
      * the given limit (basically one page of the boxes), restricted to mempool.

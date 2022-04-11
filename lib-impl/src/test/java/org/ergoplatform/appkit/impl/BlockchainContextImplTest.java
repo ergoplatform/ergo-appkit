@@ -5,6 +5,7 @@ import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockHeader;
 import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.CoveringBoxes;
+import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.Parameters;
@@ -86,6 +87,11 @@ public class BlockchainContextImplTest extends ApiTestBase {
                 return Collections.emptyList();
             else
                 return unspentBoxesMock;
+        }
+
+        @Override
+        public List<InputBox> getUnspentBoxesFor(ErgoToken token, int offset, int limit) {
+            return null;
         }
 
         @Override

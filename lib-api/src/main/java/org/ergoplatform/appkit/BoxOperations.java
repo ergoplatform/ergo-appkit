@@ -107,6 +107,41 @@ public class BoxOperations {
         return this;
     }
 
+    /**
+     * @return context this class was created with
+     */
+    public BlockchainContext getBlockchainContext() {
+        return ctx;
+    }
+
+    /**
+     * @return senders this class was created with
+     */
+    public List<Address> getSenders() {
+        return senders;
+    }
+
+    /**
+     * @return currently set amount to spend
+     */
+    public long getAmountToSpend() {
+        return amountToSpend;
+    }
+
+    /**
+     * @return currently set tokens to spend
+     */
+    public List<ErgoToken> getTokensToSpend() {
+        return tokensToSpend;
+    }
+
+    /**
+     * @return currently set fee amount
+     */
+    public long getFeeAmount() {
+        return feeAmount;
+    }
+
     @Deprecated
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()
