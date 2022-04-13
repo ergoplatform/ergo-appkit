@@ -23,9 +23,10 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     ageUsdBank.getStableCoinPrice shouldBe 2309468
 
     // redeem stable coin
-    testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
+    val unsignedTx = testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
       txBuilder.buildStableCoinExchangeTransaction(100)
     })
+    unsignedTx.getOutputs.size() shouldBe 4
 
     // mint stable coin
     testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
@@ -41,9 +42,20 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
       txBuilder.buildReserveCoinExchangeTransaction(-1000)
     })
+
+    // use additional fee for redeeming
+    val additionalFeeTx = testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
+      txBuilder.withAdditionalFee(address, 1000L * 1000L * 100L).buildReserveCoinExchangeTransaction(1000)
+    })
+    additionalFeeTx.getOutputs.size() shouldBe 5
+
+    // use additional fee for minting
+    testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
+      txBuilder.withAdditionalFee(address, 1000L * 1000L * 100L).buildReserveCoinExchangeTransaction(-1000)
+    })
   }
 
-  private def testAgeUsdTransaction(ageUsdBank: AgeUsdBank, action: AgeUsdExchangeTransactionBuilder => UnsignedTransaction) = {
+  private def testAgeUsdTransaction(ageUsdBank: AgeUsdBank, action: AgeUsdExchangeTransactionBuilder => UnsignedTransaction): UnsignedTransaction = {
     val data = MockData(
       Seq(
         loadNodeResponse("ageusd/response_Box1.json"),
@@ -65,11 +77,12 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     }
 
     unsignedTransaction.getDataInputs.size() shouldBe 1
-    unsignedTransaction.getOutputs.size() shouldBe 4
     checkSmartContractRun(unsignedTransaction) shouldBe true
     ergoClient.execute { ctx: BlockchainContext =>
       ctx.newProverBuilder().withSecretStorage(storage).build().sign(unsignedTransaction)
     }
+
+    unsignedTransaction
   }
 
   def checkSmartContractRun(unsignedTransaction: UnsignedTransaction): Boolean = {
