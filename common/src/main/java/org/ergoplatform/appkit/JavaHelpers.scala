@@ -261,7 +261,11 @@ object JavaHelpers {
 
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
   implicit val JByteRType: RType[JByte] = RType.ByteType.asInstanceOf[RType[JByte]]
-  
+  implicit val JShortRType: RType[JShort] = RType.ShortType.asInstanceOf[RType[JShort]]
+  implicit val JIntRType: RType[JInt] = RType.IntType.asInstanceOf[RType[JInt]]
+  implicit val JLongRType: RType[JLong] = RType.LongType.asInstanceOf[RType[JLong]]
+  implicit val JBooleanRType: RType[JBoolean] = RType.BooleanType.asInstanceOf[RType[JBoolean]]
+
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
 

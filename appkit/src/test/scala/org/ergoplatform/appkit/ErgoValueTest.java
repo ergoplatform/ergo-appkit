@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 
-import scala.Int;
-import scala.Long;
 import special.collection.Coll;
 import special.sigma.BigInt;
 
@@ -15,7 +13,7 @@ public class ErgoValueTest {
 
     @Test
     public void testTypeDeclarations() {
-        ErgoValue<Int> intErgoValue = ErgoValue.of(1);
+        ErgoValue<Integer> intErgoValue = ErgoValue.of(1);
         ErgoValue<Long> longErgoValue = ErgoValue.of(0L);
         ErgoValue<Byte> byteErgoValue = ErgoValue.of((byte) 1);
         ErgoValue<BigInt> bigIntErgoValue = ErgoValue.of(BigInteger.ZERO);
