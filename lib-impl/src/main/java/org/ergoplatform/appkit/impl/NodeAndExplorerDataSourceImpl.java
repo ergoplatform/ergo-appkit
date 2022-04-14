@@ -164,7 +164,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
     @Override
     public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
-        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(1000, 0));
+        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(limit, offset));
         List<Transaction> returned = new ArrayList<>(mempoolTx.size());
         for (ErgoTransaction tx : mempoolTx) {
             returned.add(new MempoolTransaction(tx));
