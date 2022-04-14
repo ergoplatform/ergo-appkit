@@ -104,6 +104,11 @@ object Iso extends LowPriorityIsos {
     override def from(a: Boolean): JBoolean = a
   }
 
+  implicit def collToColl[A: RType, B: RType](implicit iso: Iso[A, B]): Iso[Coll[A], Coll[B]] = new Iso[Coll[A], Coll[B]] {
+    override def to(as: Coll[A]): Coll[B] = as.map(iso.to)
+    override def from(bs: Coll[B]): Coll[A] = bs.map(iso.from)
+  }
+
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
     override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
@@ -255,7 +260,8 @@ object JavaHelpers {
   }
 
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
-
+  implicit val JByteRType: RType[JByte] = RType.ByteType.asInstanceOf[RType[JByte]]
+  
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
 

@@ -225,8 +225,8 @@ public class Eip4TokenBuilder {
                                            @Nullable String linkToCoverImage) {
 
 
-        ErgoValue<Coll<scala.Byte>> r7 = ErgoValue.of(type.getR7ByteArrayForType());
-        ErgoValue<Coll<scala.Byte>> r8 = ErgoValue.of(sha256ContentHash);
+        ErgoValue<Coll<Byte>> r7 = ErgoValue.of(type.getR7ByteArrayForType());
+        ErgoValue<Coll<Byte>> r8 = ErgoValue.of(sha256ContentHash);
         ErgoValue<?> r9;
 
         if (linkToContent != null && linkToCoverImage == null)

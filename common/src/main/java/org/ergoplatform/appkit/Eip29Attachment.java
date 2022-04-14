@@ -1,6 +1,5 @@
 package org.ergoplatform.appkit;
 
-import scala.Byte;
 import scala.Tuple2;
 import special.collection.Coll;
 

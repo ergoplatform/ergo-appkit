@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import scala.Byte;
 import scala.Tuple2;
 import special.collection.Coll;
 
@@ -35,7 +34,7 @@ public class GenericEip29Attachment implements Eip29Attachment {
 
     @Override
     public ErgoValue<Tuple2<Coll<Byte>, Tuple2<scala.Int, Coll<Byte>>>> getErgoValue() {
-        ErgoValue<Tuple2<scala.Int, Coll<scala.Byte>>> contentPair = ErgoValue.pairOf(
+        ErgoValue<Tuple2<scala.Int, Coll<Byte>>> contentPair = ErgoValue.pairOf(
             ErgoValue.of(getTypeRawValue()),
             ErgoValue.of(attachmentContent));
         return ErgoValue.pairOf(ErgoValue.of(MAGIC_BYTES), contentPair);
@@ -82,7 +81,7 @@ public class GenericEip29Attachment implements Eip29Attachment {
     }
 
     private static Eip29Attachment createFromAttachmentTuple(Tuple2<scala.Int, Coll<Byte>> attachmentTuple) {
-        int typeConstant = attachmentTuple._1.toInt();
+        Integer typeConstant = (Integer)(Object)attachmentTuple._1;
         GenericEip29Attachment.Type attachmentType = GenericEip29Attachment.Type.fromTypeRawValue(typeConstant);
         byte[] attachmentContent = ScalaHelpers.collByteToByteArray(attachmentTuple._2);
 

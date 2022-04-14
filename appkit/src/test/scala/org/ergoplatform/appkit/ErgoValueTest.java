@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 
-import scala.Byte;
 import scala.Int;
 import scala.Long;
 import special.collection.Coll;

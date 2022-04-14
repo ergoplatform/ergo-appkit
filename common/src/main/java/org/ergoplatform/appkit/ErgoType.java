@@ -14,7 +14,7 @@ import java.util.Objects;
  * wrapper around {@link RType} type descriptor.
  */
 public class ErgoType<T> {
-    private static ErgoType<scala.Byte> _byte = new ErgoType(RType.ByteType());
+    private static ErgoType<Byte> _byte = new ErgoType(RType.ByteType());
     private static ErgoType<scala.Short> _short = new ErgoType(RType.ShortType());
     private static ErgoType<scala.Int> _integer = new ErgoType(RType.IntType());
     private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
@@ -51,7 +51,7 @@ public class ErgoType<T> {
         return (obj instanceof ErgoType<?>) && Objects.equals(_rtype, ((ErgoType<?>)obj)._rtype);
     }
 
-    static public ErgoType<scala.Byte> byteType() { return _byte; }
+    static public ErgoType<Byte> byteType() { return _byte; }
 
     static public ErgoType<scala.Short> shortType() { return _short; }
 
