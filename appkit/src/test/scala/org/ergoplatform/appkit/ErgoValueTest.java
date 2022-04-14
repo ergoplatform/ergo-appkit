@@ -19,12 +19,16 @@ public class ErgoValueTest {
         ErgoValue<BigInt> bigIntErgoValue = ErgoValue.of(BigInteger.ZERO);
         ErgoValue<Coll<Byte>> byteArrayErgoValue = ErgoValue.of(new byte[] {0, 1, 2});
 
-        int intValue = Iso.jintToInt().from(intErgoValue.getValue());
-        long longValue = Iso.jlongToLong().from(longErgoValue.getValue());
-        byte byteValue = Iso.jbyteToByte().from(byteErgoValue.getValue());
         BigInteger bigIntValue = bigIntErgoValue.getValue().value();
-        byte byteFromCollValue = Iso.jbyteToByte().from(byteArrayErgoValue.getValue().apply(0));
+        byte byteFromCollValue = byteArrayErgoValue.getValue().apply(0);
+        byte byteValue = byteErgoValue.getValue();
+        int intValue = intErgoValue.getValue();
+        long longValue = longErgoValue.getValue();
 
         assertEquals(1, intValue);
+        assertEquals(0L, longValue);
+        assertEquals(1, byteValue);
+        assertEquals(0, byteFromCollValue);
+        assertEquals(BigInteger.ZERO, bigIntValue);
     }
 }
