@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,8 +33,33 @@ public class CoveringBoxes {
         return value;
     }
 
-    /** Returns true if the amount is covered by the boxes in this set, false otherwise. */
-    public boolean isCovered() { return getCoveredAmount() >= _amountToSpend; }
+    /**
+     * @return list of tokens covered by boxes
+     */
+    public List<ErgoToken> getCoveredTokens() {
+        HashMap<String, ErgoToken> coveredTokens = new HashMap<>();
+        for (InputBox box : _boxes) {
+            for (ErgoToken token : box.getTokens()) {
+                String tokenId = token.getId().toString();
+                if (!coveredTokens.containsKey(tokenId)) {
+                    coveredTokens.put(tokenId, token);
+                } else {
+                    ErgoToken tokenInMap = coveredTokens.get(tokenId);
+                    coveredTokens.put(tokenId, new ErgoToken(token.getId(), token.getValue() + tokenInMap.getValue()));
+                }
+            }
+
+        }
+        return new ArrayList<>(coveredTokens.values());
+    }
+
+    /**
+     * @return true if the amount and the tokens are covered by the boxes in this set, false otherwise.
+     */
+    public boolean isCovered() {
+        return getCoveredAmount() >= _amountToSpend &&
+            new SelectTokensHelper(tokensToSpend).useTokens(getCoveredTokens()).areTokensCovered();
+    }
 
     /** Returns a list of boxes stored in this set. */
     public List<InputBox> getBoxes() {
