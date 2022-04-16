@@ -88,13 +88,20 @@ public class AgeUsdBank {
      */
     public long getReserveRatio(long scCirculatingDelta, long rcCirculatingDelta) {
         long ergReserveNeeded = (scCirculating + scCirculatingDelta) * scOraclePrice;
-        long reserveChange = scCirculatingDelta * scOraclePrice + rcCirculatingDelta * getReserveCoinPrice();
-        long reserveChangeWithFee = reserveChange + Math.abs(reserveChange * FEE_PERCENT / 100);
         if (ergReserveNeeded == 0)
             return MAX_RESERVE_RATIO_PERCENT;
 
         // we can have an overflow in the calculation, so use BigInteger here
-        return BigInteger.valueOf(ergReserve + reserveChangeWithFee).multiply(BigInteger.valueOf(100)).divide(BigInteger.valueOf(ergReserveNeeded)).longValue();
+
+        // long reserveChange = scCirculatingDelta * scOraclePrice + rcCirculatingDelta * getReserveCoinPrice();
+        BigInteger reserveChange = BigInteger.valueOf(scCirculatingDelta).multiply(BigInteger.valueOf(scOraclePrice))
+            .add(BigInteger.valueOf(rcCirculatingDelta).multiply(BigInteger.valueOf(getReserveCoinPrice())));
+        // long reserveChangeWithFee = reserveChange + Math.abs(reserveChange * FEE_PERCENT / 100);
+        BigInteger reserveChangeWithFee = reserveChange.add(reserveChange.multiply(BigInteger.valueOf(FEE_PERCENT)).divide(BigInteger.valueOf(100)).abs());
+
+        // return (ergReserve + reserveChangeWithFee) * 100 / ergReserveNeeded
+        return BigInteger.valueOf(ergReserve).add(reserveChangeWithFee).multiply(BigInteger.valueOf(100))
+            .divide(BigInteger.valueOf(ergReserveNeeded)).longValue();
     }
 
     /**
@@ -190,7 +197,7 @@ public class AgeUsdBank {
      */
     public long getReserveCoinPrice() {
         long equity = getEquity();
-        return rcCirculating == 0 ? RC_DEFAULT_PRICE : equity / rcCirculating;
+        return rcCirculating == 0 || equity == 0 ? RC_DEFAULT_PRICE : equity / rcCirculating;
     }
 
     /**

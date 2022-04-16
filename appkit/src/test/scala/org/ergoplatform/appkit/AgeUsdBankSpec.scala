@@ -39,6 +39,17 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     val rcRedeemable2 = ageUsdBank2.getReserveCoinAmountRedeemable
     ageUsdBank2.canExchangeReserveCoin(-rcRedeemable2) shouldBe true
     ageUsdBank2.canExchangeReserveCoin(-(rcRedeemable2 * 2)) shouldBe false
+
+    val ageUsdBankLow = new AgeUsdBank(229357798, 155058786, 1361641506, 145461534203630L)
+    ageUsdBankLow.getStableCoinPrice shouldBe 938105 // lower price due to not enough reserve
+    ageUsdBankLow.getReserveCoinPrice shouldBe AgeUsdBank.RC_DEFAULT_PRICE
+    ageUsdBankLow.getStableCoinAmountAvailable shouldBe 0
+    ageUsdBankLow.getReserveCoinAmountRedeemable shouldBe 0
+
+    val ageUsdBankHigh = new AgeUsdBank(229357798, 155058786, 1361641506, 14546153420363000L)
+    ageUsdBankHigh.getStableCoinPrice shouldBe 2293577
+    ageUsdBankHigh.getReserveCoinPrice shouldBe 10421622
+    ageUsdBankHigh.getReserveCoinAmountAvailable shouldBe 0
   }
 
   property("Age USD exchange tx tests") {
