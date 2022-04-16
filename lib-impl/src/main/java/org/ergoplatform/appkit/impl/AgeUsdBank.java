@@ -5,6 +5,8 @@ import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 
+import java.math.BigInteger;
+
 /**
  * This class represents AgeUSD bank according to
  * https://github.com/ergoplatform/eips/blob/master/eip-0015.md
@@ -37,6 +39,7 @@ public class AgeUsdBank {
     public static final long MIN_RESERVE_RATIO_PERCENT = 400L; // percent
     public static final long MAX_RESERVE_RATIO_PERCENT = 800L; // percent
     public static final long RC_DEFAULT_PRICE = 1000000L;
+    public static final long TOTAL_SIGRSV_TOKENS = 10000000000001L;
 
     public AgeUsdBank(OutputInfo bankBox, OutputInfo rateBox) {
         if (!rateBox.getAssets().get(0).getTokenId()
@@ -77,16 +80,21 @@ public class AgeUsdBank {
      * @return current reserve ratio in bank box
      */
     public long getCurrentReserveRatio() {
-        return getReserveRatio(0);
+        return getReserveRatio(0, 0);
     }
 
     /**
      * @return reserve ratio bank box has when the given stable coin exchange takes place
      */
-    public long getReserveRatio(long scCirculatingDelta) {
+    public long getReserveRatio(long scCirculatingDelta, long rcCirculatingDelta) {
         long ergReserveNeeded = (scCirculating + scCirculatingDelta) * scOraclePrice;
-        return (ergReserveNeeded == 0) ? MAX_RESERVE_RATIO_PERCENT :
-            (ergReserve * 100) / ergReserveNeeded;
+        long reserveChange = scCirculatingDelta * scOraclePrice + rcCirculatingDelta * getReserveCoinPrice();
+        long reserveChangeWithFee = reserveChange + Math.abs(reserveChange * FEE_PERCENT / 100);
+        if (ergReserveNeeded == 0)
+            return MAX_RESERVE_RATIO_PERCENT;
+
+        // we can have an overflow in the calculation, so use BigInteger here
+        return BigInteger.valueOf(ergReserve + reserveChangeWithFee).multiply(BigInteger.valueOf(100)).divide(BigInteger.valueOf(ergReserveNeeded)).longValue();
     }
 
     /**
@@ -107,15 +115,65 @@ public class AgeUsdBank {
      * @return whether the given stable coin exchange is valid
      */
     public boolean canExchangeStableCoin(long scCirculatingDelta) {
-        return scCirculatingDelta <= 0 || getReserveRatio(scCirculatingDelta) >= MIN_RESERVE_RATIO_PERCENT;
+        return scCirculatingDelta <= 0 || getReserveRatio(scCirculatingDelta, 0) >= MIN_RESERVE_RATIO_PERCENT;
+    }
+
+    /**
+     * @return number of stable coins available to purchase
+     */
+    public long getStableCoinAmountAvailable() {
+        // based on the formula of canExchangeStableCoin
+        long scAvailable = (ergReserve * 100 - MIN_RESERVE_RATIO_PERCENT * scOraclePrice * scCirculating) / (scOraclePrice * (MIN_RESERVE_RATIO_PERCENT - 100 - FEE_PERCENT));
+        return Math.max(0, scAvailable);
     }
 
     /**
      * @return whether the given reserve coin exchange is valid
      */
     public boolean canExchangeReserveCoin(long rcCirculatingDelta) {
-        return rcCirculatingDelta > 0 && getReserveRatio(rcCirculatingDelta) <= MAX_RESERVE_RATIO_PERCENT
-            || rcCirculatingDelta <= 0 && getReserveRatio(rcCirculatingDelta) >= MIN_RESERVE_RATIO_PERCENT;
+        return rcCirculatingDelta > 0 && getReserveRatio(0, rcCirculatingDelta) <= MAX_RESERVE_RATIO_PERCENT
+            || rcCirculatingDelta <= 0 && getReserveRatio(0, rcCirculatingDelta) >= MIN_RESERVE_RATIO_PERCENT;
+    }
+
+    /**
+     * @return number of stable coins available to purchase
+     */
+    public long getReserveCoinAmountAvailable() {
+        // formula can't be expressed with a single expression, we need to loop and approach the
+        // correct value
+
+        long low = 0;
+        long high = TOTAL_SIGRSV_TOKENS - rcCirculating;
+        while (low <= high) {
+            long mid = ((high - low) / 2) + low;
+            long new_rr = getReserveRatio(0, mid);
+
+            if (new_rr == MAX_RESERVE_RATIO_PERCENT) {
+                return mid;
+            }
+
+            if (new_rr > MAX_RESERVE_RATIO_PERCENT) {
+                high = mid - 1;
+            }
+
+            if (new_rr < MAX_RESERVE_RATIO_PERCENT) {
+                low = mid + 1;
+            }
+        }
+        return (low);
+    }
+
+    /**
+     * @return Amount of reserve coins currently redeemable
+     */
+    public long getReserveCoinAmountRedeemable() {
+        long rcRate = getReserveCoinPrice();
+        long ergReserveWithdrawable = 100 * ergReserve - MIN_RESERVE_RATIO_PERCENT * scCirculating * scOraclePrice;
+        // we add some safety here: due to rounding errors, the normal calculation can end up with a
+        // reserve ratio of 399. So we are aiming for 400.02 here
+        ergReserveWithdrawable = ergReserveWithdrawable - (scCirculating * scOraclePrice) / 50;
+        long rsc = ergReserveWithdrawable / (98 * rcRate);
+        return Math.round(Math.max(0, rsc));
     }
 
     /**
@@ -131,8 +189,15 @@ public class AgeUsdBank {
      * @return reserve coin price in nanoergs.
      */
     public long getReserveCoinPrice() {
-        long equity = ergReserve - getErgLiabilities();
+        long equity = getEquity();
         return rcCirculating == 0 ? RC_DEFAULT_PRICE : equity / rcCirculating;
+    }
+
+    /**
+     * @return current bank's equity
+     */
+    private long getEquity() {
+        return ergReserve - getErgLiabilities();
     }
 
     public long getStableCoinExchangeErgAmount(long scDelta) {

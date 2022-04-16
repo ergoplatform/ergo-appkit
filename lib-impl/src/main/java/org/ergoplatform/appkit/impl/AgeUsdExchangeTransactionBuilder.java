@@ -53,23 +53,23 @@ public class AgeUsdExchangeTransactionBuilder {
     }
 
     /**
-     * @param scDelta Desired Stable coin exchange amount with negative amount meaning withdrawal
+     * @param scCirculatingDelta Desired Stable coin exchange amount with positive amount meaning withdrawal
      *                from bank
      */
-    public UnsignedTransaction buildStableCoinExchangeTransaction(long scDelta) {
-        return buildExchangeTransaction(scDelta, 0);
+    public UnsignedTransaction buildStableCoinExchangeTransaction(long scCirculatingDelta) {
+        return buildExchangeTransaction(scCirculatingDelta * -1, 0);
     }
 
     /**
      * see {@link #buildStableCoinExchangeTransaction(long)}
      */
-    public UnsignedTransaction buildReserveCoinExchangeTransaction(long rcDelta) {
-        return buildExchangeTransaction(0, rcDelta);
+    public UnsignedTransaction buildReserveCoinExchangeTransaction(long rcCirculatingDelta) {
+        return buildExchangeTransaction(0, rcCirculatingDelta * -1);
     }
 
     private UnsignedTransaction buildExchangeTransaction(long scDelta, long rcDelta) {
-        if (scDelta != 0 && rcDelta != 0 || scDelta != 0 && !bank.canExchangeStableCoin(scDelta)
-            || rcDelta != 0 && !bank.canExchangeReserveCoin(rcDelta)) {
+        if (scDelta != 0 && rcDelta != 0 || scDelta != 0 && !bank.canExchangeStableCoin(scDelta * -1)
+            || rcDelta != 0 && !bank.canExchangeReserveCoin(rcDelta * -1)) {
             throw new IllegalArgumentException("Cannot execute desired exchange due to reserve ratio.");
         }
 

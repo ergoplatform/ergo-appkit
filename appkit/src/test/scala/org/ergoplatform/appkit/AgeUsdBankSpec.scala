@@ -14,6 +14,31 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     ageUsdBank.getStableCoinPrice shouldBe 2105263
     ageUsdBank.getReserveCoinPrice shouldBe 828471
     ageUsdBank.getCurrentReserveRatio shouldBe 437
+
+    val scAvailable = ageUsdBank.getStableCoinAmountAvailable
+    ageUsdBank.canExchangeStableCoin(scAvailable) shouldBe true
+    ageUsdBank.canExchangeStableCoin(scAvailable * 2) shouldBe false
+
+    val rcAvailable = ageUsdBank.getReserveCoinAmountAvailable
+    ageUsdBank.canExchangeReserveCoin(rcAvailable) shouldBe true
+    ageUsdBank.canExchangeReserveCoin(rcAvailable * 2) shouldBe false
+    val rcRedeemable = ageUsdBank.getReserveCoinAmountRedeemable
+    ageUsdBank.canExchangeReserveCoin(-rcRedeemable) shouldBe true
+    ageUsdBank.canExchangeReserveCoin(-(rcRedeemable * 2)) shouldBe false
+
+    val ageUsdBank2 = new AgeUsdBank(229357798, 155058786, 1361641506, 1454615342036303L)
+    ageUsdBank2.getStableCoinPrice shouldBe 2293577
+    ageUsdBank2.getReserveCoinPrice shouldBe 807096
+    ageUsdBank2.getCurrentReserveRatio shouldBe 409
+    val scAvailable2 = ageUsdBank2.getStableCoinAmountAvailable
+    ageUsdBank2.canExchangeStableCoin(scAvailable2) shouldBe true
+    ageUsdBank2.canExchangeStableCoin(scAvailable2 * 2) shouldBe false
+    val rcAvailable2 = ageUsdBank2.getReserveCoinAmountAvailable
+    ageUsdBank2.canExchangeReserveCoin(rcAvailable2) shouldBe true
+    ageUsdBank2.canExchangeReserveCoin(rcAvailable2 * 2) shouldBe(false)
+    val rcRedeemable2 = ageUsdBank2.getReserveCoinAmountRedeemable
+    ageUsdBank2.canExchangeReserveCoin(-rcRedeemable2) shouldBe true
+    ageUsdBank2.canExchangeReserveCoin(-(rcRedeemable2 * 2)) shouldBe false
   }
 
   property("Age USD exchange tx tests") {
@@ -22,25 +47,32 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     ageUsdBank.getCurrentReserveRatio shouldBe 405
     ageUsdBank.getStableCoinPrice shouldBe 2309468
 
+    val scAvailable = ageUsdBank.getStableCoinAmountAvailable
+    ageUsdBank.canExchangeStableCoin(scAvailable) shouldBe true
+
+    val rcAvailable = ageUsdBank.getReserveCoinAmountAvailable
+    ageUsdBank.canExchangeReserveCoin(rcAvailable) shouldBe true
+    ageUsdBank.canExchangeReserveCoin(-ageUsdBank.getReserveCoinAmountRedeemable) shouldBe true
+
     // redeem stable coin
     val unsignedTx = testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
-      txBuilder.buildStableCoinExchangeTransaction(100)
+      txBuilder.buildStableCoinExchangeTransaction(-100)
     })
     unsignedTx.getOutputs.size() shouldBe 4
 
     // mint stable coin
     testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
-      txBuilder.buildStableCoinExchangeTransaction(-100)
+      txBuilder.buildStableCoinExchangeTransaction(ageUsdBank.getStableCoinAmountAvailable)
     })
 
     // redeem reserve coin
     testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
-      txBuilder.buildReserveCoinExchangeTransaction(1000)
+      txBuilder.buildReserveCoinExchangeTransaction(-ageUsdBank.getReserveCoinAmountRedeemable)
     })
 
     // mint reserve coin
     testAgeUsdTransaction(ageUsdBank, { txBuilder: AgeUsdExchangeTransactionBuilder =>
-      txBuilder.buildReserveCoinExchangeTransaction(-1000)
+      txBuilder.buildReserveCoinExchangeTransaction(ageUsdBank.getReserveCoinAmountAvailable)
     })
 
     // use additional fee for redeeming
