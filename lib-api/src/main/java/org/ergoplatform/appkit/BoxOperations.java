@@ -262,7 +262,7 @@ public class BoxOperations {
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
         UnsignedTransactionBuilder unsignedTransactionBuilder = txB.boxesToSpend(boxesToSpend)
-            .fee(MinFee)
+            .fee(feeAmount)
             .sendChangeTo(changeAddress);
 
         return outputBuilder.apply(unsignedTransactionBuilder).build();
