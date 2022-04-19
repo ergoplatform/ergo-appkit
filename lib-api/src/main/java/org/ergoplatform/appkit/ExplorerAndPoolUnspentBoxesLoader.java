@@ -29,7 +29,7 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
     public void prepare(@Nonnull BlockchainContext ctx, List<Address> addresses, long grossAmount, @Nonnull List<ErgoToken> tokensToSpend) {
         unconfirmedSpentBoxesIds.clear();
         BlockchainDataSource dataSource = ctx.getDataSource();
-        List<Transaction> unconfirmedTransactions = dataSource.getUnconfirmedTransactions(1000, 0);
+        List<Transaction> unconfirmedTransactions = dataSource.getUnconfirmedTransactions(0, 1000);
         for (Transaction unconfirmedTx : unconfirmedTransactions) {
             unconfirmedSpentBoxesIds.addAll(unconfirmedTx.getInputBoxesIds());
         }

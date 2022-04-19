@@ -1,2 +1,6 @@
 [4.0.9]
 - ExplorerAndPoolUnspentBoxesLoader moved from package org.ergoplatform.appkit.impl to org.ergoplatform.appkit
+- DefaultApi.getApiV1AddressesP1Transactions new parameter "concise" - use false for old behaviour
+- RestApiErgoClient.createWithProxy method replaced by RestApiErgoClient.createWithHttpClientBuilder
+  To create an instance using a proxy, use createWithHttpClientBuilder with a Builder created with
+  new OkHttpClient.Builder().proxy(...)

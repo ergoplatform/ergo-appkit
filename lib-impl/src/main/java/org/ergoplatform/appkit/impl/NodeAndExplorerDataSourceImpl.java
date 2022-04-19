@@ -59,9 +59,9 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
     public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
 
-        OkHttpClient _ok = nodeClient.getOkBuilder().build();
+        OkHttpClient ok = nodeClient.getOkBuilder().build();
         Retrofit nodeRetrofit = nodeClient.getAdapterBuilder()
-            .client(_ok)
+            .client(ok)
             .build();
 
         nodeInfoApi = nodeRetrofit.create(InfoApi.class);
@@ -72,10 +72,10 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
         if (explorerClient != null) {
             OkHttpClient okExplorer = explorerClient.getOkBuilder().build();
-            Retrofit _retrofitExplorer = explorerClient.getAdapterBuilder()
+            Retrofit retrofitExplorer = explorerClient.getAdapterBuilder()
                 .client(okExplorer)
                 .build();
-            explorerApi = _retrofitExplorer.create(DefaultApi.class);
+            explorerApi = retrofitExplorer.create(DefaultApi.class);
         } else
             explorerApi = null;
 
@@ -164,7 +164,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
     @Override
     public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
-        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(1000, 0));
+        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(limit, offset));
         List<Transaction> returned = new ArrayList<>(mempoolTx.size());
         for (ErgoTransaction tx : mempoolTx) {
             returned.add(new MempoolTransaction(tx));
