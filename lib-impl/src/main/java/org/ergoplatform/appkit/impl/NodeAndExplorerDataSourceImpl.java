@@ -18,18 +18,7 @@ import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.explorer.client.model.TransactionInfo;
-import org.ergoplatform.restapi.client.ApiClient;
-import org.ergoplatform.restapi.client.BlocksApi;
-import org.ergoplatform.restapi.client.ErgoTransaction;
-import org.ergoplatform.restapi.client.ErgoTransactionDataInput;
-import org.ergoplatform.restapi.client.ErgoTransactionInput;
-import org.ergoplatform.restapi.client.ErgoTransactionOutput;
-import org.ergoplatform.restapi.client.InfoApi;
-import org.ergoplatform.restapi.client.NodeInfo;
-import org.ergoplatform.restapi.client.Transactions;
-import org.ergoplatform.restapi.client.TransactionsApi;
-import org.ergoplatform.restapi.client.UtxoApi;
-import org.ergoplatform.restapi.client.WalletApi;
+import org.ergoplatform.restapi.client.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -135,6 +124,29 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
         List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentByaddressP1(address.toString(), offset, limit, "asc")).getItems();
         return getInputBoxes(boxes);
     }
+    @Override
+    public List<InputBox> getUnspentWalletBoxes(int minConfirmations, int minInclusionHeight) {
+        Preconditions.checkArgument(minConfirmations >= 0, "Minimum confirmations was less than 0");
+        Preconditions.checkArgument(minInclusionHeight >= 0, "Minimum inclusion height was less than 0");
+        List<WalletBox> walletBoxes = executeCall(getNodeWalletApi().walletBoxes(minConfirmations, minInclusionHeight));
+        return getFromWalletBoxes(walletBoxes, false);
+    }
+    @Override
+    public List<InputBox> getUnspentWalletBoxes() {
+        List<WalletBox> walletBoxes = executeCall(getNodeWalletApi().walletBoxes(0, 0));
+        return getFromWalletBoxes(walletBoxes, false);
+    }
+    @Override
+    public List<InputBox> getUnconfirmedUnspentWalletBoxes(int minInclusionHeight) {
+        Preconditions.checkArgument(minInclusionHeight >= 0, "Minimum inclusion height was less than 0");
+        List<WalletBox> walletBoxes = executeCall(getNodeWalletApi().walletBoxes(-1, minInclusionHeight));
+        return getFromWalletBoxes(walletBoxes, true);
+    }
+    @Override
+    public List<InputBox> getUnconfirmedUnspentWalletBoxes() {
+        List<WalletBox> walletBoxes = executeCall(getNodeWalletApi().walletBoxes(-1, 0));
+        return getFromWalletBoxes(walletBoxes, true);
+    }
 
     @Override
     public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
@@ -186,6 +198,24 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
                 }
             } catch (ErgoClientException ignored) {
                 // as stated above, we ignore exceptions getting the box information
+            }
+        }
+
+        return returnList;
+    }
+    private List<InputBox> getFromWalletBoxes(List<WalletBox> boxes, boolean withMemPool) {
+        ArrayList<InputBox> returnList = new ArrayList<>(boxes.size());
+
+        for (WalletBox box : boxes) {
+            String boxId = box.getBox().getBoxId();
+            InputBox boxInfo;
+            if(withMemPool) {
+                boxInfo = getBoxByIdWithMemPool(boxId);
+            }else{
+                boxInfo = getBoxById(boxId);
+            }
+            if (boxInfo != null) {
+                returnList.add(boxInfo);
             }
         }
 
