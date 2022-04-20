@@ -36,7 +36,7 @@ public interface Eip29Attachment {
          */
         MULTI_ATTACHMENT,
         /**
-         * This attachment is a plain text, see {@link GenericEip29Attachment.PlainTextAttachment#getText()}
+         * This attachment is a plain text, see {@link Eip29PlainTextAttachment#getText()}
          */
         PLAIN_TEXT,
         /**
