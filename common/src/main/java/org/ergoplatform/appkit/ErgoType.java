@@ -22,7 +22,7 @@ public class ErgoType<T> {
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
     private static ErgoType<Unit> _unit = new ErgoType(RType.UnitType());
     private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
-    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
+    private static ErgoType<special.sigma.SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
     private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
     private static ErgoType<Box> _box = new ErgoType(JavaHelpers.BoxRType());
     private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
@@ -67,7 +67,7 @@ public class ErgoType<T> {
 
     static public ErgoType<GroupElement> groupElementType() { return _groupElement; }
 
-    static public ErgoType<SigmaProp> sigmaPropType() { return _sigmaProp; }
+    static public ErgoType<special.sigma.SigmaProp> sigmaPropType() { return _sigmaProp; }
 
     static public ErgoType<AvlTree> avlTreeType() { return _avlTree; }
 
