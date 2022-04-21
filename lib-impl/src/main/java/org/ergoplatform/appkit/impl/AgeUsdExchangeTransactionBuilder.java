@@ -32,6 +32,10 @@ public class AgeUsdExchangeTransactionBuilder {
     private long additionalFeeAmount;
     @Nullable
     private Address additionalFeeAddress;
+    @Nullable
+    private String rateBoxId;
+    @Nullable
+    private String bankBoxId;
 
     protected AgeUsdExchangeTransactionBuilder(AgeUsdBank bank, BoxOperations operations) {
         this.bank = bank;
@@ -53,8 +57,26 @@ public class AgeUsdExchangeTransactionBuilder {
     }
 
     /**
+     * @param rateBoxId box id to use as the oracle data input for the transaction, or
+     *                  null to let the builder search for the oracle box (default)
+     */
+    public AgeUsdExchangeTransactionBuilder withRateBoxId(@Nullable String rateBoxId) {
+        this.rateBoxId = rateBoxId;
+        return this;
+    }
+
+    /**
+     * @param bankBoxId box id to use as the bank box input for the transaction, or
+     *                  null to let the builder search for the bank box (default)
+     */
+    public AgeUsdExchangeTransactionBuilder withBankBoxId(@Nullable String bankBoxId) {
+        this.bankBoxId = bankBoxId;
+        return this;
+    }
+
+    /**
      * @param scCirculatingDelta Desired Stable coin exchange amount with positive amount meaning withdrawal
-     *                from bank
+     *                           from bank
      */
     public UnsignedTransaction buildStableCoinExchangeTransaction(long scCirculatingDelta) {
         return buildExchangeTransaction(scCirculatingDelta * -1, 0);
@@ -84,8 +106,9 @@ public class AgeUsdExchangeTransactionBuilder {
         List<InputBox> customerBoxesToSpend = loadBoxesToSpendByCustomer(scDelta, rcDelta, totalAmount);
 
         // we load the bank's current box. Bank always have only one box
-        InputBox bankBox = ctx.getDataSource().getUnspentBoxesFor(
-            new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, 0L), 0, 1).get(0);
+        InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxById(bankBoxId) :
+            ctx.getDataSource().getUnspentBoxesFor(
+                new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, 0L), 0, 1).get(0);
 
         // bank box is first to spend, all customer input boxes follow
         List<InputBox> inputBoxes = new ArrayList<>(customerBoxesToSpend.size() + 1);
@@ -93,8 +116,10 @@ public class AgeUsdExchangeTransactionBuilder {
         inputBoxes.addAll(customerBoxesToSpend);
 
         // oracle's rate box is needed as data input
-        List<InputBox> rateBox = ctx.getDataSource().getUnspentBoxesFor(
-            new ErgoToken(AgeUsdBank.RATE_BOX_TOKEN_ID, 0L), 0, 1);
+        List<InputBox> rateBox = rateBoxId != null ?
+            Collections.singletonList(ctx.getDataSource().getBoxById(rateBoxId)) :
+            ctx.getDataSource().getUnspentBoxesFor(
+                new ErgoToken(AgeUsdBank.RATE_BOX_TOKEN_ID, 0L), 0, 1);
 
         UnsignedTransactionBuilder txBuilder = ctx.newTxBuilder();
 
