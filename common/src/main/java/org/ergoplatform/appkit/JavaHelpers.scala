@@ -9,8 +9,8 @@ import scala.collection.{mutable, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{ErgoTree, Constant, SValue, EvaluatedValue}
-import sigmastate.serialization.{ValueSerializer, ErgoTreeSerializer, SigmaSerializer, GroupElementSerializer}
+import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean, SigmaPropConstant}
+import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
@@ -104,6 +104,11 @@ object Iso extends LowPriorityIsos {
     override def from(a: Boolean): JBoolean = a
   }
 
+  implicit def collToColl[A: RType, B: RType](implicit iso: Iso[A, B]): Iso[Coll[A], Coll[B]] = new Iso[Coll[A], Coll[B]] {
+    override def to(as: Coll[A]): Coll[B] = as.map(iso.to)
+    override def from(bs: Coll[B]): Coll[A] = bs.map(iso.from)
+  }
+
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
     override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
     override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
@@ -181,6 +186,18 @@ object Iso extends LowPriorityIsos {
     JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
   }
 
+  val isoSigmaBooleanToByteArray: Iso[SigmaBoolean, Array[Byte]] = new Iso[SigmaBoolean, Array[Byte]] {
+    override def to(a: SigmaBoolean): Array[Byte] = {
+      val w = SigmaSerializer.startWriter()
+      SigmaBoolean.serializer.serialize(a, w)
+      w.toBytes
+    }
+    override def from(b: Array[Byte]): SigmaBoolean ={
+      val r = SigmaSerializer.startReader(b, 0)
+      SigmaBoolean.serializer.parse(r)
+    }
+  }
+
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
     override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
     override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
@@ -255,9 +272,17 @@ object JavaHelpers {
   }
 
   implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+  implicit val JByteRType: RType[JByte] = RType.ByteType.asInstanceOf[RType[JByte]]
+  implicit val JShortRType: RType[JShort] = RType.ShortType.asInstanceOf[RType[JShort]]
+  implicit val JIntRType: RType[JInt] = RType.IntType.asInstanceOf[RType[JInt]]
+  implicit val JLongRType: RType[JLong] = RType.LongType.asInstanceOf[RType[JLong]]
+  implicit val JBooleanRType: RType[JBoolean] = RType.BooleanType.asInstanceOf[RType[JBoolean]]
 
   val HeaderRType: RType[Header] = special.sigma.HeaderRType
   val PreHeaderRType: RType[special.sigma.PreHeader] = special.sigma.PreHeaderRType
+
+  /** This value must be lazy to prevent early access to uninitialized unitType value. */
+  lazy val UnitErgoVal = new ErgoValue[Unit]((), ErgoType.unitType)
 
   def Algos: ErgoAlgos = org.ergoplatform.settings.ErgoAlgos
 
@@ -307,6 +332,13 @@ object JavaHelpers {
 
   def toPreHeader(h: Header): special.sigma.PreHeader = {
     CPreHeader(h.version, h.parentId, h.timestamp, h.nBits, h.height, h.minerPk, h.votes)
+  }
+
+  def toSigmaBoolean(ergoTree: ErgoTree): SigmaBoolean = {
+    val prop = ergoTree.toProposition(ergoTree.isConstantSegregation)
+    prop match {
+      case SigmaPropConstant(p) => SigmaDsl.toSigmaBoolean(p)
+    }
   }
 
   def getStateDigest(tree: AvlTree): Array[Byte] = {

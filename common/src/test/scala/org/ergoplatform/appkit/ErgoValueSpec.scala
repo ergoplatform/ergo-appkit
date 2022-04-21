@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.{Matchers, PropSpec}
 import scalan.RType
 import scorex.util.encode.Base16
 import sigmastate._
@@ -9,6 +9,8 @@ import sigmastate.Values.Constant
 import sigmastate.eval.SigmaDsl
 import sigmastate.serialization.ValueSerializer
 import sigmastate.serialization.generators.ObjectGenerators
+import JavaHelpers._
+import special.collection.Coll
 
 class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with AppkitTestingCommon with ObjectGenerators {
@@ -39,7 +41,7 @@ class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenProperty
     hex shouldBe "1a0203010203020a14"
 
     val t = ErgoType.collType(ErgoType.byteType)
-    val collV = ErgoValue.of(coll, t)
+    val collV = ErgoValue.of(coll.convertTo[Coll[Coll[java.lang.Byte]]], t)
     collV.toHex shouldBe hex
 
   }
@@ -63,5 +65,13 @@ class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenProperty
     test(SGroupElement)
     test(SSigmaProp)
     test(SAvlTree)
+  }
+
+  property("checkTypeDeclaration") {
+    val intErgoValue = ErgoValue.of(1)
+
+    val intValue: Integer = intErgoValue.getValue
+
+    intValue shouldBe 1
   }
 }

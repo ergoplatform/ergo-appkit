@@ -27,6 +27,7 @@ public class BoxOperations {
     private List<ErgoToken> tokensToSpend = Collections.emptyList();
     private long feeAmount = MinFee;
     private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
+    private Eip29Attachment attachment;
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
 
@@ -74,6 +75,9 @@ public class BoxOperations {
         return new BoxOperations(ctx, Collections.singletonList(senderProver.getAddress()), senderProver);
     }
 
+    /**
+     * @param amountToSpend nanoerg value to be collected in inboxes
+     */
     public BoxOperations withAmountToSpend(long amountToSpend) {
         if (amountToSpend < 0) {
             throw new IllegalArgumentException("Amount to send must be >= 0");
@@ -83,17 +87,43 @@ public class BoxOperations {
         return this;
     }
 
+    /**
+     * @param tokensToSpend tokens to be collected in inboxes
+     */
     public BoxOperations withTokensToSpend(@Nonnull List<ErgoToken> tokensToSpend) {
         this.tokensToSpend = tokensToSpend;
         return this;
     }
 
+    /**
+     * @param feeAmount fee amount in nanoerg to be used for generated transactions
+     */
     public BoxOperations withFeeAmount(long feeAmount) {
         if (feeAmount < MinFee) {
             throw new IllegalArgumentException("Amount to send must be >= " + MinFee);
         }
 
         this.feeAmount = feeAmount;
+        return this;
+    }
+
+    /**
+     * @param attachment attachment to be set for outboxes
+     */
+    public BoxOperations withAttachment(@Nullable Eip29Attachment attachment) {
+        this.attachment = attachment;
+        return this;
+    }
+
+    /**
+     * @param message message to be set for outboxes as {@link Eip29PlainTextAttachment}
+     */
+    public BoxOperations withMessage(@Nullable String message) {
+        if (message != null) {
+            withAttachment(Eip29PlainTextAttachment.buildForText(message));
+        } else {
+            withAttachment(null);
+        }
         return this;
     }
 
@@ -253,6 +283,9 @@ public class BoxOperations {
                 .contract(contract);
             if (!tokensToSpend.isEmpty())
                 outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
+            if (attachment != null) {
+                outBoxBuilder.registers(attachment.getOutboxRegistersForAttachment());
+            }
             OutBox newBox = outBoxBuilder.build();
             txB.outputs(newBox);
             return txB;
@@ -270,6 +303,9 @@ public class BoxOperations {
     public UnsignedTransaction mintTokenToContractTxUnsigned(ErgoContract contract, Function<String, Eip4Token> tokenBuilder) {
         if (!tokensToSpend.isEmpty()) {
             throw new IllegalArgumentException("Mint token not possible with spending tokens");
+        }
+        if (attachment != null) {
+            throw new IllegalArgumentException("Mint token not possible with attachment");
         }
 
         return buildTxWithDefaultInputs(txB -> {
@@ -297,7 +333,7 @@ public class BoxOperations {
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
         UnsignedTransactionBuilder unsignedTransactionBuilder = txB.boxesToSpend(boxesToSpend)
-            .fee(MinFee)
+            .fee(feeAmount)
             .sendChangeTo(changeAddress);
 
         return outputBuilder.apply(unsignedTransactionBuilder).build();

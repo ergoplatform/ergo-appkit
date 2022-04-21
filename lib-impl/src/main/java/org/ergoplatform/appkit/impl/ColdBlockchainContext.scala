@@ -1,16 +1,13 @@
 package org.ergoplatform.appkit.impl
 
-import java.util
-import org.ergoplatform.appkit.{Address, BlockchainDataSource, BlockchainParameters, CoveringBoxes, ErgoProverBuilder, ErgoToken, InputBox, NetworkType, PreHeaderBuilder, SignedTransaction, UnsignedTransactionBuilder}
-import org.ergoplatform.restapi.client.{NodeInfo, Parameters}
+import org.ergoplatform.appkit._
 
-class ColdBlockchainContext(networkType: NetworkType, params: Parameters) extends BlockchainContextBase(networkType) {
+import java.util
+
+class ColdBlockchainContext(networkType: NetworkType, params: BlockchainParameters) extends BlockchainContextBase(networkType) {
   override def getDataSource: BlockchainDataSource = throw new UnsupportedOperationException("Cold blockchain context has no data source.")
 
-  private val _params = new NodeInfoParameters(new NodeInfo()
-    .parameters(params))
-
-  override def getParameters: BlockchainParameters = _params
+  override def getParameters: BlockchainParameters = params
 
   override def createPreHeader(): PreHeaderBuilder = throw new UnsupportedOperationException("Cold blockchain context has no pre header builder.")
 

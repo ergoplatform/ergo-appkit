@@ -70,24 +70,13 @@ public interface ErgoProver {
      * Signs an arbitrary message under a key representing a 
      * statement provable via a sigma-protocol.
      *
-     * @param sigmaTree public key
+     * @param sigmaProp Sigma proposition to sign the message with
      * @param message message to sign
      * @param hintsBag additional hints for a signer (useful for distributed signing)
      * @return signed message
-     * @see Signature#verifySignature(SigmaBoolean, byte[], byte[])
+     * @see Signature#verifySignature(SigmaProp, byte[], byte[])
      */
-    byte[] signMessage(SigmaBoolean sigmaTree, byte[] message, HintsBag hintsBag);
-
-    /**
-     * Signs an arbitrary message using a p2k address
-     *
-     * @param addr address whose public key will be used to sign message
-     * @param message message to sign
-     * @param hintsBag additional hints for a signer (useful for distributed signing)
-     * @return signed message
-     * @see Signature#verifySignature(P2PKAddress, byte[], byte[])
-     */
-    byte[] signMessage(P2PKAddress addr, byte[] message, HintsBag hintsBag);
+    byte[] signMessage(SigmaProp sigmaProp, byte[] message, HintsBag hintsBag);
 
     ReducedTransaction reduce(UnsignedTransaction tx, int baseCost);
 
