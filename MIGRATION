@@ -4,3 +4,5 @@
 - RestApiErgoClient.createWithProxy method replaced by RestApiErgoClient.createWithHttpClientBuilder
   To create an instance using a proxy, use createWithHttpClientBuilder with a Builder created with
   new OkHttpClient.Builder().proxy(...)
+- BlockchainDataSource.getLastBlockHeaders added parameter onlyFullHeaders - use false for old behaviour
+- BlockchainDataSource.getParameters might return a cached object - use a new data source to force reload
