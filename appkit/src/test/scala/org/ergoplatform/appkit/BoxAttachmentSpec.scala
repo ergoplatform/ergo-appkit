@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.impl.Eip29AttachmentBuilder
+import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.junit.Assert
 import org.scalatest.Matchers.{be, convertToAnyShouldWrapper}
 import org.scalatest.PropSpec
@@ -12,7 +12,7 @@ class BoxAttachmentSpec extends PropSpec {
   private val textAttachmentContent = "Your loan January"
 
   property("build plain text") {
-    val attachment = Eip29AttachmentBuilder.createPlainTextAttachment(textAttachmentContent)
+    val attachment = BoxAttachmentBuilder.createPlainTextAttachment(textAttachmentContent)
     attachment shouldNot be (null)
     val ergoValue = attachment.getErgoValue
     ergoValue shouldNot be (null)
@@ -21,7 +21,7 @@ class BoxAttachmentSpec extends PropSpec {
     backFromValue.isInstanceOf[BoxAttachmentPlainText] shouldBe true
     attachment.getText shouldBe backFromValue.asInstanceOf[BoxAttachmentPlainText].getText
 
-    val backFromHex: BoxAttachment = Eip29AttachmentBuilder.buildFromHexEncodedErgoValue("3c0e400e035052500411596f7572206c6f616e204a616e75617279")
+    val backFromHex: BoxAttachment = BoxAttachmentBuilder.buildFromHexEncodedErgoValue("3c0e400e035052500411596f7572206c6f616e204a616e75617279")
     attachment.getText shouldBe backFromHex.asInstanceOf[BoxAttachmentPlainText].getText
 
     val outboxRegistersForAttachment: Array[ErgoValue[_]] = backFromHex.getOutboxRegistersForAttachment
@@ -30,7 +30,9 @@ class BoxAttachmentSpec extends PropSpec {
   }
 
   property("multi attachment test") {
-    val multiAttachment = Eip29AttachmentBuilder.createMultiAttachment(Collections.singletonList(Eip29AttachmentBuilder.createPlainTextAttachment(textAttachmentContent)))
+    val multiAttachment = BoxAttachmentBuilder.createMultiAttachment(
+        Collections.singletonList(BoxAttachmentBuilder.createPlainTextAttachment(textAttachmentContent))
+    )
     multiAttachment.getAttachmentCount shouldBe 1
     textAttachmentContent shouldBe multiAttachment.getAttachment(0).asInstanceOf[BoxAttachmentPlainText].getText
     val ergoValue = multiAttachment.getErgoValue

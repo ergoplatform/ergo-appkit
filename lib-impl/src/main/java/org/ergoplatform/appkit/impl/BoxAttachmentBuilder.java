@@ -16,7 +16,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class Eip29AttachmentBuilder {
+public class BoxAttachmentBuilder {
     /**
      * @return register number for attachment to use according EIP-29
      */

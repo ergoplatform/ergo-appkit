@@ -22,7 +22,7 @@ class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
 
   /** Returns {@link BoxAttachment} stored in this box of null. */
   override def getAttachment: BoxAttachment =
-    Eip29AttachmentBuilder.buildFromTransactionBox(this)
+    BoxAttachmentBuilder.buildFromTransactionBox(this)
 
   private[impl] def getErgoBoxCandidate: ErgoBoxCandidate = _ergoBoxCandidate
 

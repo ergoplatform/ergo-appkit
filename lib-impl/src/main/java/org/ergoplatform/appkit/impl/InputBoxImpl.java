@@ -67,7 +67,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public BoxAttachment getAttachment() {
-        return Eip29AttachmentBuilder.buildFromTransactionBox(this);
+        return BoxAttachmentBuilder.buildFromTransactionBox(this);
     }
 
     @Override
