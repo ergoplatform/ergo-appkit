@@ -38,6 +38,6 @@ public interface TransactionBox {
      */
     Values.ErgoTree getErgoTree();
 
-    /** Returns {@link BoxAttachment} stored in this box of null. */
+    /** Returns {@link BoxAttachment} stored in this box or null. */
     BoxAttachment getAttachment();
 }
