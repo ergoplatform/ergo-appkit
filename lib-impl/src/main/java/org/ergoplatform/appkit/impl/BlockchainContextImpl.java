@@ -35,8 +35,10 @@ public class BlockchainContextImpl extends BlockchainContextBase {
             NetworkType networkType) {
         super(networkType);
 
+        List<BlockHeader> headers = dataSource.getLastBlockHeaders(NUM_LAST_HEADERS, true);
+        // access parameters after fetching the block headers can make use of caching parameters
+        // in DataSource implementations
         BlockchainParameters blockchainParameters = dataSource.getParameters();
-        List<BlockHeader> headers = dataSource.getLastBlockHeaders(NUM_LAST_HEADERS);
 
         if (blockchainParameters.getNetworkType() != networkType) {
             throw new IllegalArgumentException("Network type of NodeInfo does not match given networkType - "

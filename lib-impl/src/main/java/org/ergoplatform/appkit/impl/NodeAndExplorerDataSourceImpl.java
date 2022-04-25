@@ -57,6 +57,9 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     // Explorer
     private final DefaultApi explorerApi;
 
+    // cached to avoid multiple fetches, these values won't change while this class lives
+    private BlockchainParameters blockchainParameters;
+
     public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
 
         OkHttpClient ok = nodeClient.getOkBuilder().build();
@@ -83,13 +86,49 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
 
     @Override
     public BlockchainParameters getParameters() {
+        if (blockchainParameters == null) {
+            // getNodeInfo will load and set the parameters
+            getNodeInfo();
+        }
+        return blockchainParameters;
+    }
+
+    private NodeInfo getNodeInfo() {
         NodeInfo nodeInfo = executeCall(nodeInfoApi.getNodeInfo());
-        return new NodeInfoParameters(nodeInfo);
+        // cache the parameters while we have them
+        blockchainParameters = new NodeInfoParameters(nodeInfo);
+        return nodeInfo;
     }
 
     @Override
-    public List<BlockHeader> getLastBlockHeaders(int count) {
-        List<org.ergoplatform.restapi.client.BlockHeader> headers = executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count)));
+    public List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders) {
+        List<org.ergoplatform.restapi.client.BlockHeader> headers;
+        if (onlyFullHeaders) {
+            NodeInfo nodeInfo = getNodeInfo();
+            int fullHeight = nodeInfo.getFullHeight();
+            int headersHeight = nodeInfo.getHeadersHeight();
+            int additionalCount = Math.max(0, headersHeight - fullHeight);
+
+            List<org.ergoplatform.restapi.client.BlockHeader> headersFromNode =
+                executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count + additionalCount)));
+
+            headers = new ArrayList<>();
+
+            // only add the block headers that match the full height
+            for (org.ergoplatform.restapi.client.BlockHeader blockHeader : headersFromNode) {
+                if (blockHeader.getHeight() <= fullHeight) {
+                    headers.add(blockHeader);
+                }
+            }
+
+            if (headers.isEmpty()) {
+                throw new IllegalStateException("onlyFullHeaders set, but all returned headers are not within range.");
+            }
+
+        } else {
+            headers = executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count)));
+        }
+
         Collections.reverse(headers);
         List<BlockHeader> retVal = new ArrayList<>(headers.size());
         for (org.ergoplatform.restapi.client.BlockHeader header : headers) {

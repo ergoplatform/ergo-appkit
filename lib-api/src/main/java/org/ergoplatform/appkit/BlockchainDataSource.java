@@ -8,17 +8,20 @@ import java.util.List;
  */
 public interface BlockchainDataSource {
     /**
-     * @return blockchain parameters this data source is working with
+     * @return blockchain parameters this data source is working with. The returned value
+     *         might be cached by the data source as it is not subject to change frequently
      */
     BlockchainParameters getParameters();
 
     /**
      * Get the last headers objects, sorted by descending order
      *
-     * @param count count of a wanted block headers (required)
+     * @param count           count of a wanted block headers (required)
+     * @param onlyFullHeaders restrict returned list to full headers. If set to true, amount of
+     *                        returned block headers might be less than "count"
      * @return List&lt;BlockHeader&gt;
      */
-    List<BlockHeader> getLastBlockHeaders(int count);
+    List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders);
 
     /**
      * Get box contents for a box by a unique identifier for use as an Input
@@ -58,6 +61,7 @@ public interface BlockchainDataSource {
      * @return a requested chunk of boxes owned by the address
      */
     List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit);
+
     /**
      * Get unspent boxes owned by the given address starting from the given offset up to
      * the given limit (basically one page of the boxes), restricted to mempool.

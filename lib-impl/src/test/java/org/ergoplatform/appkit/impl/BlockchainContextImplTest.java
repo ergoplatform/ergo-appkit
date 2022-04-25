@@ -94,7 +94,7 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
-        public List<BlockHeader> getLastBlockHeaders(int count) {
+        public List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders) {
             return null;
         }
 
