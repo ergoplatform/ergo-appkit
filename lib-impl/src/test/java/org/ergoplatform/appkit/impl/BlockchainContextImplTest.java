@@ -37,7 +37,7 @@ public class BlockchainContextImplTest extends ApiTestBase {
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, new ArrayList<>());
         Assert.assertTrue(coveringBoxesFor.isCovered());
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, Collections.singletonList(new ErgoToken(tokenId, 1)));
-        Assert.assertFalse(coveringBoxesFor.isCovered());
+        Assert.assertFalse(coveringBoxesFor.isCovered()); // token is not covered
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), 2 * Parameters.OneErg, new ArrayList<>());
         Assert.assertFalse(coveringBoxesFor.isCovered());
 

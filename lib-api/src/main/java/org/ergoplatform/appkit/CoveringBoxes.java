@@ -37,15 +37,15 @@ public class CoveringBoxes {
      * @return list of tokens covered by boxes
      */
     public List<ErgoToken> getCoveredTokens() {
-        HashMap<String, ErgoToken> coveredTokens = new HashMap<>();
+        HashMap<ErgoId, ErgoToken> coveredTokens = new HashMap<>();
         for (InputBox box : _boxes) {
             for (ErgoToken token : box.getTokens()) {
-                String tokenId = token.getId().toString();
+                ErgoId tokenId = token.getId();
                 if (!coveredTokens.containsKey(tokenId)) {
                     coveredTokens.put(tokenId, token);
                 } else {
                     ErgoToken tokenInMap = coveredTokens.get(tokenId);
-                    coveredTokens.put(tokenId, new ErgoToken(token.getId(), token.getValue() + tokenInMap.getValue()));
+                    coveredTokens.put(tokenId, new ErgoToken(tokenId, token.getValue() + tokenInMap.getValue()));
                 }
             }
 
