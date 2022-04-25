@@ -36,6 +36,8 @@ public class BlockchainContextImplTest extends ApiTestBase {
         bci.ds.unspentBoxesMock.add(box);
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, new ArrayList<>());
         Assert.assertTrue(coveringBoxesFor.isCovered());
+        coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, Collections.singletonList(new ErgoToken(tokenId, 1)));
+        Assert.assertFalse(coveringBoxesFor.isCovered()); // token is not covered
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), 2 * Parameters.OneErg, new ArrayList<>());
         Assert.assertFalse(coveringBoxesFor.isCovered());
 
@@ -100,7 +102,7 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
-        public List<BlockHeader> getLastBlockHeaders(int count) {
+        public List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders) {
             return null;
         }
 

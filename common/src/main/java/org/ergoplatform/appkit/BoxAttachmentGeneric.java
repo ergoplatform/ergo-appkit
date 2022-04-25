@@ -9,19 +9,18 @@ import special.collection.Coll;
  * Represents an attachment according to EIP-29.
  * This is the superclass of all actual attachment types, as well as representing unknown types.
  */
-public class Eip29GenericAttachment implements Eip29Attachment {
-    public static final byte[] MAGIC_BYTES = new byte[]{0x50, 0x52, 0x50};
+public class BoxAttachmentGeneric implements BoxAttachment {
     private final int attachmentType;
     private final byte[] attachmentContent;
 
-    Eip29GenericAttachment(int attachmentType, byte[] attachmentContent) {
+    BoxAttachmentGeneric(int attachmentType, byte[] attachmentContent) {
         this.attachmentType = attachmentType;
         this.attachmentContent = attachmentContent;
     }
 
     @Override
     public Type getType() {
-        return Eip29GenericAttachment.Type.fromTypeRawValue(attachmentType);
+        return BoxAttachmentGeneric.Type.fromTypeRawValue(attachmentType);
     }
 
     @Override
@@ -34,7 +33,7 @@ public class Eip29GenericAttachment implements Eip29Attachment {
         ErgoValue<Tuple2<Integer, Coll<Byte>>> contentPair = ErgoValue.pairOf(
             ErgoValue.of(getTypeRawValue()),
             ErgoValue.of(attachmentContent));
-        return ErgoValue.pairOf(ErgoValue.of(MAGIC_BYTES), contentPair);
+        return ErgoValue.pairOf(ErgoValue.of(BoxAttachment.MAGIC_BYTES), contentPair);
     }
 
     @Override
@@ -52,7 +51,7 @@ public class Eip29GenericAttachment implements Eip29Attachment {
      * @param r9 Ergo value to create the attachment object from, usually stored in register 9 of boxes
      * @return object representing the attachment
      */
-    public static Eip29Attachment createFromErgoValue(ErgoValue<?> r9) {
+    public static BoxAttachment createFromErgoValue(ErgoValue<?> r9) {
         String illegalArgumentException = "R9 must be of pair (Coll[0x50, 0x52, 0x50], Tuple2(Int, Coll[Byte]), actual: ";
 
         if (!(r9.getValue() instanceof Tuple2)) {
@@ -65,7 +64,7 @@ public class Eip29GenericAttachment implements Eip29Attachment {
         }
 
         byte[] magicBytes = JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
-        if (!Arrays.equals(Eip29GenericAttachment.MAGIC_BYTES, magicBytes)) {
+        if (!Arrays.equals(BoxAttachment.MAGIC_BYTES, magicBytes)) {
             throw new IllegalArgumentException(illegalArgumentException + "Magic bytes not matched.");
         }
 
@@ -77,18 +76,18 @@ public class Eip29GenericAttachment implements Eip29Attachment {
         return createFromAttachmentTuple((Tuple2<Integer, Coll<Byte>>) attachmentValue);
     }
 
-    static Eip29Attachment createFromAttachmentTuple(Tuple2<Integer, Coll<Byte>> attachmentTuple) {
+    static BoxAttachment createFromAttachmentTuple(Tuple2<Integer, Coll<Byte>> attachmentTuple) {
         Integer typeConstant = attachmentTuple._1;
-        Eip29GenericAttachment.Type attachmentType = Eip29GenericAttachment.Type.fromTypeRawValue(typeConstant);
+        BoxAttachmentGeneric.Type attachmentType = BoxAttachmentGeneric.Type.fromTypeRawValue(typeConstant);
         byte[] attachmentContent = ScalaHelpers.collByteToByteArray(attachmentTuple._2);
 
         switch (attachmentType) {
             case PLAIN_TEXT:
-                return new Eip29PlainTextAttachment(attachmentContent);
+                return new BoxAttachmentPlainText(attachmentContent);
             case MULTI_ATTACHMENT:
-                return new Eip29MultiAttachment(attachmentContent);
+                return new BoxAttachmentMulti(attachmentContent);
             default:
-                return new Eip29GenericAttachment(typeConstant, attachmentContent);
+                return new BoxAttachmentGeneric(typeConstant, attachmentContent);
         }
     }
 

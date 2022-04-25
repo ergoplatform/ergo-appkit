@@ -10,10 +10,10 @@ import special.collection.Coll;
 /**
  * EIP-29 Attachment containing list of EIP-29 attachments
  */
-public class Eip29MultiAttachment extends Eip29GenericAttachment {
+public class BoxAttachmentMulti extends BoxAttachmentGeneric {
     private final Tuple2<Integer, Coll<Byte>>[] attachmentList;
 
-    Eip29MultiAttachment(byte[] attachmentContent) {
+    BoxAttachmentMulti(byte[] attachmentContent) {
         super(Type.MULTI_ATTACHMENT.toTypeRawValue(), attachmentContent);
 
         ErgoValue<?> attachmentTuples = ErgoValue.fromHex(new String(attachmentContent, StandardCharsets.UTF_8));
@@ -24,7 +24,7 @@ public class Eip29MultiAttachment extends Eip29GenericAttachment {
         attachmentList = (Tuple2[]) ((Coll<?>) attachmentTuples.getValue()).toArray();
     }
 
-    private Eip29MultiAttachment(byte[] attachmentContent, Tuple2<Integer, Coll<Byte>>[] attachmentList) {
+    private BoxAttachmentMulti(byte[] attachmentContent, Tuple2<Integer, Coll<Byte>>[] attachmentList) {
         super(Type.MULTI_ATTACHMENT.toTypeRawValue(), attachmentContent);
         this.attachmentList = attachmentList;
     }
@@ -32,8 +32,8 @@ public class Eip29MultiAttachment extends Eip29GenericAttachment {
     /**
      * @return i-th attachment of this multi attachment
      */
-    public Eip29Attachment getAttachment(int i) {
-        return Eip29GenericAttachment.createFromAttachmentTuple(attachmentList[i]);
+    public BoxAttachment getAttachment(int i) {
+        return BoxAttachmentGeneric.createFromAttachmentTuple(attachmentList[i]);
     }
 
     /**
@@ -47,14 +47,14 @@ public class Eip29MultiAttachment extends Eip29GenericAttachment {
      * @param attachments list of attachments to include in a multi attachment
      * @return object representing a multi attachment
      */
-    public static Eip29MultiAttachment buildForList(List<Eip29Attachment> attachments) {
+    public static BoxAttachmentMulti buildForList(List<BoxAttachment> attachments) {
         List<Tuple2<Integer, Coll<Byte>>> attachmentTuples = new ArrayList<>(attachments.size());
-        for (Eip29Attachment attachment : attachments) {
+        for (BoxAttachment attachment : attachments) {
             attachmentTuples.add(attachment.getErgoValue().getValue()._2);
         }
         Tuple2<Integer, Coll<Byte>>[] tupleArray = attachmentTuples.toArray(new Tuple2[]{});
         ErgoValue<Coll<Tuple2<Integer, Coll<Byte>>>> ergoValue = ErgoValue.of(tupleArray, ErgoType.pairType(ErgoType.integerType(), ErgoType.collType(ErgoType.byteType())));
 
-        return new Eip29MultiAttachment(ergoValue.toHex().getBytes(StandardCharsets.UTF_8), tupleArray);
+        return new BoxAttachmentMulti(ergoValue.toHex().getBytes(StandardCharsets.UTF_8), tupleArray);
     }
 }

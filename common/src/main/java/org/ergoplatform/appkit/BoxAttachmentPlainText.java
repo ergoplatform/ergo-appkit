@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * EIP-29 attachment containing a simple text
  */
-public class Eip29PlainTextAttachment extends Eip29GenericAttachment {
+public class BoxAttachmentPlainText extends BoxAttachmentGeneric {
     private final String text;
 
-    public Eip29PlainTextAttachment(byte[] attachmentContent) {
+    public BoxAttachmentPlainText(byte[] attachmentContent) {
         super(Type.PLAIN_TEXT.toTypeRawValue(), attachmentContent);
 
         text = new String(attachmentContent, StandardCharsets.UTF_8);
@@ -21,7 +21,7 @@ public class Eip29PlainTextAttachment extends Eip29GenericAttachment {
         return text;
     }
 
-    public static Eip29PlainTextAttachment buildForText(String text) {
-        return new Eip29PlainTextAttachment(text.getBytes(StandardCharsets.UTF_8));
+    public static BoxAttachmentPlainText buildForText(String text) {
+        return new BoxAttachmentPlainText(text.getBytes(StandardCharsets.UTF_8));
     }
 }

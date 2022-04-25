@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
-import org.ergoplatform.appkit.{ErgoToken, ErgoValue, InputBox, Iso, JavaHelpers, OutBox}
+import org.ergoplatform.appkit.{InputBox, OutBox, JavaHelpers, Iso, BoxAttachment, ErgoToken, ErgoValue}
 import scorex.util.ModifierId
 import sigmastate.Values
 
@@ -19,6 +19,10 @@ class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
   override def getBytesWithNoRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
 
   override def getErgoTree: Values.ErgoTree = _ergoBoxCandidate.ergoTree
+
+  /** Returns {@link BoxAttachment} stored in this box of null. */
+  override def getAttachment: BoxAttachment =
+    BoxAttachmentBuilder.buildFromTransactionBox(this)
 
   private[impl] def getErgoBoxCandidate: ErgoBoxCandidate = _ergoBoxCandidate
 
