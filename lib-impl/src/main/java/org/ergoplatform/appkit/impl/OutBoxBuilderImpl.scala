@@ -53,6 +53,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   override def registers(registers: ErgoValue[_]*): OutBoxBuilderImpl = {
     Preconditions.checkArgument(registers.nonEmpty,
       "At least one register should be specified": Any)
+    _registers.clear()
     _registers ++= registers
     this
   }

@@ -210,7 +210,7 @@ public class Eip4Token extends ErgoToken {
      * @return value of register 4 of token minting box
      */
     @Nonnull
-    public ErgoValue<Coll<scala.Byte>> getMintingBoxR4() {
+    public ErgoValue<Coll<Byte>> getMintingBoxR4() {
         return ErgoValue.of(name.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -218,7 +218,7 @@ public class Eip4Token extends ErgoToken {
      * @return value of register 5 of token minting box
      */
     @Nonnull
-    public ErgoValue<Coll<scala.Byte>> getMintingBoxR5() {
+    public ErgoValue<Coll<Byte>> getMintingBoxR5() {
         return ErgoValue.of(description.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -226,7 +226,7 @@ public class Eip4Token extends ErgoToken {
      * @return value of register 6 of token minting box
      */
     @Nonnull
-    public ErgoValue<Coll<scala.Byte>> getMintingBoxR6() {
+    public ErgoValue<Coll<Byte>> getMintingBoxR6() {
         return ErgoValue.of(Integer.toString(decimals).getBytes(StandardCharsets.UTF_8));
     }
 

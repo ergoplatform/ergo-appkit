@@ -3,6 +3,9 @@ package org.ergoplatform.appkit;
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
 
+import java.math.BigInteger;
+import java.util.Objects;
+
 import scala.Tuple2;
 import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
@@ -11,10 +14,11 @@ import sigmastate.Values;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
-import special.sigma.*;
-
-import java.math.BigInteger;
-import java.util.Objects;
+import special.sigma.AvlTree;
+import special.sigma.BigInt;
+import special.sigma.Box;
+import special.sigma.GroupElement;
+import special.sigma.SigmaProp;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -65,24 +69,28 @@ public class ErgoValue<T> {
           return false;
     }
 
-    static public ErgoValue<scala.Byte> of(byte value) {
+    static public ErgoValue<Byte> of(byte value) {
         return new ErgoValue(Iso.jbyteToByte().to(Byte.valueOf(value)), ErgoType.byteType());
     }
 
-    static public ErgoValue<scala.Short> of(short value) {
+    static public ErgoValue<Short> of(short value) {
         return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
     }
 
-    static public ErgoValue<scala.Int> of(int value) {
-        return new ErgoValue(Iso.jintToInt().to(Integer.valueOf(value)), ErgoType.integerType());
+    static public ErgoValue<Integer> of(int value) {
+        return new ErgoValue(Iso.jintToInt().to(value), ErgoType.integerType());
     }
 
-    static public ErgoValue<scala.Long> of(long value) {
+    static public ErgoValue<Long> of(long value) {
         return new ErgoValue(Iso.jlongToLong().to(Long.valueOf(value)), ErgoType.longType());
     }
 
-    static public ErgoValue<scala.Boolean> of(boolean value) {
+    static public ErgoValue<Boolean> of(boolean value) {
         return new ErgoValue(Iso.jboolToBool().to(Boolean.valueOf(value)), ErgoType.booleanType());
+    }
+
+    static public ErgoValue<?> unit() {
+        return JavaHelpers.UnitErgoVal();
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
@@ -109,14 +117,14 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().Box(value), ErgoType.boxType());
     }
 
-    static public ErgoValue<Coll<scala.Byte>> of(byte[] arr) {
+    static public ErgoValue<Coll<Byte>> of(byte[] arr) {
         Coll value = JavaHelpers.collFrom(arr);
-        ErgoType<Coll<scala.Byte>> type = ErgoType.collType(ErgoType.byteType());
-        return new ErgoValue<Coll<scala.Byte>>(value, type);
+        ErgoType<Coll<Byte>> type = ErgoType.collType(ErgoType.byteType());
+        return new ErgoValue<Coll<Byte>>(value, type);
     }
 
-    static public ErgoValue<Tuple2> pairOf(ErgoValue val1, ErgoValue val2) {
-        return new ErgoValue<Tuple2>(new Tuple2(val1.getValue(), val2.getValue()),
+    static public <A, B> ErgoValue<Tuple2<A, B>> pairOf(ErgoValue<A> val1, ErgoValue<B> val2) {
+        return new ErgoValue<>(new Tuple2<>(val1.getValue(), val2.getValue()),
             ErgoType.pairType(val1.getType(), val2.getType()));
     }
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
