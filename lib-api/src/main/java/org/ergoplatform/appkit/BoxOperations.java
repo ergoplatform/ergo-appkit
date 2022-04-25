@@ -27,7 +27,7 @@ public class BoxOperations {
     private List<ErgoToken> tokensToSpend = Collections.emptyList();
     private long feeAmount = MinFee;
     private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
-    private Eip29Attachment attachment;
+    private BoxAttachment attachment;
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
 
@@ -110,17 +110,17 @@ public class BoxOperations {
     /**
      * @param attachment attachment to be set for outboxes
      */
-    public BoxOperations withAttachment(@Nullable Eip29Attachment attachment) {
+    public BoxOperations withAttachment(@Nullable BoxAttachment attachment) {
         this.attachment = attachment;
         return this;
     }
 
     /**
-     * @param message message to be set for outboxes as {@link Eip29PlainTextAttachment}
+     * @param message message to be set for outboxes as {@link BoxAttachmentPlainText}
      */
     public BoxOperations withMessage(@Nullable String message) {
         if (message != null) {
-            withAttachment(Eip29PlainTextAttachment.buildForText(message));
+            withAttachment(BoxAttachmentPlainText.buildForText(message));
         } else {
             withAttachment(null);
         }

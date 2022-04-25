@@ -6,7 +6,7 @@ import special.collection.Coll;
 /**
  * Represents an attachment according to EIP-29.
  */
-public interface Eip29Attachment {
+public interface BoxAttachment {
     byte[] MAGIC_BYTES = new byte[]{0x50, 0x52, 0x50};
 
     /**
@@ -38,7 +38,7 @@ public interface Eip29Attachment {
          */
         MULTI_ATTACHMENT,
         /**
-         * This attachment is a plain text, see {@link Eip29PlainTextAttachment#getText()}
+         * This attachment is a plain text, see {@link BoxAttachmentPlainText#getText()}
          */
         PLAIN_TEXT,
         /**
@@ -64,7 +64,7 @@ public interface Eip29Attachment {
          * @return Type object for given attachment type raw value according to EIP-29
          */
         public static Type fromTypeRawValue(int typeRawValue) {
-            for (Type value : Eip29Attachment.Type.values()) {
+            for (Type value : BoxAttachment.Type.values()) {
                 if (value.toTypeRawValue() == typeRawValue)
                     return value;
             }

@@ -279,7 +279,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .withMessage("Test message")
         .putToContractTxUnsigned(pkContract)
       unsigned.getOutputs.get(0).getRegisters.size() shouldBe 6
-      unsigned.getOutputs.get(0).getAttachment.getType shouldBe Eip29Attachment.Type.PLAIN_TEXT
+      unsigned.getOutputs.get(0).getAttachment.getType shouldBe BoxAttachment.Type.PLAIN_TEXT
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
