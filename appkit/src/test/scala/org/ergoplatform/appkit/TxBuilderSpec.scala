@@ -274,10 +274,12 @@ class TxBuilderSpec extends PropSpec with Matchers
       val pkContract = recipient.toErgoContract
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-      val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend).withMessage("Test message")
+      val unsigned = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withMessage("Test message")
         .putToContractTxUnsigned(pkContract)
       unsigned.getOutputs.get(0).getRegisters.size() shouldBe 6
-      Eip29AttachmentBuilder.buildFromTransactionBox(unsigned.getOutputs.get(0)).getType shouldBe Eip29Attachment.Type.PLAIN_TEXT
+      unsigned.getOutputs.get(0).getAttachment.getType shouldBe Eip29Attachment.Type.PLAIN_TEXT
 
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)

@@ -7,6 +7,8 @@ import special.collection.Coll;
  * Represents an attachment according to EIP-29.
  */
 public interface Eip29Attachment {
+    byte[] MAGIC_BYTES = new byte[]{0x50, 0x52, 0x50};
+
     /**
      * @return type of this attachment, if known
      */

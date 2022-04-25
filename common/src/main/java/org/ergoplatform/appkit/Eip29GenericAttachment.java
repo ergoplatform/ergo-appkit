@@ -10,7 +10,6 @@ import special.collection.Coll;
  * This is the superclass of all actual attachment types, as well as representing unknown types.
  */
 public class Eip29GenericAttachment implements Eip29Attachment {
-    public static final byte[] MAGIC_BYTES = new byte[]{0x50, 0x52, 0x50};
     private final int attachmentType;
     private final byte[] attachmentContent;
 
@@ -34,7 +33,7 @@ public class Eip29GenericAttachment implements Eip29Attachment {
         ErgoValue<Tuple2<Integer, Coll<Byte>>> contentPair = ErgoValue.pairOf(
             ErgoValue.of(getTypeRawValue()),
             ErgoValue.of(attachmentContent));
-        return ErgoValue.pairOf(ErgoValue.of(MAGIC_BYTES), contentPair);
+        return ErgoValue.pairOf(ErgoValue.of(Eip29Attachment.MAGIC_BYTES), contentPair);
     }
 
     @Override
@@ -65,7 +64,7 @@ public class Eip29GenericAttachment implements Eip29Attachment {
         }
 
         byte[] magicBytes = JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
-        if (!Arrays.equals(Eip29GenericAttachment.MAGIC_BYTES, magicBytes)) {
+        if (!Arrays.equals(Eip29Attachment.MAGIC_BYTES, magicBytes)) {
             throw new IllegalArgumentException(illegalArgumentException + "Magic bytes not matched.");
         }
 

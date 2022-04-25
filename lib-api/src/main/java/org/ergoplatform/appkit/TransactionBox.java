@@ -37,4 +37,7 @@ public interface TransactionBox {
      * Returns the ErgoTree of the script guarding the box
      */
     Values.ErgoTree getErgoTree();
+
+    /** Returns {@link Eip29Attachment} stored in this box of null. */
+    Eip29Attachment getAttachment();
 }

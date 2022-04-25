@@ -3,13 +3,7 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.appkit.ContextVar;
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.ErgoToken;
-import org.ergoplatform.appkit.ErgoValue;
-import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.appkit.Iso;
-import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 
@@ -35,7 +29,7 @@ public class InputBoxImpl implements InputBox {
 
     public InputBoxImpl(ErgoBox ergoBox) {
         _ergoBox = ergoBox;
-        _id = new ErgoId(ergoBox.id());
+        _id = new ErgoId((byte[])ergoBox.id());
         _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
         _extension = ContextExtension.empty();
     }
@@ -69,6 +63,11 @@ public class InputBoxImpl implements InputBox {
     @Override
     public Values.ErgoTree getErgoTree() {
         return _ergoBox.ergoTree();
+    }
+
+    @Override
+    public Eip29Attachment getAttachment() {
+        return Eip29AttachmentBuilder.buildFromTransactionBox(this);
     }
 
     @Override
