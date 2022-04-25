@@ -5,6 +5,7 @@ import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockHeader;
 import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.CoveringBoxes;
+import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.Parameters;
@@ -35,6 +36,8 @@ public class BlockchainContextImplTest extends ApiTestBase {
         bci.ds.unspentBoxesMock.add(box);
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, new ArrayList<>());
         Assert.assertTrue(coveringBoxesFor.isCovered());
+        coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), Parameters.OneErg, Collections.singletonList(new ErgoToken(tokenId, 1)));
+        Assert.assertFalse(coveringBoxesFor.isCovered()); // token is not covered
         coveringBoxesFor = bci.getCoveringBoxesFor(Address.create(address), 2 * Parameters.OneErg, new ArrayList<>());
         Assert.assertFalse(coveringBoxesFor.isCovered());
 
