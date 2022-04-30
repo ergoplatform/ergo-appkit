@@ -3,6 +3,7 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
+import org.ergoplatform.appkit.BoxSelectorsJavaHelpers;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.InputBox;
@@ -165,7 +166,20 @@ public class AgeUsdExchangeTransactionBuilder {
             outboxes.add(uiFeeBox);
         }
 
-        return txBuilder.boxesToSpend(inputBoxes)
+        // Box Selector has to preselect so we don't get exceptions later
+        long outputTotal = boxOperations.getFeeAmount();
+        for (OutBox outbox : outboxes) {
+            outputTotal += outbox.getValue();
+        }
+        // Box selectors needs tokens as well.
+        List<ErgoToken> tokensOut = new ArrayList<>();
+        tokensOut.add(new ErgoToken(AgeUsdBank.SC_TOKEN_ID, bankBox.getTokens().get(0).getValue() + Math.max(0, scDelta)));
+        tokensOut.add(new ErgoToken(AgeUsdBank.RC_TOKEN_ID, bankBox.getTokens().get(1).getValue() + Math.max(0, rcDelta)));
+        tokensOut.add(new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, bankBox.getTokens().get(2).getValue()));
+
+        List<InputBox> selectedBoxes = BoxSelectorsJavaHelpers.selectBoxes(inputBoxes, outputTotal, tokensOut);
+
+        return txBuilder.boxesToSpend(selectedBoxes)
             .outputs(outboxes.toArray(new OutBox[]{}))
             .fee(boxOperations.getFeeAmount())
             .sendChangeTo(boxOperations.getSenders().get(0).getErgoAddress())
