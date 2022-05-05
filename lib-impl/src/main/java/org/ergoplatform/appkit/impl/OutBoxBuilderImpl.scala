@@ -53,6 +53,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   override def registers(registers: ErgoValue[_]*): OutBoxBuilderImpl = {
     Preconditions.checkArgument(registers.nonEmpty,
       "At least one register should be specified": Any)
+    _registers.clear()
     _registers ++= registers
     this
   }
@@ -68,7 +69,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
       _value, tree, _tokens, _registers,
       creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
-    new OutBoxImpl(_ctx, ergoBoxCandidate)
+    new OutBoxImpl(ergoBoxCandidate)
   }
 }
 

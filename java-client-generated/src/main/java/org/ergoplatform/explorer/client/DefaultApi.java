@@ -47,11 +47,12 @@ public interface DefaultApi {
    * @param p1  (required)
    * @param offset  (optional)
    * @param limit  (optional)
+   * @param concise  restricts returned transaction boxes to boxes for this address
    * @return Call&lt;ItemsA&gt;
    */
   @GET("api/v1/addresses/{p1}/transactions")
   Call<Items<TransactionInfo>> getApiV1AddressesP1Transactions(
-            @retrofit2.http.Path("p1") String p1            ,     @retrofit2.http.Query("offset") Integer offset                ,     @retrofit2.http.Query("limit") Integer limit                
+            @retrofit2.http.Path("p1") String p1, @retrofit2.http.Query("offset") Integer offset, @retrofit2.http.Query("limit") Integer limit, @retrofit2.http.Query("concise") Boolean concise
   );
 
   /**

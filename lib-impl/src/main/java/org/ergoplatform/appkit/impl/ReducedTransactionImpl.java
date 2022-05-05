@@ -50,7 +50,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
         List<ErgoBox> outputs = JavaConversions.seqAsJavaList(_tx.unsignedTx().outputs());
         List<OutBox> returnVal = new ArrayList<>(outputs.size());
         for (ErgoBoxCandidate output : outputs) {
-            returnVal.add(new OutBoxImpl(_ctx, output));
+            returnVal.add(new OutBoxImpl(output));
         }
         return returnVal;    }
 

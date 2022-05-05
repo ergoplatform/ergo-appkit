@@ -35,8 +35,14 @@ object BoxSelectorsJavaHelpers {
     val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
           throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
-      case Left(err: NotEnoughErgsError) =>
+      case Left(err: NotEnoughErgsError) => {
+        // we might have a ChangeBox error here as well, so let's report it correctly
+        if (err.balanceFound >= amountToSpend) {
+          throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
+        } else {
           throw new NotEnoughErgsException(err.message, err.balanceFound)
+        }
+      }
       case Left(err: NotEnoughTokensError) => {
         val tokensHm = err.tokensFound.foldLeft(new util.HashMap[String, java.lang.Long])((hm, elem) => {
           hm.put(elem._1.base16, elem._2)

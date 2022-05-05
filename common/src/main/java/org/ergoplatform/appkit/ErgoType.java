@@ -2,6 +2,7 @@ package org.ergoplatform.appkit;
 
 import scala.Option;
 import scala.Tuple2;
+import scala.Unit;
 import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
@@ -13,14 +14,15 @@ import java.util.Objects;
  * wrapper around {@link RType} type descriptor.
  */
 public class ErgoType<T> {
-    private static ErgoType<scala.Byte> _byte = new ErgoType(RType.ByteType());
-    private static ErgoType<scala.Short> _short = new ErgoType(RType.ShortType());
-    private static ErgoType<scala.Int> _integer = new ErgoType(RType.IntType());
-    private static ErgoType<scala.Long> _long = new ErgoType(RType.LongType());
-    private static ErgoType<scala.Boolean> _boolean = new ErgoType(RType.BooleanType());
+    private static ErgoType<Byte> _byte = new ErgoType(RType.ByteType());
+    private static ErgoType<Short> _short = new ErgoType(RType.ShortType());
+    private static ErgoType<Integer> _integer = new ErgoType(RType.IntType());
+    private static ErgoType<Long> _long = new ErgoType(RType.LongType());
+    private static ErgoType<Boolean> _boolean = new ErgoType(RType.BooleanType());
     private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
+    private static ErgoType<Unit> _unit = new ErgoType(RType.UnitType());
     private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
-    private static ErgoType<SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
+    private static ErgoType<special.sigma.SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
     private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
     private static ErgoType<Box> _box = new ErgoType(JavaHelpers.BoxRType());
     private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
@@ -49,21 +51,23 @@ public class ErgoType<T> {
         return (obj instanceof ErgoType<?>) && Objects.equals(_rtype, ((ErgoType<?>)obj)._rtype);
     }
 
-    static public ErgoType<scala.Byte> byteType() { return _byte; }
+    static public ErgoType<Byte> byteType() { return _byte; }
 
-    static public ErgoType<scala.Short> shortType() { return _short; }
+    static public ErgoType<Short> shortType() { return _short; }
 
-    static public ErgoType<scala.Int> integerType() { return _integer; }
+    static public ErgoType<Integer> integerType() { return _integer; }
 
-    static public ErgoType<scala.Long> longType() { return _long; }
+    static public ErgoType<Long> longType() { return _long; }
 
-    static public ErgoType<scala.Boolean> booleanType() { return _boolean; }
+    static public ErgoType<Boolean> booleanType() { return _boolean; }
 
     static public ErgoType<BigInt> bigIntType() { return _bigInt; }
 
+    static public ErgoType<Unit> unitType() { return _unit; }
+
     static public ErgoType<GroupElement> groupElementType() { return _groupElement; }
 
-    static public ErgoType<SigmaProp> sigmaPropType() { return _sigmaProp; }
+    static public ErgoType<special.sigma.SigmaProp> sigmaPropType() { return _sigmaProp; }
 
     static public ErgoType<AvlTree> avlTreeType() { return _avlTree; }
 

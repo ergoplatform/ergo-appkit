@@ -50,7 +50,7 @@ public class SelectTokensHelper {
      * Also keeps track if a change box is needed in case we selected to many tokens, see
      * {@link #isChangeBoxNeeded()}
      */
-    public void useTokens(Iterable<ErgoToken> selectedTokens) {
+    public SelectTokensHelper useTokens(Iterable<ErgoToken> selectedTokens) {
         for (ErgoToken selectedToken : selectedTokens) {
             String tokenId = selectedToken.getId().toString();
             if (tokensLeft.containsKey(tokenId)) {
@@ -64,6 +64,7 @@ public class SelectTokensHelper {
                 changeBoxNeeded = true;
             }
         }
+        return this;
     }
 
     /**

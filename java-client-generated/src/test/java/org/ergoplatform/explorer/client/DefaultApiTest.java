@@ -1,5 +1,9 @@
 package org.ergoplatform.explorer.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.ergoplatform.ApiTestBase;
 import org.ergoplatform.explorer.client.model.Balance;
 import org.ergoplatform.explorer.client.model.BlockInfo;
@@ -17,8 +21,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import static org.junit.Assert.*;
 
 /**
  * API tests for DefaultApi
@@ -50,9 +52,13 @@ public class DefaultApiTest extends ApiTestBase {
     public void getApiV1AddressesP1TransactionsTest() throws IOException {
         Integer offset = 0;
         Integer limit = 10;
-        Items<TransactionInfo> response = api.getApiV1AddressesP1Transactions(address, offset, limit).execute().body();
+        Items<TransactionInfo> response = api.getApiV1AddressesP1Transactions(address, offset, limit, false).execute().body();
         assertTrue(response.getItems().size() > 0);
         assertNotNull(response.getItems().get(0).getId());
+        Items<TransactionInfo> conciseResponse = api.getApiV1AddressesP1Transactions(address, offset, limit, true).execute().body();
+        assertEquals(response.getItems().size(), conciseResponse.getItems().size());
+        assertEquals(response.getItems().get(0).getId(), conciseResponse.getItems().get(0).getId());
+        assertTrue(response.getItems().get(0).getOutputs().size() > conciseResponse.getItems().get(0).getOutputs().size());
     }
 
     @Test
