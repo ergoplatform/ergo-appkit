@@ -169,7 +169,7 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
-        public long getMaxBlockCost() {
+        public int getMaxBlockCost() {
             return 0;
         }
 

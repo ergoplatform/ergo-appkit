@@ -52,8 +52,8 @@ public class NodeInfoParameters implements BlockchainParameters {
     }
 
     @Override
-    public long getMaxBlockCost() {
-        return nodeInfo.getParameters().getMaxBlockCost().longValue();
+    public int getMaxBlockCost() {
+        return nodeInfo.getParameters().getMaxBlockCost();
     }
 
     @Override
