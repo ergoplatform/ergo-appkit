@@ -171,7 +171,6 @@ public class BoxOperations {
     public long getFeeAmount() {
         return feeAmount;
     }
-
     @Deprecated
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()

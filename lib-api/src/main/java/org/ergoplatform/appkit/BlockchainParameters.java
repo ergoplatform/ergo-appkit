@@ -47,7 +47,7 @@ public interface BlockchainParameters {
     /**
      * @return computation units limit per block
      */
-    long getMaxBlockCost();
+    int getMaxBlockCost();
 
     /**
      * @return Protocol version
