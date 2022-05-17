@@ -33,6 +33,7 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
     checkIsTestnetP2PKAddress(addr)
 
     val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
+    addr2 shouldNot be (addr)
     addr2.toString shouldNot be (addrStr)
 
     val addr3 = Address.fromErgoTree(addr.getErgoAddress.script, NetworkType.TESTNET)

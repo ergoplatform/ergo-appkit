@@ -21,6 +21,8 @@ import special.sigma.GroupElement;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Objects;
+
 public class Address {
     private final String _base58String;
     private final byte[] _addrBytes;
@@ -245,13 +247,14 @@ public class Address {
 
     @Override
     public int hashCode() {
-        return _address.hashCode();
+        return Objects.hashCode(_address.hashCode(), _address.networkPrefix());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Address) {
-            return _address.equals(((Address) obj)._address);
+            return _address.networkPrefix() == ((Address) obj)._address.networkPrefix()
+                && _address.equals(((Address) obj)._address);
         }
         return false;
     }
