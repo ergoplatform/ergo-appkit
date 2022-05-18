@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
@@ -16,10 +18,9 @@ import scorex.util.encode.Base58;
 import sigmastate.Values;
 import sigmastate.basics.DLogProtocol;
 import sigmastate.eval.CostingSigmaDslBuilder$;
+import sigmastate.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
 import special.sigma.GroupElement;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
     private final String _base58String;
@@ -131,6 +132,14 @@ public class Address {
     }
 
     /**
+     * @return this addresses ErgoTree's proposition bytes. Use this to store this address
+     * on Box registers.
+     */
+    public byte[] toPropositionBytes() {
+        return getErgoAddress().script().bytes();
+    }
+
+    /**
      * @return true if this address is a SigmaBoolean
      */
     public boolean isSigmaBoolean() {
@@ -158,6 +167,20 @@ public class Address {
      * @return Address instance decoded from string
      */
     public static Address create(String base58Str) { return new Address(base58Str); }
+
+    /**
+     * Creates address from given ergovalue containing an ErgoTree proposition bytes.
+     * Use this to convert a box register containing an ErgoTree into its address.
+     *
+     * @param networkType      mainnet or testnet network
+     * @param propositionBytes ErgoTree proposition bytes
+     */
+    public static Address fromPropositionBytes(NetworkType networkType, byte[] propositionBytes) {
+        return new ErgoTreeContract(
+            ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(propositionBytes),
+            networkType
+        ).toAddress();
+    }
 
     public static Address fromMnemonic(NetworkType networkType, Mnemonic mnemonic) {
         return fromMnemonic(networkType, mnemonic.getPhrase(), mnemonic.getPassword());
