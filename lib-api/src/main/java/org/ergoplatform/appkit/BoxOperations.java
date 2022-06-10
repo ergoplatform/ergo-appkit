@@ -328,12 +328,11 @@ public class BoxOperations {
     public UnsignedTransaction buildTxWithDefaultInputs(Function<UnsignedTransactionBuilder, UnsignedTransactionBuilder> outputBuilder) {
         List<InputBox> boxesToSpend = loadTop();
 
-        P2PKAddress changeAddress = senders.get(0).asP2PK();
         UnsignedTransactionBuilder txB = ctx.newTxBuilder();
 
         UnsignedTransactionBuilder unsignedTransactionBuilder = txB.boxesToSpend(boxesToSpend)
             .fee(feeAmount)
-            .sendChangeTo(changeAddress);
+            .sendChangeTo(senders.get(0).getErgoAddress());
 
         return outputBuilder.apply(unsignedTransactionBuilder).build();
     }
