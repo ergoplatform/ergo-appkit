@@ -35,6 +35,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     val out = ctx.newTxBuilder.outBoxBuilder
       .value(amount)
       .contract(ctx.compileContract(ConstantsBuilder.empty(), script))
+      .registers(ErgoValue.unit(), ErgoValue.unit(), ErgoValue.unit(), ErgoValue.of("sd".getBytes))
       .build()
 
     out.getCreationHeight shouldBe ctx.getHeight
