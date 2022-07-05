@@ -1,15 +1,15 @@
-# Appkit: SDK for Ergo Platform dApps, wallet applications, API clients 
+## Appkit: SDK for Ergo Platform dApps, wallet applications, API clients 
 
 ![Maven Central](http://maven-badges.herokuapp.com/maven-central/org.ergoplatform%20/ergo-appkit_2.12/badge.svg)
 
-## Contents
+### Contents
 - [Introduction](#introduction)
 - [Setup](#setup)
 - [How to use](#how-to-use)
 - [Repository organisation](#repository-organization)
 - [Projects that use Appkit](#projects-that-use-appkit)
 
-## Introduction
+### Introduction
 [Ergo](https://ergoplatform.org/en/) is a resilient blockchain platform for
 contractual money. In addition to [Bitcoin](https://bitcoin.org/en/)-like
 blockchain architecture Ergo provides advanced contractual capabilities based on
@@ -55,9 +55,9 @@ overhead compared to a Java VM. For example this allows to create very
 responsive command line utility applications such as
 [ergo-tool](https://github.com/ergoplatform/ergo-tool).
 
-## Setup
+### Setup
 
-### JVM languages
+#### Maven
 
 Appkit is **Java/Scala** library which is cross compiled by both Scala 2.11 and Scala 2.12
 compilers. As a result it can run on JVMv7/[Android](https://github.com/aslesarenko/ergo-android) 
@@ -83,16 +83,20 @@ Gradle:
 As an alternative, you can download the jar file from the 
 [releases page](https://github.com/ergoplatform/ergo-appkit/releases) and add it to your project manually.
 
-### Using from non-JVM languages
+#### Building locally
 
-#### GraalVM
+See [Build instructions](BUILD.md).
+
+#### Using from non-JVM languages
+
+##### GraalVM
 In addition to Java, Appkit can be used to write Ergo applications in **Scala, JavaScript,
 Python and Ruby** and run those applications under GraalVM, which support cross
 language interoperability.
 Please see [examples](https://github.com/aslesarenko/ergo-appkit-examples), 
 [Build instructions Java and GraalVM](BUILD.md) and [GraalVM instructions](graalvm.md).
 
-#### Python 
+##### Python 
 From **Python**, you can also use Appkit running in JVM context. 
 [Guide how to use Appkit from Python by bridging with JPype](https://github.com/ergoplatform/ergo-appkit/wiki/Using-Appkit-from-Python), 
 or simply by using
@@ -102,19 +106,19 @@ or simply by using
 See [ergpy project page](https://github.com/mgpai22/ergpy) for more information.
 
 
-## How to use
+### How to use
 
-### Using from JVM 
+#### Using from JVM 
 
 * [Tutorial starting with Appkit](https://github.com/ergoplatform/ergo-appkit/wiki/Tutorial-starting-with-Appkit-on-Gradle-projects)
 * [Interacting with a local node](https://github.com/ergoplatform/ergo-appkit/wiki/Interacting-with-a-local-node)
 * [Building ErgoPay transactions in Spring](https://medium.com/@bschulte19e/implement-a-dapp-using-ergopay-d95e17a51410)
 
-### Python
+#### Python
 
 * [Building transaction, minting a token](https://github.com/ergoplatform/ergo-appkit/wiki/Using-Appkit-from-Python)
 
-## Repository organization
+### Repository organization
 
 | sub-module  | description |
 |---|-----|
@@ -124,7 +128,11 @@ See [ergpy project page](https://github.com/mgpai22/ergpy) for more information.
 | lib-impl  | Implementation of Appkit interfaces using `java-client-generated` to connect to Ergo API  |
 | examples | collection of simple Appkit example applications   |
 
-## Projects that use Appkit
+### Build locally
+
+[Build instructions Java and GraalVM](BUILD.md)
+
+### Projects that use Appkit
 
 Appkit is a foundational non-opinionated library which can be used to create other
 libraries, Apps and tools. Here is the list of projects which use Appkit. 
