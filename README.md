@@ -1,6 +1,8 @@
-## Appkit: SDK for Ergo Platform dApps, wallet applications, API clients 
+## Appkit: SDK for writing applications interacting with Ergo blockchain
 
 ![Maven Central](http://maven-badges.herokuapp.com/maven-central/org.ergoplatform%20/ergo-appkit_2.12/badge.svg)
+[![CI](https://github.com/ergoplatform/ergo-appkit/actions/workflows/ci.yml/badge.svg)](https://github.com/ergoplatform/ergo-appkit/actions/workflows/ci.yml)
+[![Publish a release](https://github.com/ergoplatform/ergo-appkit/actions/workflows/release.yml/badge.svg)](https://github.com/ergoplatform/ergo-appkit/actions/workflows/release.yml)
 
 ### Contents
 - [Introduction](#introduction)
