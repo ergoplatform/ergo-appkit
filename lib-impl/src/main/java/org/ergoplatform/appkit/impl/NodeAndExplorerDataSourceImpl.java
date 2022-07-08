@@ -60,6 +60,12 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     // cached to avoid multiple fetches, these values won't change while this class lives
     private BlockchainParameters blockchainParameters;
 
+    /**
+     * set to true to make {@link #sendTransaction(SignedTransaction)} call node's checkTransaction
+     * endpoint before actually sending the transaction
+     */
+    public boolean performCheckBeforeSend = false;
+
     public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
 
         OkHttpClient ok = nodeClient.getOkBuilder().build();
@@ -164,6 +170,14 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
             .dataInputs(dataInputsData)
             .inputs(inputsData)
             .outputs(outputsData);
+
+        if (performCheckBeforeSend) {
+            String txId = executeCall(nodeTransactionsApi.checkTransaction(txData));
+            if (!txData.getId().equals(txId)) {
+                throw new IllegalStateException("checkTransaction returned tx id " + txId +
+                    ", expected was " + txData.getId());
+            }
+        }
 
         return executeCall(nodeTransactionsApi.sendTransaction(txData));
     }
