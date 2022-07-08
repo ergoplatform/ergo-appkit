@@ -172,7 +172,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
             .outputs(outputsData);
 
         if (performCheckBeforeSend) {
-            String txId = executeCall(nodeTransactionsApi.checkTransaction(txData));
+            String txId = executeCall(nodeTransactionsApi.checkTransaction(txData)).replace("\"", "");
             if (!txData.getId().equals(txId)) {
                 throw new IllegalStateException("checkTransaction returned tx id " + txId +
                     ", expected was " + txData.getId());
