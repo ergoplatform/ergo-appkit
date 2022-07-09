@@ -1,12 +1,17 @@
 package org.ergoplatform.appkit
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
 import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import scalan.util.FileUtil
 import scorex.util.ModifierId
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
@@ -15,6 +20,7 @@ import sigmastate.interpreter.HintsBag
 import java.io.File
 import java.math.BigInteger
 import java.util.Arrays
+import scala.collection.JavaConversions
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -63,7 +69,7 @@ class TxBuilderSpec extends PropSpec with Matchers
 
  property("Sign and Verify a message round trip") {
   forAll(Gen.alphaNumStr){ msg =>
-    val ergoClient = createMockedErgoClient(MockData(Nil, Nil)) 
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
       val proverA = BoxOperations.createProver(ctx,
            new File("storage/E2.json").getPath, "abc")
@@ -155,7 +161,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       signed.getOutputsToSpend.size() shouldBe 2
     }
   }
-  
+
   property("non-standard fee contract") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
@@ -393,6 +399,52 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       // both boxes should be selected
       inputsSelected.size() shouldBe 2
+    }
+
+  }
+
+  property("Test changebox token amount max 100") {
+    val ergoClient = createMockedErgoClient(data)
+
+    val tokenList: Items[TokenInfo] = new Gson().fromJson(FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val storage = SecretStorage.loadFrom("storage/E2.json")
+      storage.unlock("abc")
+
+      val recipient = address
+
+      // send 1 ERG
+      val amountToSend = 1000L * 1000 * 1000
+      val pkContract = recipient.toErgoContract
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+
+      // first box: 1 ERG + tx fee + token that will cause a change
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee)
+        .contract(pkContract)
+        .tokens(JavaConversions.asScalaBuffer(tokenList.getItems).take(150).map { ti: TokenInfo =>
+          new ErgoToken(ti.getId, ti.getEmissionAmount)
+        }.toArray:_*)
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: enough ERG for the change box
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee)
+        .tokens(JavaConversions.asScalaBuffer(tokenList.getItems).takeRight(110).map { ti: TokenInfo =>
+          new ErgoToken(ti.getId, ti.getEmissionAmount)
+        }.toArray:_*)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val operations = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
+      val unsigned = operations.putToContractTxUnsigned(pkContract)
+
+      // all outputs should have 100 tokens at max
+      unsigned.getOutputs.forEach { output =>
+        output.getTokens.size() <= 100 shouldBe true
+      }
     }
 
   }
