@@ -442,7 +442,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val unsigned = operations.putToContractTxUnsigned(pkContract)
 
       // all outputs should have 100 tokens at max
-      unsigned.getOutputs.forEach { output =>
+      unsigned.getOutputs.forEach { output: OutBox =>
         output.getTokens.size() <= 100 shouldBe true
       }
     }
