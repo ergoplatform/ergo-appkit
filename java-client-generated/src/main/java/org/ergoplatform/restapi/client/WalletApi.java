@@ -149,7 +149,7 @@ public interface WalletApi {
   @Headers({
     "Content-Type:application/json"
   })
-  @GET("wallet/boxes/collect")
+  @POST("wallet/boxes/collect")
   Call<java.util.List<WalletBox>> walletBoxesCollect(
                     @retrofit2.http.Body BoxesRequestHolder body    
   );
