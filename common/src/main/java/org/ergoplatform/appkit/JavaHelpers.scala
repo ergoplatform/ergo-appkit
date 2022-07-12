@@ -59,6 +59,7 @@ abstract class Iso[A, B] {
   def to(a: A): B
   def from(b: B): A
   def andThen[C](iso: Iso[B,C]): Iso[A,C] = ComposeIso(iso, this)
+  def inverse: Iso[B, A] = InverseIso(this)
 }
 final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def to(a: B): A = iso.from(a)

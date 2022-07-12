@@ -144,7 +144,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx, requestedToBurn)
   }
 
-  private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
+  private[appkit] def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
     private val _allHeaders = Colls.fromArray(JavaConversions.asScalaIterator(
       _ctx.getHeaders.iterator).map(h => ScalaBridge.toSigmaHeader(h)).toArray)
 

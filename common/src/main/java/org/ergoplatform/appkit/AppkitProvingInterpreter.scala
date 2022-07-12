@@ -138,7 +138,7 @@ class AppkitProvingInterpreter(
           )
           if (diff.nonEmpty) {  // empty diff would mean equality
             throw TokenBalanceException(
-              "Invalid token burning", diff)
+              "Transaction tries to burn tokens, but not how it was requested", diff)
           }
         } else {
             throw TokenBalanceException(
@@ -147,9 +147,12 @@ class AppkitProvingInterpreter(
       }
       if (toMint.nonEmpty) {
         if (toMint.length > 1) {
-          throw TokenBalanceException("Only one token can be minted in a transaction", tokenDiff)
+          throw TokenBalanceException("Only one token can be minted in a transaction", toMint)
         }
-        Objects.deepEquals(toMint(0)._1.toArray, boxesToSpend.head.box.id)
+        val isCorrectMintedTokenId = Objects.deepEquals(toMint(0)._1.toArray, boxesToSpend.head.box.id)
+        if (!isCorrectMintedTokenId) {
+          throw TokenBalanceException("Cannot mint a token with invalid id", toMint)
+        }
       }
     }
 
