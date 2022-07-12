@@ -4,10 +4,6 @@ import org.ergoplatform.ErgoAddress;
 
 import java.util.List;
 
-import org.ergoplatform.ErgoBox;
-import org.ergoplatform.UnsignedErgoLikeTransaction;
-import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
-
 /**
  * This interface is used to represent unsigned transactions after they are
  * built using {@link UnsignedTransactionBuilder}.
@@ -31,4 +27,10 @@ public interface UnsignedTransaction extends Transaction {
      * Returns the change address associated with this unsigned transaction
      */
     ErgoAddress getChangeAddress();
+
+    /**
+     * Optional list of tokens requested for burning in this transaction.
+     * Returns
+     */
+    List<ErgoToken> getTokensToBurn();
 }

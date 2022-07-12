@@ -13,10 +13,9 @@ import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoole
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
-import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CHeader, CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -29,8 +28,8 @@ import java.util.{Map => JMap, List => JList}
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.{Constants, TokensMap}
-import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2KeyLength, Pbkdf2Iterations}
+import org.ergoplatform.wallet.TokensMap
+import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2Iterations, Pbkdf2KeyLength}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
@@ -40,6 +39,9 @@ import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
+import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
+import sigmastate.eval.Colls.outerJoin
+import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -182,8 +184,16 @@ object Iso extends LowPriorityIsos {
   }
 
   val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
-    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
+  }
+
+  val isoTokensListToTokenColl: Iso[JList[ErgoToken], TokenColl] = new Iso[JList[ErgoToken], TokenColl] {
+    override def to(ts: JList[ErgoToken]): TokenColl =
+      isoTokensListToPairsColl.to(ts).mapFirst(Colls.fromArray(_))
+
+    override def from(ts: TokenColl): JList[ErgoToken] = {
+      isoTokensListToPairsColl.from(ts.mapFirst(id => Digest32 @@ id.toArray))
+    }
   }
 
   val isoSigmaBooleanToByteArray: Iso[SigmaBoolean, Array[Byte]] = new Iso[SigmaBoolean, Array[Byte]] {
@@ -523,6 +533,40 @@ object JavaHelpers {
   def eip3DerivationParent() = {
     val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
+  }
+
+  type TokenColl = Coll[(Coll[Byte], Long)]
+
+  def checkAllTokensPositive(tokens: TokenColl): TokenColl = {
+    val invalidTokens = tokens.filter(_._2 <= 0)
+    require(invalidTokens.isEmpty, s"All token values should be > 0: ")
+    tokens
+  }
+
+  def subtractTokens(
+    reducedTokens: TokenColl,
+    subtractedTokens: TokenColl
+  ): TokenColl = {
+    val reduced = checkAllTokensPositive(reducedTokens)
+      .sumByKey(Colls.Monoids.longPlusMonoid)
+    val subtracted = checkAllTokensPositive(subtractedTokens)
+      .sumByKey(Colls.Monoids.longPlusMonoid)
+    val tokensDiff = outerJoin(subtracted, reduced)(
+      { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
+      { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
+      { case (_, (sV, rV)) => rV - sV } // for tokens both in subtracted and reduced: balance change
+    )
+    tokensDiff.filter(_._2 != 0)  // return only unbalanced tokens
+  }
+
+  def subtractTokens(
+    reducedTokens: IndexedSeq[(TokenId, Long)],
+    subtractedTokens: IndexedSeq[(TokenId, Long)]
+  ): TokenColl = {
+    subtractTokens(
+      reducedTokens = Colls.fromItems(reducedTokens:_*).mapFirst(Colls.fromArray(_)),
+      subtractedTokens = Colls.fromItems(subtractedTokens:_*).mapFirst(Colls.fromArray(_))
+    )
   }
 }
 
