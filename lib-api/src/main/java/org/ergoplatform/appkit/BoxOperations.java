@@ -31,7 +31,7 @@ public class BoxOperations {
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
 
-    private BoxOperations(BlockchainContext ctx, List<Address> senders, @Nullable ErgoProver senderProver) {
+    BoxOperations(BlockchainContext ctx, List<Address> senders, @Nullable ErgoProver senderProver) {
         this.ctx = ctx;
         this.senders = senders;
         this.senderProver = senderProver;
