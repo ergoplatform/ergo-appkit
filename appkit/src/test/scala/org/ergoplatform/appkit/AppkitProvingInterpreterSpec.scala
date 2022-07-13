@@ -36,6 +36,10 @@ class AppkitProvingInterpreterSpec extends PropSpec
     ops.withAmountToSpend(oneErg * 2)
   }
 
+  /** This method creates an UnsignedTransaction instance directly bypassing builders and
+    * their consistency logic. This allows to create invalid transactions for the tests
+    * below.
+    */
   def createUnsignedTransaction(
     ctx: BlockchainContext, prover: ErgoProver,
     inputs: IndexedSeq[ErgoBox],
@@ -117,6 +121,33 @@ class AppkitProvingInterpreterSpec extends PropSpec
             case e: TokenBalanceException =>
               val cond1 = exceptionLike[TokenBalanceException]("Transaction tries to burn tokens when no burning was requested")
               cond1(e) && e.tokensDiff.exists(t => t == (Colls.fromArray(token2._1), -10))
+            case _ => false
+          }
+        )
+      }
+
+      // Transaction tries to burn tokens when no burning was requested
+      // Inputs: (note, same token in two boxes)
+      // Box1: Token1, Amount1
+      // Box2: Token1. Amount2
+      //
+      // Outputs:
+      // Box1: Token1, Amount1
+      {
+        // another input with the same token as input1
+        val input2_with_token1 = createBox(oneErg, tree2, additionalTokens = Seq(token1.copy(_2 = 20)))
+        val output1 = createBox(oneErg * 2 + Parameters.MinFee, tree1, additionalTokens = Seq(token1))
+
+        val unsigned = createUnsignedTransaction(ctx, prover,
+          IndexedSeq(input1, input2_with_token1),
+          IndexedSeq(output1), tokensToBurn = IndexedSeq.empty)
+
+        assertExceptionThrown(
+          prover.reduce(unsigned, 0),
+          {
+            case e: TokenBalanceException =>
+              val cond1 = exceptionLike[TokenBalanceException]("Transaction tries to burn tokens when no burning was requested")
+              cond1(e) && e.tokensDiff.exists(t => t == (Colls.fromArray(token1._1), -20))
             case _ => false
           }
         )

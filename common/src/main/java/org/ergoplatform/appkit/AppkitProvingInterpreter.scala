@@ -9,7 +9,7 @@ import java.util.{Objects, List => JList}
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, subtractTokens}
+import org.ergoplatform.appkit.JavaHelpers.{TokenColl, subtractTokenColls}
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
@@ -132,7 +132,7 @@ class AppkitProvingInterpreter(
       if (toBurn.nonEmpty) {
         if (!tokensToBurn.isEmpty) {
           val requestedToBurn = isoTokensListToTokenColl.to(tokensToBurn)
-          val diff = JavaHelpers.subtractTokens(
+          val diff = JavaHelpers.subtractTokenColls(
             reducedTokens = toBurn.mapSecond(v => -v), // make positive amounts
             subtractedTokens = requestedToBurn
           )

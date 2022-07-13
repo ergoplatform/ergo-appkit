@@ -536,22 +536,46 @@ object JavaHelpers {
     DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
   }
 
+  /** Type synonym for a collection of tokens represented using Coll */
   type TokenColl = Coll[(Coll[Byte], Long)]
 
+  /** Ensures that all tokens have strictly positive value.
+    * @throws IllegalArgumentException when any token have value <= 0
+    * @return the original `tokens` collection (passes the argument through to the result)
+    */
   def checkAllTokensPositive(tokens: TokenColl): TokenColl = {
     val invalidTokens = tokens.filter(_._2 <= 0)
     require(invalidTokens.isEmpty, s"All token values should be > 0: ")
     tokens
   }
 
-  def subtractTokens(
+  /** Compute the difference between `reducedTokens` collection and `subtractedTokens` collection.
+    * It can be thought as `reducedTokens - subtractedTokens` operation.
+    *
+    * Each collection can have many `(tokenId, amount)` pairs with the same `tokenId`.
+    * The method works by first combining all the pairs with the same tokenId and then
+    * computing the difference.
+    * The resulting collection contain a single pair for each tokenId and those token ids
+    * form a subset of tokens from the argument collections.
+    *
+    * One concrete use case to think of is `subtractTokenColls(outputTokens, inputTokens)`.
+    * In this case the resulting collection of (tokenId, amount) pairs can be interpreted as:
+    * - when `amount < 0` then it is to be burnt
+    * - when `amount > 0` then it is to be minted
+    *
+    * @param reducedTokens    the tokens to be subracted from
+    * @param subtractedTokens the tokens which amounts will be subtracted from the
+    *                         corresponding tokens from `reducedTokens`
+    * @return the differences between token amounts (matched by token ids)
+    */
+  def subtractTokenColls(
     reducedTokens: TokenColl,
     subtractedTokens: TokenColl
   ): TokenColl = {
     val reduced = checkAllTokensPositive(reducedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid)
+      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
     val subtracted = checkAllTokensPositive(subtractedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid)
+      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
     val tokensDiff = outerJoin(subtracted, reduced)(
       { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
       { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
@@ -560,11 +584,15 @@ object JavaHelpers {
     tokensDiff.filter(_._2 != 0)  // return only unbalanced tokens
   }
 
+  /** Compute the difference between `reducedTokens` collection and `subtractedTokens`
+    * collection.
+    * @see subtractTokenColls for details
+    */
   def subtractTokens(
     reducedTokens: IndexedSeq[(TokenId, Long)],
     subtractedTokens: IndexedSeq[(TokenId, Long)]
   ): TokenColl = {
-    subtractTokens(
+    subtractTokenColls(
       reducedTokens = Colls.fromItems(reducedTokens:_*).mapFirst(Colls.fromArray(_)),
       subtractedTokens = Colls.fromItems(subtractedTokens:_*).mapFirst(Colls.fromArray(_))
     )

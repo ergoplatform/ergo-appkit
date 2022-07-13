@@ -2,6 +2,7 @@ package org.ergoplatform.appkit;
 
 import org.ergoplatform.ErgoAddress;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -29,8 +30,11 @@ public interface UnsignedTransaction extends Transaction {
     ErgoAddress getChangeAddress();
 
     /**
-     * Optional list of tokens requested for burning in this transaction.
-     * Returns
+     * The list of tokens requested (in builders) for burning in this transaction when
+     * it will be executed on blockchain.
+     *
+     * Returns empty list when no burning was explicitly requested (which is by default).
      */
+    @Nonnull
     List<ErgoToken> getTokensToBurn();
 }

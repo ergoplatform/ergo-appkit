@@ -12,6 +12,8 @@ import java.util.List;
 
 import scala.collection.JavaConversions;
 
+import javax.annotation.Nonnull;
+
 public class UnsignedTransactionImpl implements UnsignedTransaction {
     private final UnsignedErgoLikeTransaction _tx;
     private List<ExtendedInputBox> _boxesToSpend;
@@ -101,7 +103,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     }
 
     @Override
-    public List<ErgoToken> getTokensToBurn() {
+    public @Nonnull List<ErgoToken> getTokensToBurn() {
         return _tokensToBurn;
     }
 }
