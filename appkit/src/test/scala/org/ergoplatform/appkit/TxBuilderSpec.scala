@@ -19,6 +19,7 @@ import sigmastate.interpreter.HintsBag
 
 import java.io.File
 import java.math.BigInteger
+import java.util
 import java.util.Arrays
 import scala.collection.JavaConversions
 
@@ -47,6 +48,13 @@ class TxBuilderSpec extends PropSpec with Matchers
        |  val v10 = getVar[BigInt](10).get
        |  sigmaProp(v1.toBigInt == v10)
        |}""".stripMargin)
+  }
+
+  def loadStorageE2(): (SecretStorage, util.List[Address]) = {
+    val storage = SecretStorage.loadFrom("storage/E2.json")
+    storage.unlock("abc")
+    val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+    (storage, senders)
   }
 
   property("ContextVar id should be in range") {
@@ -271,15 +279,12 @@ class TxBuilderSpec extends PropSpec with Matchers
     val ergoClient = createMockedErgoClient(data)
 
     val reducedTx: ReducedTransaction = ergoClient.execute { ctx: BlockchainContext =>
-      val storage = SecretStorage.loadFrom("storage/E2.json")
-      storage.unlock("abc")
-
+      val (_, senders) = loadStorageE2()
       val recipient = address
-
-      val amountToSend = 1000000
       val pkContract = recipient.toErgoContract
 
-      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+      val amountToSend = 1000000
+
       val unsigned = BoxOperations.createForSenders(senders, ctx)
         .withAmountToSpend(amountToSend)
         .withMessage("Test message")
@@ -343,18 +348,14 @@ class TxBuilderSpec extends PropSpec with Matchers
 
     a[NotEnoughErgsException] shouldBe thrownBy {
       ergoClient.execute { ctx: BlockchainContext =>
-        val storage = SecretStorage.loadFrom("storage/E2.json")
-        storage.unlock("abc")
-
-        val recipient = address
+        val (_, senders) = loadStorageE2()
+        val recipientContract = address.toErgoContract
 
         val amountToSend = 1000000
-        val pkContract = recipient.toErgoContract
-
-        val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
-        val unsigned = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+        val unsigned = BoxOperations.createForSenders(senders, ctx)
+          .withAmountToSpend(amountToSend)
           .withInputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
-          .putToContractTxUnsigned(pkContract)
+          .putToContractTxUnsigned(recipientContract)
 
         val prover = ctx.newProverBuilder.build // prover without secrets
         val reduced = prover.reduce(unsigned, 0)
@@ -369,16 +370,12 @@ class TxBuilderSpec extends PropSpec with Matchers
     val ergoClient = createMockedErgoClient(data)
 
     ergoClient.execute { ctx: BlockchainContext =>
-      val storage = SecretStorage.loadFrom("storage/E2.json")
-      storage.unlock("abc")
-
+      val (_, senders) = loadStorageE2()
       val recipient = address
+      val pkContract = recipient.toErgoContract
 
       // send 1 ERG
       val amountToSend = 1000L * 1000 * 1000
-      val pkContract = recipient.toErgoContract
-
-      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
       // first box: 1 ERG + tx fee + token that will cause a change
       val input1 = ctx.newTxBuilder.outBoxBuilder
@@ -392,7 +389,8 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
-      val operations = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+      val operations = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
         .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 1)))
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val inputsSelected = operations.loadTop()

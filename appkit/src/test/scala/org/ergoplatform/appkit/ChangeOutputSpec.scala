@@ -123,10 +123,10 @@ class ChangeOutputSpec extends PropSpec with Matchers
 
     ergoClient.execute { ctx: BlockchainContext =>
 
-      val input0 = ctx.newTxBuilder.outBoxBuilder.registers(
-        ErgoValue.of(gY), ErgoValue.of(gXY)
-      ).value(30000000).contract(ctx.compileContract(
-        ConstantsBuilder.empty(),
+      val input0 = ctx.newTxBuilder.outBoxBuilder
+        .registers(ErgoValue.of(gY), ErgoValue.of(gXY))
+        .value(30000000)
+        .contract(ctx.compileContract(ConstantsBuilder.empty(),
         """{
           |  val gY = SELF.R4[GroupElement].get
           |  val gXY = SELF.R5[GroupElement].get
@@ -146,7 +146,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val txB = ctx.newTxBuilder().preHeader(ph) // for issuing token
       val tokenBox = txB.outBoxBuilder
         .value(15000000) // value of token box, doesn't really matter
-        .tokens(new ErgoToken(tokenId, tokenAmount)) // amount of token issuing
+        .tokens(new ErgoToken(tokenId, tokenAmount)) // mint a token with the given amount
         .contract(ctx.compileContract(
           // contract of the box containing tokens, just has to be spendable
           ConstantsBuilder.empty(), "{sigmaProp(1 < 2)}"
