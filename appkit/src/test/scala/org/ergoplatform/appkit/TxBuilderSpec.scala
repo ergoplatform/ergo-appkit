@@ -407,8 +407,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     val tokenList: Items[TokenInfo] = new Gson().fromJson(FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
 
     ergoClient.execute { ctx: BlockchainContext =>
-      val storage = SecretStorage.loadFrom("storage/E2.json")
-      storage.unlock("abc")
+      val (storage, _) = loadStorageE2()
 
       val recipient = address
 
@@ -418,20 +417,21 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
+      val ergoTokens = JavaConversions.asScalaBuffer(tokenList.getItems).map { ti: TokenInfo =>
+        new ErgoToken(ti.getId, ti.getEmissionAmount)
+      }
+      val tokenList1 = ergoTokens.take(150).toArray
+      val tokenList2 = ergoTokens.takeRight(110).toArray
       // first box: 1 ERG + tx fee + token that will cause a change
       val input1 = ctx.newTxBuilder.outBoxBuilder
         .value(amountToSend + Parameters.MinFee)
         .contract(pkContract)
-        .tokens(JavaConversions.asScalaBuffer(tokenList.getItems).take(150).map { ti: TokenInfo =>
-          new ErgoToken(ti.getId, ti.getEmissionAmount)
-        }.toArray:_*)
+        .tokens(tokenList1:_*)
         .build().convertToInputWith(mockTxId, 0)
       // second box: enough ERG for the change box
       val input2 = ctx.newTxBuilder.outBoxBuilder
         .value(amountToSend + Parameters.MinFee)
-        .tokens(JavaConversions.asScalaBuffer(tokenList.getItems).takeRight(110).map { ti: TokenInfo =>
-          new ErgoToken(ti.getId, ti.getEmissionAmount)
-        }.toArray:_*)
+        .tokens(tokenList2:_*)
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
@@ -439,10 +439,19 @@ class TxBuilderSpec extends PropSpec with Matchers
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val unsigned = operations.putToContractTxUnsigned(pkContract)
 
-      // all outputs should have 100 tokens at max
+      // all outputs should have 100 tokens at max, and it should contain all input tokens
+      var outTokenNum = 0
       unsigned.getOutputs.forEach { output: OutBox =>
         output.getTokens.size() <= 100 shouldBe true
+        outTokenNum = outTokenNum + output.getTokens.size()
+
+        output.getTokens.forEach { outToken: ErgoToken =>
+          // we know that ergoTokens list does not contain multiple entries for a single token, so
+          // we can use this simplified check here
+          ergoTokens.count { p: ErgoToken => p.getId.equals(outToken.getId) && p.getValue == outToken.getValue } shouldBe 1
+        }
       }
+      (tokenList1.length + tokenList2.length) shouldBe outTokenNum
     }
 
   }
