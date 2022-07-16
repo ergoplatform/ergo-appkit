@@ -3,6 +3,7 @@ package org.ergoplatform.appkit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
@@ -418,11 +419,12 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
-      val ergoTokens = JavaConversions.asScalaBuffer(tokenList.getItems).map { ti: TokenInfo =>
-        new ErgoToken(ti.getId, ti.getEmissionAmount)
-      }
-      val tokenList1 = ergoTokens.take(150).toArray
-      val tokenList2 = ergoTokens.takeRight(110).toArray
+      val ergoTokens = tokenList.getItems
+        .convertTo[IndexedSeq[TokenInfo]]
+        .map { ti => new ErgoToken(ti.getId, ti.getEmissionAmount) }
+      
+      val tokenList1 = ergoTokens.take(150)
+      val tokenList2 = ergoTokens.takeRight(110)
       // first box: 1 ERG + tx fee + token that will cause a change
       val input1 = ctx.newTxBuilder.outBoxBuilder
         .value(amountToSend + Parameters.MinFee)
@@ -436,24 +438,26 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
-      val operations = BoxOperations.createForSenders(senders, ctx).withAmountToSpend(amountToSend)
+      val operations = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val unsigned = operations.putToContractTxUnsigned(pkContract)
 
       // all outputs should have 100 tokens at max, and it should contain all input tokens
-      var outTokenNum = 0
       unsigned.getOutputs.forEach { output: OutBox =>
         output.getTokens.size() <= 100 shouldBe true
-        outTokenNum = outTokenNum + output.getTokens.size()
 
         output.getTokens.forEach(new Consumer[ErgoToken] {
           override def accept(outToken: ErgoToken): Unit = {
             // we know that ergoTokens list does not contain multiple entries for a single token, so
             // we can use this simplified check here
-            ergoTokens.count { p: ErgoToken => p.getId.equals(outToken.getId) && p.getValue == outToken.getValue } shouldBe 1
+            ergoTokens.count(_ == outToken) shouldBe 1
           }
         })
       }
+      val outTokenNum = unsigned.getOutputs
+        .map(_.getTokens.size())
+        .convertTo[IndexedSeq[Int]].sum
       (tokenList1.length + tokenList2.length) shouldBe outTokenNum
     }
 
