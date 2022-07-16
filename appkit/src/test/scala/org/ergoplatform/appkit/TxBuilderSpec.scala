@@ -7,7 +7,7 @@ import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
+import org.ergoplatform.{ErgoScriptPredef, ErgoBox}
 import org.scalacheck.Gen
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -21,6 +21,7 @@ import java.io.File
 import java.math.BigInteger
 import java.util
 import java.util.Arrays
+import java.util.function.Consumer
 import scala.collection.JavaConversions
 
 class TxBuilderSpec extends PropSpec with Matchers
@@ -445,11 +446,13 @@ class TxBuilderSpec extends PropSpec with Matchers
         output.getTokens.size() <= 100 shouldBe true
         outTokenNum = outTokenNum + output.getTokens.size()
 
-        output.getTokens.forEach { outToken: ErgoToken =>
-          // we know that ergoTokens list does not contain multiple entries for a single token, so
-          // we can use this simplified check here
-          ergoTokens.count { p: ErgoToken => p.getId.equals(outToken.getId) && p.getValue == outToken.getValue } shouldBe 1
-        }
+        output.getTokens.forEach(new Consumer[ErgoToken] {
+          override def accept(outToken: ErgoToken): Unit = {
+            // we know that ergoTokens list does not contain multiple entries for a single token, so
+            // we can use this simplified check here
+            ergoTokens.count { p: ErgoToken => p.getId.equals(outToken.getId) && p.getValue == outToken.getValue } shouldBe 1
+          }
+        })
       }
       (tokenList1.length + tokenList2.length) shouldBe outTokenNum
     }
