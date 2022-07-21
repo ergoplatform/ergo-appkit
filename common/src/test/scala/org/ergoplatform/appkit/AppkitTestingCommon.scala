@@ -1,5 +1,8 @@
 package org.ergoplatform.appkit
 
+import scalan.RType
+import sigmastate.eval.SigmaDsl
+
 trait AppkitTestingCommon {
   /** The mnemonic used in tests and test vectors. */
   val mnemonic = SecretString.create("slow silly start wash bundle suffer bulb ancient height spin express remind today effort helmet")
@@ -23,4 +26,7 @@ trait AppkitTestingCommon {
   val address = Address.fromMnemonic(
     NetworkType.MAINNET,
     Mnemonic.create(mnemonic, SecretString.empty()))
+
+  /** Helper method to construct a collection from items. */
+  def Coll[T](items: T*)(implicit cT: RType[T]) = SigmaDsl.Colls.fromItems(items:_*)
 }
