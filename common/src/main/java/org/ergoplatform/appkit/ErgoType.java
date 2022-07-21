@@ -51,6 +51,11 @@ public class ErgoType<T> {
         return (obj instanceof ErgoType<?>) && Objects.equals(_rtype, ((ErgoType<?>)obj)._rtype);
     }
 
+    @Override
+    public String toString() {
+        return "ErgoType(" + _rtype.name() + ")";
+    }
+
     static public ErgoType<Byte> byteType() { return _byte; }
 
     static public ErgoType<Short> shortType() { return _short; }
