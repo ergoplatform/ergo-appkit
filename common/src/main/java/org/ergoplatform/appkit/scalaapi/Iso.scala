@@ -36,7 +36,7 @@ abstract class IsoLowPriority {
   implicit val AvlTreeIso: Iso[AvlTree, AvlTree] = new IdentityIso[AvlTree]()
   implicit val isoIso: Iso[Box, Box] = new IdentityIso[Box]()
   implicit val HeaderIso: Iso[Header, Header] = new IdentityIso[Header]()
-  implicit val PreHeaderIso: Iso[PreHeader, PreHeader] = new IdentityIso[PreHeader]()
+  implicit val PreHeaderIso: Iso[PreHeader, PreHeader] = new IdentityIso[PreHeader]()(preHeaderType)
 }
 
 object Iso extends IsoLowPriority {

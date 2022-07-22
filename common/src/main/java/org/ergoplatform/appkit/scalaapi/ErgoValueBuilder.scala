@@ -9,8 +9,8 @@ object ErgoValueBuilder {
     *
     * @param value a value of Scala type such as `Coll[(Byte, Coll[Int])]`
     * @param iso   an isomorphism that projects he given Scala type S to the
-    *              corresponding Java type J. When type S is known to the compiler, them
-    *              iso instance can synthesized by Scala compiler and the type J is
+    *              corresponding Java type J. When type S is known to the compiler, then
+    *              iso instance can be synthesized by the Scala compiler and the type J is
     *              inferred.
     * @return ErgoValue instance of the Java type J which corresponds to the
     *         Scala type S.

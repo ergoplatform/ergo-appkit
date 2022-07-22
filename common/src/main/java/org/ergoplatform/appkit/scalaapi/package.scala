@@ -34,6 +34,6 @@ package object scalaapi {
   implicit val avlTreeType: ErgoType[AvlTree] = ErgoType.avlTreeType()
   implicit val boxType: ErgoType[Box] = ErgoType.boxType()
   implicit val headerType: ErgoType[Header] = ErgoType.headerType()
-  implicit val preHeaderType: ErgoType[PreHeader] = ErgoType.preHeaderType()
+  implicit val preHeaderType: ErgoType[sigma.PreHeader] = ErgoType.preHeaderType()
 
 }

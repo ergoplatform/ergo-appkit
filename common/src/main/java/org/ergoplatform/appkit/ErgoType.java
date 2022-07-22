@@ -26,7 +26,7 @@ public class ErgoType<T> {
     private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
     private static ErgoType<Box> _box = new ErgoType(JavaHelpers.BoxRType());
     private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
-    private static ErgoType<PreHeader> _preHeader = new ErgoType(JavaHelpers.PreHeaderRType());
+    private static ErgoType<special.sigma.PreHeader> _preHeader = new ErgoType(JavaHelpers.PreHeaderRType());
 
     public RType<T> getRType() {
         return _rtype;
@@ -80,7 +80,7 @@ public class ErgoType<T> {
 
     static public ErgoType<Header> headerType() { return _header; }
 
-    static public ErgoType<PreHeader> preHeaderType() { return _preHeader; }
+    static public ErgoType<special.sigma.PreHeader> preHeaderType() { return _preHeader; }
 
     static public <A, B> ErgoType<Tuple2<A, B>> pairType(ErgoType<A> tA, ErgoType<B> tB) {
         return new ErgoType<>(RType.pairRType(tA._rtype, tB._rtype));
