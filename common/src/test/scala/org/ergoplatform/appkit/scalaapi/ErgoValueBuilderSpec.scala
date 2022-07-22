@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit.scalaapi
 
 import org.ergoplatform.appkit.{BoxAttachment, BoxAttachmentGeneric, ErgoValue, TestingBase, ErgoType, AppkitTestingCommon}
+import scalan.RType
 import special.collection.Coll
 
 import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte}
@@ -16,7 +17,7 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
     val jShort = ErgoValue.of(10.toShort)
     vShort shouldBe jShort
 
-    val vInt = ErgoValueBuilder.buildFor(10)
+    val vInt: ErgoValue[JInt] = ErgoValueBuilder.buildFor(10)
     val jInt = ErgoValue.of(10)
     vInt shouldBe jInt
 
@@ -24,7 +25,7 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
     val jLong = ErgoValue.of(10L)
     vLong shouldBe jLong
 
-    val vBoolean = ErgoValueBuilder.buildFor(true)
+    val vBoolean: ErgoValue[JBoolean] = ErgoValueBuilder.buildFor(true)
     val jBoolean = ErgoValue.of(true)
     vBoolean shouldBe jBoolean
 
@@ -43,6 +44,7 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
     )
     vCollPair shouldBe jCollPair
 
+    // some complex type
     val x: ErgoValue[Coll[(Coll[(JByte, JLong)], Coll[JShort])]] = ErgoValueBuilder.buildFor(
       Coll(
         (Coll((1.toByte, 10L), (2.toByte, 20L)), Coll[Short](1, 2, 3)),
@@ -50,6 +52,12 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
       )
     )
     x should not be null
+
+    // check that type descriptor constructed via Iso is correct
+    val xRT = x.getType.getRType
+    xRT.tItem.tFst.tItem.tFst shouldBe RType.ByteType
+    xRT.tItem.tFst.tItem.tSnd shouldBe RType.LongType
+    xRT.tItem.tSnd.tItem shouldBe RType.ShortType
   }
 
   property("Use ErgoValueBuilder in Appkit API") {
