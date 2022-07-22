@@ -119,7 +119,11 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<Box> of(ErgoBox value) {
-        return new ErgoValue<>(JavaHelpers.SigmaDsl().Box(value), ErgoType.boxType());
+        return of(JavaHelpers.SigmaDsl().Box(value));
+    }
+
+    static public ErgoValue<Box> of(Box value) {
+        return new ErgoValue<>(value, ErgoType.boxType());
     }
 
     static public ErgoValue<Coll<Byte>> of(byte[] arr) {

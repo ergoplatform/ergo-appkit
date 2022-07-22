@@ -90,10 +90,6 @@ public class ErgoType<T> {
         return new ErgoType<>(JavaHelpers.collRType(tItem._rtype));
     }
 
-    static public <A> ErgoType<Option<A>> optionType(ErgoType<A> tItem) {
-        return new ErgoType<>(RType.optionRType(tItem._rtype));
-    }
-
     static public <A> ErgoType<A> ofRType(RType<A> rtype) {
         return new ErgoType<>(rtype);
     }

@@ -2,13 +2,16 @@ package org.ergoplatform.appkit.scalaapi
 
 import org.ergoplatform.appkit.{BoxAttachment, BoxAttachmentGeneric, ErgoValue, TestingBase, ErgoType, AppkitTestingCommon}
 import scalan.RType
+import sigmastate.eval.SigmaDsl
 import special.collection.Coll
+import special.sigma.Box
 
 import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte}
+import java.math.BigInteger
 
 class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
-  property("buildFor") {
 
+  property("buildFor") {
     val vByte = ErgoValueBuilder.buildFor(10.toByte)
     val jByte = ErgoValue.of(10.toByte)
     vByte shouldBe jByte
@@ -43,8 +46,19 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
       ErgoType.pairType(ErgoType.integerType(), ErgoType.longType())
     )
     vCollPair shouldBe jCollPair
+  }
 
-    // some complex type
+
+  property("buildFor for identity isos") {
+    val vBox = ErgoValueBuilder.buildFor(null: Box)
+    val jBox = ErgoValue.of(null: Box)
+    vBox shouldBe jBox
+    val vCollBigInt = ErgoValueBuilder.buildFor(Coll(SigmaDsl.BigInt(BigInteger.ONE)))
+    val jCollBigInt = ErgoValue.of(Coll(SigmaDsl.BigInt(BigInteger.ONE)), ErgoType.bigIntType())
+    vCollBigInt shouldBe jCollBigInt
+  }
+
+  property("buildFor some complex type") {
     val x: ErgoValue[Coll[(Coll[(JByte, JLong)], Coll[JShort])]] = ErgoValueBuilder.buildFor(
       Coll(
         (Coll((1.toByte, 10L), (2.toByte, 20L)), Coll[Short](1, 2, 3)),

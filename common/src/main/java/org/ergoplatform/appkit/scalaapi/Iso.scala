@@ -1,7 +1,10 @@
 package org.ergoplatform.appkit.scalaapi
 
 import org.ergoplatform.appkit.ErgoType
+import org.ergoplatform.appkit.scalaapi.Iso.IdentityIso
 import special.collection.Coll
+import special.sigma
+import special.sigma.{Header, Box, SigmaProp, GroupElement, AvlTree, PreHeader}
 
 /** Isomorphism between Scala type S and Java type J.
   * Note, each conversion function is actually type cast of the argument to the resulting
@@ -22,7 +25,32 @@ abstract class Iso[S, J] {
   def toScala(y: J): S
 }
 
-object Iso {
+abstract class IsoLowPriority {
+  /** This is fallback implicits which are used only when other more specific iso cannot be
+    * used in implicit search. (the trick used across Scala libraries)
+    */
+  implicit val unitIso: Iso[Unit, Unit] = new IdentityIso[Unit]()
+  implicit val bigIntIso: Iso[sigma.BigInt, sigma.BigInt] = new IdentityIso[sigma.BigInt]()
+  implicit val groupElementIso: Iso[GroupElement, GroupElement] = new IdentityIso[GroupElement]()
+  implicit val SigmaPropIso: Iso[SigmaProp, SigmaProp] = new IdentityIso[SigmaProp]()
+  implicit val AvlTreeIso: Iso[AvlTree, AvlTree] = new IdentityIso[AvlTree]()
+  implicit val isoIso: Iso[Box, Box] = new IdentityIso[Box]()
+  implicit val HeaderIso: Iso[Header, Header] = new IdentityIso[Header]()
+  implicit val PreHeaderIso: Iso[PreHeader, PreHeader] = new IdentityIso[PreHeader]()
+}
+
+object Iso extends IsoLowPriority {
+
+  /** Any type is isomorphic to itself, provided there is ErgoType descriptor.
+    * Given descriptor of type A, constructs identity Iso.
+    */
+  class IdentityIso[A](implicit tA: ErgoType[A]) extends Iso[A, A] {
+    override def scalaType: ErgoType[A] = tA
+    override def javaType: ErgoType[A] = tA
+    override def toJava(x: A): A = x
+    override def toScala(y: A): A = y
+  }
+
   /** Iso implementation for primitive types like Byte, Short, etc. (see below) */
   class PrimIso[S, J](
       implicit to: S => J, from: J => S,
