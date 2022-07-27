@@ -130,6 +130,9 @@ public class NodeInfo {
   @SerializedName("genesisBlockId")
   private String genesisBlockId = null;
 
+  @SerializedName("restApiUrl")
+  private String restApiUrl = null;
+
   @SerializedName("parameters")
   private Parameters parameters = null;
 
@@ -492,7 +495,15 @@ public class NodeInfo {
     this.genesisBlockId = genesisBlockId;
   }
 
-  public NodeInfo parameters(Parameters parameters) {
+    public String getRestApiUrl() {
+        return restApiUrl;
+    }
+
+    public void setRestApiUrl(String restApiUrl) {
+        this.restApiUrl = restApiUrl;
+    }
+
+    public NodeInfo parameters(Parameters parameters) {
     this.parameters = parameters;
     return this;
   }
@@ -539,12 +550,13 @@ public class NodeInfo {
         Objects.equals(this.headersScore, nodeInfo.headersScore) &&
         Objects.equals(this.fullBlocksScore, nodeInfo.fullBlocksScore) &&
         Objects.equals(this.genesisBlockId, nodeInfo.genesisBlockId) &&
+        Objects.equals(this.restApiUrl, nodeInfo.restApiUrl) &&
         Objects.equals(this.parameters, nodeInfo.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, appVersion, fullHeight, headersHeight, bestFullHeaderId, previousFullHeaderId, bestHeaderId, stateRoot, stateType, stateVersion, isMining, peersCount, unconfirmedCount, difficulty, currentTime, launchTime, headersScore, fullBlocksScore, genesisBlockId, parameters);
+    return Objects.hash(name, appVersion, fullHeight, headersHeight, bestFullHeaderId, previousFullHeaderId, bestHeaderId, stateRoot, stateType, stateVersion, isMining, peersCount, unconfirmedCount, difficulty, currentTime, launchTime, headersScore, fullBlocksScore, genesisBlockId, restApiUrl, parameters);
   }
 
 
@@ -572,6 +584,7 @@ public class NodeInfo {
     sb.append("    headersScore: ").append(toIndentedString(headersScore)).append("\n");
     sb.append("    fullBlocksScore: ").append(toIndentedString(fullBlocksScore)).append("\n");
     sb.append("    genesisBlockId: ").append(toIndentedString(genesisBlockId)).append("\n");
+    sb.append("    restApiUrl: ").append(toIndentedString(restApiUrl)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();
