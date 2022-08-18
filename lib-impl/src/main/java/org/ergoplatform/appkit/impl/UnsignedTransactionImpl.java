@@ -4,7 +4,11 @@ import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.appkit.ExtendedInputBox;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.OutBox;
+import org.ergoplatform.appkit.UnsignedTransaction;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
@@ -12,13 +16,10 @@ import java.util.List;
 
 import scala.collection.JavaConversions;
 
-import javax.annotation.Nonnull;
-
 public class UnsignedTransactionImpl implements UnsignedTransaction {
     private final UnsignedErgoLikeTransaction _tx;
     private List<ExtendedInputBox> _boxesToSpend;
     private List<ErgoBox> _dataBoxes;
-    private List<ErgoToken> _tokensToBurn;
     private List<ErgoBox> _outputs;
     private ErgoAddress _changeAddress;
     private ErgoLikeStateContext _stateContext;
@@ -27,13 +28,10 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
 
     public UnsignedTransactionImpl(
         UnsignedErgoLikeTransaction tx, List<ExtendedInputBox> boxesToSpend,
-        List<ErgoBox> dataBoxes, ErgoAddress changeAddress,
-        ErgoLikeStateContext stateContext, BlockchainContextImpl ctx,
-        List<ErgoToken> tokensToBurn) {
+        List<ErgoBox> dataBoxes, ErgoAddress changeAddress, ErgoLikeStateContext stateContext, BlockchainContextImpl ctx) {
         _tx = tx;
         _boxesToSpend = boxesToSpend;
         _dataBoxes = dataBoxes;
-        _tokensToBurn = tokensToBurn;
         _outputs = JavaConversions.seqAsJavaList(_tx.outputs());
         _changeAddress = changeAddress;
         _stateContext = stateContext;
@@ -100,10 +98,5 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     @Override
     public ErgoAddress getChangeAddress() {
         return _changeAddress;
-    }
-
-    @Override
-    public @Nonnull List<ErgoToken> getTokensToBurn() {
-        return _tokensToBurn;
     }
 }

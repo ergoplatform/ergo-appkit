@@ -2,8 +2,11 @@ package org.ergoplatform.appkit;
 
 import org.ergoplatform.ErgoAddress;
 
-import javax.annotation.Nonnull;
 import java.util.List;
+
+import org.ergoplatform.ErgoBox;
+import org.ergoplatform.UnsignedErgoLikeTransaction;
+import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
 /**
  * This interface is used to represent unsigned transactions after they are
@@ -28,13 +31,4 @@ public interface UnsignedTransaction extends Transaction {
      * Returns the change address associated with this unsigned transaction
      */
     ErgoAddress getChangeAddress();
-
-    /**
-     * The list of tokens requested (in builders) for burning in this transaction when
-     * it will be executed on blockchain.
-     *
-     * Returns empty list when no burning was explicitly requested (which is by default).
-     */
-    @Nonnull
-    List<ErgoToken> getTokensToBurn();
 }

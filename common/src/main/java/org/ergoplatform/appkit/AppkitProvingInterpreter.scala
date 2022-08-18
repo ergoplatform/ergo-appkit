@@ -5,24 +5,24 @@ import org.ergoplatform.wallet.interpreter.ErgoInterpreter
 import sigmastate.basics.DLogProtocol.{ProveDlog, DLogProverInput}
 
 import java.util
-import java.util.{Objects, List => JList}
+import java.util.{List => JList}
+import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, subtractTokenColls}
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
+import scorex.crypto.authds.ADKey
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
-import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
+import sigmastate.eval.{IRContext, CompiletimeIRContext}
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, error}
+import sigmastate.interpreter.{Interpreter, CostedProverResult, InterpreterContext, PrecompiledScriptProcessor, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
 import sigmastate.utxo.CostTable
-import special.collection.ExtensionMethods.PairCollOps
-import sigmastate.utils.Helpers._ // for Scala 2.11
+import sigmastate.utils.Helpers._
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
 import spire.syntax.all.cfor
 import scalan.util.Extensions.LongOps
@@ -74,13 +74,8 @@ class AppkitProvingInterpreter(
   }
 
   /** Reduces and signs the given transaction.
-   *
    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
-   * @param boxesToSpend input boxes of the transaction
-   * @param dataBoxes    data inputs of the transaction
-   * @param stateContext state context of the blockchain in which the transaction should be signed
-   * @param baseCost     the cost accumulated before this transaction
-   * @param tokensToBurn requested tokens to be burnt in the transaction, if empty no burning allowed
+   * @param baseCost the cost accumulated before this transaction
    * @return a new signed transaction with all inputs signed and the cost of this transaction
    *         The returned cost doesn't include `baseCost`.
    */
@@ -88,12 +83,11 @@ class AppkitProvingInterpreter(
            boxesToSpend: IndexedSeq[ExtendedInputBox],
            dataBoxes: IndexedSeq[ErgoBox],
            stateContext: ErgoLikeStateContext,
-           baseCost: Int,
-           tokensToBurn: JList[ErgoToken]): Try[(ErgoLikeTransaction, Int)] = Try {
+           baseCost: Int): Try[(ErgoLikeTransaction, Int)] = Try {
     val maxCost = params.maxBlockCost
     var currentCost: Long = baseCost
 
-    val (reducedTx, txCost) = reduceTransaction(unsignedTx, boxesToSpend, dataBoxes, stateContext, baseCost, tokensToBurn)
+    val (reducedTx, txCost) = reduceTransaction(unsignedTx, boxesToSpend, dataBoxes, stateContext, baseCost)
     currentCost = addCostLimited(currentCost, txCost, maxCost, msg = reducedTx.toString())
 
     val (signedTx, cost) = signReduced(reducedTx, currentCost.toInt)
@@ -101,60 +95,23 @@ class AppkitProvingInterpreter(
   }
 
   /** Reduce inputs of the given unsigned transaction to provable sigma propositions using
-   * the given context. See [[ReducedErgoLikeTransaction]] for details.
-   *
-   * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
-   * @param boxesToSpend input boxes of the transaction
-   * @param dataBoxes    data inputs of the transaction
-   * @param stateContext state context of the blockchain in which the transaction should be signed
-   * @param baseCost the cost accumulated so far and before this operation
-   * @param tokensToBurn requested tokens to be burnt in the transaction, if empty no burning allowed
-   * @return a new reduced transaction with all inputs reduced and the cost of this transaction
-   *         The returned cost doesn't include (so they need to be added back to get the total cost):
-   *         1) `baseCost`
-   *         2) reduction cost for each input.
-   */
+    * the given context. See [[ReducedErgoLikeTransaction]] for details.
+    *
+    * @note requires `unsignedTx` and `boxesToSpend` have the same boxIds in the same order.
+    * @param baseCost the cost accumulated so far and before this operation
+    * @return a new reduced transaction with all inputs reduced and the cost of this transaction
+    *         The returned cost doesn't include (so they need to be added back to get the total cost):
+    *         1) `baseCost`
+    *         2) reduction cost for each input.
+    */
   def reduceTransaction(
         unsignedTx: UnsignedErgoLikeTransaction,
         boxesToSpend: IndexedSeq[ExtendedInputBox],
         dataBoxes: IndexedSeq[ErgoBox],
         stateContext: ErgoLikeStateContext,
-        baseCost: Int,
-        tokensToBurn: JList[ErgoToken]): (ReducedErgoLikeTransaction, Int) = {
+        baseCost: Int): (ReducedErgoLikeTransaction, Int) = {
     if (unsignedTx.inputs.length != boxesToSpend.length) throw new Exception("Not enough boxes to spend")
     if (unsignedTx.dataInputs.length != dataBoxes.length) throw new Exception("Not enough data boxes")
-
-    val inputTokens = boxesToSpend.flatMap(_.box.additionalTokens.toArray)
-    val outputTokens = unsignedTx.outputCandidates.flatMap(_.additionalTokens.toArray)
-    val tokenDiff = JavaHelpers.subtractTokens(outputTokens, inputTokens)
-    if (tokenDiff.nonEmpty) {
-      val (toBurn, toMint) = tokenDiff.partition(_._2 < 0)  // those with negative diff are to be burnt
-      if (toBurn.nonEmpty) {
-        if (!tokensToBurn.isEmpty) {
-          val requestedToBurn = isoTokensListToTokenColl.to(tokensToBurn)
-          val diff = JavaHelpers.subtractTokenColls(
-            reducedTokens = toBurn.mapSecond(v => -v), // make positive amounts
-            subtractedTokens = requestedToBurn
-          )
-          if (diff.nonEmpty) {  // empty diff would mean equality
-            throw TokenBalanceException(
-              "Transaction tries to burn tokens, but not how it was requested", diff)
-          }
-        } else {
-            throw TokenBalanceException(
-              "Transaction tries to burn tokens when no burning was requested", tokenDiff)
-        }
-      }
-      if (toMint.nonEmpty) {
-        if (toMint.length > 1) {
-          throw TokenBalanceException("Only one token can be minted in a transaction", toMint)
-        }
-        val isCorrectMintedTokenId = Objects.deepEquals(toMint(0)._1.toArray, boxesToSpend.head.box.id)
-        if (!isCorrectMintedTokenId) {
-          throw TokenBalanceException("Cannot mint a token with invalid id", toMint)
-        }
-      }
-    }
 
     // Cost of transaction initialization: we should read and parse all inputs and data inputs,
     // and also iterate through all outputs to check rules
@@ -289,14 +246,6 @@ class AppkitProvingInterpreter(
   }
 
 }
-
-/** Thrown during transaction signing when inputs token are not balanced with output tokens.
-  * @param tokensDiff balance difference which caused the error
-  */
-case class TokenBalanceException(
-  message: String,
-  tokensDiff: TokenColl
-) extends Exception(s"Input and output tokens are not balanced: $message")
 
 /** Represents data necessary to sign an input of an unsigend transaction.
   * @param reductionResult result of reducing input script to a sigma proposition

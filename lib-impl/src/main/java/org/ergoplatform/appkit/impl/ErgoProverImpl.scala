@@ -43,12 +43,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
     val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
-    val (signed, cost) = _prover.sign(
-      unsignedTx = txImpl.getTx,
-      boxesToSpend = boxesToSpend,
-      dataBoxes = dataBoxes,
-      stateContext = txImpl.getStateContext,
-      baseCost = baseCost, txImpl.getTokensToBurn).getOrThrow
+    val (signed, cost) = _prover.sign(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost).getOrThrow
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
@@ -60,13 +55,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
     val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
-    val (reduced, cost) = _prover.reduceTransaction(
-      unsignedTx = txImpl.getTx,
-      boxesToSpend = boxesToSpend,
-      dataBoxes = dataBoxes,
-      stateContext = txImpl.getStateContext,
-      baseCost = baseCost,
-      tokensToBurn = txImpl.getTokensToBurn)
+    val (reduced, cost) = _prover.reduceTransaction(txImpl.getTx, boxesToSpend, dataBoxes, txImpl.getStateContext, baseCost)
     new ReducedTransactionImpl(_ctx, reduced, cost)
   }
 

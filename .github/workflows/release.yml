@@ -44,7 +44,7 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 
       - name: Build fat jar
-        run: sbt 'set test in assembly := {}' clean assembly
+        run: sbt clean assembly
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:

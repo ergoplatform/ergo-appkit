@@ -116,9 +116,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     val outputCandidatesSeq = JavaHelpers.toIndexedSeq(outputCandidates)
     val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
     val inputBoxesSeq = boxesToSpendSeq.map(eb => eb.box)
-    val requestedToBurn = _tokensToBurn.getOrElse(new ArrayList[ErgoToken])
     val burnTokens = JavaHelpers.createTokensMap(
-      Iso.isoJListErgoTokenToMapPair.to(requestedToBurn))
+      Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn.getOrElse(new ArrayList[ErgoToken])))
     val rewardDelay = if (_ctx.getNetworkType == NetworkType.MAINNET)
       Parameters.MinerRewardDelay_Mainnet
     else
@@ -141,10 +140,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     )
 
     val stateContext = createErgoLikeStateContext
-    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx, requestedToBurn)
+    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx)
   }
 
-  private[appkit] def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
+  private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
     private val _allHeaders = Colls.fromArray(JavaConversions.asScalaIterator(
       _ctx.getHeaders.iterator).map(h => ScalaBridge.toSigmaHeader(h)).toArray)
 
