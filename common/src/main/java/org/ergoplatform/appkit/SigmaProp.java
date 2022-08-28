@@ -23,6 +23,10 @@ public class SigmaProp {
         return Iso.isoSigmaBooleanToByteArray().to(sigmaBoolean);
     }
 
+    public Address toAddress(NetworkType networkType) {
+        return Address.fromSigmaBoolean(sigmaBoolean, networkType);
+    }
+
     /**
      * @return SigmaProp equal to the one that was serialized with {@link #toBytes()}
      */
