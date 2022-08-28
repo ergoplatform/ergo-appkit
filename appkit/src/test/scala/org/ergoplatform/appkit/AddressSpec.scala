@@ -44,6 +44,9 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
 
     val addr5 = Address.fromSigmaBoolean(addr.getSigmaBoolean, NetworkType.MAINNET)
     addr5 shouldBe addr2
+
+    val addr6 = new SigmaProp(ErgoValue.of(addr.getSigmaBoolean).getValue).toAddress(NetworkType.TESTNET)
+    addr6 shouldBe addr
   }
 
   property("Address from ErgoAddress") {
