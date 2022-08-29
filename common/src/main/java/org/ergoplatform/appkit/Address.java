@@ -263,6 +263,11 @@ public class Address {
         return new Address(ergoAddress);
     }
 
+    public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
+        Values.ErgoTree ergoTree = JavaHelpers$.MODULE$.toErgoTree(sigmaBoolean);
+        return fromErgoTree(ergoTree, networkType);
+    }
+
     @Override
     public String toString() {
         return _address.toString();
