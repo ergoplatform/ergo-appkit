@@ -352,6 +352,8 @@ object JavaHelpers {
     }
   }
 
+  def toErgoTree(sigmaBoolean: SigmaBoolean): ErgoTree = ErgoTree.fromSigmaBoolean(sigmaBoolean)
+
   def getStateDigest(tree: AvlTree): Array[Byte] = {
     tree.digest.toArray
   }

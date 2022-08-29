@@ -21,6 +21,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 /**
  * API tests for DefaultApi
@@ -30,7 +33,12 @@ public class DefaultApiTest extends ApiTestBase {
 
     @Before
     public void setup() {
-        api = new ExplorerApiClient("https://api.ergoplatform.com")
+        int timeout = 180;
+        ExplorerApiClient apiClient = new ExplorerApiClient("https://api.ergoplatform.com");
+        apiClient.configureFromOkClientBuilder(new OkHttpClient.Builder().connectTimeout(timeout, TimeUnit.SECONDS)
+            .readTimeout(timeout, TimeUnit.SECONDS)
+            .writeTimeout(timeout, TimeUnit.SECONDS));
+        api = apiClient
             .createService(DefaultApi.class);
     }
 
@@ -266,7 +274,7 @@ public class DefaultApiTest extends ApiTestBase {
         HashMap<String, String> regs = new HashMap<>();
         regs.put("R4", "{\"serializedValue\": \"0702472963123ce32c057907c7a7268bc09f45d9ca57819d3327b9e7497d7b1cc347\"}");
         BoxQuery body = new BoxQuery()
-           .registers(regs);
+            .registers(regs);
         Integer offset = 0;
         Integer limit = 10;
         // TODO: clarify how to use this method
