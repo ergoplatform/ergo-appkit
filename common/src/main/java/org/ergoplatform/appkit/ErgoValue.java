@@ -69,6 +69,11 @@ public class ErgoValue<T> {
           return false;
     }
 
+    @Override
+    public String toString() {
+        return "ErgoValue(" + _value.toString() + ", " + _type.toString() + ")";
+    }
+
     static public ErgoValue<Byte> of(byte value) {
         return new ErgoValue(Iso.jbyteToByte().to(Byte.valueOf(value)), ErgoType.byteType());
     }
@@ -114,7 +119,11 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<Box> of(ErgoBox value) {
-        return new ErgoValue<>(JavaHelpers.SigmaDsl().Box(value), ErgoType.boxType());
+        return of(JavaHelpers.SigmaDsl().Box(value));
+    }
+
+    static public ErgoValue<Box> of(Box value) {
+        return new ErgoValue<>(value, ErgoType.boxType());
     }
 
     static public ErgoValue<Coll<Byte>> of(byte[] arr) {
@@ -134,6 +143,10 @@ public class ErgoValue<T> {
 
     static public <T> ErgoValue<Coll<T>> of(Coll<T> coll, ErgoType<T> tT) {
         return new ErgoValue<>(coll, ErgoType.collType(tT));
+    }
+
+    static public <T> ErgoValue<T> of(T value, ErgoType<T> tT) {
+        return new ErgoValue<>(value, tT);
     }
 
     /**
