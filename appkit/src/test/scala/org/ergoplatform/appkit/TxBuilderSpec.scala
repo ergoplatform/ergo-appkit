@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
@@ -23,7 +22,6 @@ import java.math.BigInteger
 import java.util
 import java.util.Arrays
 import java.util.function.Consumer
-import scala.collection.JavaConversions
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks

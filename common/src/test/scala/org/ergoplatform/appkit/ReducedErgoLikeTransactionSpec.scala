@@ -3,14 +3,14 @@ package org.ergoplatform.appkit
 import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.appkit.ReducedInputData.createReductionResult
 import org.scalacheck.Gen
-import org.scalatest.{PropSpec, Assertion, Matchers}
+import org.scalatest.{Assertion, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.CrossVersionProps
 import sigmastate.interpreter.ContextExtension
 import sigmastate.serialization.SigmaSerializer
 import sigmastate.serialization.generators.ObjectGenerators
 
-class ReducedErgoLikeTransactionSpec extends PropSpec with CrossVersionProps
+class ReducedErgoLikeTransactionSpec extends CrossVersionProps
     with Matchers with ScalaCheckDrivenPropertyChecks with ObjectGenerators {
 
   def reducedInputDataGen(extension: ContextExtension): Gen[ReducedInputData] = for {

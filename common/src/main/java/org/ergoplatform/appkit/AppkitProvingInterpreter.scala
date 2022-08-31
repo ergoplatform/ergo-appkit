@@ -9,7 +9,7 @@ import java.util.{Objects, List => JList}
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, subtractTokenColls}
+import org.ergoplatform.appkit.JavaHelpers.TokenColl
 import org.ergoplatform.appkit.ReducedInputData.createReductionResult
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
