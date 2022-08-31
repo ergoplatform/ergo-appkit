@@ -385,5 +385,14 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
     ReducedErgoLikeTransaction(unsignedTx, reducedInputs)
   }
 
+  /** Parses the [[ReducedErgoLikeTransaction]] using the given blockVersion.
+    * @param blockVersion version of Ergo protocol to use during parsing.
+    */
+  def parse(r: SigmaByteReader, blockVersion: Byte): ReducedErgoLikeTransaction = {
+    val scriptVersion = (blockVersion - 1).toByte
+    VersionContext.withVersions(scriptVersion, scriptVersion) {
+      parse(r)
+    }
+  }
 }
 
