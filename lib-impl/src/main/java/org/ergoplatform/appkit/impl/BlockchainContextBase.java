@@ -12,7 +12,9 @@ import org.ergoplatform.appkit.ReducedTransaction;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.BlockchainParameters;
 
+import scala.Function0;
 import sigmastate.Values;
+import sigmastate.VersionContext$;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteReader;
 
