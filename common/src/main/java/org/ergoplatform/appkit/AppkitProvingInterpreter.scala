@@ -317,7 +317,7 @@ object ReducedInputData {
     * @param cost         cost accumulated during reduction
     */
   def createReductionResult(blockVersion: Byte, sb: SigmaBoolean, cost: Long): ReductionResult = {
-    val scriptVersion = blockVersion - 1
+    val scriptVersion = blockVersion - 1 // convert to script version
     if (scriptVersion >= JitActivationVersion)
       FullReductionResult(null, JitReductionResult(sb, cost))
     else

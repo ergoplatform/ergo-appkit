@@ -10,7 +10,7 @@ import sigmastate.interpreter.ContextExtension
 import sigmastate.serialization.SigmaSerializer
 import sigmastate.serialization.generators.ObjectGenerators
 
-class ReducedErgoLikeTransactionSpec extends PropSpec
+class ReducedErgoLikeTransactionSpec extends PropSpec with CrossVersionProps
     with Matchers with ScalaCheckDrivenPropertyChecks with ObjectGenerators {
 
   def reducedInputDataGen(extension: ContextExtension): Gen[ReducedInputData] = for {
