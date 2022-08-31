@@ -1,3 +1,5 @@
+[5.0.0]
+- block version now required to construct ColdErgoClient
 [4.0.9]
 - ExplorerAndPoolUnspentBoxesLoader moved from package org.ergoplatform.appkit.impl to org.ergoplatform.appkit
 - DefaultApi.getApiV1AddressesP1Transactions new parameter "concise" - use false for old behaviour
