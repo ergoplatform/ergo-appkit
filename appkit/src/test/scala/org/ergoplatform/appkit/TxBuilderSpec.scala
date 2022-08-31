@@ -308,7 +308,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     // the only necessary parameter can either be hard-coded or passed
     // together with ReducedTransaction
     val maxBlockCost = Parameters.ColdClientMaxBlockCost
-    val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost)
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost, Parameters.ColdClientBlockVersion)
 
     coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold
