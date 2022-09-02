@@ -125,6 +125,8 @@ public class BoxOperations {
      *                              up to this number of input boxes to satisfy ERG and token amount
      *                              needed and throws an {@link org.ergoplatform.appkit.InputBoxesSelectionException.InputBoxLimitExceededException}
      *                              otherwise
+     *                              if set to <= 0 (or not set), there is no input box restriction
+     *                              checked by loadTop.
      */
     public BoxOperations withMaxInputBoxesToSelect(int maxInputBoxesToSelect) {
         this.maxInputBoxesToSelect = maxInputBoxesToSelect;
@@ -438,6 +440,7 @@ public class BoxOperations {
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
                         return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
 
+                    // check the maxBoxToSelect restriction, if it is set
                     else if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
                         List<ErgoToken> remainingTokenList = tokensRemaining.getRemainingTokenList();
                         throw new InputBoxesSelectionException.InputBoxLimitExceededException(
