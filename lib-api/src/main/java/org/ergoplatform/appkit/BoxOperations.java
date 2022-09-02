@@ -28,6 +28,7 @@ public class BoxOperations {
     private long feeAmount = MinFee;
     private IUnspentBoxesLoader inputBoxesLoader = new ExplorerApiUnspentLoader();
     private BoxAttachment attachment;
+    private int maxInputBoxesToSelect = 0;
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
 
@@ -115,6 +116,23 @@ public class BoxOperations {
         return this;
     }
 
+    public int getMaxInputBoxesToSelect() {
+        return maxInputBoxesToSelect;
+    }
+
+    /**
+     * @param maxInputBoxesToSelect if set greater than 0, {@link #loadTop()} will only select
+     *                              up to this number of input boxes to satisfy ERG and token amount
+     *                              needed and throws an {@link org.ergoplatform.appkit.InputBoxesSelectionException.InputBoxLimitExceededException}
+     *                              otherwise
+     *                              if set to <= 0 (or not set), there is no input box restriction
+     *                              checked by loadTop.
+     */
+    public BoxOperations withMaxInputBoxesToSelect(int maxInputBoxesToSelect) {
+        this.maxInputBoxesToSelect = maxInputBoxesToSelect;
+        return this;
+    }
+
     /**
      * @param message message to be set for outboxes as {@link BoxAttachmentPlainText}
      */
@@ -171,6 +189,7 @@ public class BoxOperations {
     public long getFeeAmount() {
         return feeAmount;
     }
+
     @Deprecated
     public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
         ErgoProver prover = ctx.newProverBuilder()
@@ -214,6 +233,10 @@ public class BoxOperations {
      * list.
      * The list is then used to select covering boxes.
      *
+     * The method respects a max amount of boxes to be selected set by {@link #withMaxInputBoxesToSelect(int)}.
+     * If this limit is exceeded, a {@link org.ergoplatform.appkit.InputBoxesSelectionException.InputBoxLimitExceededException}
+     * is thrown and no further boxes are loaded.
+     *
      * @return a list of boxes covering the given amount
      */
     public List<InputBox> loadTop() {
@@ -230,7 +253,9 @@ public class BoxOperations {
             inputBoxesLoader.prepareForAddress(sender);
             CoveringBoxes addressUnspentBoxes = getCoveringBoxesFor(remainingAmount, remainingTokens,
                 changeBoxConsidered,
-                page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page));
+                page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page),
+                (maxInputBoxesToSelect <= 0) ? 0 : Math.max(1, maxInputBoxesToSelect - unspentBoxes.size())
+            );
 
             // when a change box needed it needs some extra nanoergs to be sent
             if (!changeBoxConsidered && addressUnspentBoxes.isChangeBoxNeeded()) {
@@ -378,6 +403,14 @@ public class BoxOperations {
                                                     List<ErgoToken> tokensToSpend,
                                                     boolean changeBoxConsidered,
                                                     Function<Integer, List<InputBox>> inputBoxesLoader) {
+        return getCoveringBoxesFor(amountToSpend, tokensToSpend, changeBoxConsidered, inputBoxesLoader, 0);
+    }
+
+    private static CoveringBoxes getCoveringBoxesFor(long amountToSpend,
+                                                     List<ErgoToken> tokensToSpend,
+                                                     boolean changeBoxConsidered,
+                                                     Function<Integer, List<InputBox>> inputBoxesLoader,
+                                                     int maxBoxesToSelect) {
         SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
         Preconditions.checkArgument(amountToSpend > 0 ||
             !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
@@ -406,6 +439,18 @@ public class BoxOperations {
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
                         return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
+
+                    // check the maxBoxToSelect restriction, if it is set
+                    else if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
+                        List<ErgoToken> remainingTokenList = tokensRemaining.getRemainingTokenList();
+                        throw new InputBoxesSelectionException.InputBoxLimitExceededException(
+                            "Input box limit exceeded, could not cover " + remainingAmountToCover +
+                                " nanoERG and " + remainingTokenList.size() + " tokens.",
+                            remainingAmountToCover,
+                            remainingTokenList,
+                            maxBoxesToSelect
+                        );
+                    }
                 }
             }
             // this chunk is not enough, go to the next (if any)
