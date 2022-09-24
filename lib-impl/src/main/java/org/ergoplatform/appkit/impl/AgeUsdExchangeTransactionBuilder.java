@@ -107,7 +107,7 @@ public class AgeUsdExchangeTransactionBuilder {
         List<InputBox> customerBoxesToSpend = loadBoxesToSpendByCustomer(scDelta, rcDelta, totalAmount);
 
         // we load the bank's current box. Bank always have only one box
-        InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxById(bankBoxId) :
+        InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxByIdWithMemPool(bankBoxId) :
             ctx.getDataSource().getUnspentBoxesFor(
                 new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, 0L), 0, 1).get(0);
 
@@ -118,7 +118,7 @@ public class AgeUsdExchangeTransactionBuilder {
 
         // oracle's rate box is needed as data input
         List<InputBox> rateBox = rateBoxId != null ?
-            Collections.singletonList(ctx.getDataSource().getBoxById(rateBoxId)) :
+            Collections.singletonList(ctx.getDataSource().getBoxByIdWithMemPool(rateBoxId)) :
             ctx.getDataSource().getUnspentBoxesFor(
                 new ErgoToken(AgeUsdBank.RATE_BOX_TOKEN_ID, 0L), 0, 1);
 

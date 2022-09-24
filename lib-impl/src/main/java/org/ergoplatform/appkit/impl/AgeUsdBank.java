@@ -4,6 +4,7 @@ import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.explorer.client.model.OutputInfo;
+import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 
 import java.math.BigInteger;
 
@@ -57,6 +58,23 @@ public class AgeUsdBank {
             .serializedValue).getValue();
         rcCirculating = (Long) ErgoValue.fromHex(bankBox.getAdditionalRegisters().get("R5")
             .serializedValue).getValue();
+
+        ergReserve = bankBox.getValue();
+    }
+
+    public AgeUsdBank(ErgoTransactionOutput bankBox, ErgoTransactionOutput rateBox) {
+        if (!rateBox.getAssets().get(0).getTokenId()
+            .equals(RATE_BOX_TOKEN_ID)) {
+            throw new IllegalArgumentException("rateBox should own token with id " + RATE_BOX_TOKEN_ID);
+        }
+        if (!bankBox.getAssets().get(2).getTokenId()
+            .equals(BANK_BOX_TOKEN_ID)) {
+            throw new IllegalArgumentException("bankBox should own token with id " + BANK_BOX_TOKEN_ID);
+        }
+
+        scOraclePrice = (Long) ErgoValue.fromHex(rateBox.getAdditionalRegisters().get("R4")).getValue() / 100;
+        scCirculating = (Long) ErgoValue.fromHex(bankBox.getAdditionalRegisters().get("R4")).getValue();
+        rcCirculating = (Long) ErgoValue.fromHex(bankBox.getAdditionalRegisters().get("R5")).getValue();
 
         ergReserve = bankBox.getValue();
     }
