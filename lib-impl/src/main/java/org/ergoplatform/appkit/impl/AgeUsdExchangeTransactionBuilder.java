@@ -101,10 +101,12 @@ public class AgeUsdExchangeTransactionBuilder {
 
         // > 0: customer will pay, < 0: customer will receive
         long totalAmount = exchangeErgAmount + bankFeeAmount + additionalFeeAmount + Parameters.MinChangeValue;
-        long receiptBoxAmount = Math.max(-totalAmount, Parameters.MinChangeValue);
+        long txFeePaidFromReceipt = (totalAmount < 0 && boxOperations.getFeeAmount() > Parameters.MinFee)
+            ? boxOperations.getFeeAmount() - Parameters.MinFee : 0;
+        long receiptBoxAmount = Math.max(-totalAmount - txFeePaidFromReceipt, Parameters.MinChangeValue);
 
         // we load the boxes to spent for the customer
-        List<InputBox> customerBoxesToSpend = loadBoxesToSpendByCustomer(scDelta, rcDelta, totalAmount);
+        List<InputBox> customerBoxesToSpend = loadBoxesToSpendByCustomer(scDelta, rcDelta, totalAmount, txFeePaidFromReceipt);
 
         // we load the bank's current box. Bank always have only one box
         InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxByIdWithMemPool(bankBoxId) :
@@ -186,7 +188,7 @@ public class AgeUsdExchangeTransactionBuilder {
             .withDataInputs(rateBox).build();
     }
 
-    private List<InputBox> loadBoxesToSpendByCustomer(long scDelta, long rcDelta, long totalAmount) {
+    private List<InputBox> loadBoxesToSpendByCustomer(long scDelta, long rcDelta, long totalAmount, long txFeePaidFromReceipt) {
         boxOperations.withAmountToSpend(Math.max(0, totalAmount));
 
         if (scDelta > 0) {
@@ -198,6 +200,12 @@ public class AgeUsdExchangeTransactionBuilder {
                 new ErgoToken(AgeUsdBank.RC_TOKEN_ID, rcDelta)));
         }
 
-        return boxOperations.loadTop();
+        // reduce the tx fee to pay temporarily so that loadTop will not load boxes for it...
+        // outer method made sure at least Parameters.MinFee remains
+        boxOperations.withFeeAmount(boxOperations.getFeeAmount() - txFeePaidFromReceipt);
+        List<InputBox> inputBoxes = boxOperations.loadTop();
+        // ...and restore the correct value
+        boxOperations.withFeeAmount(boxOperations.getFeeAmount() + txFeePaidFromReceipt);
+        return inputBoxes;
     }
 }

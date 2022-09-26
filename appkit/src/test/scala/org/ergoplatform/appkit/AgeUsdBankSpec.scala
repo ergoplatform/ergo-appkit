@@ -116,7 +116,8 @@ class AgeUsdBankSpec extends PropSpec with Matchers
     storage.unlock("abc")
 
     val unsignedTransaction = ergoClient.execute { ctx: BlockchainContext =>
-      action(ageUsdBank.getExchangeTransactionBuilder(BoxOperations.createForSender(storage.getAddressFor(NetworkType.MAINNET), ctx)))
+      action(ageUsdBank.getExchangeTransactionBuilder(BoxOperations.createForSender(storage.getAddressFor(NetworkType.MAINNET), ctx)
+        .withFeeAmount(Parameters.MinFee * 5)))
     }
 
     unsignedTransaction.getDataInputs.size() shouldBe 1
