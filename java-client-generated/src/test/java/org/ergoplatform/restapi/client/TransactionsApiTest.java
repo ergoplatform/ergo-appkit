@@ -46,7 +46,7 @@ public class TransactionsApiTest extends PeerFinder {
     public void getExpectedWaitTimeTest() throws IOException {
         Integer fee = 1000000;
         Integer txSize = 1000;
-        Integer response = api.getExpectedWaitTime(fee, txSize).execute().body();
+        Long response = api.getExpectedWaitTime(fee, txSize).execute().body();
         assertNotNull(response);
         //assertTrue(response == 0);
     }
