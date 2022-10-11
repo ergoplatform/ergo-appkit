@@ -20,13 +20,14 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
   private val _dLogSecrets = new util.ArrayList[DLogProtocol.DLogProverInput]
 
   override def withMnemonic(mnemonicPhrase: SecretString,
-                            mnemonicPass: SecretString): ErgoProverBuilder = {
-    _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass)
+                            mnemonicPass: SecretString,
+                            usePre1627KeyDerivation: java.lang.Boolean): ErgoProverBuilder = {
+    _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass, usePre1627KeyDerivation)
     this
   }
 
-  override def withMnemonic(mnemonic: Mnemonic): ErgoProverBuilder =
-    withMnemonic(mnemonic.getPhrase, mnemonic.getPassword)
+  override def withMnemonic(mnemonic: Mnemonic, usePre1627KeyDerivation: java.lang.Boolean): ErgoProverBuilder =
+    withMnemonic(mnemonic.getPhrase, mnemonic.getPassword, usePre1627KeyDerivation)
 
   override def withEip3Secret(index: Int): ErgoProverBuilder = {
     require(_masterKey != null, s"Mnemonic is not specified, use withMnemonic method.")

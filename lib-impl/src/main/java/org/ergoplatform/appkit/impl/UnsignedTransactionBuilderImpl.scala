@@ -6,6 +6,7 @@ import org.ergoplatform.appkit.{Iso, _}
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector
+import org.ergoplatform.wallet.boxes.BoxSelector
 import special.collection.Coll
 import special.sigma.Header
 
@@ -130,7 +131,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = rewardDelay,
       burnTokens = burnTokens,
-      boxSelector = DefaultBoxSelector).get
+      boxSelector = new DefaultBoxSelector(None)).get
 
     // the method above don't accept ContextExtension along with inputs, thus, after the
     // transaction has been built we need to zip with the extensions that have been

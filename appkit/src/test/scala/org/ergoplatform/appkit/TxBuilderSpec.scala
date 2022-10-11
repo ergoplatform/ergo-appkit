@@ -2,13 +2,13 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox}
+import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -221,7 +221,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     assertExceptionThrown(
       ergoClient.execute { ctx: BlockchainContext =>
         ctx.newProverBuilder()
-          .withMnemonic(mnemonic, SecretString.empty())
+          .withMnemonic(mnemonic, SecretString.empty(), false)
           .withEip3Secret(0)
           .withEip3Secret(0) // attempt to add the same index
           .build()
@@ -233,14 +233,14 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   private def testEip3Address(ctx: BlockchainContext, index: Int): Address = {
     Address.createEip3Address(index, ctx.getNetworkType,
-      mnemonic, SecretString.empty())
+      mnemonic, SecretString.empty(), false)
   }
 
   property("ErgoProverBuilder.withEip3Secret should pass secrets to the prover") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
       val prover = ctx.newProverBuilder()
-        .withMnemonic(mnemonic, SecretString.empty())
+        .withMnemonic(mnemonic, SecretString.empty(), false)
         .withEip3Secret(0)
         .withEip3Secret(1)
         .build()
@@ -399,6 +399,12 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       // both boxes should be selected
       inputsSelected.size() shouldBe 2
+
+      // if we restrict to a single box, we face InputBoxLimitExceededException
+      assertExceptionThrown(
+        operations.withMaxInputBoxesToSelect(1).loadTop(),
+        exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
+      )
     }
 
   }
@@ -422,7 +428,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val ergoTokens = tokenList.getItems
         .convertTo[IndexedSeq[TokenInfo]]
         .map { ti => new ErgoToken(ti.getId, ti.getEmissionAmount) }
-      
+
       val tokenList1 = ergoTokens.take(150)
       val tokenList2 = ergoTokens.takeRight(110)
       // first box: 1 ERG + tx fee + token that will cause a change

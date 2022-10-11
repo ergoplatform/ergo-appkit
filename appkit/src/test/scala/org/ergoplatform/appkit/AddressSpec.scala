@@ -28,16 +28,25 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
   }
 
   property("Address fromMnemonic") {
-    val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic, SecretString.empty())
+    val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonic, SecretString.empty(), false)
     addr.toString shouldBe addrStr
     checkIsTestnetP2PKAddress(addr)
 
-    val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
+    val addr2 = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty(), false)
     addr2 shouldNot be (addr)
     addr2.toString shouldNot be (addrStr)
 
     val addr3 = Address.fromErgoTree(addr.getErgoAddress.script, NetworkType.TESTNET)
     addr3 shouldBe addr
+
+    val addr4 = SigmaProp.createFromAddress(addr).toAddress(NetworkType.TESTNET)
+    addr4 shouldBe addr
+
+    val addr5 = Address.fromSigmaBoolean(addr.getSigmaBoolean, NetworkType.MAINNET)
+    addr5 shouldBe addr2
+
+    val addr6 = new SigmaProp(ErgoValue.of(addr.getSigmaBoolean).getValue).toAddress(NetworkType.TESTNET)
+    addr6 shouldBe addr
   }
 
   property("Address from ErgoAddress") {
@@ -69,12 +78,12 @@ class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyCh
   }
 
   property("Address createEip3Address") {
-    val addr = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty())
-    val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, mnemonic, SecretString.empty())
+    val addr = Address.fromMnemonic(NetworkType.MAINNET, mnemonic, SecretString.empty(), false)
+    val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, mnemonic, SecretString.empty(), false)
     firstEip3Addr.toString shouldBe firstEip3AddrStr
     addr.toString shouldNot be (firstEip3AddrStr)
 
-    val secondEip3Addr = Address.createEip3Address(1, NetworkType.MAINNET, mnemonic, SecretString.empty())
+    val secondEip3Addr = Address.createEip3Address(1, NetworkType.MAINNET, mnemonic, SecretString.empty(), false)
     secondEip3Addr.toString shouldBe secondEip3AddrStr
 
     Address.fromPropositionBytes(NetworkType.MAINNET, addr.toPropositionBytes) shouldBe addr

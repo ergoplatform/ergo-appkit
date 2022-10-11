@@ -1,21 +1,14 @@
 package org.ergoplatform.appkit
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
-import scalan.RType
 import scorex.util.encode.Base16
 import sigmastate._
 import sigmastate.Values.Constant
-import sigmastate.eval.SigmaDsl
 import sigmastate.serialization.ValueSerializer
 import sigmastate.serialization.generators.ObjectGenerators
 import JavaHelpers._
 import special.collection.Coll
 
-class ErgoValueSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
-  with AppkitTestingCommon with ObjectGenerators {
-
-  def Coll[T](items: T*)(implicit cT: RType[T]) = SigmaDsl.Colls.fromItems(items:_*)
+class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGenerators {
 
   def constToHex[T <: SType](c: Constant[T]): String = {
     val bytes = ValueSerializer.serialize(c)
