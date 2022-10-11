@@ -21,10 +21,10 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
     withNewStorageFor(mnemonicWithPassword, encryptionPass) { storage =>
       storage.unlock(encryptionPass)
       storage.isLocked shouldBe false
-      val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonicWithPassword)
+      val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonicWithPassword, false)
       val secret = storage.getSecret()
       secret should not be(null)
-      val expSecret = JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword)
+      val expSecret = JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword, false)
       expSecret shouldBe secret
       storage.getAddressFor(NetworkType.TESTNET) shouldBe addr
     }
@@ -56,7 +56,7 @@ class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenProp
   def withNewStorageFor(mnemonic: Mnemonic, encryptionPass: String)(block: SecretStorage => Unit): Unit = {
     withTempDir { dir =>
       val dirPath = dir.getPath
-      val storage = SecretStorage.createFromMnemonicIn(dirPath, mnemonic, encryptionPass)
+      val storage = SecretStorage.createFromMnemonicIn(dirPath, mnemonic, encryptionPass, false)
       try {
         block(storage)
       }

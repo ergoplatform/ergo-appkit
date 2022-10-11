@@ -425,10 +425,18 @@ object JavaHelpers {
     if (secretString == null || secretString.isEmpty) None else Some(secretString)
   }
 
-  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
+  /**
+   * Create an extended secret key from mnemonic
+   *
+   * @param seedPhrase secret seed phrase to be used in prover for generating proofs.
+   * @param pass   password to protect secret seed phrase.
+   * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+   * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+   */
+  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null, usePre1627KeyDerivation: java.lang.Boolean): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
     val seed = mnemonicToSeed(seedPhrase.toStringUnsecure, passOpt)
-    val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
+    val masterKey = ExtendedSecretKey.deriveMasterKey(seed, usePre1627KeyDerivation)
     masterKey
   }
 

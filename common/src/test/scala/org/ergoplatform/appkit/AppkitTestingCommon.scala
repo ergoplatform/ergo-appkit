@@ -25,7 +25,8 @@ trait AppkitTestingCommon {
   /** The address which corresponds to master key of the `mnemonic`. */
   val address = Address.fromMnemonic(
     NetworkType.MAINNET,
-    Mnemonic.create(mnemonic, SecretString.empty()))
+    Mnemonic.create(mnemonic, SecretString.empty()), 
+    false)
 
   /** Helper method to construct a collection from items. */
   def Coll[T](items: T*)(implicit cT: RType[T]) = SigmaDsl.Colls.fromItems(items:_*)

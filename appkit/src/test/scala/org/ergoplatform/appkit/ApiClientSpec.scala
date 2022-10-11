@@ -17,7 +17,7 @@ class ApiClientSpec
         with HttpClientTesting {
 
   val seed = SecretString.create("abc")
-  val masterKey = JavaHelpers.seedToMasterKey(seed)
+  val masterKey = JavaHelpers.seedToMasterKey(seed, null, false)
   implicit val vs = ValidationRules.currentSettings
 
   property("parse ErgoTree") {

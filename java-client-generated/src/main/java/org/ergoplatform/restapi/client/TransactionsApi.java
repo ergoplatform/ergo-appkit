@@ -37,7 +37,7 @@ public interface TransactionsApi {
    * @return Call&lt;Integer&gt;
    */
   @GET("transactions/waitTime")
-  Call<Integer> getExpectedWaitTime(
+  Call<Long> getExpectedWaitTime(
         @retrofit2.http.Query("fee") Integer fee                ,     @retrofit2.http.Query("txSize") Integer txSize                
   );
 

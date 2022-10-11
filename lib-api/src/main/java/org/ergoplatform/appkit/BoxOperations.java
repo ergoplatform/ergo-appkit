@@ -191,9 +191,9 @@ public class BoxOperations {
     }
 
     @Deprecated
-    public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic) {
+    public static ErgoProver createProver(BlockchainContext ctx, Mnemonic mnemonic, Boolean usePre1627KeyDerivation) {
         ErgoProver prover = ctx.newProverBuilder()
-            .withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword())
+            .withMnemonic(mnemonic.getPhrase(), mnemonic.getPassword(), usePre1627KeyDerivation)
             .build();
         return prover;
     }
