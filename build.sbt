@@ -134,8 +134,7 @@ lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersi
     .exclude("org.typelevel", "machinist")
     .exclude("org.typelevel", "cats-kernel")
 
-lazy val ergoWallet = ("org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion)
-    .exclude("org.scorexfoundation", "sigma-state")
+lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
 
 lazy val mockWebServer = "com.squareup.okhttp3" % "mockwebserver" % "3.12.0" % "test"
 
