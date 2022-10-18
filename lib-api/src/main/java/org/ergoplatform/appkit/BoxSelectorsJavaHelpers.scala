@@ -32,7 +32,7 @@ object BoxSelectorsJavaHelpers {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
       .map(InputBoxWrapper.apply).toIterator
     val targetAssets = tokensToSpend.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
-    val foundBoxes: IndexedSeq[InputBox] = DefaultBoxSelector.select(inputBoxes, amountToSpend, targetAssets) match {
+    val foundBoxes: IndexedSeq[InputBox] = new DefaultBoxSelector(None).select(inputBoxes, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
           throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
       case Left(err: NotEnoughErgsError) => {

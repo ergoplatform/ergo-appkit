@@ -6,6 +6,7 @@ import org.ergoplatform.appkit.{Iso, _}
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector
+import org.ergoplatform.wallet.boxes.BoxSelector
 import special.collection.Coll
 import special.sigma.Header
 
@@ -116,8 +117,9 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     val outputCandidatesSeq = JavaHelpers.toIndexedSeq(outputCandidates)
     val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
     val inputBoxesSeq = boxesToSpendSeq.map(eb => eb.box)
+    val requestedToBurn = _tokensToBurn.getOrElse(new ArrayList[ErgoToken])
     val burnTokens = JavaHelpers.createTokensMap(
-      Iso.isoJListErgoTokenToMapPair.to(_tokensToBurn.getOrElse(new ArrayList[ErgoToken])))
+      Iso.isoJListErgoTokenToMapPair.to(requestedToBurn))
     val rewardDelay = if (_ctx.getNetworkType == NetworkType.MAINNET)
       Parameters.MinerRewardDelay_Mainnet
     else
@@ -129,7 +131,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = rewardDelay,
       burnTokens = burnTokens,
-      boxSelector = DefaultBoxSelector).get
+      boxSelector = new DefaultBoxSelector(None)).get
 
     // the method above don't accept ContextExtension along with inputs, thus, after the
     // transaction has been built we need to zip with the extensions that have been
@@ -140,10 +142,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     )
 
     val stateContext = createErgoLikeStateContext
-    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx)
+    new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx, requestedToBurn)
   }
 
-  private def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
+  private[appkit] def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
     private val _allHeaders = Colls.fromArray(JavaConversions.asScalaIterator(
       _ctx.getHeaders.iterator).map(h => ScalaBridge.toSigmaHeader(h)).toArray)
 
