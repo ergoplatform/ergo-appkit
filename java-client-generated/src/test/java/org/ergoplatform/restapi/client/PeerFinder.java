@@ -21,7 +21,7 @@ public class PeerFinder extends ApiTestBase {
         "94.130.108.35"
     };
 
-    ApiClient findPeer(boolean returnFirstFound) {
+    protected ApiClient findPeer(boolean returnFirstFound) {
         ApiClient res = null;
         for (String peer : knownPeers) {
             try {
