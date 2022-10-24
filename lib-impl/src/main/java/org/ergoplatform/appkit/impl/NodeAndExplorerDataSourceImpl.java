@@ -157,6 +157,12 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     }
 
     @Override
+    public InputBox getBoxByIdWithSpent(String boxId) {
+        OutputInfo outputInfo = executeCall(explorerApi.getApiV1BoxesP1(boxId));
+        return new InputBoxImpl(outputInfo);
+    }
+
+    @Override
     public String sendTransaction(SignedTransaction tx) {
         ErgoLikeTransaction ergoTx = ((SignedTransactionImpl) tx).getTx();
         List<ErgoTransactionDataInput> dataInputsData =

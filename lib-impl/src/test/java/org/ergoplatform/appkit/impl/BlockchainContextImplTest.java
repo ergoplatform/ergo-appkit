@@ -117,6 +117,11 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
+        public InputBox getBoxByIdWithSpent(String boxId) {
+            return null;
+        }
+
+        @Override
         public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
             return null;
         }
