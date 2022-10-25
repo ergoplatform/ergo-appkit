@@ -191,7 +191,9 @@ object ScalaBridge {
           .boxId(ErgoAlgos.encode(box.id))
           .value(box.value)
           .ergoTree(ErgoAlgos.encode(TreeSerializer.serializeErgoTree(box.ergoTree)))
-          .assets(assets.map(asset => new AssetInstanceInfo().tokenId(asset.getTokenId).amount(asset.getAmount)))
+          .assets(assets.convertTo[IndexedSeq[Asset]].zipWithIndex
+            .map{ case (asset: Asset, idx: Int) => new AssetInstanceInfo().tokenId(asset.getTokenId).amount(asset.getAmount).index(idx) }
+            .convertTo[JList[AssetInstanceInfo]])
           .additionalRegisters(regs)
           .creationHeight(box.creationHeight)
           .transactionId(box.transactionId)
