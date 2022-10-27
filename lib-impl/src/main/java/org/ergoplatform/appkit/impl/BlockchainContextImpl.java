@@ -76,7 +76,7 @@ public class BlockchainContextImpl extends BlockchainContextBase {
     public InputBox[] getBoxesById(String... boxIds) throws ErgoClientException {
         List<InputBox> list = new ArrayList<>();
         for (String id : boxIds) {
-            list.add(_dataSource.getBoxById(id));
+            list.add(_dataSource.getBoxById(id, false, false));
         }
         return list.toArray(new InputBox[0]);
     }

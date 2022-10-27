@@ -102,22 +102,12 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
-        public InputBox getBoxById(String boxId) {
+        public InputBox getBoxById(String boxId, boolean findInPool, boolean findInSpent) {
             return null;
         }
 
         @Override
         public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
-            return null;
-        }
-
-        @Override
-        public InputBox getBoxByIdWithMemPool(String boxId) {
-            return null;
-        }
-
-        @Override
-        public InputBox getBoxByIdWithSpent(String boxId) {
             return null;
         }
 

@@ -24,29 +24,15 @@ public interface BlockchainDataSource {
     List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders);
 
     /**
-     * Get box contents for an unspent box by a unique identifier for use as an Input
-     *
-     * @param boxId ID of a wanted box (required)
-     * @return InputBox
-     */
-    InputBox getBoxById(String boxId);
-
-    /**
      * Get box contents for an unspent box by a unique identifier for use as an Input,
      * including mempool boxes
      *
      * @param boxId ID of a wanted box (required)
+     * @param findInPool whether to find boxes that are currently in mempool
+     * @param findInSpent whether to find boxes that are spent
      * @return InputBox
      */
-    InputBox getBoxByIdWithMemPool(String boxId);
-
-    /**
-     * Get box contents for an unspent or spent box by a unique identifier for use as register
-     * contents or for informational purposes
-     * @param boxId
-     * @return InputBox
-     */
-    InputBox getBoxByIdWithSpent(String boxId);
+    InputBox getBoxById(String boxId, boolean findInPool, boolean findInSpent);
 
     /**
      * Send an Ergo transaction
