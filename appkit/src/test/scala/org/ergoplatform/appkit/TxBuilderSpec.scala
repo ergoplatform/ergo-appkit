@@ -469,6 +469,47 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   }
 
+  property("Test same token multiple times") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val (storage, _) = loadStorageE2()
+
+      val recipient = address
+
+      // send 1 ERG
+      val amountToSend = 1000L * 1000 * 1000
+      val pkContract = recipient.toErgoContract
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee + Parameters.MinChangeValue)
+        .contract(pkContract)
+        // the same token twice
+        .tokens(new ErgoToken(mockTxId, 1), new ErgoToken(mockTxId, 1))
+        .build().convertToInputWith(mockTxId, 0)
+
+      val unsigned = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .putToContractTxUnsigned(pkContract)
+
+      // this fails due to token burning check - instead, tokens should be in change box FIXME
+      val prover = ctx.newProverBuilder.build // prover without secrets
+      val reduced = prover.reduce(unsigned, 0)
+
+      // this fails with NotEnoughTokensException, although there are enough tokens available
+      val spendAllTokens = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 2)))
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .putToContractTxUnsigned(pkContract)
+
+    }
+
+  }
+
   property("Special tx building cases") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
