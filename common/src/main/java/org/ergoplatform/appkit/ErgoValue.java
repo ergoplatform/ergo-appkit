@@ -132,6 +132,26 @@ public class ErgoValue<T> {
         return new ErgoValue<Coll<Byte>>(value, type);
     }
 
+    static public ErgoValue<Coll<Long>> of(long[] arr) {
+        return new ErgoValue<Coll<Long>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.longType()));
+    }
+
+    static public ErgoValue<Coll<Boolean>> of(boolean[] arr) {
+        return new ErgoValue<Coll<Boolean>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.booleanType()));
+    }
+
+    static public ErgoValue<Coll<Short>> of(short[] arr) {
+        return new ErgoValue<Coll<Short>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.shortType()));
+    }
+
+    static public ErgoValue<Coll<Integer>> of(int[] arr) {
+        return new ErgoValue<Coll<Integer>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.integerType()));
+    }
+
     static public <A, B> ErgoValue<Tuple2<A, B>> pairOf(ErgoValue<A> val1, ErgoValue<B> val2) {
         return new ErgoValue<>(new Tuple2<>(val1.getValue(), val2.getValue()),
             ErgoType.pairType(val1.getType(), val2.getType()));

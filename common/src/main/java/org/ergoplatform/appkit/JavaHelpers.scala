@@ -475,6 +475,14 @@ object JavaHelpers {
     in.toArray
   }
 
+  def collFrom(arr: Array[Long]): Coll[Long] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Int]): Coll[Int] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Boolean]): Coll[Boolean] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Short]): Coll[Short] = Colls.fromArray(arr)
+
   def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
     val r = SigmaSerializer.startReader(ergoTree.bytes)
     ErgoTreeSerializer.DefaultSerializer.deserializeHeaderWithTreeBytes(r)._4

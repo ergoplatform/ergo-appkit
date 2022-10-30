@@ -20,9 +20,17 @@ public class ErgoValueTest {
         ErgoValue<Short> shortErgoValue = ErgoValue.of((short) 1);
         ErgoValue<BigInt> bigIntErgoValue = ErgoValue.of(BigInteger.ZERO);
         ErgoValue<Coll<Byte>> byteArrayErgoValue = ErgoValue.of(new byte[] {0, 1, 2});
+        ErgoValue<Coll<Short>> shortArrayErgoValue = ErgoValue.of(new short[] {0, 1, 2});
+        ErgoValue<Coll<Integer>> intArrayErgoValue = ErgoValue.of(new int[] {0, 1, 2});
+        ErgoValue<Coll<Boolean>> boolArrayErgoValue = ErgoValue.of(new boolean[] {false, true});
+        ErgoValue<Coll<Long>> longArrayErgoValue = ErgoValue.of(new long[] {0, 1, 2});
 
         BigInteger bigIntValue = bigIntErgoValue.getValue().value();
+        boolean booleanFromCollValue = boolArrayErgoValue.getValue().apply(0);
         byte byteFromCollValue = byteArrayErgoValue.getValue().apply(0);
+        short shortFromCollValue = shortArrayErgoValue.getValue().apply(0);
+        int intFromCollValue = intArrayErgoValue.getValue().apply(0);
+        long longFromCollValue = longArrayErgoValue.getValue().apply(0);
         boolean booleanValue = booleanErgoValue.getValue();
         byte byteValue = byteErgoValue.getValue();
         short shortValue = shortErgoValue.getValue();
@@ -34,7 +42,11 @@ public class ErgoValueTest {
         assertEquals(true, booleanValue);
         assertEquals(1, byteValue);
         assertEquals(1, shortValue);
+        assertFalse(booleanFromCollValue);
         assertEquals(0, byteFromCollValue);
+        assertEquals(0, shortFromCollValue);
+        assertEquals(0, intFromCollValue);
+        assertEquals(0, longFromCollValue);
         assertEquals(BigInteger.ZERO, bigIntValue);
     }
 }
