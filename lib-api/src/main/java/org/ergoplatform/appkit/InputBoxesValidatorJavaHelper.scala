@@ -20,7 +20,9 @@ object InputBoxesValidatorJavaHelper {
 
     override def tokens: Map[ModifierId, Long] = {
       val tokens = mutable.Map[ModifierId, Long]()
-      inputBox.getTokens.forEach(token => AssetUtils.mergeAssetsMut(tokens, Map.apply(bytesToId(token.getId.getBytes) -> token.getValue)))
+      inputBox.getTokens.convertTo[IndexedSeq[ErgoToken]].foreach { token: ErgoToken =>
+        AssetUtils.mergeAssetsMut(tokens, Map.apply(bytesToId(token.getId.getBytes) -> token.getValue))
+      }
       tokens.toMap
     }
   }
