@@ -6,8 +6,6 @@ import static org.ergoplatform.appkit.Parameters.MinFee;
 
 import com.google.common.base.Preconditions;
 
-import org.ergoplatform.P2PKAddress;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -240,8 +238,19 @@ public class BoxOperations {
      * @return a list of boxes covering the given amount
      */
     public List<InputBox> loadTop() {
+        return loadTop(0);
+    }
+
+    /**
+     * Like {@link #loadTop()}, but this method allows giving a nanoerg amount that is not needed
+     * to be covered. Use this method if you have to provide boxes manually for the transaction,
+     * but need to load missing amounts with this method.
+     *
+     * @param amountCovered amount not needed to be covered by boxes loaded
+     */
+    public List<InputBox> loadTop(long amountCovered) {
         List<InputBox> unspentBoxes = new ArrayList<>();
-        long grossAmount = amountToSpend + feeAmount;
+        long grossAmount = amountToSpend + feeAmount - amountCovered;
         long remainingAmount = grossAmount;
         boolean changeBoxConsidered = false;
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
@@ -275,8 +284,9 @@ public class BoxOperations {
             if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) break;
             remainingTokens = tokensHelper.getRemainingTokenList();
         }
-        List<InputBox> selected = BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, grossAmount, tokensToSpend);
-        return selected;
+        // check if we have enough tokens and ERG
+        InputBoxesValidatorJavaHelper.validateBoxes(unspentBoxes, grossAmount, tokensToSpend);
+        return unspentBoxes;
     }
 
     /**

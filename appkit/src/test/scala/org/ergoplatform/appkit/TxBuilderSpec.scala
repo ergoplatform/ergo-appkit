@@ -409,6 +409,45 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   }
 
+  property("use changebox to consolidate") {
+    // this demonstrates that unnecessary input boxes can be picked up to consolidate wallet boxes
+    // via change box on the fly (issue #182)
+
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val (_, senders) = loadStorageE2()
+      val recipient = address
+      val pkContract = recipient.toErgoContract
+
+      // send 0.5 ERG
+      val amountToSend = 500L * 1000 * 1000
+
+      // first box: 1 ERG
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: 1 ERG
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val tx = ctx.newTxBuilder().boxesToSpend(util.Arrays.asList(input1, input2))
+        .outputs(ctx.newTxBuilder().outBoxBuilder().contract(pkContract).value(amountToSend).build())
+        .sendChangeTo(recipient.getErgoAddress)
+        .fee(Parameters.MinFee)
+        .build()
+
+      // both boxes should be selected
+      tx.getInputs.size() shouldBe 2
+      tx.getOutputs.size() shouldBe 3
+
+    }
+
+  }
+
   property("Test changebox token amount max 100") {
     val ergoClient = createMockedErgoClient(data)
 

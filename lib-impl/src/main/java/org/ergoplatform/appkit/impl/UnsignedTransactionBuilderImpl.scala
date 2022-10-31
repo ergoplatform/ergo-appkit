@@ -1,22 +1,19 @@
 package org.ergoplatform.appkit.impl
 
-import java.util
 import org.ergoplatform._
-import org.ergoplatform.appkit.{Iso, _}
+import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
+import org.ergoplatform.appkit._
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector
-import org.ergoplatform.wallet.boxes.BoxSelector
+import scorex.crypto.authds.ADDigest
+import sigmastate.eval.Colls
 import special.collection.Coll
 import special.sigma.Header
 
+import java.util
 import java.util._
 import java.util.stream.Collectors
-import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
-import scorex.crypto.authds.ADDigest
-import org.ergoplatform.appkit.JavaHelpers._
-import sigmastate.eval.Colls
-
 import scala.collection.JavaConversions
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
@@ -131,7 +128,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = rewardDelay,
       burnTokens = burnTokens,
-      boxSelector = new DefaultBoxSelector(None)).get
+      boxSelector = new InputBoxesValidator()).get
 
     // the method above don't accept ContextExtension along with inputs, thus, after the
     // transaction has been built we need to zip with the extensions that have been
