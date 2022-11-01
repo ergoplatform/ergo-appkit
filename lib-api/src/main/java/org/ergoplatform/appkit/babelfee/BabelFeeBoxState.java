@@ -3,6 +3,7 @@ package org.ergoplatform.appkit.babelfee;
 import org.ergoplatform.appkit.ErgoId;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
+import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.OutBox;
 import org.ergoplatform.appkit.OutBoxBuilder;
 import org.ergoplatform.appkit.Parameters;
@@ -12,10 +13,12 @@ import org.ergoplatform.appkit.UnsignedTransactionBuilder;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 /**
- * Represents a Babel Fee Box, see EIP-0031
+ * Represents a Babel Fee Box state, see EIP-0031
  */
-public class BabelFeeBox {
+public class BabelFeeBoxState {
 
     private final long pricePerToken;
     private final ErgoId tokenId;
@@ -23,7 +26,7 @@ public class BabelFeeBox {
     private final long value;
     private final long tokenAmount;
 
-    public BabelFeeBox(TransactionBox ergoBox) {
+    public BabelFeeBoxState(TransactionBox ergoBox) {
         value = ergoBox.getValue();
         List<ErgoValue<?>> registers = ergoBox.getRegisters();
         boxCreator = new SigmaProp((special.sigma.SigmaProp) registers.get(0).getValue());
@@ -42,7 +45,7 @@ public class BabelFeeBox {
         }
     }
 
-    BabelFeeBox(long pricePerToken, ErgoId tokenId, SigmaProp boxCreator, long value, long tokenAmount) {
+    BabelFeeBoxState(long pricePerToken, ErgoId tokenId, SigmaProp boxCreator, long value, long tokenAmount) {
         this.pricePerToken = pricePerToken;
         this.tokenId = tokenId;
         this.boxCreator = boxCreator;
@@ -109,13 +112,13 @@ public class BabelFeeBox {
      * @param tokenAmountChange the token amount to add to the new babel fee box
      * @return new babel fee box after swap was done
      */
-    public BabelFeeBox buildSucceedingBabelFeeBox(long tokenAmountChange) {
+    public BabelFeeBoxState buildSucceedingState(long tokenAmountChange) {
         if (tokenAmountChange <= 0)
             throw new IllegalArgumentException("tokenAmountChange must be greater than 0");
         if (tokenAmountChange > maxAmountToBuy())
             throw new IllegalArgumentException("tokenAmountChange must be less or equal maxAmountToBuy");
 
-        return new BabelFeeBox(pricePerToken, tokenId, boxCreator,
+        return new BabelFeeBoxState(pricePerToken, tokenId, boxCreator,
             value - tokenAmountChange * pricePerToken,
             tokenAmountChange + tokenAmount);
     }
@@ -123,11 +126,11 @@ public class BabelFeeBox {
     /**
      * @return outbox representing this babel fee box
      */
-    public OutBox buildOutbox(UnsignedTransactionBuilder txBuilder) {
+    public OutBox buildOutbox(UnsignedTransactionBuilder txBuilder, @Nullable InputBox babelBox) {
         OutBoxBuilder outBoxBuilder = txBuilder.outBoxBuilder()
             .contract(new BabelFeeBoxContract().getContractForToken(tokenId, txBuilder.getNetworkType()))
             .value(value)
-            .registers(ErgoValue.of(boxCreator), ErgoValue.of(pricePerToken));
+            .registers(ErgoValue.of(boxCreator), ErgoValue.of(pricePerToken), ErgoValue.of(babelBox != null ? babelBox.getId().getBytes() : new byte[0]));
 
         if (tokenAmount > 0)
             outBoxBuilder.tokens(new ErgoToken(tokenId, tokenAmount));

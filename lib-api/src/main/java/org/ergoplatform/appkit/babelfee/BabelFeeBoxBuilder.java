@@ -45,7 +45,7 @@ public class BabelFeeBoxBuilder {
         return this;
     }
 
-    public BabelFeeBox build() {
+    public BabelFeeBoxState build() {
         Objects.requireNonNull(boxCreator, "Box creator not set");
         Objects.requireNonNull(tokenId, "Token ID not set");
         if (value <= 0) {
@@ -55,6 +55,6 @@ public class BabelFeeBoxBuilder {
             throw new IllegalArgumentException("pricePerToken must be greater than 0");
         }
 
-        return new BabelFeeBox(pricePerToken, tokenId, boxCreator, value, tokenAmount);
+        return new BabelFeeBoxState(pricePerToken, tokenId, boxCreator, value, tokenAmount);
     }
 }

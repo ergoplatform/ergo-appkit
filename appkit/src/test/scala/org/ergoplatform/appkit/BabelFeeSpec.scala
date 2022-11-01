@@ -1,15 +1,11 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.ErgoScriptPredef
-import org.ergoplatform.appkit.babelfee.{BabelFeeBox, BabelFeeBoxBuilder, BabelFeeOperations}
-import org.ergoplatform.appkit.examples.RunMockedScala.createMockedErgoClient
+import org.ergoplatform.appkit.babelfee.{BabelFeeBoxState, BabelFeeOperations}
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scorex.util.Random
 import scorex.util.encode.Base16
-import sigmastate.interpreter.HintsBag
 
-import java.nio.charset.StandardCharsets
+import java.util
 import java.util.Arrays
 
 class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
@@ -129,6 +125,44 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
 
       ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty(), false).build()
         .sign(txCancel)
+    }
+  }
+
+  property("babel fee box use") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val sender = address
+
+      val txB = ctx.newTxBuilder
+      val babelFeeBoxState = BabelFeeBoxState.newBuilder().withValue(Parameters.OneErg)
+        .withTokenId(ErgoId.create(mockTokenId))
+        .withBoxCreator(Address.create(secondEip3AddrStr))
+        .withPricePerToken(Parameters.MinFee)
+        .build()
+
+      val fee = Parameters.MinFee
+
+      val output = txB.outBoxBuilder
+        .value(Parameters.MinChangeValue)
+        .contract(sender.toErgoContract)
+        .tokens(new ErgoToken(ErgoId.create(mockTokenId), 1000 - babelFeeBoxState.tokensToSellForErgAmount(fee)))
+        .build()
+      val input = txB.outBoxBuilder
+        .value(Parameters.MinChangeValue)
+        .contract(sender.toErgoContract)
+        .tokens(new ErgoToken(ErgoId.create(mockTokenId), 1000))
+        .build().convertToInputWith(mockTokenId, 0)
+
+      val babelTxB = BabelFeeOperations.getBabelFeeTransactionBuilder(txB, babelFeeBoxState.buildOutbox(txB, null).convertToInputWith(mockTokenId, 0), fee)
+
+      val tx = babelTxB.fee(fee)
+        .outputs(output)
+        .boxesToSpend(util.Arrays.asList(input))
+        .sendChangeTo(sender)
+        .build()
+
+      ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty(), false).build()
+        .sign(tx)
     }
   }
 }
