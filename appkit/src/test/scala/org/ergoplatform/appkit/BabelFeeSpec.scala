@@ -1,9 +1,8 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.babelfee.{BabelFeeBoxState, BabelFeeOperations}
+import org.ergoplatform.appkit.babelfee.{BabelFeeBoxContract, BabelFeeBoxState, BabelFeeOperations}
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scorex.util.encode.Base16
 
 import java.util
 import java.util.Arrays
@@ -93,7 +92,8 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
       )
     }
 
-    println(Base16.encode(contract.getErgoTree.bytes))
+    val contract2 = new BabelFeeBoxContract().getContractForToken(ErgoId.create(mockTokenId), NetworkType.MAINNET)
+    contract.getErgoTree shouldBe contract2.getErgoTree
   }
 
 

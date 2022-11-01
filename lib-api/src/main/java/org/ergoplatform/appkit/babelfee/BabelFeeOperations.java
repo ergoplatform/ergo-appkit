@@ -5,6 +5,7 @@ import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.ContextVar;
+import org.ergoplatform.appkit.ErgoContract;
 import org.ergoplatform.appkit.ErgoId;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
@@ -18,8 +19,11 @@ import org.ergoplatform.appkit.UnsignedTransaction;
 import org.ergoplatform.appkit.UnsignedTransactionBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 public class BabelFeeOperations {
     /**
@@ -81,8 +85,46 @@ public class BabelFeeOperations {
 
     }
 
-    public static InputBox findBabelFeeBox(ErgoId tokenId, long feeAmount) {
-        throw new UnsupportedOperationException(); //TODO
+    /**
+     * Tries to fetch a babel fee box from blockchain data source with the given unspent boxes loader
+     *
+     * @param ctx       current blockchain context
+     * @param loader    loader to receive unspent boxes
+     * @param tokenId   tokenId offered to swap
+     * @param feeAmount nanoerg amount needed to swap
+     * @return babel fee box satisfying the needs, or null if none available
+     */
+    @Nullable
+    public static InputBox findBabelFeeBox(BlockchainContext ctx, BoxOperations.IUnspentBoxesLoader loader, ErgoId tokenId, long feeAmount) {
+        ErgoContract contractForToken = new BabelFeeBoxContract().getContractForToken(tokenId, ctx.getNetworkType());
+        Address address = contractForToken.toAddress();
+        loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
+
+        int page = 0;
+        List<InputBox> inputBoxes = loader.loadBoxesPage(ctx, address, 0);
+
+        InputBox returnBox = null;
+        long pricePerToken = Long.MAX_VALUE;
+
+        while (!inputBoxes.isEmpty() && returnBox == null) {
+
+            // find the cheapest box satisfying our fee amount needs
+            for (InputBox inputBox : inputBoxes) {
+                try {
+                    BabelFeeBoxState babelFeeBoxState = new BabelFeeBoxState(inputBox);
+                    if (babelFeeBoxState.getValueAvailableToBuy() > feeAmount && babelFeeBoxState.getPricePerToken() < pricePerToken)
+                        returnBox = inputBox;
+                } catch (Throwable t) {
+                    // ignore, check next
+                }
+            }
+
+            page++;
+            // get another page
+            inputBoxes = loader.loadBoxesPage(ctx, address, page);
+        }
+
+        return returnBox;
     }
 
     /**
