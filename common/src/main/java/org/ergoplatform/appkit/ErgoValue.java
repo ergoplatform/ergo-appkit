@@ -114,6 +114,10 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 
+    static public ErgoValue<special.sigma.SigmaProp> of(org.ergoplatform.appkit.SigmaProp value) {
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value.getSigmaBoolean()), ErgoType.sigmaPropType());
+    }
+
     static public ErgoValue<AvlTree> of(AvlTreeData value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
