@@ -79,8 +79,17 @@ public interface UnsignedTransactionBuilder {
      * Adds change output to the specified address if needed.
      *
      * @param address address to send output
+     * @deprecated use {@link #sendChangeTo(Address)}
      */
+    @Deprecated
     UnsignedTransactionBuilder sendChangeTo(ErgoAddress address);
+
+    /**
+     * Adds change output to the specified address if needed.
+     *
+     * @param address address to send output
+     */
+    UnsignedTransactionBuilder sendChangeTo(Address address);
 
     /**
      * Builds a new unsigned transaction in the {@link BlockchainContext context} inherited from this builder.

@@ -1,11 +1,17 @@
 package org.ergoplatform.appkit.babelfee;
 
 import org.ergoplatform.appkit.Address;
-import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.OutBox;
+import org.ergoplatform.appkit.OutBoxBuilder;
+import org.ergoplatform.appkit.Parameters;
 import org.ergoplatform.appkit.UnsignedTransaction;
+import org.ergoplatform.appkit.UnsignedTransactionBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BabelFeeOperations {
     /**
@@ -35,4 +41,35 @@ public class BabelFeeOperations {
         });
     }
 
+    public static UnsignedTransaction cancelBabelFeeContract(BoxOperations boxOperations, InputBox babelBox) {
+        BabelFeeBox babelFeeBox = new BabelFeeBox(babelBox);
+
+        Address creatorAddress = Address.fromSigmaBoolean(babelFeeBox.getBoxCreator().getSigmaBoolean(),
+            boxOperations.getBlockchainContext().getNetworkType());
+
+        // if we can't pay tx fee from the babel box content, we need to load another box
+        List<InputBox> boxesToSpend;
+        if (babelFeeBox.getValue() < boxOperations.getFeeAmount() + Parameters.MinChangeValue)
+            boxesToSpend = boxOperations.loadTop();
+        else
+            boxesToSpend = new ArrayList<>();
+
+        boxesToSpend.add(0, babelBox);
+
+        UnsignedTransactionBuilder txB = boxOperations.getBlockchainContext().newTxBuilder();
+
+        OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
+            .value(Math.max(Parameters.MinChangeValue, babelFeeBox.getValue() - boxOperations.getFeeAmount()))
+            .contract(creatorAddress.toErgoContract());
+
+        if (!babelBox.getTokens().isEmpty())
+            outBoxBuilder.tokens(babelBox.getTokens().get(0));
+
+        return txB.boxesToSpend(boxesToSpend)
+            .fee(boxOperations.getFeeAmount())
+            .sendChangeTo(creatorAddress)
+            .outputs(outBoxBuilder.build())
+            .build();
+
+    }
 }

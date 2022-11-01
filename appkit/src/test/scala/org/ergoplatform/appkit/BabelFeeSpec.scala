@@ -113,17 +113,22 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .contract(creator.toErgoContract)
         .build().convertToInputWith(mockTokenId, 0)
 
-      val tx = BabelFeeOperations.createNewBabelContractTx(BoxOperations.createForSender(creator, ctx)
+      val txCreate = BabelFeeOperations.createNewBabelContractTx(BoxOperations.createForSender(creator, ctx)
         .withAmountToSpend(amountToSend)
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))),
         ErgoId.create(mockTokenId),
         Parameters.OneErg);
 
-      ctx.newProverBuilder().build().reduce(tx, 0)
+      ctx.newProverBuilder().build().reduce(txCreate, 0)
 
-      val babelFeeErgoBox = tx.getOutputs.get(0).convertToInputWith(mockTokenId, 0)
+      val babelFeeErgoBox = txCreate.getOutputs.get(0).convertToInputWith(mockTokenId, 0)
 
-      val babelFeeBox = new BabelFeeBox(babelFeeErgoBox)
+      // now we cancel the babel box
+      val txCancel = BabelFeeOperations.cancelBabelFeeContract(BoxOperations.createForSender(creator, ctx)
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))), babelFeeErgoBox)
+
+      ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty(), false).build()
+        .sign(txCancel)
     }
   }
 }

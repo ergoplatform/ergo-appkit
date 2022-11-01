@@ -83,6 +83,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
+  override def sendChangeTo(changeAddress: Address): UnsignedTransactionBuilder = {
+    sendChangeTo(changeAddress.getErgoAddress)
+  }
+
   def getNonEmpty[T](list: Option[List[T]], msg: => String): List[T] = {
     list match {
       case Some(list) if !list.isEmpty => list

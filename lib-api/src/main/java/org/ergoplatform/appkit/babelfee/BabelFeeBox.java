@@ -102,6 +102,13 @@ public class BabelFeeBox {
         return (floorAmount * pricePerToken >= nanoergs) ? floorAmount : floorAmount + 1;
     }
 
+    /**
+     * constructs a new babel fee box state based on this fee box with a certain token amount change
+     * done
+     *
+     * @param tokenAmountChange the token amount to add to the new babel fee box
+     * @return new babel fee box after swap was done
+     */
     public BabelFeeBox buildSucceedingBabelFeeBox(long tokenAmountChange) {
         if (tokenAmountChange <= 0)
             throw new IllegalArgumentException("tokenAmountChange must be greater than 0");
