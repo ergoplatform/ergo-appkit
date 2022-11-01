@@ -1,3 +1,8 @@
+[4.0.12]
+- getBoxById(String boxId) was replaced by getBoxById(String boxId, boolean findInPool, boolean findInSpent)
+  the old behaviour (returning only confirmed unspent boxes) can be achieved by calling
+  getBoxById(boxId, false, false)
+
 [4.0.9]
 - ExplorerAndPoolUnspentBoxesLoader moved from package org.ergoplatform.appkit.impl to org.ergoplatform.appkit
 - DefaultApi.getApiV1AddressesP1Transactions new parameter "concise" - use false for old behaviour
