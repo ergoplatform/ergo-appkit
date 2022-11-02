@@ -242,11 +242,11 @@ public class BoxOperations {
     }
 
     /**
-     * Like {@link #loadTop()}, but this method allows giving a nanoerg amount that is not needed
-     * to be covered. Use this method if you have to provide boxes manually for the transaction,
-     * but need to load missing amounts with this method.
+     * Like {@link #loadTop()} loading and returning unspent boxes covering the given amount of
+     * nanoergs, fee and tokens, but you can specify an amount of nanoergs that is already covered
+     * by other input boxes and does not need to be satisfied.
      *
-     * @param amountCovered amount not needed to be covered by boxes loaded
+     * @param amountCovered nanoerg amount that is assumed to be covered by input boxes you provide
      */
     public List<InputBox> loadTop(long amountCovered) {
         List<InputBox> unspentBoxes = new ArrayList<>();
