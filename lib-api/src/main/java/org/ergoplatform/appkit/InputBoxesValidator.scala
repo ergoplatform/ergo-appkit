@@ -48,7 +48,7 @@ class InputBoxesValidator extends BoxSelector {
         }
       } else {
         Left(NotEnoughTokensError(
-          s"not enough boxes to meet token needs $targetAssets (found only $currentAssets)", currentAssets.toMap)
+          s"Not enough tokens in input boxes to send $targetAssets (found only $currentAssets)", currentAssets.toMap)
         )
       }
     } else {
