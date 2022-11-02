@@ -31,8 +31,7 @@ class InputBoxesValidator extends BoxSelector {
     val currentAssets = mutable.Map[ModifierId, Long]()
 
     // select all input boxes - we only validate here
-    while (inputBoxes.hasNext) {
-      val box = inputBoxes.next()
+    inputBoxes.foreach { box: T =>
       currentBalance = currentBalance + box.value
       AssetUtils.mergeAssetsMut(currentAssets, box.tokens)
       res += box

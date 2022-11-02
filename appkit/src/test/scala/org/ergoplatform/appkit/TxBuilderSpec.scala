@@ -441,6 +441,8 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       // both boxes should be selected
+      // ergo-wallet's DefaultBoxSelector discarded the second input because it is not necessary for
+      // the outputs, so this test checks if all inputs are used (size 2)
       tx.getInputs.size() shouldBe 2
       tx.getOutputs.size() shouldBe 3
 
