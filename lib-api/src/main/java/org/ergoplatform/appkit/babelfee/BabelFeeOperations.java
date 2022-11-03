@@ -87,7 +87,7 @@ public class BabelFeeOperations {
     }
 
     /**
-     * Tries to fetch a babel fee box from blockchain data source with the given unspent boxes loader
+     * Tries to fetch a babel fee box for the given tokenId from blockchain data source using the given loader
      *
      * @param ctx       current blockchain context
      * @param loader    loader to receive unspent boxes
