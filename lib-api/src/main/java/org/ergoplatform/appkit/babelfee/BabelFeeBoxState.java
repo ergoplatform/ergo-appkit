@@ -39,7 +39,7 @@ public class BabelFeeBoxState {
             tokenAmount = ergoToken.getValue();
 
             if (!ergoToken.getId().equals(tokenId)) {
-                throw new IllegalStateException("token id of contract and token id in box diverge");
+                throw new IllegalStateException("Token id of contract and token id in babel box should be equial.");
             }
         } else {
             tokenAmount = 0;
