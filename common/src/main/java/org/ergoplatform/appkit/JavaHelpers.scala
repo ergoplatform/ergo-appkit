@@ -41,6 +41,7 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
 import sigmastate.eval.Colls.outerJoin
+import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
 import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
@@ -325,6 +326,12 @@ object JavaHelpers {
    */
   def decodeStringToErgoTree(base16: String): ErgoTree = {
     ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(base16).get)
+  }
+
+  def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
+    val newBytes = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+      ergoTreeBytes, positions, newValues.map(Iso.isoErgoValueToSValue.to))
+    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes._1)
   }
 
   def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {

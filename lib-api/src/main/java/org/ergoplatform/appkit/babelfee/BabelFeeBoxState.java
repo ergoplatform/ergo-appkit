@@ -10,6 +10,7 @@ import org.ergoplatform.appkit.Parameters;
 import org.ergoplatform.appkit.SigmaProp;
 import org.ergoplatform.appkit.TransactionBox;
 import org.ergoplatform.appkit.UnsignedTransactionBuilder;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class BabelFeeBoxState {
         List<ErgoValue<?>> registers = ergoBox.getRegisters();
         boxCreator = new SigmaProp((special.sigma.SigmaProp) registers.get(0).getValue());
         pricePerToken = (Long) registers.get(1).getValue();
-        this.tokenId = new BabelFeeBoxContract().getTokenIdFromErgoTree(ergoBox.getErgoTree());
+        this.tokenId = new BabelFeeBoxContract(ergoBox.getErgoTree()).getTokenId();
 
         if (!ergoBox.getTokens().isEmpty()) {
             ErgoToken ergoToken = ergoBox.getTokens().get(0);
@@ -128,7 +129,7 @@ public class BabelFeeBoxState {
      */
     public OutBox buildOutbox(UnsignedTransactionBuilder txBuilder, @Nullable InputBox babelBox) {
         OutBoxBuilder outBoxBuilder = txBuilder.outBoxBuilder()
-            .contract(new BabelFeeBoxContract().getContractForToken(tokenId, txBuilder.getNetworkType()))
+            .contract(new ErgoTreeContract(new BabelFeeBoxContract(tokenId).getErgoTree(), txBuilder.getNetworkType()))
             .value(value)
             .registers(ErgoValue.of(boxCreator), ErgoValue.of(pricePerToken), ErgoValue.of(babelBox != null ? babelBox.getId().getBytes() : new byte[0]));
 

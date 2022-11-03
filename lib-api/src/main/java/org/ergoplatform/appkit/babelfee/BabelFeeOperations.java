@@ -17,6 +17,7 @@ import org.ergoplatform.appkit.Parameters;
 import org.ergoplatform.appkit.PreHeader;
 import org.ergoplatform.appkit.UnsignedTransaction;
 import org.ergoplatform.appkit.UnsignedTransactionBuilder;
+import org.ergoplatform.appkit.impl.ErgoTreeContract;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +98,7 @@ public class BabelFeeOperations {
      */
     @Nullable
     public static InputBox findBabelFeeBox(BlockchainContext ctx, BoxOperations.IUnspentBoxesLoader loader, ErgoId tokenId, long feeAmount) {
-        ErgoContract contractForToken = new BabelFeeBoxContract().getContractForToken(tokenId, ctx.getNetworkType());
+        ErgoContract contractForToken = new ErgoTreeContract(new BabelFeeBoxContract(tokenId).getErgoTree(), ctx.getNetworkType());
         Address address = contractForToken.toAddress();
         loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
 
