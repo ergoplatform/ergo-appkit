@@ -97,12 +97,12 @@ public class BabelFeeBoxState {
     }
 
     /**
-     * @param nanoergs amount we want to receive, usually to pay transaction fees
-     * @return the amount of tokens to sell to receive at least his amount of nanoergs
+     * @param nanoErgs amount we want to receive, usually to pay transaction fees
+     * @return the amount of tokens to sell to receive at least this amount of nanoErgs
      */
-    public long tokensToSellForErgAmount(long nanoergs) {
-        long floorAmount = nanoergs / pricePerToken;
-        return (floorAmount * pricePerToken >= nanoergs) ? floorAmount : floorAmount + 1;
+    public long tokensToSellForErgAmount(long nanoErgs) {
+        long floorAmount = nanoErgs / pricePerToken;
+        return (floorAmount * pricePerToken >= nanoErgs) ? floorAmount : floorAmount + 1;
     }
 
     /**

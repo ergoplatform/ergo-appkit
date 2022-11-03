@@ -40,7 +40,8 @@ public class BabelFeeOperations {
         ErgoId tokenId,
         long pricePerToken
     ) {
-        BabelFeeBoxState babelFeeBoxState = BabelFeeBoxState.newBuilder().withBoxCreator(boxOperations.getSenders().get(0))
+        BabelFeeBoxState babelFeeBoxState = BabelFeeBoxState.newBuilder()
+            .withBoxCreator(boxOperations.getSenders().get(0))
             .withPricePerToken(pricePerToken)
             .withTokenId(tokenId)
             .withValue(boxOperations.getAmountToSpend())
