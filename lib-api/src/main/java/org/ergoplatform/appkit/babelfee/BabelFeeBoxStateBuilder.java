@@ -6,45 +6,70 @@ import org.ergoplatform.appkit.SigmaProp;
 
 import java.util.Objects;
 
-public class BabelFeeBoxBuilder {
+/**
+ * Builder class to conveniently instantiate a {@link BabelFeeBoxState} with self-defined
+ * information.
+ */
+public class BabelFeeBoxStateBuilder {
     private long pricePerToken;
     private ErgoId tokenId;
     private SigmaProp boxCreator;
     private long value;
     private long tokenAmount;
 
-    public BabelFeeBoxBuilder withPricePerToken(long pricePerToken) {
+    /**
+     * see {@link BabelFeeBoxState#getPricePerToken()}
+     */
+    public BabelFeeBoxStateBuilder withPricePerToken(long pricePerToken) {
         this.pricePerToken = pricePerToken;
         return this;
     }
 
-    public BabelFeeBoxBuilder withTokenId(ErgoId tokenId) {
+    /**
+     * see {@link BabelFeeBoxState#getTokenId()}
+     */
+    public BabelFeeBoxStateBuilder withTokenId(ErgoId tokenId) {
         this.tokenId = tokenId;
         return this;
     }
 
-    public BabelFeeBoxBuilder withBoxCreator(SigmaProp boxCreator) {
+    /**
+     * see {@link BabelFeeBoxState#getBoxCreator()}
+     */
+    public BabelFeeBoxStateBuilder withBoxCreator(SigmaProp boxCreator) {
         this.boxCreator = boxCreator;
         return this;
     }
 
-    public BabelFeeBoxBuilder withBoxCreator(Address address) {
+    /**
+     * see {@link BabelFeeBoxState#getBoxCreator()}
+     */
+    public BabelFeeBoxStateBuilder withBoxCreator(Address address) {
         this.boxCreator = SigmaProp.createFromAddress(address);
         return this;
     }
 
-    public BabelFeeBoxBuilder withValue(long value) {
-        this.value = value;
+    /**
+     * see {@link BabelFeeBoxState#getValue()}
+     */
+    public BabelFeeBoxStateBuilder withValue(long nanoErgValue) {
+        this.value = nanoErgValue;
         return this;
     }
 
-    public BabelFeeBoxBuilder withTokenAmount(long tokenAmount) {
+    /**
+     * see {@link BabelFeeBoxState#getTokenAmount()}
+     */
+    public BabelFeeBoxStateBuilder withTokenAmount(long tokenAmount) {
         if (tokenAmount < 0)
             throw new IllegalArgumentException("pricePerToken must be equal or greater than 0");
         this.tokenAmount = tokenAmount;
         return this;
     }
 
+    /**
+     * @return Babel fee box state built with the given data
+     */
     public BabelFeeBoxState build() {
         Objects.requireNonNull(boxCreator, "Box creator not set");
         Objects.requireNonNull(tokenId, "Token ID not set");

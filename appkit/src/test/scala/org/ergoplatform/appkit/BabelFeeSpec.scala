@@ -69,7 +69,7 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .contract(sender.toErgoContract)
         .tokens(new ErgoToken(
           ErgoId.create(mockTokenId),
-          1000 - babelFeeBoxState.tokensToSellForErgAmount(fee)))
+          1000 - babelFeeBoxState.calcTokensToSellForErgAmount(fee)))
         .build()
 
       val input = txB.outBoxBuilder
@@ -93,6 +93,40 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
         .sign(tx)
+    }
+  }
+
+  property("fetch babel fee boxes") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val creator = address
+
+      val tockenId = ErgoId.create(mockTokenId)
+
+      // find no boxes
+      val babelBox1 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(new util.ArrayList[InputBox]()),
+        tockenId, Parameters.MinFee)
+
+      babelBox1 shouldBe(null)
+
+      val inputBabelBox = BabelFeeBoxState.newBuilder()
+        .withValue(Parameters.OneErg)
+        .withTokenId(tockenId)
+        .withPricePerToken(Parameters.MinFee)
+        .withBoxCreator(creator)
+        .build().buildOutbox(ctx.newTxBuilder(), null)
+        .convertToInputWith(mockTokenId, 0)
+
+      val babelBox2 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(util.Arrays.asList(inputBabelBox)),
+        tockenId, Parameters.MinFee)
+
+      babelBox2 shouldBe inputBabelBox
+
+      // the amount needed (2 ERG) is more than inputBabelBox can offer, so it is discarded
+      val babelBox3 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(util.Arrays.asList(inputBabelBox)),
+        tockenId, Parameters.OneErg * 2)
+
+      babelBox3 shouldBe(null)
     }
   }
 }

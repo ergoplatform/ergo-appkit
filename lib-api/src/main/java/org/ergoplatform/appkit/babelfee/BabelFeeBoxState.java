@@ -18,6 +18,11 @@ import javax.annotation.Nullable;
 
 /**
  * Represents a Babel Fee Box state, see EIP-0031
+ * https://github.com/ergoplatform/eips/blob/master/eip-0031.md
+ * <p>
+ * The term “babel fees“ refers to the concept of paying transaction fees in tokens instead of
+ * platform’s primary token (ERG). It is a contract that buys tokens and pays ERG, suitable to be
+ * used in any transaction.
  */
 public class BabelFeeBoxState {
 
@@ -55,7 +60,7 @@ public class BabelFeeBoxState {
     }
 
     /**
-     * @return price offered per raw token amount
+     * @return nanoErg amount offered per raw token amount
      */
     public long getPricePerToken() {
         return pricePerToken;
@@ -76,11 +81,18 @@ public class BabelFeeBoxState {
     }
 
     /**
-     * @return overall ERG value in the box. not all is available to change for token as a small
-     * amount must remain in the box
+     * @return overall nanoErg value in the box. Not all is available to change for tokens as a
+     * small amount must remain in the successor box
      */
     public long getValue() {
         return value;
+    }
+
+    /**
+     * @return raw amount of tokens already collected in the box
+     */
+    public long getTokenAmount() {
+        return tokenAmount;
     }
 
     /**
@@ -91,9 +103,9 @@ public class BabelFeeBoxState {
     }
 
     /**
-     * @return max token amount possible to swap at best price
+     * @return max token raw amount possible to swap at best price
      */
-    public long maxAmountToBuy() {
+    public long getMaxTokenAmountToBuy() {
         return getValueAvailableToBuy() / pricePerToken;
     }
 
@@ -101,7 +113,7 @@ public class BabelFeeBoxState {
      * @param nanoErgs amount we want to receive, usually to pay transaction fees
      * @return the amount of tokens to sell to receive at least this amount of nanoErgs
      */
-    public long tokensToSellForErgAmount(long nanoErgs) {
+    public long calcTokensToSellForErgAmount(long nanoErgs) {
         long floorAmount = nanoErgs / pricePerToken;
         return (floorAmount * pricePerToken >= nanoErgs) ? floorAmount : floorAmount + 1;
     }
@@ -116,7 +128,7 @@ public class BabelFeeBoxState {
     public BabelFeeBoxState buildSucceedingState(long tokenAmountChange) {
         if (tokenAmountChange <= 0)
             throw new IllegalArgumentException("tokenAmountChange must be greater than 0");
-        if (tokenAmountChange > maxAmountToBuy())
+        if (tokenAmountChange > getMaxTokenAmountToBuy())
             throw new IllegalArgumentException("tokenAmountChange must be less or equal maxAmountToBuy");
 
         return new BabelFeeBoxState(pricePerToken, tokenId, boxCreator,
@@ -125,13 +137,17 @@ public class BabelFeeBoxState {
     }
 
     /**
+     * @param txBuilder         txBuilder to build the new outbox with
+     * @param precedingBabelBox if this is not the initial babel fee box, preceeding babel fee box
+     *                          must be given to set registers correct
      * @return outbox representing this babel fee box
      */
-    public OutBox buildOutbox(UnsignedTransactionBuilder txBuilder, @Nullable InputBox babelBox) {
+    public OutBox buildOutbox(UnsignedTransactionBuilder txBuilder, @Nullable InputBox precedingBabelBox) {
         OutBoxBuilder outBoxBuilder = txBuilder.outBoxBuilder()
             .contract(new ErgoTreeContract(new BabelFeeBoxContract(tokenId).getErgoTree(), txBuilder.getNetworkType()))
             .value(value)
-            .registers(ErgoValue.of(boxCreator), ErgoValue.of(pricePerToken), ErgoValue.of(babelBox != null ? babelBox.getId().getBytes() : new byte[0]));
+            .registers(ErgoValue.of(boxCreator), ErgoValue.of(pricePerToken),
+                ErgoValue.of(precedingBabelBox != null ? precedingBabelBox.getId().getBytes() : new byte[0]));
 
         if (tokenAmount > 0)
             outBoxBuilder.tokens(new ErgoToken(tokenId, tokenAmount));
@@ -139,7 +155,7 @@ public class BabelFeeBoxState {
         return outBoxBuilder.build();
     }
 
-    public static BabelFeeBoxBuilder newBuilder() {
-        return new BabelFeeBoxBuilder();
+    public static BabelFeeBoxStateBuilder newBuilder() {
+        return new BabelFeeBoxStateBuilder();
     }
 }

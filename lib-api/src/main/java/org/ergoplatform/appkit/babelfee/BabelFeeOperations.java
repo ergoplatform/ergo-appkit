@@ -88,12 +88,17 @@ public class BabelFeeOperations {
     }
 
     /**
-     * Tries to fetch a babel fee box for the given tokenId from blockchain data source using the given loader
+     * Tries to fetch a babel fee box for the given tokenId from blockchain data source using the
+     * given loader.
+     * The box returned is in general the first box satisfying the given fee amount that is returned
+     * by the loader. Under certain circumstances, a babel fee box with a better price than the
+     * first one is returned, but a best price is not guaranteed. Clients should implement an own
+     * logic to retrieve babel fee boxes if needed.
      *
      * @param ctx       current blockchain context
      * @param loader    loader to receive unspent boxes
      * @param tokenId   tokenId offered to swap
-     * @param feeAmount nanoerg amount needed to swap
+     * @param feeAmount nanoErg amount needed to swap
      * @return babel fee box satisfying the needs, or null if none available
      */
     @Nullable
@@ -103,18 +108,19 @@ public class BabelFeeOperations {
         loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
 
         int page = 0;
-        List<InputBox> inputBoxes = loader.loadBoxesPage(ctx, address, 0);
+        List<InputBox> inputBoxes = null;
 
         InputBox returnBox = null;
         long pricePerToken = Long.MAX_VALUE;
 
-        while (!inputBoxes.isEmpty() && returnBox == null) {
+        while ((page == 0 || !inputBoxes.isEmpty()) && returnBox == null) {
+            inputBoxes = loader.loadBoxesPage(ctx, address, 0);
 
             // find the cheapest box satisfying our fee amount needs
             for (InputBox inputBox : inputBoxes) {
                 try {
                     BabelFeeBoxState babelFeeBoxState = new BabelFeeBoxState(inputBox);
-                    if (babelFeeBoxState.getValueAvailableToBuy() > feeAmount && babelFeeBoxState.getPricePerToken() < pricePerToken)
+                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && babelFeeBoxState.getPricePerToken() < pricePerToken)
                         returnBox = inputBox;
                 } catch (Throwable t) {
                     // ignore, check next
@@ -160,7 +166,7 @@ public class BabelFeeOperations {
             this.superBuilder = superBuilder;
             inputBabelBox = babelBox;
             BabelFeeBoxState babelBoxState = new BabelFeeBoxState(babelBox);
-            BabelFeeBoxState outBabelBoxState = babelBoxState.buildSucceedingState(babelBoxState.tokensToSellForErgAmount(nanoErgToCover));
+            BabelFeeBoxState outBabelBoxState = babelBoxState.buildSucceedingState(babelBoxState.calcTokensToSellForErgAmount(nanoErgToCover));
             outBabelBox = outBabelBoxState.buildOutbox(superBuilder, babelBox);
         }
 
