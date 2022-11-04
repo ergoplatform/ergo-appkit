@@ -30,6 +30,18 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
+    UnsignedTransactionBuilder inputs(InputBox... boxes);
+
+    /**
+     * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
+     * as the boxes to spent. The order is preserved.
+     */
+    UnsignedTransactionBuilder addInputs(InputBox... boxes);
+
+    /**
+     * @deprecated use {@link #inputs(InputBox...)}
+     */
+    @Deprecated
     UnsignedTransactionBuilder boxesToSpend(List<InputBox> boxes);
 
     /**
@@ -41,6 +53,18 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
+    UnsignedTransactionBuilder withDataInputs(InputBox... boxes);
+
+    /**
+     * Adds input boxes to an already specified list of data inputs or, if no data input boxes
+     * defined yet, set the boxes as the data input boxes to be used. The order is preserved.
+     */
+    UnsignedTransactionBuilder addDataInputs(InputBox... boxes);
+
+    /**
+     * @deprecated use {@link #withDataInputs(InputBox...)}
+     */
+    @Deprecated
     UnsignedTransactionBuilder withDataInputs(List<InputBox> boxes);
 
     /**
@@ -53,6 +77,12 @@ public interface UnsignedTransactionBuilder {
      * @param outputs output boxes created by the transaction
      */
     UnsignedTransactionBuilder outputs(OutBox... outputs);
+
+    /**
+     * Adds output boxes to an already specified list of outputs or, if no output boxes defined yet,
+     * as the boxes to be outputted. The order is preserved.
+     */
+    UnsignedTransactionBuilder addOutputs(OutBox... outBoxes);
 
     /**
      * Adds transaction fee output.
