@@ -145,4 +145,9 @@ public interface UnsignedTransactionBuilder {
      * Returns all input boxes attached to this builder.
      */
     List<InputBox> getInputBoxes();
+
+    /**
+     * Returns all output boxes attached to this builder.
+     */
+    List<OutBox> getOutputBoxes();
 }

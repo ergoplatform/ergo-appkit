@@ -18,10 +18,9 @@ import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
   private[impl] var _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
-
+  private[impl] var _outputs: List[OutBoxImpl] = new ArrayList[OutBoxImpl]()
   private[impl] var _dataInputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
 
-  private[impl] var _outputCandidates: Option[List[ErgoBoxCandidate]] = None
   private var _tokensToBurn: Option[List[ErgoToken]] = None
   private var _feeAmount: Option[Long] = None
   private var _changeAddress: Option[ErgoAddress] = None
@@ -67,21 +66,15 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     withDataInputs(inputBoxes.toSeq: _*)
 
   override def addOutputs(outBoxes: OutBox*): UnsignedTransactionBuilder = {
-    val candidates = outBoxes
-      .map(c => c.asInstanceOf[OutBoxImpl].getErgoBoxCandidate)
-      .toIndexedSeq.asInstanceOf[IndexedSeq[ErgoBoxCandidate]]
-      .convertTo[List[ErgoBoxCandidate]]
-
-    if (_outputCandidates.isEmpty)
-      _outputCandidates = Some(candidates)
-    else
-      _outputCandidates.get.addAll(candidates)
-
+    _outputs.addAll(outBoxes
+      .toIndexedSeq
+      .asInstanceOf[IndexedSeq[OutBoxImpl]]
+      .convertTo[util.List[OutBoxImpl]])
     this
   }
 
   override def outputs(outputs: OutBox*): UnsignedTransactionBuilder = {
-    require(_outputCandidates.isEmpty, "Outputs already specified.")
+    require(_outputs.isEmpty, "Outputs already specified.")
     addOutputs(outputs: _*)
     this
   }
@@ -126,7 +119,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def build: UnsignedTransaction = {
     val inputBoxes = _inputs
-    val outputCandidates = getNonEmpty(_outputCandidates, "Output boxes are not specified")
+    val outputCandidates = _outputs.map(c => c.getErgoBoxCandidate)
+    require(!outputCandidates.isEmpty, "Output boxes are not specified")
     val boxesToSpend = inputBoxes
       .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
     val dataInputBoxes = _dataInputs.map(b => b.getErgoBox)
@@ -195,5 +189,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def getInputBoxes: List[InputBox] =
     _inputs.map(b => b.asInstanceOf[InputBox])
+
+  override def getOutputBoxes: util.List[OutBox] =
+    _outputs.map(b => b.asInstanceOf[OutBox])
 }
 
