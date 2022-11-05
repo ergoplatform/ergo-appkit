@@ -78,16 +78,17 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .tokens(new ErgoToken(ErgoId.create(mockTokenId), 1000))
         .build().convertToInputWith(mockTokenId, 0)
 
-      val babelTxB = BabelFeeOperations.getBabelFeeTransactionBuilder(txB,
+      txB.fee(fee)
+        .outputs(output)
+        .boxesToSpend(util.Arrays.asList(input))
+        .sendChangeTo(sender)
+
+      BabelFeeOperations.addBabelFeeBoxes(txB,
         babelFeeBoxState.buildOutbox(txB, null)
           .convertToInputWith(mockTokenId, 0),
         fee)
 
-      val tx = babelTxB.fee(fee)
-        .outputs(output)
-        .boxesToSpend(util.Arrays.asList(input))
-        .sendChangeTo(sender)
-        .build()
+      val tx = txB.build()
 
       ctx.newProverBuilder()
         .withMnemonic(mnemonic, SecretString.empty(), false)
@@ -107,7 +108,7 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
       val babelBox1 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(new util.ArrayList[InputBox]()),
         tockenId, Parameters.MinFee)
 
-      babelBox1 shouldBe(null)
+      babelBox1 shouldBe (null)
 
       val inputBabelBox = BabelFeeBoxState.newBuilder()
         .withValue(Parameters.OneErg)
@@ -126,7 +127,7 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
       val babelBox3 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(util.Arrays.asList(inputBabelBox)),
         tockenId, Parameters.OneErg * 2)
 
-      babelBox3 shouldBe(null)
+      babelBox3 shouldBe (null)
     }
   }
 }
