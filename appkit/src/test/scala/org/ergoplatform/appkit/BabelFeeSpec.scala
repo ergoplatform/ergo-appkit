@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.babelfee.{BabelFeeBoxState, BabelFeeOperations}
+import org.ergoplatform.appkit.babelfee.{BabelFeeBoxContract, BabelFeeBoxState, BabelFeeOperations}
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
@@ -47,6 +47,11 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
         .sign(txCancel)
+
+      // check if the contract really is for the token
+      new BabelFeeBoxContract(babelFeeErgoBox.getErgoTree).getTokenId.toString shouldBe mockTokenId
+      // check template hash
+      ErgoTreeTemplate.fromErgoTree(babelFeeErgoBox.getErgoTree).getTemplateHashHex shouldBe BabelFeeBoxContract.templateHash
     }
   }
 

@@ -1,14 +1,10 @@
 package org.ergoplatform.appkit;
 
-import scala.NotImplementedError;
-import scala.collection.IndexedSeq;
-import scorex.util.encode.Base16;
-import sigmastate.SType;
-import sigmastate.Values;
-
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+
+import scorex.util.encode.Base16;
+import sigmastate.Values;
+import sigmastate.serialization.ErgoTreeSerializer;
 
 /**
  * Represents ErgoTree template, which is an ErgoTree instance with placeholders.
@@ -48,14 +44,22 @@ public class ErgoTreeTemplate {
      * @return template bytes at the tail of the serialized ErgoTree (i.e. exclusing header and segregated
      * constants)
      */
-    public byte[] getBytes() { return _templateBytes; }
+    public byte[] getBytes() {
+        return _templateBytes;
+    }
 
     /**
      * Returns template bytes encoded as Base16 string.
      *
      * @see ErgoTreeTemplate#getBytes
      */
-    public String getEncodedBytes() { return Base16.encode(getBytes()); }
+    public String getEncodedBytes() {
+        return Base16.encode(getBytes());
+    }
+
+    public String getTemplateHashHex() {
+        return Base16.encode(scorex.crypto.hash.Sha256.hash(_templateBytes));
+    }
 
     /**
      * A number of placeholders in the template, which can be substituted (aka parameters).
@@ -64,16 +68,16 @@ public class ErgoTreeTemplate {
      * {@link ErgoTreeTemplate#applyParameters} method.
      * In general, constants of ErgoTree cannot be replaced, but every placeholder can.
      */
-    public int getParameterCount() { return _tree.constants().length(); }
+    public int getParameterCount() {
+        return _tree.constants().length();
+    }
 
     /**
-     * Returns types of all template parameters (placeholders in the ErgoTree).
+     * @param index 0-based
+     * @return value object of paramter
      */
-    public List<ErgoType<?>> getParameterTypes() {
-        Iso<List<Values.Constant<SType>>, IndexedSeq<Values.Constant<SType>>> iso =
-         Iso.JListToIndexedSeq(Iso.identityIso());
-        List<Values.Constant<SType>> ergoValues = iso.from(_tree.constants());
-        return ergoValues.stream().map(v -> Iso.isoErgoTypeToSType().from(v.tpe())).collect(Collectors.toList());
+    public ErgoValue<?> getParameter(int index) {
+        return Iso.isoErgoValueToSValue().from(_tree.constants().apply(index + 1));
     }
 
     /**
@@ -89,11 +93,22 @@ public class ErgoTreeTemplate {
      * @return new ErgoTree with the same template as this but with all it's parameters
      * replaced with `newValues`
      */
-    public Values.ErgoTree applyParameters(ErgoValue<?> newValues) {
-        throw new NotImplementedError();
+    public Values.ErgoTree applyParameters(ErgoValue<?>... newValues) {
+        int[] positions = new int[newValues.length];
+        for (int position : positions) {
+            positions[position] = position + 1;
+        }
+
+        return JavaHelpers.substituteErgoTreeConstants(_tree.bytes(), positions, newValues);
     }
 
     public static ErgoTreeTemplate fromErgoTree(Values.ErgoTree tree) {
         return new ErgoTreeTemplate(tree);
     }
+
+    public static ErgoTreeTemplate fromErgoTreeBytes(byte[] treeBytes) {
+        return fromErgoTree(ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(treeBytes));
+    }
+
+    // TODO public static ErgoTreeTemplate fromTemplateBytes(byte[] templateBytes)
 }
