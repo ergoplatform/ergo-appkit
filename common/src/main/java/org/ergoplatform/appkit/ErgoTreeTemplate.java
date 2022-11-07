@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import scala.collection.IndexedSeq;
+import scala.collection.immutable.StringOps;
+import scala.collection.mutable.ArrayOps;
 import scorex.util.encode.Base16;
 import sigmastate.SType;
 import sigmastate.Values;
@@ -38,6 +40,13 @@ public class ErgoTreeTemplate {
      * @see sigmastate.Values.ErgoTree
      */
     public ErgoTreeTemplate withParameterPositions(int[] positions) {
+        if (Arrays.stream(positions).distinct().count() != positions.length)
+            throw new IllegalArgumentException("Duplicate positions: " +
+                new ArrayOps.ofInt(positions).mkString("[", ",", "]"));
+
+        for (int p : positions)
+            if (!_tree.constants().isDefinedAt(p))
+                throw new IllegalArgumentException("Invalid parameter position " + p);
         _parameterPositions = positions;
         return this;
     }
@@ -105,11 +114,11 @@ public class ErgoTreeTemplate {
     }
 
     /**
-     * @param index 0-based index of parameter in [0 .. getParameterCount()) range
+     * @param paramIndex 0-based index of parameter in [0 .. getParameterCount()) range
      * @return ErgoValue of the given parameter
      */
-    public ErgoValue<?> getParameterValue(int index) {
-        Constant<SType> c = _tree.constants().apply(_parameterPositions[index]);
+    public ErgoValue<?> getParameterValue(int paramIndex) {
+        Constant<SType> c = _tree.constants().apply(_parameterPositions[paramIndex]);
         return Iso.isoErgoValueToSValue().from(c);
     }
 
