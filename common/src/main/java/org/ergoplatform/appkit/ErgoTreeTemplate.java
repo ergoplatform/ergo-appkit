@@ -1,9 +1,14 @@
 package org.ergoplatform.appkit;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import scala.collection.IndexedSeq;
 import scorex.util.encode.Base16;
+import sigmastate.SType;
 import sigmastate.Values;
+import sigmastate.Values.Constant;
 import sigmastate.serialization.ErgoTreeSerializer;
 
 /**
@@ -13,12 +18,28 @@ import sigmastate.serialization.ErgoTreeSerializer;
  */
 public class ErgoTreeTemplate {
 
+    private static int[] _noParameters = new int[0]; // immutable and shared by all instances
     private final Values.ErgoTree _tree;
     private final byte[] _templateBytes;
+    private int[] _parameterPositions = _noParameters;
 
     private ErgoTreeTemplate(Values.ErgoTree tree) {
         _tree = tree;
         _templateBytes = JavaHelpers.ergoTreeTemplateBytes(_tree);
+    }
+
+    /**
+     * Specifies which ErgoTree constants will be used as template parameters.
+     * Which tree constants to be used as parameters depends on the contract and use case.
+     *
+     * @param positions zero-based indexes in `ErgoTree.constants` array which can be
+     *                  substituted as parameters using
+     *                  {@link ErgoTreeTemplate#applyParameters(ErgoValue[])} method.
+     * @see sigmastate.Values.ErgoTree
+     */
+    public ErgoTreeTemplate withParameterPositions(int[] positions) {
+        _parameterPositions = positions;
+        return this;
     }
 
     @Override
@@ -62,22 +83,34 @@ public class ErgoTreeTemplate {
     }
 
     /**
-     * A number of placeholders in the template, which can be substituted (aka parameters).
-     * This is immutable property of a {@link ErgoTreeTemplate}, which counts all the constants in the
-     * {@link sigmastate.Values.ErgoTree} which can be replaced by new values using
-     * {@link ErgoTreeTemplate#applyParameters} method.
-     * In general, constants of ErgoTree cannot be replaced, but every placeholder can.
+     * A number of parameters in this template.
+     * In general, there may be more constants of ErgoTree then template parameters because
+     * not every constant make sense as a parameter.
      */
     public int getParameterCount() {
-        return _tree.constants().length();
+        return _parameterPositions.length;
     }
 
     /**
-     * @param index 0-based
-     * @return value object of paramter
+     * Returns types of all template parameters (i.e. specified constants in the ErgoTree).
      */
-    public ErgoValue<?> getParameter(int index) {
-        return Iso.isoErgoValueToSValue().from(_tree.constants().apply(index + 1));
+    public List<ErgoType<?>> getParameterTypes() {
+        List<ErgoType<?>> types = new ArrayList<>();
+        IndexedSeq<Constant<SType>> constants = _tree.constants();
+        for (int position : _parameterPositions) {
+            SType tpe = constants.apply(position).tpe();
+            types.add(Iso.isoErgoTypeToSType().from(tpe));
+        }
+        return types;
+    }
+
+    /**
+     * @param index 0-based index of parameter in [0 .. getParameterCount()) range
+     * @return ErgoValue of the given parameter
+     */
+    public ErgoValue<?> getParameterValue(int index) {
+        Constant<SType> c = _tree.constants().apply(_parameterPositions[index]);
+        return Iso.isoErgoValueToSValue().from(c);
     }
 
     /**
@@ -94,12 +127,11 @@ public class ErgoTreeTemplate {
      * replaced with `newValues`
      */
     public Values.ErgoTree applyParameters(ErgoValue<?>... newValues) {
-        int[] positions = new int[newValues.length];
-        for (int position : positions) {
-            positions[position] = position + 1;
-        }
-
-        return JavaHelpers.substituteErgoTreeConstants(_tree.bytes(), positions, newValues);
+        if (newValues.length != _parameterPositions.length)
+            throw new IllegalArgumentException(
+                "Wrong number of newValues. Expected " + _parameterPositions.length +
+                    " but was " + newValues.length);
+        return JavaHelpers.substituteErgoTreeConstants(_tree.bytes(), _parameterPositions, newValues);
     }
 
     public static ErgoTreeTemplate fromErgoTree(Values.ErgoTree tree) {
@@ -107,7 +139,9 @@ public class ErgoTreeTemplate {
     }
 
     public static ErgoTreeTemplate fromErgoTreeBytes(byte[] treeBytes) {
-        return fromErgoTree(ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(treeBytes));
+        Values.ErgoTree ergoTree =
+            ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(treeBytes);
+        return fromErgoTree(ergoTree);
     }
 
     // TODO public static ErgoTreeTemplate fromTemplateBytes(byte[] templateBytes)

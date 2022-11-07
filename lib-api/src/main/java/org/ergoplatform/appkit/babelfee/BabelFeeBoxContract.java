@@ -30,12 +30,13 @@ public class BabelFeeBoxContract {
     public BabelFeeBoxContract(ErgoId tokenId) {
         this.tokenId = tokenId;
         byte[] idBytes = tokenId.getBytes();
-        ergoTree = ErgoTreeTemplate.fromErgoTreeBytes(contractTemplate).applyParameters(new ErgoValue[]{ErgoValue.of(idBytes)});
+        ergoTree = ErgoTreeTemplate.fromErgoTreeBytes(contractTemplate)
+            .applyParameters(new ErgoValue[]{ErgoValue.of(idBytes)});
     }
 
     public BabelFeeBoxContract(Values.ErgoTree ergoTree) {
         this.ergoTree = ergoTree;
-        tokenId = new ErgoId(ScalaHelpers.collByteToByteArray((Coll<Byte>) ErgoTreeTemplate.fromErgoTree(ergoTree).getParameter(0).getValue()));
+        tokenId = new ErgoId(ScalaHelpers.collByteToByteArray((Coll<Byte>) ErgoTreeTemplate.fromErgoTree(ergoTree).getParameterValue(0).getValue()));
     }
 
     public Values.ErgoTree getErgoTree() {
