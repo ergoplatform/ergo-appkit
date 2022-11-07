@@ -321,7 +321,7 @@ public class BoxOperations {
     }
 
     /**
-     * @return OutBox prepared with the properties set to this BoxOperations instance: tokens to
+     * @return OutBoxBuilder prepared with the properties set to this BoxOperations instance: tokens to
      * spend, amount to spend and attachment.
      */
     public OutBoxBuilder prepareOutBox(UnsignedTransactionBuilder txB) {
@@ -392,7 +392,7 @@ public class BoxOperations {
             .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
-            .outputs(newBox)
+            .addOutputs(newBox)
             .fee(fee)
             .sendChangeTo(sender.getP2PKAddress())
             .build();
@@ -409,7 +409,7 @@ public class BoxOperations {
      * - returns a list of {@link InputBox} to select from. First items are preferred to be selected
      * - must not return null
      * - returning an empty list means the source of input boxes is drained and no further page will
-     * be loaded
+     *   be loaded
      *
      * @param amountToSpend       amount of NanoErgs to be covered
      * @param tokensToSpend       ErgoToken to spent
@@ -458,9 +458,8 @@ public class BoxOperations {
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
                         return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
-
-                        // check the maxBoxToSelect restriction, if it is set
-                    else if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
+                    else // check the maxBoxToSelect restriction, if it is set
+                    if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
                         List<ErgoToken> remainingTokenList = tokensRemaining.getRemainingTokenList();
                         throw new InputBoxesSelectionException.InputBoxLimitExceededException(
                             "Input box limit exceeded, could not cover " + remainingAmountToCover +

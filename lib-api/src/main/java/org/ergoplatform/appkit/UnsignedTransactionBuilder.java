@@ -23,8 +23,8 @@ public interface UnsignedTransactionBuilder {
 
     /**
      * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
-     * as the boxes to spent. The order is preserved.
-     * The boxes boxes that will be spent by the transaction when it will be included in a block.
+     * as the boxes to spend. The order is preserved.
+     * The boxes that will be spent by the transaction when it will be included in a block.
      *
      * @param boxes list of boxes to be spent by the transaction. The boxes can either be
      *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from
@@ -66,7 +66,7 @@ public interface UnsignedTransactionBuilder {
 
     /**
      * Adds output boxes to an already specified list of outputs or, if no output boxes defined yet,
-     * as the boxes to be outputted. The order is preserved.
+     * as the boxes to be output. The order is preserved.
      * After this transaction is {@link UnsignedTransactionBuilder#build() built},
      * {@link ErgoProver#sign(UnsignedTransaction)} signed,
      * {@link BlockchainContext#sendTransaction(SignedTransaction) sent} to the node and included
