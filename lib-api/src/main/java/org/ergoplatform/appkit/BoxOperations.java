@@ -312,18 +312,27 @@ public class BoxOperations {
         ErgoContract contract) {
 
         return buildTxWithDefaultInputs(txB -> {
-            OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
-                .value(amountToSpend)
+            OutBoxBuilder outBoxBuilder = prepareOutBox(txB)
                 .contract(contract);
-            if (!tokensToSpend.isEmpty())
-                outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
-            if (attachment != null) {
-                outBoxBuilder.registers(attachment.getOutboxRegistersForAttachment());
-            }
             OutBox newBox = outBoxBuilder.build();
             txB.outputs(newBox);
             return txB;
         });
+    }
+
+    /**
+     * @return OutBoxBuilder prepared with the properties set to this BoxOperations instance: tokens to
+     * spend, amount to spend and attachment.
+     */
+    public OutBoxBuilder prepareOutBox(UnsignedTransactionBuilder txB) {
+        OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
+            .value(amountToSpend);
+        if (!tokensToSpend.isEmpty())
+            outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
+        if (attachment != null) {
+            outBoxBuilder.registers(attachment.getOutboxRegistersForAttachment());
+        }
+        return outBoxBuilder;
     }
 
     /**
@@ -373,20 +382,20 @@ public class BoxOperations {
     }
 
     public static SignedTransaction spendBoxesTx(
-            BlockchainContext ctx,
-            UnsignedTransactionBuilder txB,
-            List<InputBox> boxes,
-            ErgoProver sender, Address recipient, long amount, long fee) {
+        BlockchainContext ctx,
+        UnsignedTransactionBuilder txB,
+        List<InputBox> boxes,
+        ErgoProver sender, Address recipient, long amount, long fee) {
         OutBox newBox = txB.outBoxBuilder()
-                .value(amount)
-                .contract(recipient.toErgoContract())
-                .build();
+            .value(amount)
+            .contract(recipient.toErgoContract())
+            .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
-                .outputs(newBox)
-                .fee(fee)
-                .sendChangeTo(sender.getP2PKAddress())
-                .build();
+            .addOutputs(newBox)
+            .fee(fee)
+            .sendChangeTo(sender.getP2PKAddress())
+            .build();
         SignedTransaction signed = sender.sign(tx);
         return signed;
     }
@@ -449,9 +458,8 @@ public class BoxOperations {
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
                         return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
-
-                    // check the maxBoxToSelect restriction, if it is set
-                    else if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
+                    else // check the maxBoxToSelect restriction, if it is set
+                    if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
                         List<ErgoToken> remainingTokenList = tokensRemaining.getRemainingTokenList();
                         throw new InputBoxesSelectionException.InputBoxLimitExceededException(
                             "Input box limit exceeded, could not cover " + remainingAmountToCover +

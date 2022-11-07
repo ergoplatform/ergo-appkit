@@ -83,7 +83,7 @@ class DataInputsSpec extends PropSpec with Matchers
       val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
-      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).withDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()
+      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).addDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()
 
       an[Exception] shouldBe thrownBy {
         ctx.newProverBuilder().build().sign(unsigned)

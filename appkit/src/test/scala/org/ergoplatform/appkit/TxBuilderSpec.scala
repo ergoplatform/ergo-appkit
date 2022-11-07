@@ -2,7 +2,7 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException}
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
@@ -161,7 +161,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
-      val unsigned = txB.inputs(input)
+      val unsigned = txB.addInputs(input)
         .outputs(output).addOutputs(feeOut)
         .sendChangeTo(changeAddr)
         .build()
@@ -405,6 +405,16 @@ class TxBuilderSpec extends PropSpec with Matchers
         operations.withMaxInputBoxesToSelect(1).loadTop(),
         exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
       )
+
+      // if there is only a single input box, we face NotEnoughCoinsForChangeException
+      val operations2 = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
+
+      assertExceptionThrown(
+        operations2.loadTop(),
+        exceptionLike[NotEnoughCoinsForChangeException]()
+      )
     }
 
   }
@@ -434,7 +444,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
-      val tx = ctx.newTxBuilder().inputs(input1).addInputs(input2)
+      val tx = ctx.newTxBuilder().addInputs(input1).addInputs(input2)
         .outputs(ctx.newTxBuilder().outBoxBuilder().contract(pkContract).value(amountToSend).build())
         .sendChangeTo(recipient.getErgoAddress)
         .fee(Parameters.MinFee)

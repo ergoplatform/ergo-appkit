@@ -17,9 +17,9 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
-  private[impl] var _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
-  private[impl] var _outputs: List[OutBoxImpl] = new ArrayList[OutBoxImpl]()
-  private[impl] var _dataInputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
+  private[impl] val _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
+  private[impl] val _outputs: List[OutBoxImpl] = new ArrayList[OutBoxImpl]()
+  private[impl] val _dataInputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
 
   private var _tokensToBurn: Option[List[ErgoToken]] = None
   private var _feeAmount: Option[Long] = None
@@ -33,43 +33,35 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
   }
 
   override def addInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
-    _inputs.addAll(boxes
-      .map(b => b.asInstanceOf[InputBoxImpl])
-      .toIndexedSeq.asInstanceOf[IndexedSeq[InputBoxImpl]]
-      .convertTo[util.List[InputBoxImpl]])
+    boxes.foreach { case b: InputBoxImpl =>
+      _inputs.add(b)
+    }
     this
   }
 
-  override def inputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+  override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_inputs.isEmpty, "inputs already specified")
-    addInputs(boxes: _*)
+    addInputs(inputBoxes.toSeq: _*)
     this
   }
-
-  override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder =
-    inputs(inputBoxes.toSeq: _*)
 
   override def addDataInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
-    _dataInputs.addAll(boxes
-      .toIndexedSeq.asInstanceOf[IndexedSeq[InputBoxImpl]]
-      .convertTo[util.List[InputBoxImpl]])
+    boxes.foreach { case b: InputBoxImpl =>
+      _dataInputs.add(b)
+    }
     this
   }
 
-  override def withDataInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+  override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_dataInputs.isEmpty, "dataInputs list is already specified")
-    addDataInputs(boxes: _*)
+    addDataInputs(inputBoxes.toSeq: _*)
     this
   }
-
-  override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder =
-    withDataInputs(inputBoxes.toSeq: _*)
 
   override def addOutputs(outBoxes: OutBox*): UnsignedTransactionBuilder = {
-    _outputs.addAll(outBoxes
-      .toIndexedSeq
-      .asInstanceOf[IndexedSeq[OutBoxImpl]]
-      .convertTo[util.List[OutBoxImpl]])
+    outBoxes.foreach { case b: OutBoxImpl =>
+      _outputs.add(b)
+    }
     this
   }
 

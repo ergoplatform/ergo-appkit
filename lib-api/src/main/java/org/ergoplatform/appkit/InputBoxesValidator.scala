@@ -7,7 +7,6 @@ import org.ergoplatform.wallet.boxes.{BoxSelector, ReemissionData}
 import org.ergoplatform.wallet.{AssetUtils, TokensMap}
 import org.ergoplatform.{ErgoBoxAssets, ErgoBoxAssetsHolder}
 import scorex.util.ModifierId
-import sigmastate.utils.Helpers.EitherOps
 
 import scala.collection.mutable
 
@@ -42,8 +41,9 @@ class InputBoxesValidator extends BoxSelector {
       if (targetAssets.forall {
         case (id, targetAmt) => currentAssets.getOrElse(id, 0L) >= targetAmt
       }) {
-        formChangeBoxes(currentBalance, targetBalance, currentAssets, targetAssets).mapRight { changeBoxes =>
-          BoxSelectionResult(res, changeBoxes)
+        formChangeBoxes(currentBalance, targetBalance, currentAssets, targetAssets) match {
+          case Right(changeBoxes) => Right(BoxSelectionResult(res, changeBoxes))
+          case Left(error) => Left(error)
         }
       } else {
         Left(NotEnoughTokensError(
