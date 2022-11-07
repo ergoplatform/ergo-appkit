@@ -22,7 +22,9 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder preHeader(PreHeader ph);
 
     /**
-     * Specifies boxes that will be spent by the transaction when it will be included in a block.
+     * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
+     * as the boxes to spent. The order is preserved.
+     * The boxes boxes that will be spent by the transaction when it will be included in a block.
      *
      * @param boxes list of boxes to be spent by the transaction. The boxes can either be
      *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from
@@ -30,22 +32,17 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
-    UnsignedTransactionBuilder inputs(InputBox... boxes);
-
-    /**
-     * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
-     * as the boxes to spent. The order is preserved.
-     */
     UnsignedTransactionBuilder addInputs(InputBox... boxes);
 
     /**
-     * @deprecated use {@link #inputs(InputBox...)}
+     * @deprecated use {@link #addInputs(InputBox...)}
      */
     @Deprecated
     UnsignedTransactionBuilder boxesToSpend(List<InputBox> boxes);
 
     /**
-     * Specifies boxes that will be used as data-inputs by the transaction when it will be included in a block.
+     * Adds input boxes to an already specified list of data inputs or, if no data input boxes
+     * defined yet, set the boxes as the data input boxes to be used. The order is preserved.
      *
      * @param boxes list of boxes to be used as data-inputs by the transaction. The boxes can either be
      *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from
@@ -53,34 +50,29 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
-    UnsignedTransactionBuilder withDataInputs(InputBox... boxes);
-
-    /**
-     * Adds input boxes to an already specified list of data inputs or, if no data input boxes
-     * defined yet, set the boxes as the data input boxes to be used. The order is preserved.
-     */
     UnsignedTransactionBuilder addDataInputs(InputBox... boxes);
 
     /**
-     * @deprecated use {@link #withDataInputs(InputBox...)}
+     * @deprecated use {@link #addDataInputs(InputBox...)}
      */
     @Deprecated
     UnsignedTransactionBuilder withDataInputs(List<InputBox> boxes);
 
     /**
-     * Specifies output boxes of the transaction. After this transaction is
-     * {@link UnsignedTransactionBuilder#build() built}, {@link ErgoProver#sign(UnsignedTransaction)} signed,
-     * {@link BlockchainContext#sendTransaction(SignedTransaction) sent} to the node and included into a
-     * next block
-     * the output boxes will be put in the UTXO set.
-     *
-     * @param outputs output boxes created by the transaction
+     * @deprecated use {@link #addOutputs(OutBox...)}
      */
+    @Deprecated
     UnsignedTransactionBuilder outputs(OutBox... outputs);
 
     /**
      * Adds output boxes to an already specified list of outputs or, if no output boxes defined yet,
      * as the boxes to be outputted. The order is preserved.
+     * After this transaction is {@link UnsignedTransactionBuilder#build() built},
+     * {@link ErgoProver#sign(UnsignedTransaction)} signed,
+     * {@link BlockchainContext#sendTransaction(SignedTransaction) sent} to the node and included
+     * into a next block the output boxes will be put in the UTXO set.
+     *
+     * @param outBoxes output boxes created by the transaction
      */
     UnsignedTransactionBuilder addOutputs(OutBox... outBoxes);
 

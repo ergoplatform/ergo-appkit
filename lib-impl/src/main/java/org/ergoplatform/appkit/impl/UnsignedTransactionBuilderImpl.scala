@@ -40,14 +40,11 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
-  override def inputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+  override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_inputs.isEmpty, "inputs already specified")
-    addInputs(boxes: _*)
+    addInputs(inputBoxes.toSeq: _*)
     this
   }
-
-  override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder =
-    inputs(inputBoxes.toSeq: _*)
 
   override def addDataInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
     _dataInputs.addAll(boxes
@@ -56,14 +53,11 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
-  override def withDataInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+  override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_dataInputs.isEmpty, "dataInputs list is already specified")
-    addDataInputs(boxes: _*)
+    addDataInputs(inputBoxes.toSeq: _*)
     this
   }
-
-  override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder =
-    withDataInputs(inputBoxes.toSeq: _*)
 
   override def addOutputs(outBoxes: OutBox*): UnsignedTransactionBuilder = {
     _outputs.addAll(outBoxes

@@ -161,7 +161,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
-      val unsigned = txB.inputs(input)
+      val unsigned = txB.addInputs(input)
         .outputs(output).addOutputs(feeOut)
         .sendChangeTo(changeAddr)
         .build()
@@ -434,7 +434,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(pkContract)
         .build().convertToInputWith(mockTxId, 1)
 
-      val tx = ctx.newTxBuilder().inputs(input1).addInputs(input2)
+      val tx = ctx.newTxBuilder().addInputs(input1).addInputs(input2)
         .outputs(ctx.newTxBuilder().outBoxBuilder().contract(pkContract).value(amountToSend).build())
         .sendChangeTo(recipient.getErgoAddress)
         .fee(Parameters.MinFee)
