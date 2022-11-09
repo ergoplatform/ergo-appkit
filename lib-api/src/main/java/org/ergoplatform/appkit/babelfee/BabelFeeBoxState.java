@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 /**
  * Represents a Babel Fee Box state, see EIP-0031
- * https://github.com/ergoplatform/eips/blob/master/eip-0031.md
+ * https://github.com/ergoplatform/eips/blob/81edece9d2589a80c09baa33be26922a125a4cb4/eip-0031.md
  * <p>
  * The term “babel fees“ refers to the concept of paying transaction fees in tokens instead of
  * platform’s primary token (ERG). It is a contract that buys tokens and pays ERG, suitable to be
