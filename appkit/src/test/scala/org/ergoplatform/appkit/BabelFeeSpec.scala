@@ -111,7 +111,7 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
 
       // find no boxes
       val babelBox1 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(new util.ArrayList[InputBox]()),
-        tockenId, Parameters.MinFee)
+        tockenId, Parameters.MinFee, 1)
 
       babelBox1 shouldBe (null)
 
@@ -124,13 +124,13 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
         .convertToInputWith(mockTokenId, 0)
 
       val babelBox2 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(util.Arrays.asList(inputBabelBox)),
-        tockenId, Parameters.MinFee)
+        tockenId, Parameters.MinFee, 1)
 
       babelBox2 shouldBe inputBabelBox
 
       // the amount needed (2 ERG) is more than inputBabelBox can offer, so it is discarded
       val babelBox3 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(util.Arrays.asList(inputBabelBox)),
-        tockenId, Parameters.OneErg * 2)
+        tockenId, Parameters.OneErg * 2, 1)
 
       babelBox3 shouldBe (null)
     }

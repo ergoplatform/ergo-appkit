@@ -85,19 +85,27 @@ public class BabelFeeOperations {
     /**
      * Tries to fetch a babel fee box for the given tokenId from blockchain data source using the
      * given loader.
-     * The box returned is in general the first box satisfying the given fee amount that is returned
-     * by the loader. Under certain circumstances, a babel fee box with a better price than the
-     * first one is returned, but a best price is not guaranteed. Clients should implement an own
-     * logic to retrieve babel fee boxes if needed.
+     * If maxPagesToLoadForPriceSearch is 0, the babel fee box with the best price satisfying
+     * feeAmount is returned. As this can result in infinite loading times, it is recommended to
+     * specify a maximum pages to load variable which means that the box with the best price within
+     * these pages is returnd.
+     * Clients should implement an own logic to retrieve babel fee boxes if needed.
      *
      * @param ctx       current blockchain context
      * @param loader    loader to receive unspent boxes
      * @param tokenId   tokenId offered to swap
      * @param feeAmount nanoErg amount needed to swap
+     * @param maxPagesToLoadForPriceSearch number of pages to load to search for best price, or 0 to
+     *                                     load all pages
      * @return babel fee box satisfying the needs, or null if none available
      */
     @Nullable
-    public static InputBox findBabelFeeBox(BlockchainContext ctx, BoxOperations.IUnspentBoxesLoader loader, ErgoId tokenId, long feeAmount) {
+    public static InputBox findBabelFeeBox(
+        BlockchainContext ctx,
+        BoxOperations.IUnspentBoxesLoader loader,
+        ErgoId tokenId,
+        long feeAmount,
+        int maxPagesToLoadForPriceSearch) {
         ErgoContract contractForToken = new ErgoTreeContract(new BabelFeeBoxContract(tokenId).getErgoTree(), ctx.getNetworkType());
         Address address = contractForToken.toAddress();
         loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
@@ -108,8 +116,8 @@ public class BabelFeeOperations {
         InputBox returnBox = null;
         long pricePerToken = Long.MAX_VALUE;
 
-        while ((page == 0 || !inputBoxes.isEmpty()) && returnBox == null) {
-            inputBoxes = loader.loadBoxesPage(ctx, address, 0);
+        while ((page == 0 || !inputBoxes.isEmpty()) && (returnBox == null || maxPagesToLoadForPriceSearch == 0 || page < maxPagesToLoadForPriceSearch)) {
+            inputBoxes = loader.loadBoxesPage(ctx, address, page);
 
             // find the cheapest box satisfying our fee amount needs
             for (InputBox inputBox : inputBoxes) {
@@ -123,8 +131,6 @@ public class BabelFeeOperations {
             }
 
             page++;
-            // get another page
-            inputBoxes = loader.loadBoxesPage(ctx, address, page);
         }
 
         return returnBox;
