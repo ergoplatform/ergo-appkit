@@ -12,7 +12,7 @@ import sigmastate.Values;
  */
 public interface TransactionBox {
     /**
-     * Returns the ERG value stored in this box, i.e. unspent value in UTXO.
+     * Returns the nanoERG value stored in this box, i.e. unspent value in UTXO.
      */
     long getValue();
 

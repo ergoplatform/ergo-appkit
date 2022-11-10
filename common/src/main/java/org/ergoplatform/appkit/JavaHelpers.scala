@@ -41,6 +41,7 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
 import sigmastate.eval.Colls.outerJoin
+import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
 import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
@@ -325,6 +326,25 @@ object JavaHelpers {
    */
   def decodeStringToErgoTree(base16: String): ErgoTree = {
     ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(base16).get)
+  }
+
+  /** Transforms serialized bytes of ErgoTree with segregated constants by
+    * replacing constants at given positions with new values. This operation
+    * allow to use serialized scripts as pre-defined templates.
+    * See [[sigmastate.SubstConstants]] for details.
+    *
+    * @param ergoTreeBytes serialized ErgoTree with ConstantSegregationFlag set to 1.
+    * @param positions     zero based indexes in ErgoTree.constants array which
+    *                      should be replaced with new values
+    * @param newValues     new values to be injected into the corresponding
+    *                      positions in ErgoTree.constants array
+    * @return a new ErgoTree such that only specified constants
+    *         are replaced and all other remain exactly the same
+    */
+  def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
+    val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+      ergoTreeBytes, positions, newValues.map(Iso.isoErgoValueToSValue.to))
+    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
   }
 
   def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {
