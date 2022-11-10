@@ -106,7 +106,8 @@ public class BabelFeeOperations {
         ErgoId tokenId,
         long feeAmount,
         int maxPagesToLoadForPriceSearch) {
-        ErgoContract contractForToken = new ErgoTreeContract(new BabelFeeBoxContract(tokenId).getErgoTree(), ctx.getNetworkType());
+        ErgoContract contractForToken = new ErgoTreeContract(
+            new BabelFeeBoxContract(tokenId).getErgoTree(), ctx.getNetworkType());
         Address address = contractForToken.toAddress();
         loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
 
@@ -114,17 +115,23 @@ public class BabelFeeOperations {
         List<InputBox> inputBoxes = null;
 
         InputBox returnBox = null;
-        long pricePerToken = Long.MAX_VALUE;
+        long minPricePerToken = Long.MAX_VALUE;
 
-        while ((page == 0 || !inputBoxes.isEmpty()) && (returnBox == null || maxPagesToLoadForPriceSearch == 0 || page < maxPagesToLoadForPriceSearch)) {
+        while ((page == 0 || !inputBoxes.isEmpty()) &&
+               (returnBox == null ||
+                maxPagesToLoadForPriceSearch == 0 ||
+                page < maxPagesToLoadForPriceSearch)) {
             inputBoxes = loader.loadBoxesPage(ctx, address, page);
 
             // find the cheapest box satisfying our fee amount needs
             for (InputBox inputBox : inputBoxes) {
                 try {
                     BabelFeeBoxState babelFeeBoxState = new BabelFeeBoxState(inputBox);
-                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && babelFeeBoxState.getPricePerToken() < pricePerToken)
+                    long priceFromBox = babelFeeBoxState.getPricePerToken();
+                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && priceFromBox < minPricePerToken) {
                         returnBox = inputBox;
+                        minPricePerToken = priceFromBox;
+                    }
                 } catch (Throwable t) {
                     // ignore, check next
                 }

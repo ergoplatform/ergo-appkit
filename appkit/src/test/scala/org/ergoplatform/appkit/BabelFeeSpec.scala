@@ -110,7 +110,8 @@ class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
       val tockenId = ErgoId.create(mockTokenId)
 
       // find no boxes
-      val babelBox1 = BabelFeeOperations.findBabelFeeBox(ctx, new MockedBoxesLoader(new util.ArrayList[InputBox]()),
+      val babelBox1 = BabelFeeOperations.findBabelFeeBox(ctx,
+        new MockedBoxesLoader(new util.ArrayList[InputBox]()),
         tockenId, Parameters.MinFee, 1)
 
       babelBox1 shouldBe (null)
