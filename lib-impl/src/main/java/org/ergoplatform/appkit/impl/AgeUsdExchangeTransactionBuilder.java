@@ -3,7 +3,6 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
-import org.ergoplatform.appkit.BoxSelectorsJavaHelpers;
 import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.InputBox;
@@ -101,15 +100,14 @@ public class AgeUsdExchangeTransactionBuilder {
 
         // > 0: customer will pay, < 0: customer will receive
         long totalAmount = exchangeErgAmount + bankFeeAmount + additionalFeeAmount + Parameters.MinChangeValue;
-        long txFeePaidFromReceipt = (totalAmount < 0 && boxOperations.getFeeAmount() > Parameters.MinFee)
-            ? boxOperations.getFeeAmount() - Parameters.MinFee : 0;
+        long txFeePaidFromReceipt = (totalAmount < 0) ? boxOperations.getFeeAmount() : 0;
         long receiptBoxAmount = Math.max(-totalAmount - txFeePaidFromReceipt, Parameters.MinChangeValue);
 
         // we load the boxes to spent for the customer
         List<InputBox> customerBoxesToSpend = loadBoxesToSpendByCustomer(scDelta, rcDelta, totalAmount, txFeePaidFromReceipt);
 
         // we load the bank's current box. Bank always have only one box
-        InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxByIdWithMemPool(bankBoxId) :
+        InputBox bankBox = bankBoxId != null ? ctx.getDataSource().getBoxById(bankBoxId, true, false) :
             ctx.getDataSource().getUnspentBoxesFor(
                 new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, 0L), 0, 1).get(0);
 
@@ -120,7 +118,7 @@ public class AgeUsdExchangeTransactionBuilder {
 
         // oracle's rate box is needed as data input
         List<InputBox> rateBox = rateBoxId != null ?
-            Collections.singletonList(ctx.getDataSource().getBoxByIdWithMemPool(rateBoxId)) :
+            Collections.singletonList(ctx.getDataSource().getBoxById(rateBoxId, true, false)) :
             ctx.getDataSource().getUnspentBoxesFor(
                 new ErgoToken(AgeUsdBank.RATE_BOX_TOKEN_ID, 0L), 0, 1);
 
@@ -168,20 +166,7 @@ public class AgeUsdExchangeTransactionBuilder {
             outboxes.add(uiFeeBox);
         }
 
-        // Box Selector has to preselect so we don't get exceptions later
-        long outputTotal = boxOperations.getFeeAmount();
-        for (OutBox outbox : outboxes) {
-            outputTotal += outbox.getValue();
-        }
-        // Box selectors needs tokens as well.
-        List<ErgoToken> tokensOut = new ArrayList<>();
-        tokensOut.add(new ErgoToken(AgeUsdBank.SC_TOKEN_ID, bankBox.getTokens().get(0).getValue() + Math.max(0, scDelta)));
-        tokensOut.add(new ErgoToken(AgeUsdBank.RC_TOKEN_ID, bankBox.getTokens().get(1).getValue() + Math.max(0, rcDelta)));
-        tokensOut.add(new ErgoToken(AgeUsdBank.BANK_BOX_TOKEN_ID, bankBox.getTokens().get(2).getValue()));
-
-        List<InputBox> selectedBoxes = BoxSelectorsJavaHelpers.selectBoxes(inputBoxes, outputTotal, tokensOut);
-
-        return txBuilder.boxesToSpend(selectedBoxes)
+        return txBuilder.boxesToSpend(inputBoxes)
             .outputs(outboxes.toArray(new OutBox[]{}))
             .fee(boxOperations.getFeeAmount())
             .sendChangeTo(boxOperations.getSenders().get(0).getErgoAddress())
@@ -200,12 +185,6 @@ public class AgeUsdExchangeTransactionBuilder {
                 new ErgoToken(AgeUsdBank.RC_TOKEN_ID, rcDelta)));
         }
 
-        // reduce the tx fee to pay temporarily so that loadTop will not load boxes for it...
-        // outer method made sure at least Parameters.MinFee remains
-        boxOperations.withFeeAmount(boxOperations.getFeeAmount() - txFeePaidFromReceipt);
-        List<InputBox> inputBoxes = boxOperations.loadTop();
-        // ...and restore the correct value
-        boxOperations.withFeeAmount(boxOperations.getFeeAmount() + txFeePaidFromReceipt);
-        return inputBoxes;
+        return boxOperations.loadTop(txFeePaidFromReceipt);
     }
 }
