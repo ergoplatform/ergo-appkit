@@ -69,7 +69,7 @@ public class PreHeaderBuilderImpl implements PreHeaderBuilder {
         BlockHeader h = _ctx.getHeaders().get(0);
         byte version = _version == null ? h.getVersion() : _version;
         Coll<Object> parentId = _parentId == null ? (Coll<Object>)(Object)h.getParentId() : _parentId;
-        long timestamp = _timestamp == null ? h.getTimestamp() : _timestamp;
+        long timestamp = _timestamp == null ? Math.max(h.getTimestamp(), System.currentTimeMillis()) : _timestamp;
         long nBits = _nBits == null ? h.getNBits() : _nBits;
         int height = _height == null ? h.getHeight() : _height;
         GroupElement minerPk = _minerPk == null ? h.getMinerPk() : _minerPk;

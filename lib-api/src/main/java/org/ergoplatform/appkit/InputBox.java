@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import special.sigma.Box;
+
 /**
  * Interface of UTXO boxes which can be accessed in the blockchain node.
  * Instances of this interface can be {@link BlockchainContext#getBoxesById(String...) obtained}
@@ -50,5 +52,9 @@ public interface InputBox extends TransactionBox {
      */
     byte[] getBytes();
 
+    /**
+     * @return this box as an ergo value to store in a register
+     */
+    ErgoValue<Box> toErgoValue();
 }
 

@@ -70,7 +70,7 @@ class AppkitProvingInterpreterSpec extends PropSpec
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
       val prover = ctx.newProverBuilder()
-        .withMnemonic(mnemonic, SecretString.empty())
+        .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
       val tree1 = ErgoScriptPredef.TrueProp(ergoTreeHeaderInTests)
       val tree2 = ErgoScriptPredef.FalseProp(ergoTreeHeaderInTests)

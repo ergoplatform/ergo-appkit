@@ -81,7 +81,7 @@ public class ExampleScenarios {
                                 .build())
                 .build();
         ErgoProverBuilder proverB = _ctx.newProverBuilder();
-        ErgoProver prover = proverB.withMnemonic(seedPhrase, null).build();
+        ErgoProver prover = proverB.withMnemonic(seedPhrase, null, false).build();
         SignedTransaction signed = prover.sign(tx);
         return signed;
     }

@@ -60,8 +60,15 @@ public class SecretStorage {
         unlock(SecretString.create(encryptionPass));
     }
 
+    /**
+     * Initializes storage with the seed derived from an existing mnemonic phrase.
+     * @param mnemonic - mnemonic phase
+     * @param encryptionPass - encryption password
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+     * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+    */
     public static SecretStorage createFromMnemonicIn(
-            String secretDir, Mnemonic mnemonic, SecretString encryptionPassword) {
+            String secretDir, Mnemonic mnemonic, SecretString encryptionPassword, Boolean usePre1627KeyDerivation) {
         SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
 
         SecretString password = mnemonic.getPassword();
@@ -71,14 +78,14 @@ public class SecretStorage {
                 JavaHelpers.secretStringToOption(password != null ?
                     password.toInterface4JSecretString() : null),
                 encryptionPassword.toInterface4JSecretString(),
-                settings);
+                settings, usePre1627KeyDerivation);
 
         return new SecretStorage(jsonStorage);
     }
 
     public static SecretStorage createFromMnemonicIn(
-            String secretDir, Mnemonic mnemonic, String encryptionPassword) {
-        return createFromMnemonicIn(secretDir, mnemonic, SecretString.create(encryptionPassword));
+            String secretDir, Mnemonic mnemonic, String encryptionPassword, Boolean usePre1627KeyDerivation) {
+        return createFromMnemonicIn(secretDir, mnemonic, SecretString.create(encryptionPassword), usePre1627KeyDerivation);
     }
 
     public static SecretStorage loadFrom(String storageFileName) {

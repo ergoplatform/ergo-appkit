@@ -1,31 +1,26 @@
 package org.ergoplatform.appkit.impl
 
-import java.util
 import org.ergoplatform._
-import org.ergoplatform.appkit.{Iso, _}
+import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
+import org.ergoplatform.appkit._
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector
+import scorex.crypto.authds.ADDigest
+import sigmastate.eval.Colls
 import special.collection.Coll
 import special.sigma.Header
 
+import java.util
 import java.util._
-import java.util.stream.Collectors
-import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
-import scorex.crypto.authds.ADDigest
-import org.ergoplatform.appkit.JavaHelpers._
-import sigmastate.eval.Colls
-
 import scala.collection.JavaConversions
+import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
-  private[impl] var _inputs: List[UnsignedInput] = _
-  private var _inputBoxes: Option[List[InputBoxImpl]] = None
+  private[impl] val _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
+  private[impl] val _outputs: List[OutBoxImpl] = new ArrayList[OutBoxImpl]()
+  private[impl] val _dataInputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
 
-  private[impl] var _dataInputs: List[DataInput] = new ArrayList[DataInput]()
-  private var _dataInputBoxes: Option[List[InputBoxImpl]] = None
-
-  private[impl] var _outputCandidates: Option[List[ErgoBoxCandidate]] = None
   private var _tokensToBurn: Option[List[ErgoToken]] = None
   private var _feeAmount: Option[Long] = None
   private var _changeAddress: Option[ErgoAddress] = None
@@ -37,29 +32,42 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
+  override def addInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+    boxes.foreach { case b: InputBoxImpl =>
+      _inputs.add(b)
+    }
+    this
+  }
+
   override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
-    require(_inputBoxes.isEmpty, "boxesToSpend list is already specified")
-    _inputs = inputBoxes
-      .map(box => JavaHelpers.createUnsignedInput(box.getId.getBytes))
-    _inputBoxes = Some(inputBoxes.map(b => b.asInstanceOf[InputBoxImpl]))
+    require(_inputs.isEmpty, "inputs already specified")
+    addInputs(inputBoxes.toSeq: _*)
+    this
+  }
+
+  override def addDataInputs(boxes: InputBox*): UnsignedTransactionBuilder = {
+    boxes.foreach { case b: InputBoxImpl =>
+      _dataInputs.add(b)
+    }
     this
   }
 
   override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
-    require(_dataInputBoxes.isEmpty, "dataInputs list is already specified")
-    _dataInputs = inputBoxes
-      .map(box => JavaHelpers.createDataInput(box.getId.getBytes))
-    _dataInputBoxes = Some(inputBoxes.map(_.asInstanceOf[InputBoxImpl]))
+    require(_dataInputs.isEmpty, "dataInputs list is already specified")
+    addDataInputs(inputBoxes.toSeq: _*)
+    this
+  }
+
+  override def addOutputs(outBoxes: OutBox*): UnsignedTransactionBuilder = {
+    outBoxes.foreach { case b: OutBoxImpl =>
+      _outputs.add(b)
+    }
     this
   }
 
   override def outputs(outputs: OutBox*): UnsignedTransactionBuilder = {
-    require(_outputCandidates.isEmpty, "Outputs already specified.")
-    val candidates = outputs
-      .map(c => c.asInstanceOf[OutBoxImpl].getErgoBoxCandidate)
-      .toIndexedSeq.asInstanceOf[IndexedSeq[ErgoBoxCandidate]]
-      .convertTo[List[ErgoBoxCandidate]]
-    _outputCandidates = Some(candidates)
+    require(_outputs.isEmpty, "Outputs already specified.")
+    addOutputs(outputs: _*)
     this
   }
 
@@ -73,7 +81,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     require(_tokensToBurn.isEmpty, "Tokens to burn already specified.")
     _tokensToBurn = Some({
       val res = new util.ArrayList[ErgoToken]()
-      Collections.addAll(res, tokens:_*)
+      Collections.addAll(res, tokens: _*)
       res
     })
     this
@@ -85,11 +93,15 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
+  override def sendChangeTo(changeAddress: Address): UnsignedTransactionBuilder = {
+    sendChangeTo(changeAddress.getErgoAddress)
+  }
+
   def getNonEmpty[T](list: Option[List[T]], msg: => String): List[T] = {
     list match {
       case Some(list) if !list.isEmpty => list
       case _ =>
-        throw new IllegalArgumentException("requirement failed: "+ msg)
+        throw new IllegalArgumentException("requirement failed: " + msg)
     }
   }
 
@@ -97,19 +109,19 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     opt match {
       case Some(x) => x
       case _ =>
-        throw new IllegalArgumentException("requirement failed: "+ msg)
+        throw new IllegalArgumentException("requirement failed: " + msg)
     }
   }
 
   override def build: UnsignedTransaction = {
-    val inputBoxes = getInputBoxesImpl
-    val outputCandidates = getNonEmpty(_outputCandidates, "Output boxes are not specified")
+    val inputBoxes = _inputs
+    val outputCandidates = _outputs.map(c => c.getErgoBoxCandidate)
+    require(!outputCandidates.isEmpty, "Output boxes are not specified")
     val boxesToSpend = inputBoxes
       .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
-    val dataInputBoxes = _dataInputBoxes
-       .getOrElse(new util.ArrayList[InputBoxImpl]())
-       .map(b => b.getErgoBox)
+    val dataInputBoxes = _dataInputs.map(b => b.getErgoBox)
     val dataInputs = JavaHelpers.toIndexedSeq(_dataInputs)
+      .map(box => JavaHelpers.createDataInput(box.getId.getBytes))
     require(_feeAmount.isEmpty || _feeAmount.get >= MinFee,
       s"When fee amount is defined it should be >= $MinFee, got ${_feeAmount.get}")
     val changeAddress = getDefined(_changeAddress, "Change address is not defined")
@@ -130,7 +142,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       changeAddress = changeAddress, minChangeValue = MinChangeValue,
       minerRewardDelay = rewardDelay,
       burnTokens = burnTokens,
-      boxSelector = DefaultBoxSelector).get
+      boxSelector = new InputBoxesValidator()).get
 
     // the method above don't accept ContextExtension along with inputs, thus, after the
     // transaction has been built we need to zip with the extensions that have been
@@ -171,10 +183,10 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def getNetworkType: NetworkType = _ctx.getNetworkType
 
-  private def getInputBoxesImpl: List[InputBoxImpl] =
-    getNonEmpty(_inputBoxes, "Input boxes are not specified")
-
   override def getInputBoxes: List[InputBox] =
-    getInputBoxesImpl.stream.collect(Collectors.toList[InputBox])
+    _inputs.map(b => b.asInstanceOf[InputBox])
+
+  override def getOutputBoxes: util.List[OutBox] =
+    _outputs.map(b => b.asInstanceOf[OutBox])
 }
 
