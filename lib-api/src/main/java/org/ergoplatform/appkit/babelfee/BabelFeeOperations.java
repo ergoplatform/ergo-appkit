@@ -115,7 +115,7 @@ public class BabelFeeOperations {
         List<InputBox> inputBoxes = null;
 
         InputBox returnBox = null;
-        long minPricePerToken = Long.MAX_VALUE;
+        long bestPricePerToken = 0;
 
         while ((page == 0 || !inputBoxes.isEmpty()) &&
                (returnBox == null ||
@@ -128,9 +128,9 @@ public class BabelFeeOperations {
                 try {
                     BabelFeeBoxState babelFeeBoxState = new BabelFeeBoxState(inputBox);
                     long priceFromBox = babelFeeBoxState.getPricePerToken();
-                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && priceFromBox < minPricePerToken) {
+                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && priceFromBox > bestPricePerToken) {
                         returnBox = inputBox;
-                        minPricePerToken = priceFromBox;
+                        bestPricePerToken = priceFromBox;
                     }
                 } catch (Throwable t) {
                     // ignore, check next
