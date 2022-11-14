@@ -45,7 +45,7 @@ class ErgoTreeTemplateSpec extends TestingBase
 
     assertExceptionThrown(
       template.applyParameters(ErgoValue.of(1.toByte)), // invalid type of ErgoValue (should be Int)
-      exceptionLike[AssertionError]()
+      exceptionLike[IllegalArgumentException]("expected new constant to have the same SInt$ tpe, got SByte$")
     )
   }
 
