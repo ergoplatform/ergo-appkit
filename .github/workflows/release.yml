@@ -44,9 +44,10 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 
       - name: Build fat jar
-        run: sbt clean assembly
-      - name: Save fat jar artifact
-        uses: actions/upload-artifact@v3
+        run: sbt 'set test in assembly := {}' clean assembly
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          name: ergo-appkit.jar
-          path: target/**/ergo-appkit-*.jar
+          asset_paths: '["target/**/ergo-appkit-*.jar"]'

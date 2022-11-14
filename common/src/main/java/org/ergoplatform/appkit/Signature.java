@@ -14,6 +14,6 @@ public class Signature {
      * @return whether signature is valid or not
      */
     public static boolean verifySignature(SigmaProp sigmaProp, byte[] message, byte[] signature) {
-        return SigmaPropInterpreter.verifySignature(sigmaProp.getSigmaBoolean(), message, signature);
+        return SigmaPropInterpreter.verifySignature(sigmaProp.getSigmaBoolean(), message, signature, null);
     }
 }

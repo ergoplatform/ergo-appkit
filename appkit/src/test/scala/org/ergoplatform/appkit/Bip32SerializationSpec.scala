@@ -9,7 +9,7 @@ class Bip32SerializationSpec extends PropSpec with Matchers with ScalaCheckDrive
   with AppkitTesting {
 
   property("Serialization roundtrip") {
-    val masterKey = JavaHelpers.seedToMasterKey(mnemonic, SecretString.empty())
+    val masterKey = JavaHelpers.seedToMasterKey(mnemonic, SecretString.empty(), false)
     val xpubString = Bip32Serialization.serializeExtendedPublicKeyToHex(masterKey, NetworkType.MAINNET)
 
     an[IllegalArgumentException] shouldBe thrownBy {

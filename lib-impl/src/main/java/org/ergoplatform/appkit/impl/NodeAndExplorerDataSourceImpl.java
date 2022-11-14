@@ -60,6 +60,12 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     // cached to avoid multiple fetches, these values won't change while this class lives
     private BlockchainParameters blockchainParameters;
 
+    /**
+     * set to true to make {@link #sendTransaction(SignedTransaction)} call node's checkTransaction
+     * endpoint before actually sending the transaction
+     */
+    public boolean performCheckBeforeSend = false;
+
     public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
 
         OkHttpClient ok = nodeClient.getOkBuilder().build();
@@ -139,15 +145,30 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     }
 
     @Override
-    public InputBox getBoxById(String boxId) {
-        ErgoTransactionOutput boxData = executeCall(nodeUtxoApi.getBoxById(boxId));
+    public InputBox getBoxById(String boxId, boolean findInPool, boolean findInSpent) {
+        if (findInSpent && !findInPool) {
+            return getBoxByIdExplorer(boxId);
+        } else if (!findInSpent) {
+            return getUnspentBoxByIdNode(boxId, findInPool);
+        } else {
+            // find in spent and find in pool => try node first and fall back to explorer
+            try {
+                return getUnspentBoxByIdNode(boxId, findInPool);
+            } catch (Throwable t) {
+                return getBoxByIdExplorer(boxId);
+            }
+        }
+    }
+
+    private InputBox getUnspentBoxByIdNode(String boxId, boolean findInPool) {
+        ErgoTransactionOutput boxData = (findInPool) ? executeCall(nodeUtxoApi.getBoxWithPoolById(boxId))
+            : executeCall(nodeUtxoApi.getBoxById(boxId));
         return new InputBoxImpl(boxData);
     }
 
-    @Override
-    public InputBox getBoxByIdWithMemPool(String boxId) {
-        ErgoTransactionOutput boxData = executeCall(nodeUtxoApi.getBoxWithPoolById(boxId));
-        return new InputBoxImpl(boxData);
+    private InputBox getBoxByIdExplorer(String boxId) {
+        OutputInfo outputInfo = executeCall(explorerApi.getApiV1BoxesP1(boxId));
+        return new InputBoxImpl(outputInfo);
     }
 
     @Override
@@ -164,6 +185,14 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
             .dataInputs(dataInputsData)
             .inputs(inputsData)
             .outputs(outputsData);
+
+        if (performCheckBeforeSend) {
+            String txId = executeCall(nodeTransactionsApi.checkTransaction(txData)).replace("\"", "");
+            if (!txData.getId().equals(txId)) {
+                throw new IllegalStateException("checkTransaction returned tx id " + txId +
+                    ", expected was " + txData.getId());
+            }
+        }
 
         return executeCall(nodeTransactionsApi.sendTransaction(txData));
     }
@@ -188,7 +217,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
                 if (output.getAddress().equals(senderAddress) && output.getSpentTransactionId() == null) {
                     // we have an unconfirmed box - get info from node for it
                     try {
-                        InputBox boxInfo = getBoxByIdWithMemPool(output.getBoxId());
+                        InputBox boxInfo = getBoxById(output.getBoxId(), true, false);
                         if (boxInfo != null) {
                             inputBoxes.add(boxInfo);
                         }
@@ -217,7 +246,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
         for (OutputInfo box : boxes) {
             String boxId = box.getBoxId();
             try {
-                InputBox boxInfo = getBoxById(boxId);
+                InputBox boxInfo = getBoxById(boxId, false, false);
                 // can be null if node does not know about the box (yet)
                 // instead of throwing an error, we continue with the boxes actually known
                 if (boxInfo != null) {

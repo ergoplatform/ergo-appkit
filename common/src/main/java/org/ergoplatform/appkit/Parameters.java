@@ -9,7 +9,7 @@ public class Parameters {
      * This is part of Ergo protocol and cannot be changed.
      */
     public static final int MinerRewardDelay_Mainnet = 720;
-    public static final int MinerRewardDelay_Testnet = 72;
+    public static final int MinerRewardDelay_Testnet = 720;
 
     /**
      * One Erg is 10^9 NanoErg
@@ -32,4 +32,9 @@ public class Parameters {
      * Max block cost for Cold Client
      */
     public static final int ColdClientMaxBlockCost = 1000000;
+
+    /**
+     * Activated version for Cold Client
+     */
+    public static final byte ColdClientBlockVersion = 2;
 }

@@ -33,8 +33,14 @@ public class Peer {
   @SerializedName("name")
   private String name = null;
 
-  @SerializedName("lastSeen")
-  private Integer lastSeen = null;
+  @SerializedName("restApiUrl")
+  private String restApiUrl = null;
+
+  @SerializedName("lastMessage")
+  private Long lastMessage = null;
+
+  @SerializedName("lastHandshake")
+  private Long lastHandshake = null;
 
   /**
    * Gets or Sets connectionType
@@ -116,25 +122,31 @@ public class Peer {
     this.name = name;
   }
 
-  public Peer lastSeen(Integer lastSeen) {
-    this.lastSeen = lastSeen;
-    return this;
-  }
+    public String getRestApiUrl() {
+        return restApiUrl;
+    }
 
-   /**
-   * Get lastSeen
-   * @return lastSeen
-  **/
-  @Schema(description = "")
-  public Integer getLastSeen() {
-    return lastSeen;
-  }
+    public void setRestApiUrl(String restApiUrl) {
+        this.restApiUrl = restApiUrl;
+    }
 
-  public void setLastSeen(Integer lastSeen) {
-    this.lastSeen = lastSeen;
-  }
+    public Long getLastMessage() {
+        return lastMessage;
+    }
 
-  public Peer connectionType(ConnectionTypeEnum connectionType) {
+    public void setLastMessage(Long lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public Long getLastHandshake() {
+        return lastHandshake;
+    }
+
+    public void setLastHandshake(Long lastHandshake) {
+        this.lastHandshake = lastHandshake;
+    }
+
+    public Peer connectionType(ConnectionTypeEnum connectionType) {
     this.connectionType = connectionType;
     return this;
   }
@@ -164,13 +176,15 @@ public class Peer {
     Peer peer = (Peer) o;
     return Objects.equals(this.address, peer.address) &&
         Objects.equals(this.name, peer.name) &&
-        Objects.equals(this.lastSeen, peer.lastSeen) &&
+        Objects.equals(this.lastHandshake, peer.lastHandshake) &&
+        Objects.equals(this.lastMessage, peer.lastMessage) &&
+        Objects.equals(this.restApiUrl, peer.restApiUrl) &&
         Objects.equals(this.connectionType, peer.connectionType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, name, lastSeen, connectionType);
+    return Objects.hash(address, name, lastHandshake, lastMessage, restApiUrl, connectionType);
   }
 
 
@@ -181,7 +195,9 @@ public class Peer {
     
     sb.append("    address: ").append(toIndentedString(address)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    lastSeen: ").append(toIndentedString(lastSeen)).append("\n");
+    sb.append("    lastMessage: ").append(toIndentedString(lastMessage)).append("\n");
+    sb.append("    lastHandshake: ").append(toIndentedString(lastHandshake)).append("\n");
+    sb.append("    restApiUrl: ").append(toIndentedString(restApiUrl)).append("\n");
     sb.append("    connectionType: ").append(toIndentedString(connectionType)).append("\n");
     sb.append("}");
     return sb.toString();

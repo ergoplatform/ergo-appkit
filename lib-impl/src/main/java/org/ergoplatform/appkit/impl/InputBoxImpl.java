@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.appkit.*;
+import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 
 import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
+import special.sigma.Box;
 
 public class InputBoxImpl implements InputBox {
     private final ErgoId _id;
@@ -24,6 +26,13 @@ public class InputBoxImpl implements InputBox {
         _id = new ErgoId(JavaHelpers.decodeStringToBytes(boxData.getBoxId()));
         _ergoBox = ScalaBridge.isoErgoTransactionOutput().to(boxData);
         _boxData = boxData;
+        _extension = ContextExtension.empty();
+    }
+
+    public InputBoxImpl(OutputInfo outputInfo) {
+        _id = ErgoId.create(outputInfo.getBoxId());
+        _ergoBox = ScalaBridge.isoExplTransactionOutput().to(outputInfo);
+        _boxData = ScalaBridge.isoErgoTransactionOutput().from(_ergoBox);
         _extension = ContextExtension.empty();
     }
 
@@ -115,5 +124,10 @@ public class InputBoxImpl implements InputBox {
     @Override
     public String toString() {
         return String.format("InputBox(%s, %s)", getId(), getValue());
+    }
+
+    @Override
+    public ErgoValue<Box> toErgoValue() {
+        return ErgoValue.of(getErgoBox());
     }
 }

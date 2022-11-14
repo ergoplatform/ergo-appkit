@@ -13,10 +13,9 @@ import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoole
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
-import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CHeader, CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -29,8 +28,8 @@ import java.util.{Map => JMap, List => JList}
 import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.{Constants, TokensMap}
-import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2KeyLength, Pbkdf2Iterations}
+import org.ergoplatform.wallet.TokensMap
+import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2Iterations, Pbkdf2KeyLength}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
@@ -40,6 +39,10 @@ import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
+import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
+import sigmastate.eval.Colls.outerJoin
+import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
+import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -57,6 +60,7 @@ abstract class Iso[A, B] {
   def to(a: A): B
   def from(b: B): A
   def andThen[C](iso: Iso[B,C]): Iso[A,C] = ComposeIso(iso, this)
+  def inverse: Iso[B, A] = InverseIso(this)
 }
 final case class InverseIso[A,B](iso: Iso[A,B]) extends Iso[B,A] {
   override def to(a: B): A = iso.from(a)
@@ -182,8 +186,16 @@ object Iso extends LowPriorityIsos {
   }
 
   val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
-    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
+  }
+
+  val isoTokensListToTokenColl: Iso[JList[ErgoToken], TokenColl] = new Iso[JList[ErgoToken], TokenColl] {
+    override def to(ts: JList[ErgoToken]): TokenColl =
+      isoTokensListToPairsColl.to(ts).mapFirst(Colls.fromArray(_))
+
+    override def from(ts: TokenColl): JList[ErgoToken] = {
+      isoTokensListToPairsColl.from(ts.mapFirst(id => Digest32 @@ id.toArray))
+    }
   }
 
   val isoSigmaBooleanToByteArray: Iso[SigmaBoolean, Array[Byte]] = new Iso[SigmaBoolean, Array[Byte]] {
@@ -316,6 +328,25 @@ object JavaHelpers {
     ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(base16).get)
   }
 
+  /** Transforms serialized bytes of ErgoTree with segregated constants by
+    * replacing constants at given positions with new values. This operation
+    * allow to use serialized scripts as pre-defined templates.
+    * See [[sigmastate.SubstConstants]] for details.
+    *
+    * @param ergoTreeBytes serialized ErgoTree with ConstantSegregationFlag set to 1.
+    * @param positions     zero based indexes in ErgoTree.constants array which
+    *                      should be replaced with new values
+    * @param newValues     new values to be injected into the corresponding
+    *                      positions in ErgoTree.constants array
+    * @return a new ErgoTree such that only specified constants
+    *         are replaced and all other remain exactly the same
+    */
+  def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
+    val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+      ergoTreeBytes, positions, newValues.map(v => Iso.isoErgoValueToSValue.to(v).asInstanceOf[Constant[SType]]))
+    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+  }
+
   def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {
     implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
     P2PKAddress(pk)
@@ -340,6 +371,8 @@ object JavaHelpers {
       case SigmaPropConstant(p) => SigmaDsl.toSigmaBoolean(p)
     }
   }
+
+  def toErgoTree(sigmaBoolean: SigmaBoolean): ErgoTree = ErgoTree.fromSigmaBoolean(sigmaBoolean)
 
   def getStateDigest(tree: AvlTree): Array[Byte] = {
     tree.digest.toArray
@@ -412,10 +445,18 @@ object JavaHelpers {
     if (secretString == null || secretString.isEmpty) None else Some(secretString)
   }
 
-  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
+  /**
+   * Create an extended secret key from mnemonic
+   *
+   * @param seedPhrase secret seed phrase to be used in prover for generating proofs.
+   * @param pass   password to protect secret seed phrase.
+   * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+   * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+   */
+  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null, usePre1627KeyDerivation: java.lang.Boolean): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
     val seed = mnemonicToSeed(seedPhrase.toStringUnsecure, passOpt)
-    val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
+    val masterKey = ExtendedSecretKey.deriveMasterKey(seed, usePre1627KeyDerivation)
     masterKey
   }
 
@@ -453,6 +494,14 @@ object JavaHelpers {
   def collToByteArray(in: Coll[Byte]): Array[Byte] = {
     in.toArray
   }
+
+  def collFrom(arr: Array[Long]): Coll[Long] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Int]): Coll[Int] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Boolean]): Coll[Boolean] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Short]): Coll[Short] = Colls.fromArray(arr)
 
   def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
     val r = SigmaSerializer.startReader(ergoTree.bytes)
@@ -523,6 +572,68 @@ object JavaHelpers {
   def eip3DerivationParent() = {
     val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
+  }
+
+  /** Type synonym for a collection of tokens represented using Coll */
+  type TokenColl = Coll[(Coll[Byte], Long)]
+
+  /** Ensures that all tokens have strictly positive value.
+    * @throws IllegalArgumentException when any token have value <= 0
+    * @return the original `tokens` collection (passes the argument through to the result)
+    */
+  def checkAllTokensPositive(tokens: TokenColl): TokenColl = {
+    val invalidTokens = tokens.filter(_._2 <= 0)
+    require(invalidTokens.isEmpty, s"All token values should be > 0: ")
+    tokens
+  }
+
+  /** Compute the difference between `reducedTokens` collection and `subtractedTokens` collection.
+    * It can be thought as `reducedTokens - subtractedTokens` operation.
+    *
+    * Each collection can have many `(tokenId, amount)` pairs with the same `tokenId`.
+    * The method works by first combining all the pairs with the same tokenId and then
+    * computing the difference.
+    * The resulting collection contain a single pair for each tokenId and those token ids
+    * form a subset of tokens from the argument collections.
+    *
+    * One concrete use case to think of is `subtractTokenColls(outputTokens, inputTokens)`.
+    * In this case the resulting collection of (tokenId, amount) pairs can be interpreted as:
+    * - when `amount < 0` then it is to be burnt
+    * - when `amount > 0` then it is to be minted
+    *
+    * @param reducedTokens    the tokens to be subracted from
+    * @param subtractedTokens the tokens which amounts will be subtracted from the
+    *                         corresponding tokens from `reducedTokens`
+    * @return the differences between token amounts (matched by token ids)
+    */
+  def subtractTokenColls(
+    reducedTokens: TokenColl,
+    subtractedTokens: TokenColl
+  ): TokenColl = {
+    val reduced = checkAllTokensPositive(reducedTokens)
+      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
+    val subtracted = checkAllTokensPositive(subtractedTokens)
+      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
+    val tokensDiff = outerJoin(subtracted, reduced)(
+      { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
+      { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
+      { case (_, (sV, rV)) => rV - sV } // for tokens both in subtracted and reduced: balance change
+    )
+    tokensDiff.filter(_._2 != 0)  // return only unbalanced tokens
+  }
+
+  /** Compute the difference between `reducedTokens` collection and `subtractedTokens`
+    * collection.
+    * @see subtractTokenColls for details
+    */
+  def subtractTokens(
+    reducedTokens: IndexedSeq[(TokenId, Long)],
+    subtractedTokens: IndexedSeq[(TokenId, Long)]
+  ): TokenColl = {
+    subtractTokenColls(
+      reducedTokens = Colls.fromItems(reducedTokens:_*).mapFirst(Colls.fromArray(_)),
+      subtractedTokens = Colls.fromItems(subtractedTokens:_*).mapFirst(Colls.fromArray(_))
+    )
   }
 }
 

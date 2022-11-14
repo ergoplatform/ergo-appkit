@@ -12,6 +12,10 @@ public class SigmaProp {
         this.sigmaBoolean = sigmaBoolean;
     }
 
+    public SigmaProp(special.sigma.SigmaProp sigmaProp) {
+        this(JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
+    }
+
     public Values.SigmaBoolean getSigmaBoolean() {
         return sigmaBoolean;
     }
@@ -21,6 +25,10 @@ public class SigmaProp {
      */
     public byte[] toBytes() {
         return Iso.isoSigmaBooleanToByteArray().to(sigmaBoolean);
+    }
+
+    public Address toAddress(NetworkType networkType) {
+        return Address.fromSigmaBoolean(sigmaBoolean, networkType);
     }
 
     /**
