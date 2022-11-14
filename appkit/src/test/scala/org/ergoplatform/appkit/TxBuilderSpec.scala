@@ -2,9 +2,8 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException}
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.appkit.examples.RunMockedScala.data
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
@@ -23,7 +22,6 @@ import java.math.BigInteger
 import java.util
 import java.util.Arrays
 import java.util.function.Consumer
-import scala.collection.JavaConversions
 
 class TxBuilderSpec extends PropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -161,8 +159,8 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
-      val unsigned = txB.boxesToSpend(Arrays.asList(input))
-        .outputs(output, feeOut)
+      val unsigned = txB.addInputs(input)
+        .outputs(output).addOutputs(feeOut)
         .sendChangeTo(changeAddr)
         .build()
       val prover = ctx.newProverBuilder().build()
@@ -308,7 +306,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     // the only necessary parameter can either be hard-coded or passed
     // together with ReducedTransaction
     val maxBlockCost = Parameters.ColdClientMaxBlockCost
-    val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost)
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost, Parameters.ColdClientBlockVersion)
 
     coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold
@@ -405,6 +403,57 @@ class TxBuilderSpec extends PropSpec with Matchers
         operations.withMaxInputBoxesToSelect(1).loadTop(),
         exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
       )
+
+      // if there is only a single input box, we face NotEnoughCoinsForChangeException
+      val operations2 = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
+
+      assertExceptionThrown(
+        operations2.loadTop(),
+        exceptionLike[NotEnoughCoinsForChangeException]()
+      )
+    }
+
+  }
+
+  property("use changebox to consolidate") {
+    // this demonstrates that unnecessary input boxes can be picked up to consolidate wallet boxes
+    // via change box on the fly (issue #182)
+
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val (_, senders) = loadStorageE2()
+      val recipient = address
+      val pkContract = recipient.toErgoContract
+
+      // send 0.5 ERG
+      val amountToSend = 500L * 1000 * 1000
+
+      // first box: 1 ERG
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: 1 ERG
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val tx = ctx.newTxBuilder().addInputs(input1).addInputs(input2)
+        .outputs(ctx.newTxBuilder().outBoxBuilder().contract(pkContract).value(amountToSend).build())
+        .sendChangeTo(recipient.getErgoAddress)
+        .fee(Parameters.MinFee)
+        .build()
+
+      // both boxes should be selected
+      // ergo-wallet's DefaultBoxSelector discarded the second input because it is not necessary for
+      // the outputs, so this test checks if all inputs are used (size 2)
+      tx.getInputs.size() shouldBe 2
+      tx.getOutputs.size() shouldBe 3
+
     }
 
   }
@@ -465,6 +514,56 @@ class TxBuilderSpec extends PropSpec with Matchers
         .map(_.getTokens.size())
         .convertTo[IndexedSeq[Int]].sum
       (tokenList1.length + tokenList2.length) shouldBe outTokenNum
+    }
+
+  }
+
+  property("Test same token multiple times") {
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val (storage, _) = loadStorageE2()
+
+      val recipient = address
+
+      // send 1 ERG
+      val amountToSend = 1000L * 1000 * 1000
+      val pkContract = recipient.toErgoContract
+
+      val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
+
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(amountToSend + Parameters.MinFee + Parameters.MinChangeValue)
+        .contract(pkContract)
+        // the same token twice
+        .tokens(new ErgoToken(mockTxId, 1), new ErgoToken(mockTxId, 1))
+        .build().convertToInputWith(mockTxId, 0)
+
+      val unsigned = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .putToContractTxUnsigned(pkContract)
+
+      // check if this succeeds without token burning, but with tokens in change box
+      // otherwise exception would be raised
+      val prover = ctx.newProverBuilder.build // prover without secrets
+      val reduced = prover.reduce(unsigned, 0)
+
+      // outputs should contain the two tokens going in
+      unsigned.getOutputs.convertTo[IndexedSeq[OutBox]]
+        .map(_.getTokens.convertTo[IndexedSeq[ErgoToken]])
+        .flatten(identity)
+        .filter(_.getId.toString.equals(mockTxId))
+        .map(_.getValue).sum shouldBe 2L
+
+      // check if this suceeds finding all tokens and not raising any exception
+      val spendAllTokens = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 2)))
+        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .putToContractTxUnsigned(pkContract)
+
+      val reduced2 = prover.reduce(spendAllTokens, 0)
     }
 
   }

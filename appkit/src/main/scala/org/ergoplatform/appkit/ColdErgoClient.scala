@@ -10,10 +10,11 @@ class ColdErgoClient(networkType: NetworkType, params: BlockchainParameters) ext
   /**
     * Convenience constructor for giving maxBlockCost
     */
-  def this(networkType: NetworkType, maxBlockCost: Int) {
+  def this(networkType: NetworkType, maxBlockCost: Int, blockVersion: Byte) {
     this(networkType, new NodeInfoParameters(
       new NodeInfo().parameters(new client.Parameters()
-        .maxBlockCost(Integer.valueOf(maxBlockCost)))))
+        .maxBlockCost(Integer.valueOf(maxBlockCost))
+        .blockVersion(Integer.valueOf(blockVersion)))))
   }
 
   override def execute[T](action: function.Function[BlockchainContext, T]): T = {
