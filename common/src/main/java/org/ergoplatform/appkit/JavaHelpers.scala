@@ -41,6 +41,7 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
 import sigmastate.eval.Colls.outerJoin
+import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
 import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
@@ -327,6 +328,25 @@ object JavaHelpers {
     ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(base16).get)
   }
 
+  /** Transforms serialized bytes of ErgoTree with segregated constants by
+    * replacing constants at given positions with new values. This operation
+    * allow to use serialized scripts as pre-defined templates.
+    * See [[sigmastate.SubstConstants]] for details.
+    *
+    * @param ergoTreeBytes serialized ErgoTree with ConstantSegregationFlag set to 1.
+    * @param positions     zero based indexes in ErgoTree.constants array which
+    *                      should be replaced with new values
+    * @param newValues     new values to be injected into the corresponding
+    *                      positions in ErgoTree.constants array
+    * @return a new ErgoTree such that only specified constants
+    *         are replaced and all other remain exactly the same
+    */
+  def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
+    val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+      ergoTreeBytes, positions, newValues.map(Iso.isoErgoValueToSValue.to))
+    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+  }
+
   def createP2PKAddress(pk: ProveDlog, networkPrefix: NetworkPrefix): P2PKAddress = {
     implicit val ergoAddressEncoder: ErgoAddressEncoder = ErgoAddressEncoder(networkPrefix)
     P2PKAddress(pk)
@@ -425,10 +445,18 @@ object JavaHelpers {
     if (secretString == null || secretString.isEmpty) None else Some(secretString)
   }
 
-  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null): ExtendedSecretKey = {
+  /**
+   * Create an extended secret key from mnemonic
+   *
+   * @param seedPhrase secret seed phrase to be used in prover for generating proofs.
+   * @param pass   password to protect secret seed phrase.
+   * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+   * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
+   */
+  def seedToMasterKey(seedPhrase: SecretString, pass: SecretString = null, usePre1627KeyDerivation: java.lang.Boolean): ExtendedSecretKey = {
     val passOpt = if (pass == null || pass.isEmpty()) None else Some(pass.toStringUnsecure)
     val seed = mnemonicToSeed(seedPhrase.toStringUnsecure, passOpt)
-    val masterKey = ExtendedSecretKey.deriveMasterKey(seed)
+    val masterKey = ExtendedSecretKey.deriveMasterKey(seed, usePre1627KeyDerivation)
     masterKey
   }
 
@@ -466,6 +494,14 @@ object JavaHelpers {
   def collToByteArray(in: Coll[Byte]): Array[Byte] = {
     in.toArray
   }
+
+  def collFrom(arr: Array[Long]): Coll[Long] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Int]): Coll[Int] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Boolean]): Coll[Boolean] = Colls.fromArray(arr)
+
+  def collFrom(arr: Array[Short]): Coll[Short] = Colls.fromArray(arr)
 
   def ergoTreeTemplateBytes(ergoTree: ErgoTree): Array[Byte] = {
     val r = SigmaSerializer.startReader(ergoTree.bytes)

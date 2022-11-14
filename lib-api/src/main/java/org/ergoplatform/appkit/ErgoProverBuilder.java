@@ -13,16 +13,20 @@ public interface ErgoProverBuilder {
      *
      * @param mnemonicPhrase secret seed phrase to be used in prover for generating proofs.
      * @param mnemonicPass   password to protect secret seed phrase.
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
+     * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
-    ErgoProverBuilder withMnemonic(SecretString mnemonicPhrase, SecretString mnemonicPass);
+    ErgoProverBuilder withMnemonic(SecretString mnemonicPhrase, SecretString mnemonicPass, Boolean usePre1627KeyDerivation);
 
     /**
      * Configure this builder to use the given mnemonic when building a new prover.
      *
      * @param mnemonic {@link Mnemonic} instance containing secret seed phrase to be used in prover for
      *                 generating proofs.
+     * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be true for new 
+     * wallets, and false for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
-    ErgoProverBuilder withMnemonic(Mnemonic mnemonic);
+    ErgoProverBuilder withMnemonic(Mnemonic mnemonic, Boolean usePre1627KeyDerivation);
 
     /**
      * Configure this builder to derive the new EIP-3 secret key with the given index.

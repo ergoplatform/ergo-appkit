@@ -6,6 +6,7 @@ import sigmastate.Values.Constant
 import sigmastate.serialization.ValueSerializer
 import sigmastate.serialization.generators.ObjectGenerators
 import JavaHelpers._
+import sigmastate.eval.Evaluation.fromDslTuple
 import special.collection.Coll
 
 class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGenerators {
@@ -36,7 +37,20 @@ class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGene
     val t = ErgoType.collType(ErgoType.byteType)
     val collV = ErgoValue.of(coll.convertTo[Coll[Coll[java.lang.Byte]]], t)
     collV.toHex shouldBe hex
+  }
 
+  property("ErgoValue with pair (hex test vector)") {
+    val tuple = (10.toByte, 20L)
+    val tupSType = STuple(SByte, SLong)
+    val c = Constant[STuple](fromDslTuple(tuple, tupSType), tupSType)
+    val hex = constToHex(c)
+    hex shouldBe "3e050a28"
+
+    val t = ErgoType.pairType(ErgoType.byteType, ErgoType.longType())
+    val tupleV = ErgoValue.pairOf(ErgoValue.of(tuple._1), ErgoValue.of(tuple._2))
+    tupleV.getType shouldBe t
+    tupleV.toHex shouldBe hex
+    ErgoValue.fromHex(hex) shouldBe tupleV
   }
 
   property("fromHex/toHex roundtrip") {

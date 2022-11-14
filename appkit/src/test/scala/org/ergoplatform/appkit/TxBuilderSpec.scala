@@ -2,12 +2,12 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.NotEnoughErgsException
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox}
+import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
 import org.scalacheck.Gen
 import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -159,8 +159,8 @@ class TxBuilderSpec extends PropSpec with Matchers
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
-      val unsigned = txB.boxesToSpend(Arrays.asList(input))
-        .outputs(output, feeOut)
+      val unsigned = txB.addInputs(input)
+        .outputs(output).addOutputs(feeOut)
         .sendChangeTo(changeAddr)
         .build()
       val prover = ctx.newProverBuilder().build()
@@ -219,7 +219,7 @@ class TxBuilderSpec extends PropSpec with Matchers
     assertExceptionThrown(
       ergoClient.execute { ctx: BlockchainContext =>
         ctx.newProverBuilder()
-          .withMnemonic(mnemonic, SecretString.empty())
+          .withMnemonic(mnemonic, SecretString.empty(), false)
           .withEip3Secret(0)
           .withEip3Secret(0) // attempt to add the same index
           .build()
@@ -231,14 +231,14 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   private def testEip3Address(ctx: BlockchainContext, index: Int): Address = {
     Address.createEip3Address(index, ctx.getNetworkType,
-      mnemonic, SecretString.empty())
+      mnemonic, SecretString.empty(), false)
   }
 
   property("ErgoProverBuilder.withEip3Secret should pass secrets to the prover") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
       val prover = ctx.newProverBuilder()
-        .withMnemonic(mnemonic, SecretString.empty())
+        .withMnemonic(mnemonic, SecretString.empty(), false)
         .withEip3Secret(0)
         .withEip3Secret(1)
         .build()
@@ -397,6 +397,63 @@ class TxBuilderSpec extends PropSpec with Matchers
 
       // both boxes should be selected
       inputsSelected.size() shouldBe 2
+
+      // if we restrict to a single box, we face InputBoxLimitExceededException
+      assertExceptionThrown(
+        operations.withMaxInputBoxesToSelect(1).loadTop(),
+        exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
+      )
+
+      // if there is only a single input box, we face NotEnoughCoinsForChangeException
+      val operations2 = BoxOperations.createForSenders(senders, ctx)
+        .withAmountToSpend(amountToSend)
+        .withInputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
+
+      assertExceptionThrown(
+        operations2.loadTop(),
+        exceptionLike[NotEnoughCoinsForChangeException]()
+      )
+    }
+
+  }
+
+  property("use changebox to consolidate") {
+    // this demonstrates that unnecessary input boxes can be picked up to consolidate wallet boxes
+    // via change box on the fly (issue #182)
+
+    val ergoClient = createMockedErgoClient(data)
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val (_, senders) = loadStorageE2()
+      val recipient = address
+      val pkContract = recipient.toErgoContract
+
+      // send 0.5 ERG
+      val amountToSend = 500L * 1000 * 1000
+
+      // first box: 1 ERG
+      val input1 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 0)
+      // second box: 1 ERG
+      val input2 = ctx.newTxBuilder.outBoxBuilder
+        .value(Parameters.OneErg)
+        .contract(pkContract)
+        .build().convertToInputWith(mockTxId, 1)
+
+      val tx = ctx.newTxBuilder().addInputs(input1).addInputs(input2)
+        .outputs(ctx.newTxBuilder().outBoxBuilder().contract(pkContract).value(amountToSend).build())
+        .sendChangeTo(recipient.getErgoAddress)
+        .fee(Parameters.MinFee)
+        .build()
+
+      // both boxes should be selected
+      // ergo-wallet's DefaultBoxSelector discarded the second input because it is not necessary for
+      // the outputs, so this test checks if all inputs are used (size 2)
+      tx.getInputs.size() shouldBe 2
+      tx.getOutputs.size() shouldBe 3
+
     }
 
   }
@@ -420,7 +477,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       val ergoTokens = tokenList.getItems
         .convertTo[IndexedSeq[TokenInfo]]
         .map { ti => new ErgoToken(ti.getId, ti.getEmissionAmount) }
-      
+
       val tokenList1 = ergoTokens.take(150)
       val tokenList2 = ergoTokens.takeRight(110)
       // first box: 1 ERG + tx fee + token that will cause a change
