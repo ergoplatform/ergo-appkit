@@ -544,17 +544,19 @@ class TxBuilderSpec extends PropSpec with Matchers
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
         .putToContractTxUnsigned(pkContract)
 
-      // this fails due to token burning check - instead, tokens should be in change box FIXME
+      // check if this succeeds without token burning, but with tokens in change box
+      // otherwise exception would be raised
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
 
-      // this fails with NotEnoughTokensException, although there are enough tokens available
+      // check if this suceeds finding all tokens and not raising any exception
       val spendAllTokens = BoxOperations.createForSenders(senders, ctx)
         .withAmountToSpend(amountToSend)
         .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 2)))
         .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
         .putToContractTxUnsigned(pkContract)
 
+      val reduced2 = prover.reduce(spendAllTokens, 0)
     }
 
   }
