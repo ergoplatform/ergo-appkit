@@ -549,6 +549,13 @@ class TxBuilderSpec extends PropSpec with Matchers
       val prover = ctx.newProverBuilder.build // prover without secrets
       val reduced = prover.reduce(unsigned, 0)
 
+      // outputs should contain the two tokens going in
+      unsigned.getOutputs.convertTo[IndexedSeq[OutBox]]
+        .map(_.getTokens.convertTo[IndexedSeq[ErgoToken]])
+        .flatten(identity)
+        .filter(_.getId.toString.equals(mockTxId))
+        .map(_.getValue).sum shouldBe 2L
+
       // check if this suceeds finding all tokens and not raising any exception
       val spendAllTokens = BoxOperations.createForSenders(senders, ctx)
         .withAmountToSpend(amountToSend)
