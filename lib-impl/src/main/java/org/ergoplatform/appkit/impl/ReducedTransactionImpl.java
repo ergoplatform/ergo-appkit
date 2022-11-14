@@ -88,4 +88,12 @@ public class ReducedTransactionImpl implements ReducedTransaction {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "ReducedTransactionImpl(\n" +
+            _tx + ",\n" +
+            _txCost + "\n" +
+            ")";
+    }
 }
