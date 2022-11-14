@@ -1,40 +1,41 @@
 package org.ergoplatform.appkit
 
-import scala.collection.mutable
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughCoinsForChangeBoxesError
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughErgsError
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector.NotEnoughTokensError
-
-import java.util.{List => JList, Map => JMap}
-import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.appkit.Iso._
-import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.ErgoBoxAssets
-import org.ergoplatform.ErgoBoxAssetsHolder
 import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
+import org.ergoplatform.appkit.Iso._
+import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.wallet.AssetUtils
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughCoinsForChangeBoxesError, NotEnoughErgsError, NotEnoughTokensError}
 import scorex.util.{ModifierId, bytesToId}
 
 import java.util
+import java.util.{List => JList}
+import scala.collection.mutable
 
 
-object BoxSelectorsJavaHelpers {
+object InputBoxesValidatorJavaHelper {
 
   final case class InputBoxWrapper(val inputBox: InputBox) extends ErgoBoxAssets {
     override def value: Long = inputBox.getValue
-    override def tokens: Map[ModifierId, Long] = 
-      inputBox.getTokens.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
+
+    override def tokens: Map[ModifierId, Long] = {
+      val tokens = mutable.Map[ModifierId, Long]()
+      inputBox.getTokens.convertTo[IndexedSeq[ErgoToken]].foreach { token: ErgoToken =>
+        AssetUtils.mergeAssetsMut(tokens, Map.apply(bytesToId(token.getId.getBytes) -> token.getValue))
+      }
+      tokens.toMap
+    }
   }
 
-  def selectBoxes(unspentBoxes: JList[InputBox],
-                  amountToSpend: Long,
-                  tokensToSpend: JList[ErgoToken]): JList[InputBox] = {
+  def validateBoxes(unspentBoxes: JList[InputBox],
+                    amountToSpend: Long,
+                    tokensToSpend: JList[ErgoToken]): Unit = {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
-      .map(InputBoxWrapper.apply).toIterator
+      .map(InputBoxWrapper.apply)
     val targetAssets = tokensToSpend.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
-    val foundBoxes: IndexedSeq[InputBox] = new DefaultBoxSelector(None).select(inputBoxes, amountToSpend, targetAssets) match {
+    new InputBoxesValidator().select(inputBoxes.toIterator, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
-          throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
+        throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
       case Left(err: NotEnoughErgsError) => {
         // we might have a ChangeBox error here as well, so let's report it correctly
         if (err.balanceFound >= amountToSpend) {
@@ -53,9 +54,8 @@ object BoxSelectorsJavaHelpers {
       case Left(err) =>
         throw new InputBoxesSelectionException(
           s"Not enough funds in boxes to pay $amountToSpend nanoERGs, \ntokens: $tokensToSpend, \nreason: $err")
-      case Right(v) => v.boxes.map(_.inputBox).toIndexedSeq
+      case Right(v) => // do nothing, everything alright
     }
-    foundBoxes.convertTo[JList[InputBox]]
   }
 
 }

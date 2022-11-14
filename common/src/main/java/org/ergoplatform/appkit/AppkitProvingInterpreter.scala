@@ -9,14 +9,15 @@ import java.util.{Objects, List => JList}
 import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, subtractTokenColls}
+import org.ergoplatform.appkit.JavaHelpers.TokenColl
+import org.ergoplatform.appkit.ReducedInputData.createReductionResult
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
 import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
+import sigmastate.interpreter.Interpreter.{ReductionResult, JitReductionResult, ScriptEnv, AotReductionResult, FullReductionResult}
 import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
@@ -26,6 +27,8 @@ import sigmastate.utils.Helpers._ // for Scala 2.11
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
 import spire.syntax.all.cfor
 import scalan.util.Extensions.LongOps
+import sigmastate.VersionContext
+import sigmastate.VersionContext.JitActivationVersion
 
 import scala.collection.mutable
 
@@ -306,6 +309,22 @@ case class TokenBalanceException(
   */
 case class ReducedInputData(reductionResult: ReductionResult, extension: ContextExtension)
 
+object ReducedInputData {
+  /** Creates [[ReductionResult]] for the given blockVersion.
+    *
+    * @param blockVersion version of Ergo protocol (stored in block header)
+    * @param sb           sigma proposition (typically result of script reduction)
+    * @param cost         cost accumulated during reduction
+    */
+  def createReductionResult(blockVersion: Byte, sb: SigmaBoolean, cost: Long): ReductionResult = {
+    val scriptVersion = blockVersion - 1 // convert to script version
+    if (scriptVersion >= JitActivationVersion)
+      FullReductionResult(null, JitReductionResult(sb, cost))
+    else
+      FullReductionResult(AotReductionResult(sb, cost), null)
+  }
+}
+
 /** Represent `reduced` transaction, i.e. unsigned transaction where each unsigned input
   * is augmented with [[ReducedInputData]] which contains a script reduction result.
   * After an unsigned transaction is reduced it can be signed without context.
@@ -356,7 +375,9 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
       val cost = r.getULong()
       val input = tx.inputs(i)
       val extension = input.extension
-      reducedInputs(i) = ReducedInputData(ReductionResult(sb, cost), extension)
+      val currentBlockVersion: Byte = (VersionContext.current.activatedVersion + 1).toByte
+      val reductionResult = createReductionResult(currentBlockVersion, sb, cost)
+      reducedInputs(i) = ReducedInputData(reductionResult, extension)
       unsignedInputs(i) = new UnsignedInput(input.boxId, extension)
     }
 
@@ -364,5 +385,14 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
     ReducedErgoLikeTransaction(unsignedTx, reducedInputs)
   }
 
+  /** Parses the [[ReducedErgoLikeTransaction]] using the given blockVersion.
+    * @param blockVersion version of Ergo protocol to use during parsing.
+    */
+  def parse(r: SigmaByteReader, blockVersion: Byte): ReducedErgoLikeTransaction = {
+    val scriptVersion = (blockVersion - 1).toByte
+    VersionContext.withVersions(scriptVersion, scriptVersion) {
+      parse(r)
+    }
+  }
 }
 

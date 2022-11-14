@@ -6,8 +6,6 @@ import static org.ergoplatform.appkit.Parameters.MinFee;
 
 import com.google.common.base.Preconditions;
 
-import org.ergoplatform.P2PKAddress;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -240,8 +238,19 @@ public class BoxOperations {
      * @return a list of boxes covering the given amount
      */
     public List<InputBox> loadTop() {
+        return loadTop(0);
+    }
+
+    /**
+     * Like {@link #loadTop()} loading and returning unspent boxes covering the given amount of
+     * nanoergs, fee and tokens, but you can specify an amount of nanoergs that is already covered
+     * by other input boxes and does not need to be satisfied.
+     *
+     * @param amountCovered nanoerg amount that is assumed to be covered by input boxes you provide
+     */
+    public List<InputBox> loadTop(long amountCovered) {
         List<InputBox> unspentBoxes = new ArrayList<>();
-        long grossAmount = amountToSpend + feeAmount;
+        long grossAmount = amountToSpend + feeAmount - amountCovered;
         long remainingAmount = grossAmount;
         boolean changeBoxConsidered = false;
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
@@ -275,8 +284,9 @@ public class BoxOperations {
             if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) break;
             remainingTokens = tokensHelper.getRemainingTokenList();
         }
-        List<InputBox> selected = BoxSelectorsJavaHelpers.selectBoxes(unspentBoxes, grossAmount, tokensToSpend);
-        return selected;
+        // check if we have enough tokens and ERG
+        InputBoxesValidatorJavaHelper.validateBoxes(unspentBoxes, grossAmount, tokensToSpend);
+        return unspentBoxes;
     }
 
     /**
@@ -302,18 +312,27 @@ public class BoxOperations {
         ErgoContract contract) {
 
         return buildTxWithDefaultInputs(txB -> {
-            OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
-                .value(amountToSpend)
+            OutBoxBuilder outBoxBuilder = prepareOutBox(txB)
                 .contract(contract);
-            if (!tokensToSpend.isEmpty())
-                outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
-            if (attachment != null) {
-                outBoxBuilder.registers(attachment.getOutboxRegistersForAttachment());
-            }
             OutBox newBox = outBoxBuilder.build();
             txB.outputs(newBox);
             return txB;
         });
+    }
+
+    /**
+     * @return OutBoxBuilder prepared with the properties set to this BoxOperations instance: tokens to
+     * spend, amount to spend and attachment.
+     */
+    public OutBoxBuilder prepareOutBox(UnsignedTransactionBuilder txB) {
+        OutBoxBuilder outBoxBuilder = txB.outBoxBuilder()
+            .value(amountToSpend);
+        if (!tokensToSpend.isEmpty())
+            outBoxBuilder.tokens(tokensToSpend.toArray(new ErgoToken[]{}));
+        if (attachment != null) {
+            outBoxBuilder.registers(attachment.getOutboxRegistersForAttachment());
+        }
+        return outBoxBuilder;
     }
 
     /**
@@ -363,20 +382,20 @@ public class BoxOperations {
     }
 
     public static SignedTransaction spendBoxesTx(
-            BlockchainContext ctx,
-            UnsignedTransactionBuilder txB,
-            List<InputBox> boxes,
-            ErgoProver sender, Address recipient, long amount, long fee) {
+        BlockchainContext ctx,
+        UnsignedTransactionBuilder txB,
+        List<InputBox> boxes,
+        ErgoProver sender, Address recipient, long amount, long fee) {
         OutBox newBox = txB.outBoxBuilder()
-                .value(amount)
-                .contract(recipient.toErgoContract())
-                .build();
+            .value(amount)
+            .contract(recipient.toErgoContract())
+            .build();
 
         UnsignedTransaction tx = txB.boxesToSpend(boxes)
-                .outputs(newBox)
-                .fee(fee)
-                .sendChangeTo(sender.getP2PKAddress())
-                .build();
+            .addOutputs(newBox)
+            .fee(fee)
+            .sendChangeTo(sender.getP2PKAddress())
+            .build();
         SignedTransaction signed = sender.sign(tx);
         return signed;
     }
@@ -439,9 +458,8 @@ public class BoxOperations {
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())
                         return new CoveringBoxes(amountToSpend, selectedCoveringBoxes, tokensToSpend, changeBoxConsidered);
-
-                    // check the maxBoxToSelect restriction, if it is set
-                    else if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
+                    else // check the maxBoxToSelect restriction, if it is set
+                    if (maxBoxesToSelect > 0 && selectedCoveringBoxes.size() >= maxBoxesToSelect) {
                         List<ErgoToken> remainingTokenList = tokensRemaining.getRemainingTokenList();
                         throw new InputBoxesSelectionException.InputBoxLimitExceededException(
                             "Input box limit exceeded, could not cover " + remainingAmountToCover +

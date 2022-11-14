@@ -114,6 +114,10 @@ public class ErgoValue<T> {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 
+    static public ErgoValue<special.sigma.SigmaProp> of(org.ergoplatform.appkit.SigmaProp value) {
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value.getSigmaBoolean()), ErgoType.sigmaPropType());
+    }
+
     static public ErgoValue<AvlTree> of(AvlTreeData value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
@@ -130,6 +134,26 @@ public class ErgoValue<T> {
         Coll value = JavaHelpers.collFrom(arr);
         ErgoType<Coll<Byte>> type = ErgoType.collType(ErgoType.byteType());
         return new ErgoValue<Coll<Byte>>(value, type);
+    }
+
+    static public ErgoValue<Coll<Long>> of(long[] arr) {
+        return new ErgoValue<Coll<Long>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.longType()));
+    }
+
+    static public ErgoValue<Coll<Boolean>> of(boolean[] arr) {
+        return new ErgoValue<Coll<Boolean>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.booleanType()));
+    }
+
+    static public ErgoValue<Coll<Short>> of(short[] arr) {
+        return new ErgoValue<Coll<Short>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.shortType()));
+    }
+
+    static public ErgoValue<Coll<Integer>> of(int[] arr) {
+        return new ErgoValue<Coll<Integer>>((Coll) JavaHelpers.collFrom(arr),
+            ErgoType.collType(ErgoType.integerType()));
     }
 
     static public <A, B> ErgoValue<Tuple2<A, B>> pairOf(ErgoValue<A> val1, ErgoValue<B> val2) {

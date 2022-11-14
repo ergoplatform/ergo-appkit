@@ -77,15 +77,13 @@ class DataInputsSpec extends PropSpec with Matchers
         .contract(truePropContract(ctx)).build()
 
       val inputs = new java.util.ArrayList[InputBox]()
-      val dataInputs = new java.util.ArrayList[InputBox]()
 
       inputs.add(input)
-      dataInputs.add(dataInput)
 
       val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
-      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).withDataInputs(dataInputs).fee(10000000).sendChangeTo(changeAddr).build()
+      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).addDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()
 
       an[Exception] shouldBe thrownBy {
         ctx.newProverBuilder().build().sign(unsigned)
@@ -115,15 +113,13 @@ class DataInputsSpec extends PropSpec with Matchers
         .contract(truePropContract(ctx)).build()
 
       val inputs = new java.util.ArrayList[InputBox]()
-      val dataInputs = new java.util.ArrayList[InputBox]()
 
       inputs.add(input)
-      dataInputs.add(dataInput)
 
       val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
-      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).withDataInputs(dataInputs).fee(10000000).sendChangeTo(changeAddr).build()
+      val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).addDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()
 
       ctx.newProverBuilder().build().sign(unsigned)
     }

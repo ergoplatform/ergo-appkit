@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.explorer.client.model.{AdditionalRegister, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
+import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
 
 import java.util
 import java.util.List
+import java.util.{Map => JMap, List => JList}
 import java.lang.{Byte => JByte}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
 import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input}
@@ -146,7 +147,7 @@ object ScalaBridge {
     override def to(boxData: ErgoTransactionOutput): ErgoBox = {
       val tree= boxData.getErgoTree.convertTo[ErgoTree]
       val tokens = boxData.getAssets.convertTo[Coll[(TokenId, Long)]]
-      val regs = boxData.getAdditionalRegisters().convertTo[AdditionalRegisters]
+      val regs = boxData.getAdditionalRegisters.convertTo[AdditionalRegisters]
       new ErgoBox(boxData.getValue, tree,
         tokens, regs,
         ModifierId @@ boxData.getTransactionId,
@@ -170,33 +171,36 @@ object ScalaBridge {
     }
   }
 
-//  implicit val isoExplTransactionOutput: Iso[TransactionOutput, ErgoBox] = new Iso[TransactionOutput, ErgoBox] {
-//    override def to(boxData: TransactionOutput): ErgoBox = {
-//      val tree = boxData.getErgoTree.convertTo[ErgoTree]
-//      val tokens = boxData.getAssets.convertTo[Coll[(TokenId, Long)]]
-//      val regs = boxData.getAdditionalRegisters().convertTo[AdditionalRegisters]
-//      new ErgoBox(boxData.getValue, tree,
-//        tokens, regs,
-//        ModifierId @@ boxData.getTransactionId,
-//        boxData.getIndex.shortValue,
-//        boxData.getCreationHeight)
-//    }
-//
-//    override def from(box: ErgoBox): ErgoTransactionOutput = {
-//      val assets = box.additionalTokens.convertTo[List[Asset]]
-//      val regs = isoRegistersToMap.from(box.additionalRegisters)
-//      val out = new ErgoTransactionOutput()
-//          .boxId(ErgoAlgos.encode(box.id))
-//          .value(box.value)
-//          .ergoTree(ErgoAlgos.encode(TreeSerializer.serializeErgoTree(box.ergoTree)))
-//          .assets(assets)
-//          .additionalRegisters(regs)
-//          .creationHeight(box.creationHeight)
-//          .transactionId(box.transactionId)
-//          .index(box.index)
-//      out
-//    }
-//  }
+  implicit val isoExplTransactionOutput: Iso[OutputInfo, ErgoBox] = new Iso[OutputInfo, ErgoBox] {
+    override def to(boxData: OutputInfo): ErgoBox = {
+      val tree = boxData.getErgoTree.convertTo[ErgoTree]
+      val tokens = boxData.getAssets.convertTo[IndexedSeq[AssetInstanceInfo]].sortBy(_.getIndex)
+        .map(asset => new ErgoToken(asset.getTokenId, asset.getAmount)).convertTo[JList[ErgoToken]].convertTo[Coll[(TokenId, Long)]]
+      val regs = boxData.getAdditionalRegisters.convertTo[AdditionalRegisters]
+      new ErgoBox(boxData.getValue, tree,
+        tokens, regs,
+        ModifierId @@ boxData.getTransactionId,
+        boxData.getIndex.shortValue,
+        boxData.getCreationHeight)
+    }
+
+    override def from(box: ErgoBox): OutputInfo = {
+      val assets = box.additionalTokens.convertTo[List[Asset]]
+      val regs = isoExplRegistersToMap.from(box.additionalRegisters)
+      val out = new OutputInfo()
+          .boxId(ErgoAlgos.encode(box.id))
+          .value(box.value)
+          .ergoTree(ErgoAlgos.encode(TreeSerializer.serializeErgoTree(box.ergoTree)))
+          .assets(assets.convertTo[IndexedSeq[Asset]].zipWithIndex
+            .map{ case (asset: Asset, idx: Int) => new AssetInstanceInfo().tokenId(asset.getTokenId).amount(asset.getAmount).index(idx) }
+            .convertTo[JList[AssetInstanceInfo]])
+          .additionalRegisters(regs)
+          .creationHeight(box.creationHeight)
+          .transactionId(box.transactionId)
+          .index(box.index)
+      out
+    }
+  }
 
   implicit val isoBlockHeader: Iso[BlockHeader, Header] = new Iso[BlockHeader, Header] {
     override def to(h: BlockHeader): Header =

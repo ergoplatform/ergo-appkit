@@ -22,7 +22,7 @@ class ErgoAuthSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
     // EIP-28: "the wallet app adds some own bytes to the obtained message from ErgoAuthRequest"
     val signedMessage = new String(Random.randomBytes(16)) + requestedMessage +
       new String(Random.randomBytes(32))
-    val signature = new ColdErgoClient(address.getNetworkType, Parameters.ColdClientMaxBlockCost)
+    val signature = new ColdErgoClient(address.getNetworkType, Parameters.ColdClientMaxBlockCost, Parameters.ColdClientBlockVersion)
       .execute { ctx: BlockchainContext =>
 
         val prover = ctx.newProverBuilder().withMnemonic(mnemonic, SecretString.empty(), false).build()
