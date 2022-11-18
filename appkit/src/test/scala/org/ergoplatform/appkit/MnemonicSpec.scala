@@ -1,15 +1,15 @@
 package org.ergoplatform.appkit
 
 import java.util
-
 import org.ergoplatform.appkit.Mnemonic._
-import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicChecksumException, MnemonicEmptyException, MnemonicWordException, MnemonicWrongListSizeException}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
+import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicWrongListSizeException, MnemonicChecksumException, MnemonicWordException, MnemonicEmptyException}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.collection.JavaConversions.seqAsJavaList
 
-class MnemonicSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class MnemonicSpec extends AnyPropSpec with Matchers with ScalaCheckPropertyChecks {
 
   val testMnemonic = "walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice reduce"
   val testEntropy: Array[Byte] = Array[Byte](-10, -55, 58, 24, 3, 117, -34, -15, -7, 81, 116, 5, 50, -84, 3, -94, -70, 73, -93, 45)

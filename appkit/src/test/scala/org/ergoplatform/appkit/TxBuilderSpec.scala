@@ -2,15 +2,17 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
+import org.apache.commons.io.FileUtils
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException, NotEnoughCoinsForChangeException}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
+import org.ergoplatform.{ErgoBox, ErgoTreePredef}
 import org.scalacheck.Gen
-import org.scalatest.{Matchers, PropSpec}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import scalan.util.FileUtil
 import scorex.util.ModifierId
 import sigmastate.eval.CBigInt
@@ -19,12 +21,13 @@ import sigmastate.interpreter.HintsBag
 
 import java.io.File
 import java.math.BigInteger
+import java.nio.charset.Charset
 import java.util
 import java.util.Arrays
 import java.util.function.Consumer
 
-class TxBuilderSpec extends PropSpec with Matchers
-  with ScalaCheckDrivenPropertyChecks
+class TxBuilderSpec extends AnyPropSpec with Matchers
+  with ScalaCheckPropertyChecks
   with AppkitTesting
   with HttpClientTesting
   with NegativeTesting {
@@ -129,7 +132,7 @@ class TxBuilderSpec extends PropSpec with Matchers
       // alice signing bob's box. Does not work here but works in other cases.
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
-      signed.getCost shouldBe 14685
+      signed.getCost shouldBe 5565
 
       // check the signed transaction contains all the context variables
       // we attached to the input box
@@ -155,7 +158,7 @@ class TxBuilderSpec extends PropSpec with Matchers
         .contract(truePropContract(ctx)).build()
       val feeOut = txB.outBoxBuilder()
         .value(1000000)
-        .contract(ctx.newContract(ErgoScriptPredef.feeProposition()))
+        .contract(ctx.newContract(ErgoTreePredef.feeProposition()))
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress
@@ -460,8 +463,11 @@ class TxBuilderSpec extends PropSpec with Matchers
 
   property("Test changebox token amount max 100") {
     val ergoClient = createMockedErgoClient(data)
-
-    val tokenList: Items[TokenInfo] = new Gson().fromJson(FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
+    val tokensFile = FileUtil.file(s"appkit/src/test/resources/tokens.json")
+    val tokenList: Items[TokenInfo] = new Gson()
+      .fromJson(
+        FileUtils.readFileToString(tokensFile, Charset.defaultCharset()),
+        new TypeToken[Items[TokenInfo]]() {}.getType)
 
     ergoClient.execute { ctx: BlockchainContext =>
       val (storage, _) = loadStorageE2()

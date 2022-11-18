@@ -8,6 +8,7 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val scala213 = "2.13.8"
 lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
 
@@ -79,10 +80,11 @@ git.gitUncommittedChanges in ThisBuild := true
 val mockitoScalaVerstion = "1.11.4"
 
 lazy val testingDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalactic" %% "scalactic" % "3.0.+" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "com.lihaoyi" %% "pprint" % "0.5.4" % "test",  // the last version with Scala 2.11 support
+  "org.scalatest" %% "scalatest" % "3.2.14" % Test,
+  "org.scalactic" %% "scalactic" % "3.2.14" % Test,
+  "org.scalacheck" %% "scalacheck" % "1.15.2" % Test,
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.3.0" % Test, // last supporting Scala 2.11
+  "com.lihaoyi" %% "pprint" % "0.6.3" % Test,  // the last version with Scala 2.11 support
   (sigmaState % Test).classifier("tests")
 )
 
@@ -126,15 +128,20 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "5.0.2"
-val ergoWalletVersion = "5.0.2"
+val sigmaStateVersion = "4.0.5-824-9d78ae84-20221118-1555-SNAPSHOT"
+val ergoWalletVersion = "5.0.3-2-d4ae9607-20221118-0004-SNAPSHOT"
+
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
     .exclude("org.typelevel", "machinist")
     .exclude("org.typelevel", "cats-kernel")
 
-lazy val ergoWallet = "org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion
+lazy val ergoWallet = ("org.ergoplatform" %% "ergo-wallet" % ergoWalletVersion)
+    .exclude("org.scorexfoundation", "sigma-state")
+
+lazy val commonsIo = "commons-io" % "commons-io" % "2.5"
+lazy val guava     = "com.google.guava" % "guava" % "23.0"
 
 lazy val mockWebServer = "com.squareup.okhttp3" % "mockwebserver" % "3.12.0" % "test"
 
@@ -178,6 +185,7 @@ lazy val common = (project in file("common"))
       name := "common",
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
+        guava,
         sigmaState,
         ergoWallet
       ),
@@ -214,7 +222,8 @@ lazy val appkit = (project in file("appkit"))
       libImpl % allConfigDependency)
     .settings(commonSettings ++ testSettings,
       libraryDependencies ++= Seq(
-        mockWebServer//,
+        mockWebServer,
+        commonsIo
 //        "org.mockito" %% "mockito-scala" % mockitoScalaVerstion % "test",
 //        "org.mockito" %% "mockito-scala-scalatest" % mockitoScalaVerstion % "test"
       ))

@@ -4,17 +4,22 @@ import scalan.util.FileUtil
 import JavaHelpers._
 import java.util.{List => JList}
 import java.lang.{String => JString}
+import org.apache.commons.io.FileUtils
+
+import java.nio.charset.Charset
 
 trait HttpClientTesting {
   val responsesDir = "appkit/src/test/resources/mockwebserver"
   val addr1 = "9f4QF8AD1nQ3nJahQVkMj8hFSVVzVom77b52JU7EW71Zexg6N8v"
 
   def loadNodeResponse(name: String) = {
-    FileUtil.read(FileUtil.file(s"$responsesDir/node_responses/$name"))
+    val file = FileUtil.file(s"$responsesDir/node_responses/$name")
+    FileUtils.readFileToString(file, Charset.defaultCharset())
   }
 
   def loadExplorerResponse(name: String) = {
-    FileUtil.read(FileUtil.file(s"$responsesDir/explorer_responses/$name"))
+    val file = FileUtil.file(s"$responsesDir/explorer_responses/$name")
+    FileUtils.readFileToString(file, Charset.defaultCharset())
   }
 
   case class MockData(nodeResponses: Seq[String] = Nil, explorerResponses: Seq[String] = Nil) {

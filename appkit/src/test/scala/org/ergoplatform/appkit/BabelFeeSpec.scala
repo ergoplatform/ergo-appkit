@@ -1,13 +1,14 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.babelfee.{BabelFeeBoxContract, BabelFeeBoxState, BabelFeeOperations}
-import org.scalatest.{Matchers, PropSpec}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.ergoplatform.appkit.babelfee.{BabelFeeOperations, BabelFeeBoxContract, BabelFeeBoxState}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import java.util
 import java.util.Arrays
 
-class BabelFeeSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class BabelFeeSpec extends AnyPropSpec with Matchers with ScalaCheckPropertyChecks
   with HttpClientTesting
   with AppkitTestingCommon {
 

@@ -16,19 +16,15 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeP
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.Interpreter.{ReductionResult, JitReductionResult, ScriptEnv, AotReductionResult, FullReductionResult}
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv}
 import sigmastate.interpreter.{Interpreter, CostedProverResult, ContextExtension, ProverInterpreter, HintsBag}
-import sigmastate.lang.exceptions.CostLimitException
+import sigmastate.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
-import sigmastate.utxo.CostTable
-import special.collection.ExtensionMethods.PairCollOps
-import sigmastate.utils.Helpers._ // for Scala 2.11
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
-import spire.syntax.all.cfor
+import debox.cfor
+import org.ergoplatform.sdk.Extensions.{CollOps, PairCollOps}
 import scalan.util.Extensions.LongOps
 import sigmastate.VersionContext
-import sigmastate.VersionContext.JitActivationVersion
 
 import scala.collection.mutable
 
@@ -52,7 +48,7 @@ class AppkitProvingInterpreter(
       val dLogInputs: JList[DLogProverInput],
       val dhtInputs: JList[DiffieHellmanTupleProverInput],
       params: ErgoLikeParameters)
-  extends ErgoLikeInterpreter()(new CompiletimeIRContext) with ProverInterpreter {
+  extends ErgoLikeInterpreter with ProverInterpreter {
 
   override type CTX = ErgoLikeContext
   import Iso._
@@ -162,7 +158,7 @@ class AppkitProvingInterpreter(
     // Cost of transaction initialization: we should read and parse all inputs and data inputs,
     // and also iterate through all outputs to check rules
     val initialCost = ArithUtils.addExact(
-      CostTable.interpreterInitCost,
+      1000,
       java7.compat.Math.multiplyExact(boxesToSpend.size, params.inputCost),
       java7.compat.Math.multiplyExact(dataBoxes.size, params.dataInputCost),
       java7.compat.Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
@@ -318,10 +314,7 @@ object ReducedInputData {
     */
   def createReductionResult(blockVersion: Byte, sb: SigmaBoolean, cost: Long): ReductionResult = {
     val scriptVersion = blockVersion - 1 // convert to script version
-    if (scriptVersion >= JitActivationVersion)
-      FullReductionResult(null, JitReductionResult(sb, cost))
-    else
-      FullReductionResult(AotReductionResult(sb, cost), null)
+    ReductionResult(sb, cost)
   }
 }
 
@@ -375,8 +368,7 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
       val cost = r.getULong()
       val input = tx.inputs(i)
       val extension = input.extension
-      val currentBlockVersion: Byte = (VersionContext.current.activatedVersion + 1).toByte
-      val reductionResult = createReductionResult(currentBlockVersion, sb, cost)
+      val reductionResult = ReductionResult(sb, cost)
       reducedInputs(i) = ReducedInputData(reductionResult, extension)
       unsignedInputs(i) = new UnsignedInput(input.boxId, extension)
     }

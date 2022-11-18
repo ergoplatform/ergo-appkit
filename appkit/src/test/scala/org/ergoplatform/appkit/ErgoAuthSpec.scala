@@ -1,13 +1,14 @@
 package org.ergoplatform.appkit
 
-import org.scalatest.{Matchers, PropSpec}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import scorex.util.Random
 import sigmastate.interpreter.HintsBag
 
 import java.nio.charset.StandardCharsets
 
-class ErgoAuthSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class ErgoAuthSpec extends AnyPropSpec with Matchers with ScalaCheckPropertyChecks
   with AppkitTestingCommon {
 
   property("ErgoAuth address round trip") {

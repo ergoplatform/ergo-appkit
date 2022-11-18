@@ -3,7 +3,8 @@ package org.ergoplatform.appkit
 import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.appkit.ReducedInputData.createReductionResult
 import org.scalacheck.Gen
-import org.scalatest.{Assertion, Matchers}
+import org.scalatest.{Assertion}
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.CrossVersionProps
 import sigmastate.interpreter.ContextExtension

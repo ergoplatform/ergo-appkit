@@ -1,48 +1,46 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.wallet.secrets.{ExtendedSecretKey, DerivationPath}
-import scalan.RType
+import scalan.{RType, ExactIntegral}
 import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
 
-import scala.collection.{mutable, JavaConversions}
+import scala.collection.{JavaConversions, mutable}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean, SigmaPropConstant}
+import sigmastate.Values.{SValue, SigmaPropConstant, ErgoTree, SigmaBoolean, Constant, EvaluatedValue}
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
-import sigmastate.eval.Extensions._
-import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
+import special.sigma.{Header, GroupElement, AnyValue, AvlTree}
+
 import java.util
-import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString, Boolean => JBoolean}
+import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
 import java.math.BigInteger
 import java.text.Normalizer.Form.NFKD
 import java.text.Normalizer.normalize
-import java.util.{Map => JMap, List => JList}
-
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
+import java.util.{List => JList, Map => JMap}
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
+import org.ergoplatform.appkit.Iso.isoErgoTokenToPair
 import org.ergoplatform.wallet.TokensMap
 import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2Iterations, Pbkdf2KeyLength}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
-import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
-import sigmastate.interpreter.CryptoConstants.EcPointType
+import sigmastate.basics.{DiffieHellmanTupleProverInput, ProveDHTuple}
+import sigmastate.basics.CryptoConstants.EcPointType
 import scorex.util.{idToBytes, bytesToId, ModifierId}
 import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
-import sigmastate.eval.Colls.outerJoin
+import org.ergoplatform.appkit.JavaHelpers.{TokenIdRType, TokenColl}
+import org.ergoplatform.sdk.Extensions.{CollBuilderOps, PairCollOps}
+import scalan.ExactIntegral.LongIsExactIntegral
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import special.collection.ExtensionMethods.PairCollOps
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -545,6 +543,7 @@ object JavaHelpers {
    * @return a mapping from asset id to to balance and total assets number
    */
   def extractAssets(boxes: IndexedSeq[ErgoBoxCandidate]): (Map[Seq[Byte], Long], Int) = {
+    import special.collection.Extensions.CollOps
     val map: mutable.Map[Seq[Byte], Long] = mutable.Map[Seq[Byte], Long]()
     val assetsNum = boxes.foldLeft(0) { case (acc, box) =>
       require(box.additionalTokens.length <= SigmaConstants.MaxTokens.value, "too many assets in one box")
@@ -610,11 +609,11 @@ object JavaHelpers {
     reducedTokens: TokenColl,
     subtractedTokens: TokenColl
   ): TokenColl = {
-    val reduced = checkAllTokensPositive(reducedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
-    val subtracted = checkAllTokensPositive(subtractedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
-    val tokensDiff = outerJoin(subtracted, reduced)(
+    val exactNumeric: Numeric[Long] = new ExactIntegral.IntegralFromExactIntegral(LongIsExactIntegral)
+    val b = reducedTokens.builder // any Coll has builder, which is suitable
+    val reduced = checkAllTokensPositive(reducedTokens).sumByKey(exactNumeric) // summation with overflow checking
+    val subtracted = checkAllTokensPositive(subtractedTokens).sumByKey(exactNumeric) // summation with overflow checking
+    val tokensDiff = b.outerJoin(subtracted, reduced)(
       { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
       { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
       { case (_, (sV, rV)) => rV - sV } // for tokens both in subtracted and reduced: balance change

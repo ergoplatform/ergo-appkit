@@ -11,6 +11,7 @@ import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
+import sigmastate.crypto.Platform;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
@@ -18,7 +19,6 @@ import special.sigma.AvlTree;
 import special.sigma.BigInt;
 import special.sigma.Box;
 import special.sigma.GroupElement;
-import special.sigma.SigmaProp;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -103,7 +103,7 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<GroupElement> of(ECPoint value) {
-        return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(value), ErgoType.groupElementType());
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(new Platform.Ecp(value)), ErgoType.groupElementType());
     }
 
     static public ErgoValue<GroupElement> of(GroupElement ge) {

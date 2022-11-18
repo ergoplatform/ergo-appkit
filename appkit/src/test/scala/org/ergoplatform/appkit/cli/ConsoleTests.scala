@@ -1,11 +1,12 @@
 package org.ergoplatform.appkit.cli
 
-import java.io.{InputStreamReader, BufferedReader, PrintStream}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
+import java.io.{PrintStream, InputStreamReader, BufferedReader}
 
-class ConsoleTests extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks with ConsoleTesting {
+class ConsoleTests extends AnyPropSpec with Matchers with ScalaCheckPropertyChecks with ConsoleTesting {
   val scenario = ConsoleScenario(Seq(
     WriteRead("Enter line 1> ", "input line 1"),
     WriteRead("Enter line 2> ", "input line 2"),

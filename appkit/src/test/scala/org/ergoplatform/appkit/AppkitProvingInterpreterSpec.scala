@@ -1,23 +1,23 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction}
+import org.ergoplatform.{ErgoBox, UnsignedErgoLikeTransaction, ErgoTreePredef}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
 import org.ergoplatform.settings.ErgoAlgos
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sigmastate.helpers.NegativeTesting
-import org.scalatest.{Matchers, PropSpec}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.TestsBase
 import sigmastate.eval.Colls
 import sigmastate.helpers.TestingHelpers.createBox
 
 import java.util
-import java.util.Collections
-import util.{List => JList}
+import java.util.{Collections, List => JList}
 
-class AppkitProvingInterpreterSpec extends PropSpec
+class AppkitProvingInterpreterSpec extends AnyPropSpec
   with Matchers
-  with ScalaCheckDrivenPropertyChecks
+  with ScalaCheckPropertyChecks
   with AppkitTestingCommon
   with HttpClientTesting
   with NegativeTesting
@@ -72,8 +72,8 @@ class AppkitProvingInterpreterSpec extends PropSpec
       val prover = ctx.newProverBuilder()
         .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
-      val tree1 = ErgoScriptPredef.TrueProp(ergoTreeHeaderInTests)
-      val tree2 = ErgoScriptPredef.FalseProp(ergoTreeHeaderInTests)
+      val tree1 = ErgoTreePredef.TrueProp(ergoTreeHeaderInTests)
+      val tree2 = ErgoTreePredef.FalseProp(ergoTreeHeaderInTests)
       val token1 = (ErgoAlgos.hash("id1"), 10L)
       val token2 = (ErgoAlgos.hash("id2"), 20L)
       val ergoToken1 = Iso.isoErgoTokenToPair.from(token1)

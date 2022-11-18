@@ -1,18 +1,15 @@
 package org.ergoplatform.appkit.cli
 
-import org.ergoplatform.appkit.FileMockedErgoClient
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{PropSpec, Matchers}
-import org.ergoplatform.appkit.JavaHelpers._
-import java.lang.{String => JString}
-import java.util.{List => JList}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 object TestCliApplication extends CliApplication
 
 class CliApplicationSpec
-    extends PropSpec
+    extends AnyPropSpec
         with Matchers
-        with ScalaCheckDrivenPropertyChecks
+        with ScalaCheckPropertyChecks
         with ConsoleTesting
         with CommandsTesting {
 

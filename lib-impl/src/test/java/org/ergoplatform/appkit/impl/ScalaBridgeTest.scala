@@ -2,15 +2,16 @@ package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit.impl.ScalaBridge.isoSpendingProof
 import org.ergoplatform.restapi.client.SpendingProof
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sigmastate.Values.{ByteArrayConstant, IntConstant}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.generators.ObjectGenerators
 
-import scala.collection.{JavaConverters, JavaConversions}
+import scala.collection.JavaConversions
 
-class ScalaBridgeTest extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class ScalaBridgeTest extends AnyPropSpec with Matchers with ScalaCheckPropertyChecks
   with ObjectGenerators {
   property("isoSpendingProof") {
     val fakeProof = Array[Byte](0, 1, 2)
