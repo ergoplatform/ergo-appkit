@@ -2,10 +2,10 @@ package org.ergoplatform.appkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import scala.collection.IndexedSeq;
-import scala.collection.immutable.StringOps;
 import scala.collection.mutable.ArrayOps;
 import scorex.util.encode.Base16;
 import sigmastate.SType;
@@ -40,7 +40,12 @@ public class ErgoTreeTemplate {
      * @see sigmastate.Values.ErgoTree
      */
     public ErgoTreeTemplate withParameterPositions(int[] positions) {
-        if (Arrays.stream(positions).distinct().count() != positions.length)
+        HashSet<Integer> integerHashSet = new HashSet<>(positions.length);
+        for (int position : positions) {
+            integerHashSet.add(position);
+        }
+
+        if (integerHashSet.size() != positions.length)
             throw new IllegalArgumentException("Duplicate positions: " +
                 new ArrayOps.ofInt(positions).mkString("[", ",", "]"));
 
