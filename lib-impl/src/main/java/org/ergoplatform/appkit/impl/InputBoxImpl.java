@@ -8,9 +8,8 @@ import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
@@ -82,7 +81,7 @@ public class InputBoxImpl implements InputBox {
     @Override
     public InputBox withContextVars(ContextVar... variables) {
         ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
-          Stream.of(variables).collect(Collectors.toList())
+            Arrays.asList(variables)
         );
         InputBoxImpl res =  new InputBoxImpl(_ergoBox);
         res._extension = extension;
