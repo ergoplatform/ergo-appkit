@@ -1,5 +1,8 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.SecretString;
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.wallet.mnemonic.WordList;
 
 import java.util.Collections;
@@ -40,7 +43,7 @@ public class Mnemonic {
         org.ergoplatform.wallet.mnemonic.Mnemonic mnemonic =
                 new org.ergoplatform.wallet.mnemonic.Mnemonic(languageId
                         , strength);
-        Try<org.ergoplatform.wallet.interface4j.SecretString> resTry = mnemonic.toMnemonic(entropy);
+        Try<SecretString> resTry = mnemonic.toMnemonic(entropy);
         if (resTry.isFailure())
             throw new RuntimeException(
                     String.format("Cannot create mnemonic for languageId: %s, strength: %d", languageId,

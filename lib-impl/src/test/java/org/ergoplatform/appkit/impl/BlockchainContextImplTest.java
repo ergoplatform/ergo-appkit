@@ -5,7 +5,7 @@ import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.BlockHeader;
 import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.CoveringBoxes;
-import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.Parameters;

@@ -4,6 +4,7 @@ import org.ergoplatform.appkit.examples.RunMockedScala
 import org.ergoplatform.appkit.examples.RunMockedScala.createMockedErgoClient
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.ErgoAddressEncoder
+import org.ergoplatform.sdk.SecretString
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

@@ -1,9 +1,10 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.UnsignedErgoLikeTransaction
-import org.ergoplatform.appkit.ReducedInputData.createReductionResult
+import org.ergoplatform.sdk.{ReducedInputData, ReducedErgoLikeTransaction, ReducedErgoLikeTransactionSerializer}
+import org.ergoplatform.sdk.ReducedInputData.createReductionResult
 import org.scalacheck.Gen
-import org.scalatest.{Assertion}
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.CrossVersionProps

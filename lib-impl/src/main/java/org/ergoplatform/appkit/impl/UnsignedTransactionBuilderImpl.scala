@@ -1,10 +1,12 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.appkit.JavaHelpers.ListOps
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
-import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
+import org.ergoplatform.appkit.{InputBox, UnsignedTransactionBuilder, Address, InputBoxesValidator, OutBox, Parameters, NetworkType, PreHeader, UnsignedTransaction, BlockchainContext}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.{ErgoToken, Iso, ExtendedInputBox, JavaHelpers}
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import scorex.crypto.authds.ADDigest
 import sigmastate.eval.Colls
@@ -14,7 +16,6 @@ import special.sigma.Header
 import java.util
 import java.util._
 import scala.collection.JavaConversions
-import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
   private[impl] val _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
@@ -41,7 +42,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_inputs.isEmpty, "inputs already specified")
-    addInputs(inputBoxes.toSeq: _*)
+    addInputs(inputBoxes.convertTo[IndexedSeq[InputBox]]: _*)
     this
   }
 
@@ -54,7 +55,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
   override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
     require(_dataInputs.isEmpty, "dataInputs list is already specified")
-    addDataInputs(inputBoxes.toSeq: _*)
+    addDataInputs(inputBoxes.convertTo[IndexedSeq[InputBox]]: _*)
     this
   }
 

@@ -5,6 +5,8 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import sigmastate.Values.{EvaluatedValue, ByteArrayConstant, IntConstant}
 import sigmastate.{SType, TrivialProp}
 import sigmastate.helpers.TestingHelpers._
+import org.ergoplatform.sdk
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
@@ -14,8 +16,8 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckPropertyChecks
     with AppkitTesting {
   import ErgoBox._
-  import Iso._
-  import JavaHelpers.UniversalConverter
+  import sdk.Iso._
+  import sdk.JavaHelpers.UniversalConverter
 
   type Registers = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
 
@@ -57,8 +59,8 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
     // check that bouncycastle-based implementation is equivalent to the
     // original Java8-based implementation
     forAll(MinSuccessful(50)) { (mnemonic: String, passOpt: Option[String]) =>
-      val seed = JavaHelpers.mnemonicToSeed(mnemonic, passOpt)
-      val expSeed = WMnemonic.toSeed(org.ergoplatform.wallet.interface4j.SecretString.create(mnemonic), passOpt.map(a => org.ergoplatform.wallet.interface4j.SecretString.create(a)))
+      val seed = sdk.JavaHelpers.mnemonicToSeed(mnemonic, passOpt)
+      val expSeed = WMnemonic.toSeed(SecretString.create(mnemonic), passOpt.map(a => SecretString.create(a)))
       seed shouldBe expSeed
       println(s"Mnemonic: $mnemonic, Password: $passOpt")
     }

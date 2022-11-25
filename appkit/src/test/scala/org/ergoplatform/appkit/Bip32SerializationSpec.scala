@@ -1,6 +1,8 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk
+import org.ergoplatform.sdk.SecretString
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -9,7 +11,7 @@ class Bip32SerializationSpec extends AnyPropSpec with Matchers with ScalaCheckPr
   with AppkitTesting {
 
   property("Serialization roundtrip") {
-    val masterKey = JavaHelpers.seedToMasterKey(mnemonic, SecretString.empty(), false)
+    val masterKey = sdk.JavaHelpers.seedToMasterKey(mnemonic, SecretString.empty(), false)
     val xpubString = Bip32Serialization.serializeExtendedPublicKeyToHex(masterKey, NetworkType.MAINNET)
 
     an[IllegalArgumentException] shouldBe thrownBy {
@@ -21,7 +23,7 @@ class Bip32SerializationSpec extends AnyPropSpec with Matchers with ScalaCheckPr
     val firstEip3Addr = Address.createEip3Address(0, NetworkType.MAINNET, eip3ParentKeyDeserialized)
     firstEip3Addr.toString shouldBe firstEip3AddrStr
 
-    val eip3ParentKeyDerivedFromMaster = masterKey.derive(JavaHelpers.eip3DerivationParent()).publicKey
+    val eip3ParentKeyDerivedFromMaster = masterKey.derive(sdk.JavaHelpers.eip3DerivationParent()).publicKey
 
     eip3ParentKeyDerivedFromMaster shouldBe eip3ParentKeyDeserialized
   }

@@ -7,6 +7,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sigmastate.eval._
 import sigmastate.basics.CryptoConstants
 import special.sigma.GroupElement
+import org.ergoplatform.sdk
 
 import scala.util.Try
 
@@ -49,7 +50,7 @@ class MultiProveDlogSpec extends AnyPropSpec with Matchers
       // below is ergoTree of a random box picked from the block explorer. The boxId is 02abc29b6a28ccf7e9620afa16e1067caeb75fcd2e62c066e190742962cdcbae
       // We just need valid ergoTree to construct the change address
       val tree = "100207036ba5cfbc03ea2471fdf02737f64dbcd58c34461a7ec1e586dcd713dacbf89a120400d805d601db6a01ddd6027300d603b2a5730100d604e4c672030407d605e4c672030507eb02ce7201720272047205ce7201720472027205"
-      val ergoTree = JavaHelpers.decodeStringToErgoTree(tree)
+      val ergoTree = sdk.JavaHelpers.decodeStringToErgoTree(tree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(10000000).sendChangeTo(changeAddr).build()
 

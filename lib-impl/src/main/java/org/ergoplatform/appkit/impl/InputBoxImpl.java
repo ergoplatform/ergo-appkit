@@ -3,7 +3,10 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.BoxAttachment;
+import org.ergoplatform.appkit.ContextVar;
+import org.ergoplatform.appkit.ErgoValue;
+import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
@@ -12,6 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
 import special.sigma.Box;
@@ -66,7 +73,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public List<ErgoValue<?>> getRegisters() {
-        return JavaHelpers.getBoxRegisters(_ergoBox);
+        return org.ergoplatform.appkit.JavaHelpers.getBoxRegisters(_ergoBox);
     }
 
     @Override
@@ -81,7 +88,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public InputBox withContextVars(ContextVar... variables) {
-        ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
+        ContextExtension extension = org.ergoplatform.appkit.Iso.isoContextVarsToContextExtension().to(
           Stream.of(variables).collect(Collectors.toList())
         );
         InputBoxImpl res =  new InputBoxImpl(_ergoBox);

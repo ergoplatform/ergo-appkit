@@ -1,11 +1,11 @@
 package org.ergoplatform.appkit.commands
 
 import java.io.File
-
 import org.ergoplatform.appkit._
 import org.ergoplatform.appkit.config.ErgoToolConfig
-import org.ergoplatform.appkit.cli.{Console, AppContext, CmdLineParser}
+import org.ergoplatform.appkit.cli.{CmdLineParser, AppContext, Console}
 import org.ergoplatform.appkit.cli.Console.readNewPassword
+import org.ergoplatform.sdk.{SecretString, ErgoId}
 
 /** Base class for all commands which can be executed by ErgoTool.
   * Inherit this class to implement a new command.

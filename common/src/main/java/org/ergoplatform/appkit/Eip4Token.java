@@ -7,6 +7,8 @@ import java.util.Arrays;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
 import special.collection.Coll;
 
@@ -34,9 +36,9 @@ public class Eip4Token extends ErgoToken {
                      @Nonnull ErgoValue<Coll<Object>> r5, @Nonnull ErgoValue<Coll<Object>> r6,
                      @Nullable ErgoValue<?> r7, @Nullable ErgoValue<?> r8, @Nullable ErgoValue<?> r9) {
         this(id, amount,
-            new String(JavaHelpers$.MODULE$.collToByteArray(r4.getValue()), StandardCharsets.UTF_8),
-            new String(JavaHelpers$.MODULE$.collToByteArray(r5.getValue()), StandardCharsets.UTF_8),
-            Integer.parseInt(new String(JavaHelpers$.MODULE$.collToByteArray(r6.getValue()), StandardCharsets.UTF_8)),
+            new String(JavaHelpers.collToByteArray(r4.getValue()), StandardCharsets.UTF_8),
+            new String(JavaHelpers.collToByteArray(r5.getValue()), StandardCharsets.UTF_8),
+            Integer.parseInt(new String(JavaHelpers.collToByteArray(r6.getValue()), StandardCharsets.UTF_8)),
             r7, r8, r9);
     }
 
@@ -145,7 +147,7 @@ public class Eip4Token extends ErgoToken {
             Coll<?> assetType = (Coll<?>) r7.getValue();
 
             if (assetType.length() > 0 && assetType.tItem() == ErgoType.byteType().getRType()) {
-                return JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r7.getValue());
+                return JavaHelpers.collToByteArray((Coll<Object>) r7.getValue());
             } else {
                 return null;
             }
@@ -169,7 +171,7 @@ public class Eip4Token extends ErgoToken {
     @Nullable
     public byte[] getNftContentHash() {
         if (isNftAssetType()) {
-            return JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r8.getValue());
+            return JavaHelpers.collToByteArray((Coll<Object>) r8.getValue());
         } else {
             return null;
         }
@@ -183,10 +185,10 @@ public class Eip4Token extends ErgoToken {
         if (r9 != null && isNftAssetType()) {
             // if r9 ErgoValue is Coll[Byte], we have the direct link here
             if (r9.getValue() instanceof Coll) {
-                return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) r9.getValue()),
+                return new String(JavaHelpers.collToByteArray((Coll<Object>) r9.getValue()),
                     StandardCharsets.UTF_8);
             } else if (r9.getValue() instanceof Tuple2) {
-                return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._1),
+                return new String(JavaHelpers.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._1),
                     StandardCharsets.UTF_8);
             }
         }
@@ -199,7 +201,7 @@ public class Eip4Token extends ErgoToken {
     @Nullable
     public String getNftCoverImageLink() {
         if (r9 != null && isNftAssetType() && r9.getValue() instanceof Tuple2) {
-            return new String(JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._2),
+            return new String(JavaHelpers.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._2),
                 StandardCharsets.UTF_8);
         } else {
             return null;

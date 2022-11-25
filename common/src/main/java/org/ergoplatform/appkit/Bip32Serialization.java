@@ -2,10 +2,10 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.jcajce.provider.digest.RIPEMD160;
 import org.ergoplatform.appkit.NetworkType;
-import org.ergoplatform.wallet.Constants;
-import org.ergoplatform.wallet.secrets.DerivationPath;
-import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.wallet.Constants;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class Bip32Serialization {
             throw new IllegalArgumentException("Master key expected for serialization");
         }
 
-        DerivationPath eip3ParentPath = JavaHelpers.eip3DerivationParent();
+        DerivationPath eip3ParentPath = org.ergoplatform.sdk.JavaHelpers.eip3DerivationParent();
         ExtendedPublicKey eip3ParentKey = ((ExtendedSecretKey) masterKey.derive(eip3ParentPath)).publicKey();
         // we need the parent's parent for its fingerprint
         ExtendedPublicKey eip3ParentParent = ((ExtendedSecretKey) masterKey.derive(

@@ -2,7 +2,8 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
-
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -49,7 +50,7 @@ public class ErgoValue<T> {
      * @return hex string of serialized bytes
      */
     public String toHex() {
-        Values.EvaluatedValue<SType> c = Iso.isoErgoValueToSValue().to(this);
+        Values.EvaluatedValue<SType> c = org.ergoplatform.appkit.Iso.isoErgoValueToSValue().to(this);
         byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
         return Base16$.MODULE$.encode(bytes);
     }
@@ -95,7 +96,7 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<?> unit() {
-        return JavaHelpers.UnitErgoVal();
+        return org.ergoplatform.appkit.JavaHelpers.UnitErgoVal();
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
@@ -190,7 +191,7 @@ public class ErgoValue<T> {
     static public ErgoValue<?> fromHex(String hex) {
         byte[] bytes = JavaHelpers.decodeStringToBytes(hex);
         Values.EvaluatedValue<SType> c = (Values.EvaluatedValue<SType>)ValueSerializer.deserialize(bytes, 0);
-        ErgoValue<?> res = Iso.isoErgoValueToSValue().from(c);
+        ErgoValue<?> res = org.ergoplatform.appkit.Iso.isoErgoValueToSValue().from(c);
         return res;
     }
 }

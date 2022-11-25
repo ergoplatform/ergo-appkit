@@ -4,6 +4,7 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.ergoplatform.sdk
 
 class DataInputsSpec extends AnyPropSpec with Matchers
   with ScalaCheckPropertyChecks
@@ -45,7 +46,7 @@ class DataInputsSpec extends AnyPropSpec with Matchers
 
       inputs.add(input)
 
-      val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
+      val ergoTree = sdk.JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
       val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).fee(10000000).sendChangeTo(changeAddr).build()
@@ -81,7 +82,7 @@ class DataInputsSpec extends AnyPropSpec with Matchers
 
       inputs.add(input)
 
-      val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
+      val ergoTree = sdk.JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
       val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).addDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()
@@ -117,7 +118,7 @@ class DataInputsSpec extends AnyPropSpec with Matchers
 
       inputs.add(input)
 
-      val ergoTree = JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
+      val ergoTree = sdk.JavaHelpers.decodeStringToErgoTree(dummyErgoTree)
       val changeAddr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET).getErgoAddress
 
       val unsigned = txB.boxesToSpend(inputs).outputs(dummyOutput).addDataInputs(dataInput).fee(10000000).sendChangeTo(changeAddr).build()

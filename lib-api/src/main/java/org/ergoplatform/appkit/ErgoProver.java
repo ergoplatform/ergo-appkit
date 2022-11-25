@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
-import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters;
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters;
 import special.sigma.BigInt;
 
 import sigmastate.Values.SigmaBoolean;

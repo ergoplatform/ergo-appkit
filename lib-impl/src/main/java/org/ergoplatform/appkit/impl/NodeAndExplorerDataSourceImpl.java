@@ -10,7 +10,7 @@ import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.appkit.Iso;
+import org.ergoplatform.sdk.Iso;
 import org.ergoplatform.appkit.OutBox;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.Transaction;

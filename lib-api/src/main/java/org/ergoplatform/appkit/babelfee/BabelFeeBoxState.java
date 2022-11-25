@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.babelfee;
 
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.OutBox;

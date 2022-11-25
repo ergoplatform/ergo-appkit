@@ -6,7 +6,7 @@ import scala.Unit;
 import scalan.RType;
 import special.collection.Coll;
 import special.sigma.*;
-
+import org.ergoplatform.sdk.JavaHelpers;
 import java.util.Objects;
 
 /**

@@ -5,7 +5,11 @@ import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
-import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.ExtendedInputBox;
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext;
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
 import java.util.List;

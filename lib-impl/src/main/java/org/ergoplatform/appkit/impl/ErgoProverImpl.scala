@@ -1,15 +1,15 @@
 package org.ergoplatform.appkit.impl
 
 import java.util
-
 import org.ergoplatform.P2PKAddress
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import sigmastate.eval.CostingSigmaDslBuilder
 import sigmastate.interpreter.HintsBag
 import special.sigma.BigInt
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
-import JavaHelpers._
+import sigmastate.utils.Helpers._
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, ErgoToken}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 
 class ErgoProverImpl(_ctx: BlockchainContextBase,
                      _prover: AppkitProvingInterpreter) extends ErgoProver {
@@ -23,11 +23,10 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
   override def getAddress = new Address(getP2PKAddress)
 
   override def getSecretKey: BigInt =
-    CostingSigmaDslBuilder.BigInt(_prover.secretKeys.get(0).privateInput.w)
+    CostingSigmaDslBuilder.BigInt(_prover.secretKeys(0).privateInput.w)
 
   override def getEip3Addresses: util.List[Address] = {
     val addresses = _prover.secretKeys
-      .convertTo[IndexedSeq[ExtendedSecretKey]]
       .drop(1)
       .map { k =>
         val p2pkAddress = JavaHelpers.createP2PKAddress(k.publicImage, networkPrefix)
@@ -48,7 +47,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
       boxesToSpend = boxesToSpend,
       dataBoxes = dataBoxes,
       stateContext = txImpl.getStateContext,
-      baseCost = baseCost, txImpl.getTokensToBurn).getOrThrow
+      baseCost = baseCost, txImpl.getTokensToBurn.convertTo[IndexedSeq[ErgoToken]]).getOrThrow
     new SignedTransactionImpl(_ctx, signed, cost)
   }
 
@@ -66,7 +65,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
       dataBoxes = dataBoxes,
       stateContext = txImpl.getStateContext,
       baseCost = baseCost,
-      tokensToBurn = txImpl.getTokensToBurn)
+      tokensToBurn = txImpl.getTokensToBurn.convertTo[IndexedSeq[ErgoToken]])
     new ReducedTransactionImpl(_ctx, reduced, cost)
   }
 

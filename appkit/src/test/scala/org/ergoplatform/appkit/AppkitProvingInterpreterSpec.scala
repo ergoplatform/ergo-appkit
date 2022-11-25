@@ -1,8 +1,10 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.{ErgoBox, UnsignedErgoLikeTransaction, ErgoTreePredef}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
+import org.ergoplatform.sdk.{ErgoToken, SecretString, ExtendedInputBox, TokenBalanceException}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk
 import org.ergoplatform.settings.ErgoAlgos
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
@@ -54,7 +56,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
       .map(b => new InputBoxImpl(b))
       .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
       .convertTo[util.List[ExtendedInputBox]]
-    val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
+    val boxesToSpendSeq = org.ergoplatform.sdk.JavaHelpers.toIndexedSeq(boxesToSpend)
     val tx = new UnsignedErgoLikeTransaction(
       inputs = boxesToSpendSeq.map(_.toUnsignedInput),
       dataInputs = IndexedSeq(),
@@ -76,8 +78,8 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
       val tree2 = ErgoTreePredef.FalseProp(ergoTreeHeaderInTests)
       val token1 = (ErgoAlgos.hash("id1"), 10L)
       val token2 = (ErgoAlgos.hash("id2"), 20L)
-      val ergoToken1 = Iso.isoErgoTokenToPair.from(token1)
-      val ergoToken2 = Iso.isoErgoTokenToPair.from(token2)
+      val ergoToken1 = sdk.Iso.isoErgoTokenToPair.from(token1)
+      val ergoToken2 = sdk.Iso.isoErgoTokenToPair.from(token2)
 
       val input1 = createBox(oneErg + Parameters.MinFee, tree1, additionalTokens = Seq(token1))
       val input2 = createBox(oneErg, tree2, additionalTokens = Seq(token2))

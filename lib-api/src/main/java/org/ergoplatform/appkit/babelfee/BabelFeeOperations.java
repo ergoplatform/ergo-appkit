@@ -5,7 +5,7 @@ import org.ergoplatform.appkit.BlockchainContext;
 import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.ContextVar;
 import org.ergoplatform.appkit.ErgoContract;
-import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.OutBox;

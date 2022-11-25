@@ -1,9 +1,12 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.SecretString;
+import org.ergoplatform.sdk.JavaHelpers;
+import static org.ergoplatform.appkit.JavaHelpers.*;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.wallet.settings.EncryptionSettings;
 import org.ergoplatform.wallet.secrets.JsonSecretStorage;
-import org.ergoplatform.wallet.settings.EncryptionSettings;
 import org.ergoplatform.wallet.settings.SecretStorageSettings;
 import scala.Option;
 import scala.runtime.BoxedUnit;
@@ -49,7 +52,7 @@ public class SecretStorage {
     }
 
     public void unlock(SecretString encryptionPass) {
-        Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass.toInterface4JSecretString());
+        Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass);
         if (resTry.isFailure()) {
             Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
@@ -63,7 +66,7 @@ public class SecretStorage {
     /**
      * Initializes storage with the seed derived from an existing mnemonic phrase.
      * @param mnemonic - mnemonic phase
-     * @param encryptionPass - encryption password
+     * @param encryptionPassword - encryption password
      * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
      * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
     */
@@ -74,10 +77,9 @@ public class SecretStorage {
         SecretString password = mnemonic.getPassword();
 
         JsonSecretStorage jsonStorage = JsonSecretStorage
-            .restore(mnemonic.getPhrase().toInterface4JSecretString(),
-                JavaHelpers.secretStringToOption(password != null ?
-                    password.toInterface4JSecretString() : null),
-                encryptionPassword.toInterface4JSecretString(),
+            .restore(mnemonic.getPhrase(),
+                secretStringToOption(password != null ? password : null),
+                encryptionPassword,
                 settings, usePre1627KeyDerivation);
 
         return new SecretStorage(jsonStorage);

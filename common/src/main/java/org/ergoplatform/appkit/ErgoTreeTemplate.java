@@ -27,7 +27,7 @@ public class ErgoTreeTemplate {
 
     private ErgoTreeTemplate(Values.ErgoTree tree) {
         _tree = tree;
-        _templateBytes = JavaHelpers.ergoTreeTemplateBytes(_tree);
+        _templateBytes = org.ergoplatform.sdk.JavaHelpers.ergoTreeTemplateBytes(_tree);
     }
 
     /**

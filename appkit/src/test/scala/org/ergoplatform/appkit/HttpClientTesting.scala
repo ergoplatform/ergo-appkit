@@ -2,9 +2,11 @@ package org.ergoplatform.appkit
 
 import scalan.util.FileUtil
 import JavaHelpers._
+
 import java.util.{List => JList}
 import java.lang.{String => JString}
 import org.apache.commons.io.FileUtils
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 
 import java.nio.charset.Charset
 

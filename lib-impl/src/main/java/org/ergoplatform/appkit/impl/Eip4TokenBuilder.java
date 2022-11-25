@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.Eip4Token;
-import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.TransactionBox;
 import org.ergoplatform.explorer.client.DefaultApi;

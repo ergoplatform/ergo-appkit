@@ -3,10 +3,10 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedInput;
-import org.ergoplatform.appkit.ErgoId;
+import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.appkit.OutBox;
-import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
-import org.ergoplatform.appkit.ReducedErgoLikeTransactionSerializer$;
+import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
+import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer$;
 import org.ergoplatform.appkit.ReducedTransaction;
 
 import java.util.ArrayList;

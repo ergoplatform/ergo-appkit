@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.sdk.JavaHelpers;
 
 import java.math.BigInteger;
 

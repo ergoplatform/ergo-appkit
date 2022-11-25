@@ -8,6 +8,8 @@ import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.{ErgoToken, SecretString}
 import org.ergoplatform.{ErgoBox, ErgoTreePredef}
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers

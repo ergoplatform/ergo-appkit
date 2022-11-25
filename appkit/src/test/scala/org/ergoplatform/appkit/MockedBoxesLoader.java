@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ErgoToken;
+
 import java.util.Collections;
 import java.util.List;
 

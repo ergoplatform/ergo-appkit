@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import com.google.common.base.Preconditions.checkState
 import org.ergoplatform.SigmaConstants
 import org.ergoplatform.appkit._
+import org.ergoplatform.sdk.ErgoToken
 
 import scala.collection.mutable.ArrayBuffer
 

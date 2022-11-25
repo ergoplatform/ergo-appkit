@@ -7,6 +7,7 @@ import org.ergoplatform.appkit.JavaHelpers._
 import java.util.{List => JList}
 import java.lang.{String => JString}
 import org.ergoplatform.appkit.FileMockedErgoClient
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.scalatest.matchers.should.Matchers
 
 import java.nio.charset.Charset

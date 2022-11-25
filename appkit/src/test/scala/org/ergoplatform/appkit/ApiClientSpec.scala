@@ -2,6 +2,7 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.examples.ExampleScenarios
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
 import org.scalatest.matchers.should.Matchers
@@ -18,7 +19,7 @@ class ApiClientSpec
         with HttpClientTesting {
 
   val seed = SecretString.create("abc")
-  val masterKey = JavaHelpers.seedToMasterKey(seed, null, false)
+  val masterKey = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(seed, null, false)
   implicit val vs = ValidationRules.currentSettings
 
   property("parse ErgoTree") {

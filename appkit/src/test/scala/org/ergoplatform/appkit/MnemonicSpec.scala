@@ -3,6 +3,8 @@ package org.ergoplatform.appkit
 import java.util
 import org.ergoplatform.appkit.Mnemonic._
 import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicWrongListSizeException, MnemonicChecksumException, MnemonicWordException, MnemonicEmptyException}
+import org.ergoplatform.sdk
+import org.ergoplatform.sdk.SecretString
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -38,7 +40,7 @@ class MnemonicSpec extends AnyPropSpec with Matchers with ScalaCheckPropertyChec
   }
 
   property("serializeExtendedPublicKey") {
-    val masterKey = JavaHelpers.seedToMasterKey(SecretString.create("lens stadium egg cage hollow noble gate belt impulse vicious middle endless angry buzz crack"), SecretString.empty(), false)
+    val masterKey = sdk.JavaHelpers.seedToMasterKey(SecretString.create("lens stadium egg cage hollow noble gate belt impulse vicious middle endless angry buzz crack"), SecretString.empty(), false)
 
     Bip32Serialization.serializeExtendedPublicKeyToHex(masterKey, NetworkType.MAINNET) shouldBe "0488b21e04220c2217000000009216e49a70865823eff5381d6fd33ac96743af1f3051dc4cc8edd66a29a740860326cfc301b0c8d4d815ac721e0551304417e6133c2c9137f9f22c33895a3e1650"
   }

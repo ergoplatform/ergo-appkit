@@ -1,6 +1,8 @@
 package org.ergoplatform.appkit;
 
 import sigmastate.Values;
+import org.ergoplatform.sdk.JavaHelpers;
+import org.ergoplatform.sdk.Iso;
 
 /**
  * Proposition which can be proven and verified by sigma protocol.

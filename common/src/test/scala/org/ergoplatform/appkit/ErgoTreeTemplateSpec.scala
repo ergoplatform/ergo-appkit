@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.appkit.Iso._
 import sigmastate.{SInt, EQ, Plus, SType}
 import sigmastate.Values.{IntConstant, ErgoTree}
 import sigmastate.helpers.NegativeTesting
