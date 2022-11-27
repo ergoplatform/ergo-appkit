@@ -53,6 +53,16 @@ public interface InputBox extends TransactionBox {
     byte[] getBytes();
 
     /**
+     * @return id of transaction which created the box
+     */
+    String getTransactionId();
+
+    /**
+     * @return 0-based index of this box in the output list of the transaction which created the box
+     */
+    int getTransactionIndex();
+
+    /**
      * @return this box as an ergo value to store in a register
      */
     ErgoValue<Box> toErgoValue();
