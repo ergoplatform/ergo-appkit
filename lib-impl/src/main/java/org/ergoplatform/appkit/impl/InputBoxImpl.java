@@ -112,6 +112,16 @@ public class InputBoxImpl implements InputBox {
     @Override
     public byte[] getBytes() { return _ergoBox.bytes(); }
 
+    @Override
+    public String getTransactionId() {
+        return (String) _ergoBox.transactionId();
+    }
+
+    @Override
+    public int getTransactionIndex() {
+        return _ergoBox.index();
+    }
+
     public ErgoBox getErgoBox() {
         return _ergoBox;
     }
