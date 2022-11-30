@@ -128,8 +128,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "4.0.5-846-055a9cfa-SNAPSHOT"
-val ergoWalletVersion = "5.0.3-3-6087e7d8-20221125-1807-SNAPSHOT"
+val sigmaStateVersion = "4.0.5-847-45149ff2-SNAPSHOT"
+val ergoWalletVersion = "5.0.3-7-cc3a9b26-SNAPSHOT"
 
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
