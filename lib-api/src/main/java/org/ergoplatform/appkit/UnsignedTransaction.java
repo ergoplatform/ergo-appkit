@@ -37,4 +37,16 @@ public interface UnsignedTransaction extends Transaction {
      */
     @Nonnull
     List<ErgoToken> getTokensToBurn();
+
+    /**
+     * Json representation of this transaction.
+     */
+    @Nonnull
+    String toJson(boolean prettyPrint);
+
+    /**
+     * Json representation of this transaction.
+     */
+    @Nonnull
+    String toJson(boolean prettyPrint, boolean formatJson);
 }

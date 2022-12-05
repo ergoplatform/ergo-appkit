@@ -1,16 +1,23 @@
 package org.ergoplatform.appkit.impl;
 
+import com.google.gson.Gson;
+
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedErgoLikeTransaction;
 import org.ergoplatform.appkit.*;
+import org.ergoplatform.restapi.client.ErgoTransaction;
+import org.ergoplatform.restapi.client.ErgoTransactionOutput;
+import org.ergoplatform.restapi.client.JSON;
+import org.ergoplatform.restapi.client.UnsignedErgoTransaction;
 import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import scala.collection.JavaConversions;
+import sigmastate.Values;
 
 import javax.annotation.Nonnull;
 
@@ -105,5 +112,24 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     @Override
     public @Nonnull List<ErgoToken> getTokensToBurn() {
         return _tokensToBurn;
+    }
+
+    @Override
+    public String toJson(boolean prettyPrint) {
+        return toJson(prettyPrint, true);
+    }
+
+    @Override
+    public String toJson(boolean prettyPrint, boolean formatJson) {
+        UnsignedErgoTransaction tx = ScalaBridge.isoUnsignedErgoTransaction().from(_tx);
+        if (prettyPrint) {
+            for (ErgoTransactionOutput o : tx.getOutputs()) {
+                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+                o.ergoTree(tree.toString());
+            }
+        }
+        Gson gson = (prettyPrint || formatJson) ? JSON.createGson().setPrettyPrinting().create() : JSON.createGson().create();
+        String json = gson.toJson(tx);
+        return json;
     }
 }

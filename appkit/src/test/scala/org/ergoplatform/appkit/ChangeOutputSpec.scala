@@ -59,6 +59,7 @@ class ChangeOutputSpec extends PropSpec with Matchers
       val signed = ctx.newProverBuilder().withDHTData(gY, gY, gXY, gXY, x).build().sign(unsigned)
       val outputs = signed.getOutputsToSpend
       assert(outputs.size == 3)
+      println(unsigned.toJson(false))
       println(signed.toJson(false))
     }
   }
