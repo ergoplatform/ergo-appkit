@@ -39,11 +39,14 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     val tokenNumOfDecVal = token.getMintingBoxR6
     _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
 
-    // optional registers, but either all of them or none
-    if (token.getMintingBoxR7 != null && token.getMintingBoxR8 != null) {
-      _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8)
-      if (token.getMintingBoxR9 != null)
-        _registers += token.getMintingBoxR9
+    if(token.getMintingBoxR7 != null){
+      _registers ++= Array(token.getMintingBoxR7)
+    }
+    if(token.getMintingBoxR8 != null){
+      _registers ++= Array(token.getMintingBoxR8)
+    }
+    if(token.getMintingBoxR9 != null){
+      _registers ++= Array(token.getMintingBoxR9)
     }
 
     _tokens += token
