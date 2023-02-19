@@ -245,4 +245,11 @@ public class Eip4TokenBuilder {
 
         return eip4Token;
     }
+
+
+    public static Eip4Token buildNftArtworkCollectionToken(@Nonnull String id, long amount, @Nonnull String name,
+                                                           @Nonnull String description, int decimals) {
+
+        return new Eip4Token(id, amount, name, description, decimals, ErgoValue.of(Eip4Token.AssetType.NFT_AUDIO.getR7ByteArrayForType()), null, null);
+    }
 }
