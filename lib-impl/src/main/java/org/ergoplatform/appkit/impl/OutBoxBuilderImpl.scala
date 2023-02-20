@@ -50,9 +50,22 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
           _registers ++= Array(token.getMintingBoxR9)
         }
 
+      } else {
+        if(token.getMintingBoxR9 != null){
+          throw new IllegalArgumentException("R9 cannot exist without R8")
+        }
       }
 
+    } else {
+      if(token.getMintingBoxR8 != null){
+        throw new IllegalArgumentException("R8 cannot exist without R7")
+      }
+      if(token.getMintingBoxR9 != null){
+        throw new IllegalArgumentException("R9 cannot exist without R7")
+      }
     }
+
+
     _tokens += token
     this
   }
