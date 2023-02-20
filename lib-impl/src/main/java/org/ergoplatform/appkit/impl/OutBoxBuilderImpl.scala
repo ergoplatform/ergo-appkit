@@ -41,14 +41,18 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
 
     if(token.getMintingBoxR7 != null){
       _registers ++= Array(token.getMintingBoxR7)
-    }
-    if(token.getMintingBoxR8 != null){
-      _registers ++= Array(token.getMintingBoxR8)
-    }
-    if(token.getMintingBoxR9 != null){
-      _registers ++= Array(token.getMintingBoxR9)
-    }
 
+      if(token.getMintingBoxR8 != null){
+        _registers ++= Array(token.getMintingBoxR8)
+
+
+        if(token.getMintingBoxR9 != null){
+          _registers ++= Array(token.getMintingBoxR9)
+        }
+
+      }
+
+    }
     _tokens += token
     this
   }
