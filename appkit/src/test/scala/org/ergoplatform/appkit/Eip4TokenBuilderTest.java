@@ -149,4 +149,29 @@ public class Eip4TokenBuilderTest {
         Assert.assertNotNull(nftWithCover.getNftCoverImageLink());
         Assert.assertNull(nftAudio.getNftCoverImageLink());
     }
+
+    @Test
+    public void buildNftArtworkCollectionTokenTest() {
+        Eip4Token collectionToken = Eip4TokenBuilder.buildNftArtworkCollectionToken(
+            "6d35874826256ba6f41d896663b5ac461a04264142e46192dd3cd42538c5cee4",
+            1,
+            "Collection Test Token",
+            "Description for Collection Test Token",
+            0
+        );
+
+
+        Assert.assertNotNull(collectionToken);
+
+        Assert.assertEquals(Eip4Token.AssetType.ARTWORK_COLLECTION, collectionToken.getAssetType());
+
+        Assert.assertEquals(0, collectionToken.getDecimals());
+
+        Assert.assertTrue(collectionToken.isNftAssetType());
+
+        Assert.assertNull(collectionToken.getNftContentLink());
+
+        Assert.assertNull(collectionToken.getNftCoverImageLink());
+    }
+
 }
