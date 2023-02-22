@@ -39,30 +39,20 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     val tokenNumOfDecVal = token.getMintingBoxR6
     _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
 
-    if(token.getMintingBoxR7 != null){
-      _registers ++= Array(token.getMintingBoxR7)
+    _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
 
-      if(token.getMintingBoxR8 != null){
-        _registers ++= Array(token.getMintingBoxR8)
+    _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8, token.getMintingBoxR9)
 
+    if (token.getMintingBoxR9 != null && token.getMintingBoxR8 == null) {
+      throw new IllegalArgumentException("Invalid token: R9 cannot exist without R8")
+    }
 
-        if(token.getMintingBoxR9 != null){
-          _registers ++= Array(token.getMintingBoxR9)
-        }
+    if (token.getMintingBoxR8 != null && token.getMintingBoxR7 == null) {
+      throw new IllegalArgumentException("Invalid token: R8 cannot exist without R7")
+    }
 
-      } else {
-        if(token.getMintingBoxR9 != null){
-          throw new IllegalArgumentException("R9 cannot exist without R8")
-        }
-      }
-
-    } else {
-      if(token.getMintingBoxR8 != null){
-        throw new IllegalArgumentException("R8 cannot exist without R7")
-      }
-      if(token.getMintingBoxR9 != null){
-        throw new IllegalArgumentException("R9 cannot exist without R7")
-      }
+    if (token.getMintingBoxR9 != null && token.getMintingBoxR7 == null) {
+      throw new IllegalArgumentException("Invalid token: R9 cannot exist without R7")
     }
 
 
