@@ -250,6 +250,6 @@ public class Eip4TokenBuilder {
     public static Eip4Token buildNftArtworkCollectionToken(@Nonnull String id, long amount, @Nonnull String name,
                                                            @Nonnull String description, int decimals) {
 
-        return new Eip4Token(id, amount, name, description, decimals, ErgoValue.of(Eip4Token.AssetType.NFT_AUDIO.getR7ByteArrayForType()), null, null);
+        return new Eip4Token(id, amount, name, description, decimals, ErgoValue.of(Eip4Token.AssetType.ARTWORK_COLLECTION.getR7ByteArrayForType()), null, null);
     }
 }
