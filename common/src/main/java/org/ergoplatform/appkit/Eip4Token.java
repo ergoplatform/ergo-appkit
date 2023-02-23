@@ -71,12 +71,6 @@ public class Eip4Token extends ErgoToken {
         this.description = description;
         this.decimals = decimals;
 
-        // check if EIP4 specification is fulfilled. It defines that R7 to R9 are null, or
-        // R7 and R8 are set with R9 being optional. Other combinations are not valid.
-        if (!(r7 != null && r8 != null || r7 == null && r8 == null && r9 == null)) {
-            throw new IllegalArgumentException("Either define all of R7 to R9 or none of them");
-        }
-
         this.r7 = r7;
         this.r8 = r8;
         this.r9 = r9;
@@ -275,6 +269,10 @@ public class Eip4Token extends ErgoToken {
          */
         NFT_VIDEO,
         /**
+         * NFT - Artwork collection
+         */
+        ARTWORK_COLLECTION,
+        /**
          * Membership token - threshold signature
          */
         MEMBERSHIP_THRESHOLD_SIG,
@@ -294,6 +292,8 @@ public class Eip4Token extends ErgoToken {
                     return new byte[]{1, 2};
                 case NFT_VIDEO:
                     return new byte[]{1, 3};
+                case ARTWORK_COLLECTION:
+                    return new byte[] {1, 4};
                 case MEMBERSHIP_THRESHOLD_SIG:
                     return new byte[]{2, 1};
                 default:
