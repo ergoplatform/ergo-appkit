@@ -67,32 +67,6 @@ public class NodeAndExplorerDataSourceImpl extends NodeDataSourceImpl {
         return getInputBoxes(boxes);
     }
 
-    @Override
-    public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
-        List<InputBox> inputBoxes = new ArrayList<>();
-        String senderAddress = address.toString();
-        List<TransactionInfo> mempoolTx = executeCall(getExplorerApi().getApiV1MempoolTransactionsByaddressP1(
-            senderAddress, offset, limit)).getItems();
-
-        // now check if we have boxes on the address
-        for (TransactionInfo tx : mempoolTx) {
-            for (OutputInfo output : tx.getOutputs()) {
-                if (output.getAddress().equals(senderAddress) && output.getSpentTransactionId() == null) {
-                    // we have an unconfirmed box - get info from node for it
-                    try {
-                        InputBox boxInfo = getBoxById(output.getBoxId(), true, false);
-                        if (boxInfo != null) {
-                            inputBoxes.add(boxInfo);
-                        }
-                    } catch (ErgoClientException e) {
-                        // ignore error, no box to add
-                    }
-                }
-            }
-        }
-        return inputBoxes;
-    }
-
     private List<InputBox> getInputBoxes(List<OutputInfo> boxes) {
         ArrayList<InputBox> returnList = new ArrayList<>(boxes.size());
 

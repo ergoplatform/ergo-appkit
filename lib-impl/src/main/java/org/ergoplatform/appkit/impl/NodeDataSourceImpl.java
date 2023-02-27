@@ -199,23 +199,48 @@ public class NodeDataSourceImpl implements BlockchainDataSource {
 
     @Override
     public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
+        return getUnspentBoxesNodeApi(address, offset, limit);
+    }
+
+    public List<InputBox> getUnspentBoxesNodeApi(Address address, int offset, int limit) {
         if (isBlockchainApiEnabled()) {
-            return getUnspentBoxesNodeApi(address, offset, limit);
+            // FIXME returns newest boxes first, need to be reversed
+            List<ErgoTransactionOutput> ergoTransactionOutput = executeCall(blockchainApi.getUnspentBoxesByAddress(address.toString(), limit, offset));
+            List<InputBox> inputs = new ArrayList<>(ergoTransactionOutput.size());
+            for (ErgoTransactionOutput transactionOutput : ergoTransactionOutput) {
+                inputs.add(new InputBoxImpl(transactionOutput));
+            }
+            return inputs;
         } else {
             throw new UnsupportedOperationException("Request needs node with enabled blockchain API.");
         }
     }
 
-    public List<InputBox> getUnspentBoxesNodeApi(Address address, int offset, int limit) {
-        // TODO /blockchain/box/unspent/byAddress
-        // FIXME not newest first
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
-        throw new UnsupportedOperationException();
-        // TODO use transactions/unconfirmed/, but we need to sort of already spent ones as well
+        Transactions poolTransactions = executeCall(nodeTransactionsApi.getUnconfirmedTransactions(offset, limit));
+
+        // first prepare a list of box ids that are spent so that we don't return output boxes that
+        // are already spent in chained transactions
+        List<String> spentBoxIds = new ArrayList<>();
+        for (ErgoTransaction poolTransaction : poolTransactions) {
+            for (ErgoTransactionInput input : poolTransaction.getInputs()) {
+                spentBoxIds.add(input.getBoxId());
+            }
+        }
+
+        String ergoTree = address.toErgoContract().getErgoTree().bytesHex();
+        List<InputBox> inputs = new ArrayList<>();
+
+        // now check the output boxes
+        for (ErgoTransaction poolTransaction : poolTransactions) {
+            for (ErgoTransactionOutput output : poolTransaction.getOutputs()) {
+                if (output.getErgoTree().equals(ergoTree) && !spentBoxIds.contains(output.getBoxId()))
+                    inputs.add(new InputBoxImpl(output));
+            }
+        }
+
+        return inputs;
     }
 
     @Override
