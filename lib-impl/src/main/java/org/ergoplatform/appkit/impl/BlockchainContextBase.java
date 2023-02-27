@@ -12,7 +12,9 @@ import org.ergoplatform.appkit.ReducedTransaction;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.BlockchainParameters;
 
+import scala.Function0;
 import sigmastate.Values;
+import sigmastate.VersionContext$;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteReader;
 
@@ -43,7 +45,7 @@ public abstract class BlockchainContextBase implements BlockchainContext {
     @Override
     public ReducedTransaction parseReducedTransaction(byte[] txBytes) {
         SigmaByteReader r = SigmaSerializer$.MODULE$.startReader(txBytes, 0);
-        ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer$.MODULE$.parse(r);
+        ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer$.MODULE$.parse(r, getParameters().getBlockVersion());
         int cost = (int)r.getUInt(); // TODO use java7.compat.Math.toIntExact when it will available in Sigma
         return new ReducedTransactionImpl(this, tx, cost);
     }

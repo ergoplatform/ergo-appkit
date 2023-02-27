@@ -32,4 +32,9 @@ public class Parameters {
      * Max block cost for Cold Client
      */
     public static final int ColdClientMaxBlockCost = 1000000;
+
+    /**
+     * Activated version for Cold Client
+     */
+    public static final byte ColdClientBlockVersion = 2;
 }

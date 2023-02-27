@@ -1,4 +1,5 @@
-[4.0.12]
+[5.0.0]
+- block version now required to construct ColdErgoClient
 - getBoxById(String boxId) was replaced by getBoxById(String boxId, boolean findInPool, boolean findInSpent)
   the old behaviour (returning only confirmed unspent boxes) can be achieved by calling
   getBoxById(boxId, false, false)

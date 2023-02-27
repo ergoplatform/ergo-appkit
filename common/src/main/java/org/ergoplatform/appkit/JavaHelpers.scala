@@ -343,7 +343,7 @@ object JavaHelpers {
     */
   def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
     val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
-      ergoTreeBytes, positions, newValues.map(Iso.isoErgoValueToSValue.to))
+      ergoTreeBytes, positions, newValues.map(v => Iso.isoErgoValueToSValue.to(v).asInstanceOf[Constant[SType]]))
     ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
   }
 

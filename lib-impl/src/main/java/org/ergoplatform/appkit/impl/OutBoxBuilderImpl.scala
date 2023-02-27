@@ -39,16 +39,29 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     val tokenNumOfDecVal = token.getMintingBoxR6
     _registers ++= Array(tokenNameVal, tokenDescVal, tokenNumOfDecVal)
 
-    // optional registers, but either all of them or none
-    if (token.getMintingBoxR7 != null && token.getMintingBoxR8 != null) {
-      _registers ++= Array(token.getMintingBoxR7, token.getMintingBoxR8)
-      if (token.getMintingBoxR9 != null)
-        _registers += token.getMintingBoxR9
+
+    if (token.getMintingBoxR9 != null && token.getMintingBoxR8 == null) {
+      throw new IllegalArgumentException("Invalid token: R9 cannot exist without R8")
     }
+
+    if (token.getMintingBoxR8 != null && token.getMintingBoxR7 == null) {
+      throw new IllegalArgumentException("Invalid token: R8 cannot exist without R7")
+    }
+
+    if (token.getMintingBoxR9 != null && token.getMintingBoxR7 == null) {
+      throw new IllegalArgumentException("Invalid token: R9 cannot exist without R7")
+    }
+
+    // added only if they are non-null values
+    _registers ++= Seq(Option(token.getMintingBoxR7)).flatten
+    _registers ++= Seq(Option(token.getMintingBoxR8)).flatten
+    _registers ++= Seq(Option(token.getMintingBoxR9)).flatten
+
 
     _tokens += token
     this
   }
+
 
   override def registers(registers: ErgoValue[_]*): OutBoxBuilderImpl = {
     Preconditions.checkArgument(registers.nonEmpty,
