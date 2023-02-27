@@ -2,204 +2,67 @@ package org.ergoplatform.appkit.impl;
 
 import com.google.common.base.Preconditions;
 
-import org.ergoplatform.ErgoLikeTransaction;
 import org.ergoplatform.appkit.Address;
-import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.BlockchainDataSource;
-import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.appkit.Iso;
-import org.ergoplatform.appkit.OutBox;
-import org.ergoplatform.appkit.SignedTransaction;
-import org.ergoplatform.appkit.Transaction;
 import org.ergoplatform.explorer.client.DefaultApi;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.explorer.client.model.OutputInfo;
 import org.ergoplatform.explorer.client.model.TransactionInfo;
 import org.ergoplatform.restapi.client.ApiClient;
-import org.ergoplatform.restapi.client.BlocksApi;
-import org.ergoplatform.restapi.client.ErgoTransaction;
-import org.ergoplatform.restapi.client.ErgoTransactionDataInput;
-import org.ergoplatform.restapi.client.ErgoTransactionInput;
-import org.ergoplatform.restapi.client.ErgoTransactionOutput;
-import org.ergoplatform.restapi.client.InfoApi;
-import org.ergoplatform.restapi.client.NodeInfo;
-import org.ergoplatform.restapi.client.Transactions;
-import org.ergoplatform.restapi.client.TransactionsApi;
-import org.ergoplatform.restapi.client.UtxoApi;
-import org.ergoplatform.restapi.client.WalletApi;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import jline.internal.Nullable;
 import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 /**
  * BlockchainDataSource implementation using Node API and Explorer API. Node API is preferred,
- * Explorer is optional to use. Not all methods can be used without Explorer set up.
+ * Explorer is optional to use. Not all methods can be used without Explorer set up when Node's
+ * blockchain API is disabled.
  */
-public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
-    // Node
-    private final InfoApi nodeInfoApi;
-    private final BlocksApi nodeBlocksApi;
-    private final UtxoApi nodeUtxoApi;
-    private final TransactionsApi nodeTransactionsApi;
-    private final WalletApi nodeWalletApi;
-
+public class NodeAndExplorerDataSourceImpl extends NodeDataSourceImpl {
     // Explorer
     private final DefaultApi explorerApi;
 
-    // cached to avoid multiple fetches, these values won't change while this class lives
-    private BlockchainParameters blockchainParameters;
+    public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, ExplorerApiClient explorerClient) {
+        super(nodeClient);
 
-    /**
-     * set to true to make {@link #sendTransaction(SignedTransaction)} call node's checkTransaction
-     * endpoint before actually sending the transaction
-     */
-    public boolean performCheckBeforeSend = false;
+        if (explorerClient == null) {
+            throw new IllegalArgumentException("For node-only use, use NodeDataSourceImpl");
+        }
 
-    public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
-
-        OkHttpClient ok = nodeClient.getOkBuilder().build();
-        Retrofit nodeRetrofit = nodeClient.getAdapterBuilder()
-            .client(ok)
+        OkHttpClient okExplorer = explorerClient.getOkBuilder().build();
+        Retrofit retrofitExplorer = explorerClient.getAdapterBuilder()
+            .client(okExplorer)
             .build();
-
-        nodeInfoApi = nodeRetrofit.create(InfoApi.class);
-        nodeBlocksApi = nodeRetrofit.create(BlocksApi.class);
-        nodeUtxoApi = nodeRetrofit.create(UtxoApi.class);
-        nodeTransactionsApi = nodeRetrofit.create(TransactionsApi.class);
-        nodeWalletApi = nodeRetrofit.create(WalletApi.class);
-
-        if (explorerClient != null) {
-            OkHttpClient okExplorer = explorerClient.getOkBuilder().build();
-            Retrofit retrofitExplorer = explorerClient.getAdapterBuilder()
-                .client(okExplorer)
-                .build();
-            explorerApi = retrofitExplorer.create(DefaultApi.class);
-        } else
-            explorerApi = null;
-
+        explorerApi = retrofitExplorer.create(DefaultApi.class);
     }
 
     @Override
-    public BlockchainParameters getParameters() {
-        if (blockchainParameters == null) {
-            // getNodeInfo will load and set the parameters
-            getNodeInfo();
-        }
-        return blockchainParameters;
-    }
-
-    private NodeInfo getNodeInfo() {
-        NodeInfo nodeInfo = executeCall(nodeInfoApi.getNodeInfo());
-        // cache the parameters while we have them
-        blockchainParameters = new NodeInfoParameters(nodeInfo);
-        return nodeInfo;
-    }
-
-    @Override
-    public List<BlockHeader> getLastBlockHeaders(int count, boolean onlyFullHeaders) {
-        List<org.ergoplatform.restapi.client.BlockHeader> headers;
-        if (onlyFullHeaders) {
-            NodeInfo nodeInfo = getNodeInfo();
-            int fullHeight = nodeInfo.getFullHeight();
-            int headersHeight = nodeInfo.getHeadersHeight();
-            int additionalCount = Math.max(0, headersHeight - fullHeight);
-
-            List<org.ergoplatform.restapi.client.BlockHeader> headersFromNode =
-                executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count + additionalCount)));
-
-            headers = new ArrayList<>();
-
-            // only add the block headers that match the full height
-            for (org.ergoplatform.restapi.client.BlockHeader blockHeader : headersFromNode) {
-                if (blockHeader.getHeight() <= fullHeight) {
-                    headers.add(blockHeader);
-                }
-            }
-
-            if (headers.isEmpty()) {
-                throw new IllegalStateException("onlyFullHeaders set, but all returned headers are not within range.");
-            }
-
-        } else {
-            headers = executeCall(nodeBlocksApi.getLastHeaders(BigDecimal.valueOf(count)));
-        }
-
-        Collections.reverse(headers);
-        List<BlockHeader> retVal = new ArrayList<>(headers.size());
-        for (org.ergoplatform.restapi.client.BlockHeader header : headers) {
-            retVal.add(BlockHeaderImpl.createFromRestApi(header));
-        }
-
-        return retVal;
-    }
-
-    @Override
-    public InputBox getBoxById(String boxId, boolean findInPool, boolean findInSpent) {
-        if (findInSpent && !findInPool) {
+    protected InputBox getBoxByIdIncludingSpent(String boxId) {
+        if (isBlockchainApiEnabled())
+            return getBoxByIdNode(boxId);
+        else
             return getBoxByIdExplorer(boxId);
-        } else if (!findInSpent) {
-            return getUnspentBoxByIdNode(boxId, findInPool);
-        } else {
-            // find in spent and find in pool => try node first and fall back to explorer
-            try {
-                return getUnspentBoxByIdNode(boxId, findInPool);
-            } catch (Throwable t) {
-                return getBoxByIdExplorer(boxId);
-            }
-        }
     }
 
-    private InputBox getUnspentBoxByIdNode(String boxId, boolean findInPool) {
-        ErgoTransactionOutput boxData = (findInPool) ? executeCall(nodeUtxoApi.getBoxWithPoolById(boxId))
-            : executeCall(nodeUtxoApi.getBoxById(boxId));
-        return new InputBoxImpl(boxData);
-    }
-
-    private InputBox getBoxByIdExplorer(String boxId) {
+    public InputBox getBoxByIdExplorer(String boxId) {
         OutputInfo outputInfo = executeCall(explorerApi.getApiV1BoxesP1(boxId));
         return new InputBoxImpl(outputInfo);
     }
 
     @Override
-    public String sendTransaction(SignedTransaction tx) {
-        ErgoLikeTransaction ergoTx = ((SignedTransactionImpl) tx).getTx();
-        List<ErgoTransactionDataInput> dataInputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionDataInput()).from(ergoTx.dataInputs());
-        List<ErgoTransactionInput> inputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionInput()).from(ergoTx.inputs());
-        List<ErgoTransactionOutput> outputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionOutput()).from(ergoTx.outputs());
-        ErgoTransaction txData = new ErgoTransaction()
-            .id(ergoTx.id())
-            .dataInputs(dataInputsData)
-            .inputs(inputsData)
-            .outputs(outputsData);
-
-        if (performCheckBeforeSend) {
-            String txId = executeCall(nodeTransactionsApi.checkTransaction(txData)).replace("\"", "");
-            if (!txData.getId().equals(txId)) {
-                throw new IllegalStateException("checkTransaction returned tx id " + txId +
-                    ", expected was " + txData.getId());
-            }
-        }
-
-        return executeCall(nodeTransactionsApi.sendTransaction(txData));
+    public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
+        if (isBlockchainApiEnabled())
+            return getUnspentBoxesNodeApi(address, offset, limit);
+        else
+            return getUnspentBoxesForExplorer(address, offset, limit);
     }
 
-    @Override
-    public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
-        Preconditions.checkNotNull(explorerApi, ErgoClient.explorerUrlNotSpecifiedMessage);
+    public List<InputBox> getUnspentBoxesForExplorer(Address address, int offset, int limit) {
         List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentByaddressP1(address.toString(), offset, limit, "asc")).getItems();
         return getInputBoxes(boxes);
     }
@@ -230,16 +93,6 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
         return inputBoxes;
     }
 
-    @Override
-    public List<Transaction> getUnconfirmedTransactions(int offset, int limit) {
-        Transactions mempoolTx = executeCall(getNodeTransactionsApi().getUnconfirmedTransactions(limit, offset));
-        List<Transaction> returned = new ArrayList<>(mempoolTx.size());
-        for (ErgoTransaction tx : mempoolTx) {
-            returned.add(new MempoolTransaction(tx));
-        }
-        return returned;
-    }
-
     private List<InputBox> getInputBoxes(List<OutputInfo> boxes) {
         ArrayList<InputBox> returnList = new ArrayList<>(boxes.size());
 
@@ -260,75 +113,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
         return returnList;
     }
 
-    protected <T> T executeCall(Call<T> apiCall) throws ErgoClientException {
-        try {
-            Response<T> response = apiCall.execute();
-
-            if (!response.isSuccessful()) {
-                throw new ErgoClientException(response.code() + ": " +
-                    (response.errorBody() != null ? response.errorBody().string() : "Server returned error"), null);
-            } else {
-                return response.body();
-            }
-        } catch (Exception e) {
-            throw new ErgoClientException(
-                String.format("Error executing API request to %s: %s", apiCall.request().url(), e.getMessage()), e);
-        }
-    }
-
-    // getters for the API clients - all public so that clients can utilize them for own calls
-    public InfoApi getNodeInfoApi() {
-        return nodeInfoApi;
-    }
-
-    public BlocksApi getNodeBlocksApi() {
-        return nodeBlocksApi;
-    }
-
-    public UtxoApi getNodeUtxoApi() {
-        return nodeUtxoApi;
-    }
-
-    public TransactionsApi getNodeTransactionsApi() {
-        return nodeTransactionsApi;
-    }
-
-    public WalletApi getNodeWalletApi() {
-        return nodeWalletApi;
-    }
-
     public DefaultApi getExplorerApi() {
         return explorerApi;
-    }
-
-    private static class MempoolTransaction implements Transaction {
-        private final ErgoTransaction tx;
-
-        public MempoolTransaction(ErgoTransaction tx) {
-            this.tx = tx;
-        }
-
-        @Override
-        public String getId() {
-            return tx.getId();
-        }
-
-        @Override
-        public List<String> getInputBoxesIds() {
-            List<String> returnVal = new ArrayList<>(tx.getInputs().size());
-            for (ErgoTransactionInput input : tx.getInputs()) {
-                returnVal.add(input.getBoxId());
-            }
-            return returnVal;
-        }
-
-        @Override
-        public List<OutBox> getOutputs() {
-            List<OutBox> returnVal = new ArrayList<>(tx.getOutputs().size());
-            for (ErgoTransactionOutput output : tx.getOutputs()) {
-                returnVal.add(new OutBoxImpl(ScalaBridge.isoErgoTransactionOutput().to(output)));
-            }
-            return returnVal;
-        }
     }
 }

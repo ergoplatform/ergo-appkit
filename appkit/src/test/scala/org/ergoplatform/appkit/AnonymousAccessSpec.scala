@@ -43,10 +43,6 @@ class AnonymousAccessSpec extends PropSpec with Matchers
 
     ergoClient.execute { ctx: BlockchainContext =>
       ctx shouldNot be (null)
-      assertExceptionThrown(
-        ctx.getDataSource.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API),
-        exceptionLike[NullPointerException](ErgoClient.explorerUrlNotSpecifiedMessage)
-      )
     }
   }
 
