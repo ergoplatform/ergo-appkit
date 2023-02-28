@@ -22,9 +22,9 @@ public interface BlockchainApi {
         @retrofit2.http.Path("boxId") String boxId
     );
 
-    @POST("blockchain/box/unspent/byAddress/{address}")
+    @POST("blockchain/box/unspent/byAddress/")
     Call<List<ErgoTransactionOutput>> getUnspentBoxesByAddress(
-        @retrofit2.http.Path("address") String address,
+        @retrofit2.http.Body String address,
         @retrofit2.http.Query("limit") Integer limit,
         @retrofit2.http.Query("offset") Integer offset
     );
