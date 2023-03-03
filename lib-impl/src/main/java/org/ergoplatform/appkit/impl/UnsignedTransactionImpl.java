@@ -119,6 +119,12 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         return toJson(prettyPrint, true);
     }
 
+    /**
+     * Converts this transaction to JSON string.
+     * @param prettyPrint if true, the ErgoTrees will be pretty printed, otherwise they will be output as hex strings
+     * @param formatJson  if true, the JSON will be formatted
+     * @return JSON string
+     */
     @Override
     public String toJson(boolean prettyPrint, boolean formatJson) {
         UnsignedErgoTransaction tx = ScalaBridge.isoUnsignedErgoTransaction().from(_tx);
