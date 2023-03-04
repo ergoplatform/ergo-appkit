@@ -30,6 +30,14 @@ public class MultisigTransaction {
     }
 
     /**
+     * adds the commitments not present on this instance from another multisig transaction instance
+     * for the same transaction.
+     */
+    public void addCommitments(MultisigTransaction other) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @return list of participants that added a commitment for the transaction
      */
     public List<Address> getCommitingParticipants() {
