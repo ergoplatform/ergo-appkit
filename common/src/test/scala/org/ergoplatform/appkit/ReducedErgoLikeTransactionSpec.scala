@@ -24,8 +24,9 @@ class ReducedErgoLikeTransactionSpec extends CrossVersionProps
     val extensions = unsignedTx.inputs.map(ui => reducedInputDataGen(ui.extension))
     for {
       reducedInputs <- Gen.sequence[Seq[ReducedInputData], ReducedInputData](extensions)
+      cost <- Gen.choose(10, 100000)
     } yield
-      ReducedErgoLikeTransaction(unsignedTx, reducedInputs)
+      ReducedErgoLikeTransaction(unsignedTx, reducedInputs, cost)
   }
 
   implicit lazy val reducedErgoLikeTransactionGen: Gen[ReducedErgoLikeTransaction] = for {
