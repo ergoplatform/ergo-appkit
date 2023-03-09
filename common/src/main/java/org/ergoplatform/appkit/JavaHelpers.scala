@@ -9,13 +9,13 @@ import scala.collection.{mutable, JavaConversions}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean, SigmaPropConstant}
+import sigmastate.Values.{SValue, SigmaPropConstant, Value, ErgoTree, SigmaBoolean, Constant, EvaluatedValue}
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, IRContext}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -39,10 +39,13 @@ import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
-import sigmastate.eval.Colls.outerJoin
+import org.ergoplatform.appkit.JavaHelpers.{TokenIdRType, TokenColl}
+import org.ergoplatform.appkit.scalaapi.Extensions.{PairCollOps, CollBuilderOps}
+import org.ergoplatform.appkit.scalaapi.Utils
+import scalan.ExactIntegral.LongIsExactIntegral
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import special.collection.ExtensionMethods.PairCollOps
+import sigmastate.interpreter.Interpreter.ScriptEnv
+import sigmastate.lang.SigmaCompiler
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -382,10 +385,19 @@ object JavaHelpers {
     JavaConversions.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
+  // TODO remove when accessible from ErgoScriptPredef in Sigma
+  /** Compiles the given ErgoScript `code` into ErgoTree expression. */
+  def compileWithCosting(env: ScriptEnv, code: String, networkPrefix: NetworkPrefix)
+    (implicit IR: IRContext): Value[SType] = {
+    val compiler = new SigmaCompiler(networkPrefix)
+    val res = compiler.compile(env, code)
+    res.buildTree
+  }
+
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
     val env = JavaConversions.mapAsScalaMap(constants).toMap
     implicit val IR = new CompiletimeIRContext
-    val prop = ErgoScriptPredef.compileWithCosting(env, contractText, networkPrefix).asSigmaProp
+    val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
   }
 
@@ -610,11 +622,13 @@ object JavaHelpers {
     reducedTokens: TokenColl,
     subtractedTokens: TokenColl
   ): TokenColl = {
+    val exactNumeric: Numeric[Long] = new Utils.IntegralFromExactIntegral(LongIsExactIntegral)
+    val b = reducedTokens.builder // any Coll has builder, which is suitable
     val reduced = checkAllTokensPositive(reducedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
+      .sumByKey(exactNumeric) // summation with overflow checking
     val subtracted = checkAllTokensPositive(subtractedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
-    val tokensDiff = outerJoin(subtracted, reduced)(
+      .sumByKey(exactNumeric) // summation with overflow checking
+    val tokensDiff = b.outerJoin(subtracted, reduced)(
       { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
       { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
       { case (_, (sV, rV)) => rV - sV } // for tokens both in subtracted and reduced: balance change

@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import debox.cfor
 import org.ergoplatform.validation.ValidationRules
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
 import sigmastate.basics.DLogProtocol.{ProveDlog, DLogProverInput}
@@ -10,22 +11,19 @@ import org.ergoplatform.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
 import org.ergoplatform.appkit.JavaHelpers.TokenColl
-import org.ergoplatform.appkit.ReducedInputData.createReductionResult
+import org.ergoplatform.appkit.scalaapi.Extensions.CollOps
 import org.ergoplatform.utils.ArithUtils
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.eval.CompiletimeIRContext
-import sigmastate.interpreter.Interpreter.{ReductionResult, JitReductionResult, ScriptEnv, AotReductionResult, FullReductionResult}
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, FullReductionResult, JitReductionResult}
 import sigmastate.interpreter.{ProverResult, Interpreter, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
-import sigmastate.utxo.CostTable
 import special.collection.ExtensionMethods.PairCollOps
 import sigmastate.utils.Helpers._ // for Scala 2.11
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
-import spire.syntax.all.cfor
 import scalan.util.Extensions.LongOps
 import sigmastate.VersionContext
 import sigmastate.VersionContext.JitActivationVersion
@@ -52,7 +50,7 @@ class AppkitProvingInterpreter(
       val dLogInputs: JList[DLogProverInput],
       val dhtInputs: JList[DiffieHellmanTupleProverInput],
       params: ErgoLikeParameters)
-  extends ErgoLikeInterpreter()(new CompiletimeIRContext) with ProverInterpreter {
+  extends ErgoLikeInterpreter with ProverInterpreter {
 
   override type CTX = ErgoLikeContext
   import Iso._
@@ -164,7 +162,7 @@ class AppkitProvingInterpreter(
     // Cost of transaction initialization: we should read and parse all inputs and data inputs,
     // and also iterate through all outputs to check rules
     val initialCost = ArithUtils.addExact(
-      CostTable.interpreterInitCost,
+      10000, // use Interpreter.interpreterInitCost from Sigma once it's available
       java7.compat.Math.multiplyExact(boxesToSpend.size, params.inputCost),
       java7.compat.Math.multiplyExact(dataBoxes.size, params.dataInputCost),
       java7.compat.Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
@@ -312,19 +310,6 @@ case class TokenBalanceException(
 case class ReducedInputData(reductionResult: ReductionResult, extension: ContextExtension)
 
 object ReducedInputData {
-  /** Creates [[ReductionResult]] for the given blockVersion.
-    *
-    * @param blockVersion version of Ergo protocol (stored in block header)
-    * @param sb           sigma proposition (typically result of script reduction)
-    * @param cost         cost accumulated during reduction
-    */
-  def createReductionResult(blockVersion: Byte, sb: SigmaBoolean, cost: Long): ReductionResult = {
-    val scriptVersion = blockVersion - 1 // convert to script version
-    if (scriptVersion >= JitActivationVersion)
-      FullReductionResult(null, JitReductionResult(sb, cost))
-    else
-      FullReductionResult(AotReductionResult(sb, cost), null)
-  }
 }
 
 /** Represent `reduced` transaction, i.e. unsigned transaction where each unsigned input
@@ -379,8 +364,7 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
       val cost = r.getULong()
       val input = tx.inputs(i)
       val extension = input.extension
-      val currentBlockVersion: Byte = (VersionContext.current.activatedVersion + 1).toByte
-      val reductionResult = createReductionResult(currentBlockVersion, sb, cost)
+      val reductionResult = FullReductionResult(JitReductionResult(sb, cost))
       reducedInputs(i) = ReducedInputData(reductionResult, extension)
       unsignedInputs(i) = new UnsignedInput(input.boxId, extension)
     }
