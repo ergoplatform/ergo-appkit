@@ -17,7 +17,7 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeP
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, FullReductionResult, JitReductionResult}
+import sigmastate.interpreter.Interpreter.{ReductionResult, JitReductionResult, ScriptEnv, FullReductionResult, estimateCryptoVerifyCost}
 import sigmastate.interpreter.{ProverResult, Interpreter, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
@@ -55,6 +55,12 @@ class AppkitProvingInterpreter(
   override type CTX = ErgoLikeContext
   import Iso._
   import Helpers._
+
+  // TODO use Interpreter.interpreterInitCost from Sigma once it's available
+  /** Initial cost of instantiating an interpreter and creating ErgoLikeContext.
+    * Added once per transaction.
+    */
+  val interpreterInitCost: Int = 10000
 
   val secrets: Seq[SigmaProtocolPrivateInput[_ <: SigmaProtocol[_], _ <: SigmaProtocolCommonInput[_]]] = {
     val dlogs: IndexedSeq[DLogProverInput] = JListToIndexedSeq(identityIso[ExtendedSecretKey]).to(secretKeys).map(_.privateInput)
@@ -162,7 +168,7 @@ class AppkitProvingInterpreter(
     // Cost of transaction initialization: we should read and parse all inputs and data inputs,
     // and also iterate through all outputs to check rules
     val initialCost = ArithUtils.addExact(
-      10000, // use Interpreter.interpreterInitCost from Sigma once it's available
+      interpreterInitCost,
       java7.compat.Math.multiplyExact(boxesToSpend.size, params.inputCost),
       java7.compat.Math.multiplyExact(dataBoxes.size, params.dataInputCost),
       java7.compat.Math.multiplyExact(unsignedTx.outputCandidates.size, params.outputCost)
@@ -209,7 +215,7 @@ class AppkitProvingInterpreter(
 
       val reducedInput = reduce(Interpreter.emptyEnv, inputBox.box.ergoTree, context)
 
-      currentCost = reducedInput.reductionResult.cost
+      currentCost = reducedInput.reductionResult.cost // Note, this value includes context.initCost
       reducedInputs += reducedInput
     }
 
@@ -243,14 +249,15 @@ class AppkitProvingInterpreter(
       val proverResult = proveReduced(reducedInput, unsignedTx.messageToSign)
       val signedInput = Input(unsignedInput.boxId, proverResult)
 
-      // TODO add verification cost here
-      // currentCost = addCostLimited(currentCost, verificationCost, maxCost, msg = signedInput.toString())
+      val verificationCost = estimateCryptoVerifyCost(reducedInput.reductionResult.value).toBlockCost
+      currentCost = addCostLimited(currentCost, verificationCost, maxCost, msg = signedInput.toString())
 
       provedInputs += signedInput
     }
 
     val signedTx = new ErgoLikeTransaction(
       provedInputs.result(), unsignedTx.dataInputs, unsignedTx.outputCandidates)
+    // compute accumulated crypto verification cost of all inputs
     val txVerificationCost = (currentCost - baseCost).toIntExact
     (signedTx, txVerificationCost)
   }
