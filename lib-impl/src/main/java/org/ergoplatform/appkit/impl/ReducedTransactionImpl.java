@@ -20,14 +20,12 @@ import sigmastate.utils.SigmaByteWriter;
 public class ReducedTransactionImpl implements ReducedTransaction {
     private final BlockchainContextBase _ctx;
     private final ReducedErgoLikeTransaction _tx;
-    private final int _txCost;
 
     public ReducedTransactionImpl(
             BlockchainContextBase ctx,
-            ReducedErgoLikeTransaction tx, int txCost) {
+            ReducedErgoLikeTransaction tx) {
         _ctx = ctx;
         _tx = tx;
-        _txCost = txCost;
     }
 
     @Override
@@ -64,28 +62,32 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public int getCost() {
-        return _txCost;
+        return _tx.cost();
     }
 
     @Override
     public byte[] toBytes() {
         SigmaByteWriter w = SigmaSerializer$.MODULE$.startWriter();
         ReducedErgoLikeTransactionSerializer$.MODULE$.serialize(_tx, w);
-        w.putUInt(_txCost);
         return w.toBytes();
     }
 
     @Override
     public int hashCode() {
-        return 31 * _tx.hashCode() + _txCost;
+        return _tx.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ReducedTransactionImpl) {
            ReducedTransactionImpl that = (ReducedTransactionImpl)obj;
-           return Objects.equals(that._tx, this._tx) && that._txCost == this._txCost;
+           return Objects.equals(that._tx, this._tx);
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "ReducedTransactionImpl(" + _tx.toString() + ")";
     }
 }
