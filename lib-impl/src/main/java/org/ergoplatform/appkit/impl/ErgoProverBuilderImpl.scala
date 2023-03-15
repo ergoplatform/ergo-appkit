@@ -86,7 +86,8 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
     val keys = new util.ArrayList[ExtendedSecretKey]
     if (_masterKey != null) {
       keys.add(_masterKey)
-      keys.addAll(_eip2Keys.map(_._2).toIndexedSeq.convertTo[util.List[ExtendedSecretKey]])
+      val secretKeys: IndexedSeq[ExtendedSecretKey] = _eip2Keys.map(_._2).toIndexedSeq
+      keys.addAll(secretKeys.convertTo[java.util.List[ExtendedSecretKey]])
     }
     val interpreter = new AppkitProvingInterpreter(keys, _dLogSecrets, _dhtSecrets, parameters)
     new ErgoProverImpl(_ctx, interpreter)

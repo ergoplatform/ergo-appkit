@@ -6,6 +6,7 @@ import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
 
 import scala.collection.{mutable, JavaConverters}
+import scala.collection.compat.immutable.ArraySeq
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
@@ -175,11 +176,12 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit def isoJMapToMap[K,V1,V2](iso: Iso[V1, V2]): Iso[JMap[K, V1], scala.collection.Map[K,V2]] = new Iso[JMap[K, V1], scala.collection.Map[K,V2]] {
+    import JavaConverters._
     override def to(a: JMap[K, V1]): scala.collection.Map[K, V2] = {
-      JavaConverters.mapAsScalaMap(a).mapValues(iso.to).toMap
+      a.asScala.mapValues(iso.to).toMap
     }
     override def from(b: scala.collection.Map[K, V2]): JMap[K, V1] = {
-      JavaConverters.mapAsJavaMap(b.mapValues(iso.from).toMap)
+      b.mapValues(iso.from).toMap.asJava
     }
   }
 
@@ -228,8 +230,10 @@ object Iso extends LowPriorityIsos {
 
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
+      import JavaConverters._
+
       override def to(as: JList[A]): IndexedSeq[B] = {
-        JavaConverters.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+       as.iterator().asScala.map(itemIso.to).toIndexedSeq
       }
 
       override def from(bs: IndexedSeq[B]): JList[A] = {
@@ -241,8 +245,9 @@ object Iso extends LowPriorityIsos {
 
   implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
     new Iso[JList[A], Coll[B]] {
+      import JavaConverters._
       override def to(as: JList[A]): Coll[B] = {
-        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
+        val bsIter = as.iterator.asScala.map { a =>
           itemIso.to(a)
         }
         Colls.fromArray(bsIter.toArray(tB.classTag))
@@ -382,8 +387,20 @@ object JavaHelpers {
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
-    JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
+    import JavaConverters._
+    xs.iterator().asScala.toIndexedSeq
   }
+
+  def toJavaList[T](xs: Seq[T]): util.List[T] = {
+    import JavaConverters._
+    xs.asJava
+  }
+
+  /** Wraps an array into sequence.
+    * This method in necessary because ArraySeq is not available from Java (for all Scala versions).
+    */
+  def arraySeq[T](arr: Array[T]): Seq[T] =
+    ArraySeq.unsafeWrapArray(arr)
 
   // TODO remove when accessible from ErgoScriptPredef in Sigma
   /** Compiles the given ErgoScript `code` into ErgoTree expression. */
@@ -395,7 +412,8 @@ object JavaHelpers {
   }
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConverters.mapAsScalaMap(constants).toMap
+    import JavaConverters._
+    val env = constants.asScala.toMap
     implicit val IR = new CompiletimeIRContext
     val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)

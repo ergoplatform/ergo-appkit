@@ -3,11 +3,7 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedInput;
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.OutBox;
-import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
-import org.ergoplatform.appkit.ReducedErgoLikeTransactionSerializer$;
-import org.ergoplatform.appkit.ReducedTransaction;
+import org.ergoplatform.appkit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +31,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<String> getInputBoxesIds() {
-        List<UnsignedInput> inputs = JavaConverters.seqAsJavaList(getTx().unsignedTx().inputs());
+        List<UnsignedInput> inputs = JavaHelpers$.MODULE$.toJavaList(getTx().unsignedTx().inputs());
         List<String> returnVal = new ArrayList<>(inputs.size());
         for (UnsignedInput input : inputs) {
             returnVal.add(new ErgoId(input.boxId()).toString());
@@ -45,7 +41,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<OutBox> getOutputs() {
-        List<ErgoBox> outputs = JavaConverters.seqAsJavaList(_tx.unsignedTx().outputs());
+        List<ErgoBox> outputs = JavaHelpers$.MODULE$.toJavaList(_tx.unsignedTx().outputs());
         List<OutBox> returnVal = new ArrayList<>(outputs.size());
         for (ErgoBoxCandidate output : outputs) {
             returnVal.add(new OutBoxImpl(output));

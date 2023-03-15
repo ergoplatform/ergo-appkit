@@ -14,7 +14,7 @@ import special.sigma.Header
 import java.util
 import java.util._
 import scala.collection.JavaConverters
-import scala.collection.JavaConverters.iterableAsScalaIterable
+import JavaConverters._
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
   private[impl] val _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
@@ -157,8 +157,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
   }
 
   private[appkit] def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
-    private val _allHeaders = Colls.fromArray(JavaConverters.asScalaIterator(
-      _ctx.getHeaders.iterator).map(h => ScalaBridge.toSigmaHeader(h)).toArray)
+    private val _allHeaders = Colls.fromArray(
+      _ctx.getHeaders.iterator.asScala.map(h => ScalaBridge.toSigmaHeader(h)).toArray)
 
     private val _headers = _allHeaders.slice(1, _allHeaders.length)
 

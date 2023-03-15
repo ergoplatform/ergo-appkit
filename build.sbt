@@ -43,6 +43,9 @@ lazy val commonSettings = Seq(
   publishTo := sonatypePublishToBundle.value,
   scmInfo := Some(
     ScmInfo(url("https://github.com/ergoplatform/ergo-appkit"), "scm:git@github.com:ergoplatform/ergo-appkit.git")
+  ),
+  libraryDependencies ++= Seq(
+    "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
   )
 )
 
