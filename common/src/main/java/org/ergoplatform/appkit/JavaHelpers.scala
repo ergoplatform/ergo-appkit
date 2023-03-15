@@ -5,7 +5,7 @@ import scalan.RType
 import special.collection.Coll
 import com.google.common.base.{Preconditions, Strings}
 
-import scala.collection.{mutable, JavaConversions}
+import scala.collection.{mutable, JavaConverters}
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
@@ -176,10 +176,10 @@ object Iso extends LowPriorityIsos {
 
   implicit def isoJMapToMap[K,V1,V2](iso: Iso[V1, V2]): Iso[JMap[K, V1], scala.collection.Map[K,V2]] = new Iso[JMap[K, V1], scala.collection.Map[K,V2]] {
     override def to(a: JMap[K, V1]): scala.collection.Map[K, V2] = {
-      JavaConversions.mapAsScalaMap(a).mapValues(iso.to)
+      JavaConverters.mapAsScalaMap(a).mapValues(iso.to).toMap
     }
     override def from(b: scala.collection.Map[K, V2]): JMap[K, V1] = {
-      JavaConversions.mapAsJavaMap(b.mapValues(iso.from))
+      JavaConverters.mapAsJavaMap(b.mapValues(iso.from).toMap)
     }
   }
 
@@ -229,7 +229,7 @@ object Iso extends LowPriorityIsos {
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
       override def to(as: JList[A]): IndexedSeq[B] = {
-        JavaConversions.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+        JavaConverters.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
       }
 
       override def from(bs: IndexedSeq[B]): JList[A] = {
@@ -242,7 +242,7 @@ object Iso extends LowPriorityIsos {
   implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
     new Iso[JList[A], Coll[B]] {
       override def to(as: JList[A]): Coll[B] = {
-        val bsIter = JavaConversions.asScalaIterator(as.iterator).map { a =>
+        val bsIter = JavaConverters.asScalaIterator(as.iterator).map { a =>
           itemIso.to(a)
         }
         Colls.fromArray(bsIter.toArray(tB.classTag))
@@ -382,7 +382,7 @@ object JavaHelpers {
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
-    JavaConversions.asScalaIterator(xs.iterator()).toIndexedSeq
+    JavaConverters.asScalaIterator(xs.iterator()).toIndexedSeq
   }
 
   // TODO remove when accessible from ErgoScriptPredef in Sigma
@@ -395,7 +395,7 @@ object JavaHelpers {
   }
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConversions.mapAsScalaMap(constants).toMap
+    val env = JavaConverters.mapAsScalaMap(constants).toMap
     implicit val IR = new CompiletimeIRContext
     val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
@@ -441,7 +441,7 @@ object JavaHelpers {
     * This method should be equivalent to [[org.ergoplatform.wallet.mnemonic.Mnemonic.toSeed()]].
     */
   def mnemonicToSeed(mnemonic: String, passOpt: Option[String] = None): Array[Byte] = {
-    val normalizedMnemonic = normalize(mnemonic.toCharArray, NFKD)
+    val normalizedMnemonic = normalize(ArrayCharSequence(mnemonic.toCharArray), NFKD)
     val normalizedPass = normalize(s"mnemonic${passOpt.getOrElse("")}", NFKD)
 
     val gen = new PKCS5S2ParametersGenerator(new SHA512Digest)
