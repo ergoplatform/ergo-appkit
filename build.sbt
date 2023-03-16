@@ -120,6 +120,9 @@ credentials ++= (for {
 // these options applied only in "compile" task since scalac crashes on scaladoc compilation with "-release 8"
 // see https://github.com/scala/community-builds/issues/796#issuecomment-423395500
 //scalacOptions in(Compile, compile) ++= Seq("-release", "8")
+
+test in assembly := {}
+
 assemblyJarName in assembly := s"ergo-appkit-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
