@@ -42,7 +42,7 @@ class InputBoxesValidator extends BoxSelector {
         case (id, targetAmt) => currentAssets.getOrElse(id, 0L) >= targetAmt
       }) {
         formChangeBoxes(currentBalance, targetBalance, currentAssets, targetAssets) match {
-          case Right(changeBoxes) => Right(BoxSelectionResult(res, changeBoxes))
+          case Right(changeBoxes) => Right(new BoxSelectionResult(res.toSeq, changeBoxes, None))
           case Left(error) => Left(error)
         }
       } else {

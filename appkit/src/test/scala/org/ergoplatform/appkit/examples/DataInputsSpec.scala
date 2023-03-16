@@ -34,6 +34,9 @@ class DataInputsSpec extends PropSpec with Matchers
         ConstantsBuilder.create().item("expectedDataInputPropBytes", dataInputPropBytes).build(), inputBoxScript
       )).build().convertToInputWith(dummyTxId, 0)
 
+      input.getTransactionId shouldBe dummyTxId
+      input.getTransactionIndex shouldBe 0
+
       val txB = ctx.newTxBuilder()
 
       val dummyOutput = txB.outBoxBuilder()

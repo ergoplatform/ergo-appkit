@@ -8,7 +8,8 @@ import sigmastate.Values.{ByteArrayConstant, IntConstant}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.generators.ObjectGenerators
 
-import scala.collection.{JavaConverters, JavaConversions}
+import scala.collection.JavaConverters
+import JavaConverters._
 
 class ScalaBridgeTest extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with ObjectGenerators {
@@ -22,11 +23,11 @@ class ScalaBridgeTest extends PropSpec with Matchers with ScalaCheckDrivenProper
     val p = isoSpendingProof.from(res)
     val expected = new SpendingProof()
       .proofBytes("000102")
-      .extension(JavaConversions.mapAsJavaMap(
+      .extension(
         Map(
           "2" -> "0e03010203", // note, the order doesn't matter
-          "1" -> "0414")
-      ))
+          "1" -> "0414").asJava
+      )
     p shouldBe expected
     val res2 = isoSpendingProof.to(p)
     res2 shouldBe res

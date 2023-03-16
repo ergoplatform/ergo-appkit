@@ -3,31 +3,25 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedInput;
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.OutBox;
-import org.ergoplatform.appkit.ReducedErgoLikeTransaction;
-import org.ergoplatform.appkit.ReducedErgoLikeTransactionSerializer$;
-import org.ergoplatform.appkit.ReducedTransaction;
+import org.ergoplatform.appkit.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteWriter;
 
 public class ReducedTransactionImpl implements ReducedTransaction {
     private final BlockchainContextBase _ctx;
     private final ReducedErgoLikeTransaction _tx;
-    private final int _txCost;
 
     public ReducedTransactionImpl(
             BlockchainContextBase ctx,
-            ReducedErgoLikeTransaction tx, int txCost) {
+            ReducedErgoLikeTransaction tx) {
         _ctx = ctx;
         _tx = tx;
-        _txCost = txCost;
     }
 
     @Override
@@ -37,7 +31,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<String> getInputBoxesIds() {
-        List<UnsignedInput> inputs = JavaConversions.seqAsJavaList(getTx().unsignedTx().inputs());
+        List<UnsignedInput> inputs = JavaHelpers$.MODULE$.toJavaList(getTx().unsignedTx().inputs());
         List<String> returnVal = new ArrayList<>(inputs.size());
         for (UnsignedInput input : inputs) {
             returnVal.add(new ErgoId(input.boxId()).toString());
@@ -47,7 +41,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<OutBox> getOutputs() {
-        List<ErgoBox> outputs = JavaConversions.seqAsJavaList(_tx.unsignedTx().outputs());
+        List<ErgoBox> outputs = JavaHelpers$.MODULE$.toJavaList(_tx.unsignedTx().outputs());
         List<OutBox> returnVal = new ArrayList<>(outputs.size());
         for (ErgoBoxCandidate output : outputs) {
             returnVal.add(new OutBoxImpl(output));
@@ -64,28 +58,32 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public int getCost() {
-        return _txCost;
+        return _tx.cost();
     }
 
     @Override
     public byte[] toBytes() {
         SigmaByteWriter w = SigmaSerializer$.MODULE$.startWriter();
         ReducedErgoLikeTransactionSerializer$.MODULE$.serialize(_tx, w);
-        w.putUInt(_txCost);
         return w.toBytes();
     }
 
     @Override
     public int hashCode() {
-        return 31 * _tx.hashCode() + _txCost;
+        return _tx.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ReducedTransactionImpl) {
            ReducedTransactionImpl that = (ReducedTransactionImpl)obj;
-           return Objects.equals(that._tx, this._tx) && that._txCost == this._txCost;
+           return Objects.equals(that._tx, this._tx);
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "ReducedTransactionImpl(" + _tx.toString() + ")";
     }
 }
