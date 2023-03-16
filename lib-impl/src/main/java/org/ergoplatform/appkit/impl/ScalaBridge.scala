@@ -23,8 +23,8 @@ import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
-
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters
+import JavaConverters._
 
 object ScalaBridge {
   import org.ergoplatform.appkit.JavaHelpers._
@@ -32,7 +32,7 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      val vars = JavaConversions.mapAsScalaMap(spendingProof.getExtension).map { case (k, v) =>
+      val vars = spendingProof.getExtension.asScala.map { case (k, v) =>
         val id = JByte.parseByte(k, 10)
         val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
         (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
@@ -115,7 +115,7 @@ object ScalaBridge {
 
   implicit val isoRegistersToMap: Iso[Registers, AdditionalRegisters] = new Iso[Registers, AdditionalRegisters] {
     override def to(regs: Registers): AdditionalRegisters = {
-      JavaConversions.mapAsScalaMap(regs).map { r =>
+      regs.asScala.map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
         val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
@@ -134,7 +134,7 @@ object ScalaBridge {
 
   implicit val isoExplRegistersToMap: Iso[ERegisters, AdditionalRegisters] = new Iso[ERegisters, AdditionalRegisters] {
     override def to(regs: ERegisters): AdditionalRegisters = {
-      JavaConversions.mapAsScalaMap(regs).map { r =>
+      regs.asScala.map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
         val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2.serializedValue))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])

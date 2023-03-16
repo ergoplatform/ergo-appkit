@@ -16,7 +16,7 @@ import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
 import java.util.ArrayList;
 import java.util.List;
 
-import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 import sigmastate.Values;
 
 import javax.annotation.Nonnull;
@@ -41,7 +41,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _boxesToSpend = boxesToSpend;
         _dataBoxes = dataBoxes;
         _tokensToBurn = tokensToBurn;
-        _outputs = JavaConversions.seqAsJavaList(_tx.outputs());
+        _outputs = JavaHelpers$.MODULE$.toJavaList(_tx.outputs());
         _changeAddress = changeAddress;
         _stateContext = stateContext;
         _ctx = ctx;

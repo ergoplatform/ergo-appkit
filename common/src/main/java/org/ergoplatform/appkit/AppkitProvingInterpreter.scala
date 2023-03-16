@@ -192,7 +192,7 @@ class AppkitProvingInterpreter(
       limit = maxCost, msg = s"when adding assets cost of $totalAssetsAccessCost")
 
     var currentCost = txCost
-    val reducedInputs = mutable.ArrayBuilder.make[ReducedInputData]()
+    val reducedInputs = mutable.ArrayBuilder.make[ReducedInputData]
 
     for ((inputBox, boxIdx) <- boxesToSpend.zipWithIndex) {
       val unsignedInput = unsignedTx.inputs(boxIdx)
@@ -237,7 +237,7 @@ class AppkitProvingInterpreter(
   def signReduced(
           reducedTx: ReducedErgoLikeTransaction,
           baseCost: Int): (ErgoLikeTransaction, Int) = {
-    val provedInputs = mutable.ArrayBuilder.make[Input]()
+    val provedInputs = mutable.ArrayBuilder.make[Input]
     val unsignedTx = reducedTx.unsignedTx
 
     val maxCost = params.maxBlockCost
