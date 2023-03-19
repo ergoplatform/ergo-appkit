@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 
+import sigmastate.eval.CBigInt;
 import special.collection.Coll;
 import special.sigma.BigInt;
 
@@ -25,7 +26,7 @@ public class ErgoValueTest {
         ErgoValue<Coll<Boolean>> boolArrayErgoValue = ErgoValue.of(new boolean[] {false, true});
         ErgoValue<Coll<Long>> longArrayErgoValue = ErgoValue.of(new long[] {3, 4, 5});
 
-        BigInteger bigIntValue = bigIntErgoValue.getValue().value();
+        BigInteger bigIntValue = ((CBigInt)bigIntErgoValue.getValue()).wrappedValue();
         boolean booleanFromCollValue = boolArrayErgoValue.getValue().apply(0);
         byte byteFromCollValue = byteArrayErgoValue.getValue().apply(0);
         short shortFromCollValue = shortArrayErgoValue.getValue().apply(0);

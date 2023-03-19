@@ -5,10 +5,10 @@ import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstance
 
 import java.util
 import java.util.List
-import java.util.{Map => JMap, List => JList}
+import java.util.{List => JList, Map => JMap}
 import java.lang.{Byte => JByte}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input}
+import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input, UnsignedErgoLikeTransaction, UnsignedInput}
 import org.ergoplatform.appkit.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
@@ -23,8 +23,8 @@ import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
-
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters
+import JavaConverters._
 
 object ScalaBridge {
   import org.ergoplatform.appkit.JavaHelpers._
@@ -32,7 +32,7 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      val vars = JavaConversions.mapAsScalaMap(spendingProof.getExtension).map { case (k, v) =>
+      val vars = spendingProof.getExtension.asScala.map { case (k, v) =>
         val id = JByte.parseByte(k, 10)
         val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
         (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
@@ -75,6 +75,16 @@ object ScalaBridge {
           .spendingProof(ScalaBridge.isoSpendingProof.from(input.spendingProof))
   }
 
+  implicit val isoErgoTransactionUnsignedInput: Iso[ErgoTransactionUnsignedInput, UnsignedInput] = new Iso[ErgoTransactionUnsignedInput, UnsignedInput] {
+    override def to(ergoTransactionInput: ErgoTransactionUnsignedInput) =
+      new UnsignedInput(
+        ADKey @@ ErgoAlgos.decodeUnsafe(ergoTransactionInput.getBoxId))
+
+    override def from(input: UnsignedInput): ErgoTransactionUnsignedInput =
+      new ErgoTransactionUnsignedInput()
+          .boxId(ErgoAlgos.encode(input.boxId))
+  }
+
   implicit val isoAssetToErgoToken: Iso[Asset, ErgoToken] = new Iso[Asset, ErgoToken] {
     override def to(a: Asset): ErgoToken = new ErgoToken(a.getTokenId, a.getAmount)
     override def from(t: ErgoToken): Asset = new Asset().tokenId(t.getId.toString).amount(t.getValue)
@@ -105,7 +115,7 @@ object ScalaBridge {
 
   implicit val isoRegistersToMap: Iso[Registers, AdditionalRegisters] = new Iso[Registers, AdditionalRegisters] {
     override def to(regs: Registers): AdditionalRegisters = {
-      JavaConversions.mapAsScalaMap(regs).map { r =>
+      regs.asScala.map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
         val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
@@ -124,7 +134,7 @@ object ScalaBridge {
 
   implicit val isoExplRegistersToMap: Iso[ERegisters, AdditionalRegisters] = new Iso[ERegisters, AdditionalRegisters] {
     override def to(regs: ERegisters): AdditionalRegisters = {
-      JavaConversions.mapAsScalaMap(regs).map { r =>
+      regs.asScala.map { r =>
         val id = ErgoBox.registerByName(r._1).asInstanceOf[NonMandatoryRegisterId]
         val v = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(r._2.serializedValue))
         (id, v.asInstanceOf[EvaluatedValue[_ <: SType]])
@@ -256,6 +266,22 @@ object ScalaBridge {
       new ErgoTransaction()
         .id(tx.id)
         .inputs(tx.inputs.convertTo[List[ErgoTransactionInput]])
+        .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
+        .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])
+  }
+
+  implicit val isoUnsignedErgoTransaction: Iso[UnsignedErgoTransaction, UnsignedErgoLikeTransaction] = new Iso[UnsignedErgoTransaction, UnsignedErgoLikeTransaction] {
+    override def to(apiTx: UnsignedErgoTransaction): UnsignedErgoLikeTransaction =
+      new UnsignedErgoLikeTransaction(
+        apiTx.getInputs.convertTo[IndexedSeq[UnsignedInput]],
+        apiTx.getDataInputs.convertTo[IndexedSeq[DataInput]],
+        apiTx.getOutputs.convertTo[IndexedSeq[ErgoBox]]
+      )
+
+    override def from(tx: UnsignedErgoLikeTransaction): UnsignedErgoTransaction =
+      new UnsignedErgoTransaction()
+        .id(tx.id)
+        .inputs(tx.inputs.convertTo[List[ErgoTransactionUnsignedInput]])
         .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
         .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])
   }

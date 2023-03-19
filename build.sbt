@@ -8,6 +8,7 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val scala213 = "2.13.8"
 lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
 
@@ -18,8 +19,8 @@ lazy val scala211 = "2.11.12"
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  crossScalaVersions := Seq(scala212, scala211),
-  scalaVersion := scala212,
+  crossScalaVersions := Seq(scala213, scala212, scala211),
+  scalaVersion := scala213,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "https://dl.bintray.com/typesafe/maven-releases/",
@@ -42,6 +43,9 @@ lazy val commonSettings = Seq(
   publishTo := sonatypePublishToBundle.value,
   scmInfo := Some(
     ScmInfo(url("https://github.com/ergoplatform/ergo-appkit"), "scm:git@github.com:ergoplatform/ergo-appkit.git")
+  ),
+  libraryDependencies ++= Seq(
+    "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
   )
 )
 
@@ -82,7 +86,7 @@ lazy val testingDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % "test",
   "org.scalactic" %% "scalactic" % "3.0.+" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "com.lihaoyi" %% "pprint" % "0.5.4" % "test",  // the last version with Scala 2.11 support
+  "com.lihaoyi" %% "pprint" % "0.6.3" % "test",  // the last version with Scala 2.11 support
   (sigmaState % Test).classifier("tests")
 )
 
@@ -116,6 +120,9 @@ credentials ++= (for {
 // these options applied only in "compile" task since scalac crashes on scaladoc compilation with "-release 8"
 // see https://github.com/scala/community-builds/issues/796#issuecomment-423395500
 //scalacOptions in(Compile, compile) ++= Seq("-release", "8")
+
+test in assembly := {}
+
 assemblyJarName in assembly := s"ergo-appkit-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
@@ -126,8 +133,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "5.0.2"
-val ergoWalletVersion = "5.0.2"
+val sigmaStateVersion = "5.0.5"
+val ergoWalletVersion = "5.0.7"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
