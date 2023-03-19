@@ -38,7 +38,7 @@ object MultisigAddressImpl {
   def fromParticipants(
     numRequiredSigners: Int, participants: java.util.List[Address],
     networkType: NetworkType, treeHeaderFlags: Byte = MultisigAddress.DEFAULT_TREE_HEADER_FLAGS): MultisigAddress = {
-    val p2pkAddresses = participants.asScala.map(_.asP2PK())
+    val p2pkAddresses = participants.asScala.map(_.asP2PK()).toSeq
     new MultisigAddressImpl(numRequiredSigners, p2pkAddresses, networkType, treeHeaderFlags)
   }
 
