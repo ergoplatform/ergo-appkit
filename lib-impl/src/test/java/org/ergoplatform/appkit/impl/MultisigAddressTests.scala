@@ -38,6 +38,24 @@ class MultisigAddressTests extends PropSpec with Matchers with ScalaCheckDrivenP
     }
   }
 
+  property("address order stability") {
+    // do create a multisig address, convert to Address and back
+    forAll(thresholdGen, MinSuccessful(50)) { threshold: CTHRESHOLD =>
+      val addresses = threshold.children.map(Address.fromSigmaBoolean(_, NetworkType.MAINNET))
+      val multisigAddress = MultisigAddress.buildFromParticipants(
+        threshold.k,
+        addresses.asJava,
+        NetworkType.MAINNET)
+
+      val multisigAddress2 = MultisigAddress.buildFromParticipants(
+        threshold.k,
+        addresses.reverse.asJava,
+        NetworkType.MAINNET)
+
+      multisigAddress.getAddress shouldBe multisigAddress2.getAddress
+    }
+  }
+
   property("fromAddress negative") {
     // check that fromAddress fails on non-P2S addresses
     forAll(proveDlogGen) { dlog: ProveDlog =>
