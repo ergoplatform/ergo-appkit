@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit.scalaapi
 
+import debox.cfor
 import scalan.ExactIntegral
 
 import scala.collection.mutable
@@ -120,5 +121,17 @@ object Utils {
     private def notSupported = throw new NotImplementedError("operation is not supported")
 
     def parseString(str: String): Option[A] = throw new NotImplementedError("operation is not supported")
+  }
+
+  implicit val byteArrayOrdering: Ordering[Array[Byte]] = new Ordering[Array[Byte]] {
+    override def compare(x: Array[Byte], y: Array[Byte]): Int = {
+      val len = math.min(x.length, y.length)
+      cfor(0)(_ < len, _ + 1) { i =>
+        val cmp = (x(i) & 0xFF) - (y(i) & 0xFF)
+        if (cmp != 0)
+          return cmp
+      }
+      x.length - y.length
+    }
   }
 }

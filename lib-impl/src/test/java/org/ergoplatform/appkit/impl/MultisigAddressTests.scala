@@ -13,12 +13,14 @@ import scala.collection.JavaConverters._
 
 class MultisigAddressTests extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with ObjectGenerators with NegativeTesting {
+  import org.ergoplatform.appkit.scalaapi.Utils.byteArrayOrdering
 
+  /** Generate CTHRESHOLD with sorted children. */
   lazy val thresholdGen = for {
     n <- Gen.choose(1, 20)
     k <- Gen.choose(1, n)
     children <- Gen.listOfN(n, proveDlogGen)
-  } yield CTHRESHOLD(k, children)
+  } yield CTHRESHOLD(k, children.sortBy(_.pkBytes))
 
   property("getAddress/fromAddress roundtrip") {
     // do create a multisig address, convert to Address and back

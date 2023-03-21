@@ -38,7 +38,11 @@ object MultisigAddressImpl {
   def fromParticipants(
     numRequiredSigners: Int, participants: java.util.List[Address],
     networkType: NetworkType, treeHeaderFlags: Byte = MultisigAddress.DEFAULT_TREE_HEADER_FLAGS): MultisigAddress = {
-    val p2pkAddresses = participants.asScala.map(_.asP2PK()).toSeq
+    import org.ergoplatform.appkit.scalaapi.Utils.byteArrayOrdering
+    val p2pkAddresses = participants.asScala
+      .map { a => val pk = a.asP2PK(); (pk, pk.pubkey.pkBytes) }
+      .sortBy(_._2)
+      .map(_._1).toSeq
     new MultisigAddressImpl(numRequiredSigners, p2pkAddresses, networkType, treeHeaderFlags)
   }
 
