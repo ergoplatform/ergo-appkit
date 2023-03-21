@@ -5,77 +5,55 @@ import java.util.List;
 /**
  * EIP-41/EIP-11 compliant multi sig transaction
  */
-public class MultisigTransaction {
+public abstract class MultisigTransaction {
 
     /**
      * @return transaction that is going to be signed
      */
-    public Transaction getTransaction() {
-        throw new UnsupportedOperationException();
-    }
+    abstract public ReducedTransaction getTransaction();
 
     /**
-     * @return multisig address this transaction was created for
-     */
-    public MultisigAddress getMultisigAddress() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * adds a new commitment to this multisig transaction
+     * adds a new hint to this multisig transaction
      * @param prover to add commitment for
      */
-    public void addCommitment(ErgoProver prover) {
-        throw new UnsupportedOperationException();
-    }
+    abstract public void addHint(ErgoProver prover);
 
     /**
-     * adds the commitments not present on this instance from another multisig transaction instance
+     * adds the hints not present on this instance from another multisig transaction instance
      * for the same transaction.
      */
-    public void addCommitments(MultisigTransaction other) {
-        throw new UnsupportedOperationException();
-    }
+    abstract public void mergeHints(MultisigTransaction other);
 
     /**
-     * @return list of participants that added a commitment for the transaction
+     * adds the hints not present on this instance from the EIP-11 json
      */
-    public List<Address> getCommitingParticipants() {
-        throw new UnsupportedOperationException();
-    }
+    abstract public void mergeHints(String json);
 
-    public boolean hasEnoughCommitments() {
-        throw new UnsupportedOperationException();
-    }
+    /**
+     * @return list of participants that added a hint for the transaction
+     */
+    abstract public List<Address> getCommitingParticipants();
+    /**
+     * @return true if SignedTransaction can be built
+     */
+    abstract public boolean isHintBagComplete();
 
     /**
      * @return the signed transaction if enough commitments are available
-     * @throws IllegalStateException if {@link #hasEnoughCommitments()} is false
+     * @throws IllegalStateException if {@link #isHintBagComplete()} is false
      */
-    public SignedTransaction toSignedTransaction() {
-        throw new UnsupportedOperationException();
-    }
+    abstract public SignedTransaction toSignedTransaction();
 
     /**
      * @return EIP-11 compliant json string to transfer the partially signed transaction to the
-     * next particpant
+     * next participant
      */
-    public String toJson() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * constructs a multi sig transaction from an unsigned transaction. The first multi sig address
-     * in input boxes is used.
-     */
-    public static MultisigTransaction fromTransaction(UnsignedTransaction transaction) {
-        throw new UnsupportedOperationException();
-    }
+    abstract public String hintsToJson();
 
     /**
      * constructs a multi sig transaction from a reduced transaction
      */
-    public static MultisigTransaction fromTransaction(ReducedTransaction transaction, MultisigAddress address) {
+    public static MultisigTransaction fromTransaction(ReducedTransaction transaction) {
         throw new UnsupportedOperationException();
     }
 
