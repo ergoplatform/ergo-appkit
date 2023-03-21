@@ -69,6 +69,11 @@ public class ReducedTransactionImpl implements ReducedTransaction {
     }
 
     @Override
+    public SigningParticipants getSignersRequired() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int hashCode() {
         return _tx.hashCode();
     }
