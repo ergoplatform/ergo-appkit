@@ -1,0 +1,27 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/restapi/client/NipopowApi.java)
+
+The `NipopowApi` interface is part of the `ergo-appkit` project and provides methods for constructing PoPow headers and proofs. The purpose of this code is to define an API for interacting with the Nipopow protocol, which is a proof-of-work consensus algorithm used by the Ergo blockchain. 
+
+The interface contains four methods, each of which corresponds to a different endpoint in the Nipopow API. The first two methods, `getPopowHeaderByHeight` and `getPopowHeaderById`, are used to construct PoPow headers. The `getPopowHeaderByHeight` method takes an integer parameter `height` and returns the PoPow header for the block at that height. The `getPopowHeaderById` method takes a string parameter `headerId` and returns the PoPow header for the block with that ID. 
+
+The other two methods, `getPopowProof` and `getPopowProofByHeaderId`, are used to construct PoPoW proofs. The `getPopowProof` method takes two BigDecimal parameters, `minChainLength` and `suffixLength`, and returns the PoPoW proof for the given parameters. The `getPopowProofByHeaderId` method takes three BigDecimal parameters, `minChainLength`, `suffixLength`, and `headerId`, and returns the PoPoW proof for the given parameters and header ID. 
+
+All four methods return a `Call` object, which is part of the Retrofit2 library used by this project. The `Call` object is used to make HTTP requests to the Nipopow API and receive responses. 
+
+Overall, this code provides a convenient way for developers to interact with the Nipopow protocol and construct PoPow headers and proofs for the Ergo blockchain. Here is an example of how the `getPopowHeaderByHeight` method might be used:
+
+```
+NipopowApi nipopowApi = retrofit.create(NipopowApi.class);
+Call<PopowHeader> call = nipopowApi.getPopowHeaderByHeight(1000);
+Response<PopowHeader> response = call.execute();
+PopowHeader header = response.body();
+```
+## Questions: 
+ 1. What is the purpose of this code?
+   - This code defines an interface for making API calls related to Nipopow (Non-Interactive Proof-of-Proof-of-Work) in the Ergo blockchain platform.
+
+2. What external libraries or dependencies does this code use?
+   - This code uses the Retrofit2 and OkHttp3 libraries for making HTTP requests and handling responses.
+
+3. What API endpoints are available through this interface?
+   - This interface provides four API endpoints: `getPopowHeaderByHeight`, `getPopowHeaderById`, `getPopowProof`, and `getPopowProofByHeaderId`. These endpoints allow the user to construct PoPow headers and proofs for the Ergo blockchain.

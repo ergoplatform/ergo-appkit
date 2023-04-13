@@ -1,0 +1,32 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/explorer/client/auth/HttpBasicAuth.java)
+
+The `HttpBasicAuth` class in the `org.ergoplatform.explorer.client.auth` package is responsible for adding HTTP Basic Authentication headers to outgoing requests made by an `OkHttpClient` instance. This class implements the `Interceptor` interface from the OkHttp library, which allows it to intercept and modify requests and responses.
+
+The class has three instance variables: `username`, `password`, and `credentials`. The `username` and `password` variables store the username and password for the Basic Authentication header, respectively. The `credentials` variable is a convenience method for setting both the `username` and `password` at once.
+
+The `intercept` method is the main method of the class and is called by OkHttp whenever a request is made. It first retrieves the original request from the `Chain` object passed as a parameter. If the request already has an Authorization header, the method does nothing and simply returns the original request. If the request does not have an Authorization header, the method creates a new request with the Authorization header added using the `Credentials.basic` method from OkHttp. This method takes the `username` and `password` instance variables and returns a string in the format "Basic [base64-encoded username:password]". The new request is then returned using the `chain.proceed` method.
+
+This class can be used in conjunction with an `OkHttpClient` instance to add Basic Authentication headers to all outgoing requests. For example:
+
+```
+OkHttpClient client = new OkHttpClient.Builder()
+        .addInterceptor(new HttpBasicAuth())
+        .build();
+
+Request request = new Request.Builder()
+        .url("https://example.com/api")
+        .build();
+
+Response response = client.newCall(request).execute();
+```
+
+In this example, the `HttpBasicAuth` instance is added as an interceptor to the `OkHttpClient` instance. This means that all requests made using this client will have the Basic Authentication header added automatically. The `Request` object is then created as usual and passed to the `OkHttpClient` instance to execute the request.
+## Questions: 
+ 1. What is the purpose of this code?
+   This code defines a class called `HttpBasicAuth` that implements the `Interceptor` interface from the OkHttp library. It adds HTTP Basic authentication credentials to outgoing requests if they don't already have them.
+
+2. How is the username and password set for this HTTP Basic authentication?
+   The username and password can be set separately using the `setUsername` and `setPassword` methods, or together using the `setCredentials` method.
+
+3. What happens if a request already has an authorization header?
+   If a request already has an authorization header (e.g. for Basic auth), the `intercept` method does nothing and simply proceeds with the request as-is.

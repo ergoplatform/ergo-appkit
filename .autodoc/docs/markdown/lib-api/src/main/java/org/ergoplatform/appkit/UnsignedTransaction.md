@@ -1,0 +1,20 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/UnsignedTransaction.java)
+
+The `UnsignedTransaction` interface is a part of the `ergo-appkit` project and is used to represent unsigned transactions after they are built using the `UnsignedTransactionBuilder`. This interface extends the `Transaction` interface and provides additional methods to retrieve information about the unsigned transaction.
+
+The `getInputs()` method returns a list of unsigned input boxes that will be used in the transaction. The `getDataInputs()` method returns a list of data inputs that will be used in the transaction. The `getChangeAddress()` method returns the change address associated with the unsigned transaction.
+
+The `getTokensToBurn()` method returns a list of tokens requested for burning in the transaction. If no burning was explicitly requested, an empty list is returned.
+
+The `toJson(boolean prettyPrint)` method returns a formatted (pretty printed) JSON string representation of the transaction. The `toJson(boolean prettyPrint, boolean formatJson)` method returns a string with JSON text representation of the transaction. If `prettyPrint` is set to `true`, the ErgoTrees will be pretty printed, otherwise they will be output as hex strings. If `formatJson` is set to `true`, the JSON pretty printer is used to format the JSON output.
+
+This interface can be used in the larger project to build and represent unsigned transactions. The `UnsignedTransactionBuilder` can be used to build unsigned transactions, and the `UnsignedTransaction` interface can be used to represent them. The methods provided by this interface can be used to retrieve information about the unsigned transaction, such as the input boxes, data inputs, change address, and tokens requested for burning. The `toJson()` methods can be used to obtain a JSON representation of the transaction.
+## Questions: 
+ 1. What is the purpose of the `UnsignedTransaction` interface?
+- The `UnsignedTransaction` interface is used to represent unsigned transactions after they are built using `UnsignedTransactionBuilder`.
+
+2. What methods are available for retrieving information about the transaction inputs?
+- The `getInputs()` method returns a list of unsigned input boxes that will be used in this transaction, while the `getDataInputs()` method returns a list of data inputs that will be used in this transaction.
+
+3. What is the purpose of the `getTokensToBurn()` method?
+- The `getTokensToBurn()` method returns a list of tokens requested (in builders) for burning in this transaction when it will be executed on blockchain. If no burning was explicitly requested, an empty list is returned.

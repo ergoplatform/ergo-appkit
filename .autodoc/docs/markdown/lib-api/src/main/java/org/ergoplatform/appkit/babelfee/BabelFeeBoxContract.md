@@ -1,0 +1,32 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/babelfee/BabelFeeBoxContract.java)
+
+The `BabelFeeBoxContract` class is a representation of a smart contract used in the Ergo blockchain. The purpose of this contract is to create a box (a data structure that holds assets in the Ergo blockchain) that can be used to pay for transaction fees in the Ergo network. 
+
+The contract is defined by an ErgoTreeTemplate, which is a binary representation of the contract's logic. The `contractTemplateHex` variable contains the hexadecimal representation of the ErgoTreeTemplate. The `contractTemplate` variable is a byte array that is obtained by decoding the `contractTemplateHex` variable. 
+
+The `BabelFeeBoxContract` class has two constructors. The first constructor takes an `ErgoId` object as a parameter. The `ErgoId` object represents the token that will be used to pay for transaction fees. The constructor creates an `ErgoTree` object by applying the `tokenId` parameter to the `contractTemplate`. The resulting `ErgoTree` object is stored in the `ergoTree` field. 
+
+The second constructor takes an `ErgoTree` object as a parameter. The `ErgoTree` object represents the contract's logic. The constructor creates an `ErgoId` object by extracting the token ID from the `ErgoTree` object. The `ErgoId` object is stored in the `tokenId` field. 
+
+The `getErgoTree` method returns the `ergoTree` field, which contains the contract's logic in the form of an `ErgoTree` object. The `getTokenId` method returns the `tokenId` field, which contains the token ID used to pay for transaction fees. 
+
+This class can be used in the larger project to create boxes that can be used to pay for transaction fees. For example, the following code creates a `BabelFeeBoxContract` object and uses it to create a box that can be used to pay for transaction fees:
+
+```
+ErgoId tokenId = new ErgoId("1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef");
+BabelFeeBoxContract contract = new BabelFeeBoxContract(tokenId);
+Values.ErgoTree ergoTree = contract.getErgoTree();
+long value = 1000000000L;
+ErgoBox box = new ErgoBox(value, ergoTree);
+```
+
+In this example, a new `ErgoId` object is created with a random token ID. A new `BabelFeeBoxContract` object is created with the `ErgoId` object as a parameter. The `getErgoTree` method is called to obtain the `ErgoTree` object. A new `ErgoBox` object is created with the `ErgoTree` object and a value of 1 Ergo. This box can be used to pay for transaction fees in the Ergo network.
+## Questions: 
+ 1. What is the purpose of this code and what problem does it solve?
+- This code defines a class called `BabelFeeBoxContract` which represents a smart contract used for Ergo blockchain transactions. It solves the problem of creating and managing a smart contract for handling fees in the Ergo blockchain.
+
+2. What is the significance of the `templateHash` variable?
+- The `templateHash` variable is a string representation of the hash of the ErgoTreeTemplate used by the `BabelFeeBoxContract`. It is used for Explorer requests to identify the contract.
+
+3. What is the difference between the two constructors of the `BabelFeeBoxContract` class?
+- The first constructor takes an `ErgoId` as a parameter and creates an `ErgoTree` using the `contractTemplate` and the `tokenId`. The second constructor takes an `ErgoTree` as a parameter and creates an `ErgoId` from the `tokenId` parameter of the `ErgoTree`.
