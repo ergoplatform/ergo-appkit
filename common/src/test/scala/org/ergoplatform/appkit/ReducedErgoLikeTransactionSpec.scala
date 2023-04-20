@@ -2,24 +2,25 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.scalacheck.Gen
-import org.scalatest.{Assertion, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.CrossVersionProps
 import sigmastate.interpreter.ContextExtension
-import sigmastate.interpreter.Interpreter.{JitReductionResult, FullReductionResult}
 import sigmastate.serialization.SigmaSerializer
 import sigmastate.serialization.generators.ObjectGenerators
+import sigmastate.interpreter.Interpreter.ReductionResult
 
 class ReducedErgoLikeTransactionSpec extends CrossVersionProps
     with Matchers with ScalaCheckDrivenPropertyChecks with ObjectGenerators {
 
-  val printDebugInfo: Boolean = false
+  override val printDebugInfo: Boolean = false
 
   def reducedInputDataGen(extension: ContextExtension): Gen[ReducedInputData] = for {
     sb <- sigmaBooleanGen
     cost <- Gen.choose(10L, 1000L)
   } yield
-    ReducedInputData(FullReductionResult(JitReductionResult(sb, cost)), extension)
+    ReducedInputData(ReductionResult(sb, cost), extension)
 
   def reducedErgoLikeTransactionGen(
         unsignedTx: UnsignedErgoLikeTransaction): Gen[ReducedErgoLikeTransaction] = {

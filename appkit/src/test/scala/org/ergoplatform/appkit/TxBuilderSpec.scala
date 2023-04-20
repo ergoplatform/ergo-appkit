@@ -2,14 +2,15 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException, NotEnoughCoinsForChangeException}
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoBox, ErgoScriptPredef}
+import org.ergoplatform.{ErgoScriptPredef, ErgoBox, appkit}
 import org.scalacheck.Gen
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scalan.util.FileUtil
 import scorex.util.ModifierId
@@ -23,7 +24,7 @@ import java.util
 import java.util.Arrays
 import java.util.function.Consumer
 
-class TxBuilderSpec extends PropSpec with Matchers
+class TxBuilderSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting
@@ -461,7 +462,7 @@ class TxBuilderSpec extends PropSpec with Matchers
   property("Test changebox token amount max 100") {
     val ergoClient = createMockedErgoClient(data)
 
-    val tokenList: Items[TokenInfo] = new Gson().fromJson(FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
+    val tokenList: Items[TokenInfo] = new Gson().fromJson(appkit.FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
 
     ergoClient.execute { ctx: BlockchainContext =>
       val (storage, _) = loadStorageE2()
