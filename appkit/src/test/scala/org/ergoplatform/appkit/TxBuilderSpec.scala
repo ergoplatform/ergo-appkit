@@ -12,7 +12,7 @@ import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scalan.util.FileUtil
+import scalan.util.{FileUtil => SFileUtil}
 import scorex.util.ModifierId
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
@@ -462,7 +462,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
   property("Test changebox token amount max 100") {
     val ergoClient = createMockedErgoClient(data)
 
-    val tokenList: Items[TokenInfo] = new Gson().fromJson(appkit.FileUtil.read(FileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
+    val tokenList: Items[TokenInfo] = new Gson().fromJson(appkit.FileUtil.read(SFileUtil.file(s"appkit/src/test/resources/tokens.json")), new TypeToken[Items[TokenInfo]]() {}.getType)
 
     ergoClient.execute { ctx: BlockchainContext =>
       val (storage, _) = loadStorageE2()
