@@ -154,6 +154,7 @@ Appkit is a foundational non-opinionated library which can be used to create oth
 libraries, Apps and tools. Here is the list of projects which use Appkit. 
 
 - [Official Ergo Wallet App](https://github.com/ergoplatform/ergo-wallet-app) - a cross-platform wallet for Ergo supporting Android, iOS (via RoboVM) and Desktop (via Kotlin Compose). Can be used as an example of cross-platform application using Appkit.
+- [SigmaFi](https://github.com/K-Singh/Sigma-Finance) - A Decentralized P2P Financial Contracts on the Ergo blockchain.
 - [ErgoMixer](https://github.com/ergoMixer/ergoMixBack) - a web application for mixing ergs and tokens based on Ergo platform
 - [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds) - Run contracts + off-chain code in the browser
 - [ErgoGravity](https://github.com/ErgoGravity) - provides the required tools for Ergo platform to be integrated with Gravity network (`gateway-proxy`, `ergo-susy-proxy`, `ergo-luport-executor`, `startup-script`)
