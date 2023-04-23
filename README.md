@@ -36,26 +36,40 @@ Ergo Appkit has idiomatic Java API and is written in Java/Scala. It is a thin
 wrapper around core components provided by [ErgoScript
 interpreter](https://github.com/ScorexFoundation/sigmastate-interpreter) and
 [Ergo protocol](https://github.com/ergoplatform/ergo) implementations which are
-written in Scala. It is
-[published](https://mvnrepository.com/artifact/org.ergoplatform/ergo-appkit) on
+written in Scala. This gives easy access to core Ergo functionality such as generalized
+signatures based on [sigma
+protocols](https://hackernoon.com/sigma-protocols-for-the-working-programmer), data
+serializers, address encodings etc.
+
+Appkit is [published](https://mvnrepository.com/artifact/org.ergoplatform/ergo-appkit) on
 maven repository and cross compiled to both Java 7 and Java 8+ jars.
 
-The Appkit library is compatible with [GraalVM](https://www.graalvm.org) - a
+### Supported platforms (iOS, Android, Desktop)
+
+Appkit has been successfully used on Android, iOS and Desktop platforms in following
+scenarios:
+
+1. Appkit is compatible with [GraalVM](https://www.graalvm.org) - a
 novel next generation approach to implement software which is reusable across
 several programming languages and execution environments. For example if Node.js
 application is run on GraalVM, then it can use Appkit to interact with Ergo
 Blockchain (see [motivation for using Graal](#why-graal) below). 
 
-Using Appkit Ergo applications can be written in one of the languages supported
+2. Using Appkit,  Ergo applications can be written in one of the languages supported
 by GraalVM (i.e. Java, JavaScript, C/C++, Python, Ruby, R) and using this
 library applications can communicate with Ergo nodes via unified API and
-programming model provided by Appkit. In addition Appkit based Ergo applications
+programming model provided by Appkit.
+
+3. Appkit based Ergo applications
 can be compiled into native code using [native-image ahead of time
-compiler](https://www.graalvm.org/docs/reference-manual/native-image/) and then
+compiler](https://www.graalvm.org/latest/reference-manual/native-image/) and then
 executed without Java VM with very fast startup time and lower runtime memory
 overhead compared to a Java VM. For example this allows to create very
 responsive command line utility applications such as
 [ergo-tool](https://github.com/ergoplatform/ergo-tool).
+
+4. Appkit is used in [Ergo Wallet App](https://github.com/ergoplatform/ergo-wallet-app)
+   and hence can be used to develop Andoid, iOS and Desktop applications.
 
 ### Setup
 
@@ -139,15 +153,19 @@ See [ergpy project page](https://github.com/mgpai22/ergpy) for more information.
 Appkit is a foundational non-opinionated library which can be used to create other
 libraries, Apps and tools. Here is the list of projects which use Appkit. 
 
-- [ergo-tool](https://github.com/ergoplatform/ergo-tool) - a Command Line Interface application for Ergo
-- [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples) - Ergo Appkit Examples
-- [ergo-android](https://github.com/aslesarenko/ergo-android) - Example Android application 
+- [Official Ergo Wallet App](https://github.com/ergoplatform/ergo-wallet-app) - a cross-platform wallet for Ergo supporting Android, iOS (via RoboVM) and Desktop (via Kotlin Compose). Can be used as an example of cross-platform application using Appkit.
 - [ErgoMixer](https://github.com/ergoMixer/ergoMixBack) - a web application for mixing ergs and tokens based on Ergo platform
 - [ergo-playgrounds](https://github.com/ergoplatform/ergo-playgrounds) - Run contracts + off-chain code in the browser
 - [ErgoGravity](https://github.com/ErgoGravity) - provides the required tools for Ergo platform to be integrated with Gravity network (`gateway-proxy`, `ergo-susy-proxy`, `ergo-luport-executor`, `startup-script`)
+- [ergo-tool](https://github.com/ergoplatform/ergo-tool) - a Command Line Interface application for Ergo
+- [ergo-appkit-examples](https://github.com/aslesarenko/ergo-appkit-examples) - Ergo Appkit Examples
+- [ergo-android](https://github.com/aslesarenko/ergo-android) - Example Android application 
 - [ergo-faucet](https://github.com/zargarzadehm/ergo-faucet) - A tool for gain some test tokens or Erg in mainnet or testnet network - ErgoFaucet is available [here](https://ergofaucet.org) 
 - [ergo-jde](https://github.com/ergoplatform/ergo-jde) - JSON dApp Environment (JDE)
 - [Kiosk](https://github.com/scalahub/Kiosk) - a library on top of Ergo-Appkit for interacting with the Ergo Blockchain
 - [ergo-mixer-demo](https://github.com/anon92048/ergo-mixer-demo) - a non-interactive (and non-custodial) mixing scheme on top of the Ergo Platform blockchain
 - [ergo-subpooling](https://github.com/K-Singh/ergo-subpooling) - a smart contract based mining pool for smaller miners and groups of friends
+- [GetBlok-Plasma](https://github.com/GetBlok-io/GetBlok-Plasma) - An Ergo-Appkit based library providing an abstraction layer to easily interact with AVL Trees as an L2 Solution
+- [ergo-python-appkit](https://github.com/ergo-pad/ergo-python-appkit)
+- [scala-play-next-ergo](https://github.com/kii-dot/scala-play-next-ergo) - Scala Play with Ergo Appkit and NextJs
 - Add your project here by creating a PR

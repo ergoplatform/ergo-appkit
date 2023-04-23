@@ -19,6 +19,7 @@ import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.Values;
 import sigmastate.basics.DLogProtocol;
+import sigmastate.crypto.Platform;
 import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
@@ -122,7 +123,7 @@ public class Address {
      * Extract public key from P2PKAddress and return its group element
      */
     public GroupElement getPublicKeyGE() {
-        SecP256K1Point point = getPublicKey().value();
+        Platform.Ecp point = getPublicKey().value();
         return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
     }
 

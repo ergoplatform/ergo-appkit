@@ -1,17 +1,18 @@
 package org.ergoplatform.appkit
 
-import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 import JavaHelpers._
-import java.util.{Arrays, List => JList}
 
+import java.util.{Arrays, List => JList}
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 
-class ChangeOutputSpec extends PropSpec with Matchers
+class ChangeOutputSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting {

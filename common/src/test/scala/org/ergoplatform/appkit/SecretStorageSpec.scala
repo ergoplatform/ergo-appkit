@@ -2,10 +2,11 @@ package org.ergoplatform.appkit
 
 import java.io.File
 import com.google.common.io.Files
-import org.scalatest.{PropSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class SecretStorageSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks
     with AppkitTestingCommon {
   val mnemonicWithPassword = Mnemonic.create("phrase".toCharArray, "mnemonic pass".toCharArray)
   val encryptionPass = "encryption pass"

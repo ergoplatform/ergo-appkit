@@ -4,14 +4,15 @@ import org.ergoplatform.appkit.examples.RunMockedScala
 import org.ergoplatform.appkit.examples.RunMockedScala.createMockedErgoClient
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
 import scorex.util.encode.Base16
 import sigmastate.serialization.ErgoTreeSerializer
 
 
 
-class AddressSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class AddressSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with AppkitTesting {
 
   def checkIsTestnetP2PKAddress(addr: Address) = {
