@@ -2,16 +2,17 @@ package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit.{Address, NetworkType, MultisigAddress}
 import org.scalacheck.Gen
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import sigmastate.serialization.generators.ObjectGenerators
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
 import sigmastate.CTHRESHOLD
 import sigmastate.basics.DLogProtocol.ProveDlog
 import sigmastate.helpers.NegativeTesting
 
 import scala.collection.JavaConverters._
 
-class MultisigAddressTests extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+class MultisigAddressTests extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks
   with ObjectGenerators with NegativeTesting {
   import org.ergoplatform.appkit.scalaapi.Utils.byteArrayOrdering
 
