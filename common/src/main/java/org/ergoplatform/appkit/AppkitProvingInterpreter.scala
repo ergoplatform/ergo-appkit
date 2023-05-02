@@ -17,7 +17,7 @@ import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeP
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
-import sigmastate.interpreter.Interpreter.{ReductionResult, JitReductionResult, ScriptEnv, FullReductionResult, estimateCryptoVerifyCost}
+import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, estimateCryptoVerifyCost}
 import sigmastate.interpreter.{ProverResult, Interpreter, ContextExtension, ProverInterpreter, HintsBag}
 import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
@@ -26,7 +26,6 @@ import sigmastate.utils.Helpers._ // for Scala 2.11
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
 import scalan.util.Extensions.LongOps
 import sigmastate.VersionContext
-import sigmastate.VersionContext.JitActivationVersion
 
 import scala.collection.mutable
 
@@ -371,7 +370,7 @@ object ReducedErgoLikeTransactionSerializer extends SigmaSerializer[ReducedErgoL
       val cost = r.getULong()
       val input = tx.inputs(i)
       val extension = input.extension
-      val reductionResult = FullReductionResult(JitReductionResult(sb, cost))
+      val reductionResult = ReductionResult(sb, cost)
       reducedInputs(i) = ReducedInputData(reductionResult, extension)
       unsignedInputs(i) = new UnsignedInput(input.boxId, extension)
     }

@@ -1,19 +1,17 @@
 package org.ergoplatform.appkit
 
-import java.util
-
-import org.ergoplatform.appkit.BoxOperations.{createProver}
+import org.ergoplatform.appkit.BoxOperations.createProver
 import org.ergoplatform.appkit.Parameters.MinFee
-import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
 import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
-class AnonymousAccessSpec extends PropSpec with Matchers
+class AnonymousAccessSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
     with AppkitTesting
     with HttpClientTesting

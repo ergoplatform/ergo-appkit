@@ -11,6 +11,7 @@ import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
+import sigmastate.crypto.Platform;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
 import special.collection.Coll;
@@ -103,7 +104,8 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<GroupElement> of(ECPoint value) {
-        return new ErgoValue<>(JavaHelpers.SigmaDsl().GroupElement(value), ErgoType.groupElementType());
+        GroupElement ge = JavaHelpers.SigmaDsl().GroupElement(new Platform.Ecp(value));
+        return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
     static public ErgoValue<GroupElement> of(GroupElement ge) {
