@@ -1,4 +1,4 @@
-name: Publish a release
+name: Build fat jar
 
 on:
   workflow_dispatch:
