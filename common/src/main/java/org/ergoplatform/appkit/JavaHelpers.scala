@@ -3,7 +3,6 @@ package org.ergoplatform.appkit
 import org.ergoplatform.wallet.secrets.{ExtendedSecretKey, DerivationPath}
 import scalan.RType
 import special.collection.Coll
-import com.google.common.base.{Preconditions, Strings}
 
 import scala.collection.{mutable, JavaConverters}
 import scala.collection.compat.immutable.ArraySeq
@@ -43,6 +42,7 @@ import org.bouncycastle.crypto.params.KeyParameter
 import org.ergoplatform.appkit.JavaHelpers.{TokenIdRType, TokenColl}
 import org.ergoplatform.appkit.scalaapi.Extensions.{PairCollOps, CollBuilderOps}
 import org.ergoplatform.appkit.scalaapi.Utils
+import scalan.util.StringUtil._
 import scalan.ExactIntegral.LongIsExactIntegral
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
 import sigmastate.interpreter.Interpreter.ScriptEnv
@@ -216,7 +216,7 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
-    override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
+    override def to(a: JString): Option[String] = if (a.isNullOrEmpty) None else Some(a)
     override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
   }
 
@@ -442,8 +442,8 @@ object JavaHelpers {
         registers: Seq[ErgoValue[_]], creationHeight: Int): ErgoBoxCandidate = {
     import ErgoBox.nonMandatoryRegisters
     val nRegs = registers.length
-    Preconditions.checkArgument(nRegs <= nonMandatoryRegisters.length,
-       "Too many additional registers %d. Max allowed %d", nRegs, nonMandatoryRegisters.length)
+    require(nRegs <= nonMandatoryRegisters.length,
+       s"Too many additional registers $nRegs. Max allowed ${nonMandatoryRegisters.length}")
     implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
     val rs = registers.zipWithIndex.map { case (ergoValue, i) =>

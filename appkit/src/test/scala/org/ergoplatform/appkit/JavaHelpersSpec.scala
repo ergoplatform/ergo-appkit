@@ -2,14 +2,15 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.ErgoBox
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatest.{PropSpec, Matchers}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
+import sigmastate.Values.{EvaluatedValue, ByteArrayConstant, IntConstant}
 import sigmastate.{SType, TrivialProp}
 import sigmastate.helpers.TestingHelpers._
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 
-class JavaHelpersSpec extends PropSpec with Matchers
+class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
     with AppkitTesting {
   import ErgoBox._

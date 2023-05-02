@@ -1,8 +1,8 @@
 package org.ergoplatform.appkit.cli
 
-import java.io.{StringReader, ByteArrayOutputStream, BufferedReader, PrintStream}
+import org.scalatest.matchers.should.Matchers
 
-import org.scalatest.Matchers
+import java.io.{PrintStream, StringReader, BufferedReader, ByteArrayOutputStream}
 
 trait ConsoleTesting { self: Matchers =>
 

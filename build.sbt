@@ -83,9 +83,10 @@ git.gitUncommittedChanges in ThisBuild := true
 val mockitoScalaVerstion = "1.11.4"
 
 lazy val testingDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalactic" %% "scalactic" % "3.0.+" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+  "org.scalactic" %% "scalactic" % "3.2.14" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.15.2" % "test",        // last supporting Scala 2.11
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.3.0" % Test, // last supporting Scala 2.11
   "com.lihaoyi" %% "pprint" % "0.6.3" % "test",  // the last version with Scala 2.11 support
   (sigmaState % Test).classifier("tests")
 )
@@ -133,8 +134,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "5.0.5"
-val ergoWalletVersion = "5.0.7"
+val sigmaStateVersion = "5.0.7"
+val ergoWalletVersion = "5.0.10"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
@@ -149,8 +150,9 @@ libraryDependencies ++= Seq(
   sigmaState,
   (sigmaState % Test).classifier("tests"),
   ergoWallet,
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.15.2" % "test",        // last supporting Scala 2.11
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.3.0" % Test, // last supporting Scala 2.11
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2"
@@ -186,7 +188,9 @@ lazy val common = (project in file("common"))
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
         sigmaState,
-        ergoWallet
+        ergoWallet,
+        "com.google.guava" % "guava" % "23.0",
+        "commons-io" % "commons-io" % "2.5"
       ),
       publish / skip := true
     )
