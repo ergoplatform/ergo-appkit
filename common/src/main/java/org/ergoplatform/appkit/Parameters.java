@@ -36,5 +36,5 @@ public class Parameters {
     /**
      * Activated version for Cold Client
      */
-    public static final byte ColdClientBlockVersion = 2;
+    public static final byte ColdClientBlockVersion = 3;
 }
