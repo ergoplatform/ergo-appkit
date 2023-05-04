@@ -1,15 +1,15 @@
 package org.ergoplatform.appkit
 
 import java.util
-
 import org.ergoplatform.appkit.Mnemonic._
-import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicChecksumException, MnemonicEmptyException, MnemonicWordException, MnemonicWrongListSizeException}
+import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicWrongListSizeException, MnemonicChecksumException, MnemonicWordException, MnemonicEmptyException}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
 
-import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.JavaConverters._
 
-class MnemonicSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class MnemonicSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   val testMnemonic = "walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice reduce"
   val testEntropy: Array[Byte] = Array[Byte](-10, -55, 58, 24, 3, 117, -34, -15, -7, 81, 116, 5, 50, -84, 3, -94, -70, 73, -93, 45)
@@ -25,15 +25,15 @@ class MnemonicSpec extends PropSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   property("checkMnemonic") {
-    val entropy = Mnemonic.toEntropy(LANGUAGE_ID_ENGLISH, seqAsJavaList(testMnemonic.split(' ')))
+    val entropy = Mnemonic.toEntropy(LANGUAGE_ID_ENGLISH, testMnemonic.split(' ').toSeq.asJava)
     entropy shouldBe testEntropy
 
     an[MnemonicWordException] should be thrownBy Mnemonic.checkEnglishMnemonic(
-      seqAsJavaList("wanut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice reduce".split(' ')))
+      "wanut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice reduce".split(' ').toSeq.asJava)
     an[MnemonicWrongListSizeException] should be thrownBy Mnemonic.checkEnglishMnemonic(
-      seqAsJavaList("walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice".split(' ')))
+      "walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice".split(' ').toSeq.asJava)
     an[MnemonicChecksumException] should be thrownBy Mnemonic.checkEnglishMnemonic(
-      seqAsJavaList("walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice earth".split(' ')))
+      "walnut endorse maid alone fuel jump torch company ahead nice abstract earth pig spice earth".split(' ').toSeq.asJava)
     an[MnemonicEmptyException] should be thrownBy Mnemonic.checkEnglishMnemonic(new util.ArrayList[String]())
   }
 

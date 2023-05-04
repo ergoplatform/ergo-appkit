@@ -4,13 +4,14 @@ import org.ergoplatform.appkit.examples.ExampleScenarios
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.Values.SigmaPropConstant
 import sigmastate.serialization.ErgoTreeSerializer
 
 class ApiClientSpec
-    extends PropSpec
+    extends AnyPropSpec
         with Matchers
         with ScalaCheckDrivenPropertyChecks
         with AppkitTesting

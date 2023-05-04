@@ -2,12 +2,12 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.impl.BoxAttachmentBuilder
 import org.junit.Assert
-import org.scalatest.Matchers.{be, convertToAnyShouldWrapper}
-import org.scalatest.PropSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 
 import java.util.Collections
 
-class BoxAttachmentSpec extends PropSpec {
+class BoxAttachmentSpec extends AnyPropSpec with Matchers {
 
   private val textAttachmentContent = "Your loan January"
 

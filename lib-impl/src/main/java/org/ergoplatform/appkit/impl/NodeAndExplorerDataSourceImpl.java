@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jline.internal.Nullable;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -67,7 +66,7 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
      */
     public boolean performCheckBeforeSend = false;
 
-    public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, @Nullable ExplorerApiClient explorerClient) {
+    public NodeAndExplorerDataSourceImpl(ApiClient nodeClient, ExplorerApiClient explorerClient) {
 
         OkHttpClient ok = nodeClient.getOkBuilder().build();
         Retrofit nodeRetrofit = nodeClient.getAdapterBuilder()
