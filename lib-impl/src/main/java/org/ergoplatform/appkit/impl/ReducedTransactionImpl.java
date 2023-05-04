@@ -86,7 +86,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
     public String toString() {
         return "ReducedTransactionImpl(\n" +
             _tx + ",\n" +
-            _txCost + "\n" +
+            getCost() + "\n" +
             ")";
     }
 }
