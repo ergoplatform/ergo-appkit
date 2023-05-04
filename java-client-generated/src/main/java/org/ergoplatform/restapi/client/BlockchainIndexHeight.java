@@ -6,7 +6,7 @@ public class BlockchainIndexHeight {
     @SerializedName("fullHeight")
     private Long fullHeight = null;
 
-    @SerializedName("fullHeight")
+    @SerializedName("indexedHeight")
     private Long indexedHeight = null;
 
     public Long getFullHeight() {
