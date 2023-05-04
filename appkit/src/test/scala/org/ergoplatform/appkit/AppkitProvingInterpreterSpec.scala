@@ -4,8 +4,9 @@ import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
 import org.ergoplatform.settings.ErgoAlgos
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import sigmastate.helpers.NegativeTesting
-import org.scalatest.{Matchers, PropSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.TestsBase
 import sigmastate.eval.Colls
@@ -15,7 +16,7 @@ import java.util
 import java.util.Collections
 import util.{List => JList}
 
-class AppkitProvingInterpreterSpec extends PropSpec
+class AppkitProvingInterpreterSpec extends AnyPropSpec
   with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTestingCommon

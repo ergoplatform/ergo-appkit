@@ -1,13 +1,14 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
 import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
-class DHTProverSpec extends PropSpec with Matchers
+class DHTProverSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting {

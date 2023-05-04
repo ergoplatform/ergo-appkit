@@ -28,9 +28,9 @@ public interface InputBox extends TransactionBox {
     /**
      * Json representation of this transaction.
      *
-     * @param prettyPrint if `true` then ergoTree is pretty-printed, otherwise encoded bytes
-     *                    are used.
-     * @return string with json text
+     * @param prettyPrint if true, the ErgoTrees will be pretty printed, otherwise they
+     *                    will be output as hex strings
+     * @return formatted (pretty printed) JSON string
      */
     String toJson(boolean prettyPrint);
 
@@ -51,6 +51,16 @@ public interface InputBox extends TransactionBox {
      * Returns the serialized bytes representing this InputBox, including transaction reference data
      */
     byte[] getBytes();
+
+    /**
+     * @return id of transaction which created the box
+     */
+    String getTransactionId();
+
+    /**
+     * @return 0-based index of this box in the output list of the transaction which created the box
+     */
+    int getTransactionIndex();
 
     /**
      * @return this box as an ergo value to store in a register

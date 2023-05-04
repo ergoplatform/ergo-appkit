@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import scala.Option;
-import scala.collection.JavaConversions;
 import scala.util.Try;
 
 /**
@@ -115,7 +114,7 @@ public class Mnemonic {
         int concatLenBits = words.size() * 11;
         boolean[] concatBits = new boolean[concatLenBits];
         int wordindex = 0;
-        List<String> wordList = JavaConversions.seqAsJavaList(WordList.load(languageId).get().words().toList());
+        List<String> wordList = JavaHelpers$.MODULE$.toJavaList(WordList.load(languageId).get().words().toList());
         for (String word : words) {
             // Find the words index in the wordlist.
             int ndx = Collections.binarySearch(wordList, word);

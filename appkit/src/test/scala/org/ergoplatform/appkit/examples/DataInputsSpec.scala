@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class DataInputsSpec extends PropSpec with Matchers
+class DataInputsSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
   with HttpClientTesting {
@@ -33,6 +34,9 @@ class DataInputsSpec extends PropSpec with Matchers
       val input = ctx.newTxBuilder.outBoxBuilder.value(20000000).contract(ctx.compileContract(
         ConstantsBuilder.create().item("expectedDataInputPropBytes", dataInputPropBytes).build(), inputBoxScript
       )).build().convertToInputWith(dummyTxId, 0)
+
+      input.getTransactionId shouldBe dummyTxId
+      input.getTransactionIndex shouldBe 0
 
       val txB = ctx.newTxBuilder()
 

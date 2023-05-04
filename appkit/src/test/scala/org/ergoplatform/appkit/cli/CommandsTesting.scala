@@ -1,22 +1,23 @@
 package org.ergoplatform.appkit.cli
 
-import scalan.util.FileUtil
+import org.ergoplatform.appkit
+import scalan.util.{FileUtil => SFileUtil}
 import org.ergoplatform.appkit.JavaHelpers._
+
 import java.util.{List => JList}
 import java.lang.{String => JString}
-
-import org.scalatest.Matchers
-import org.ergoplatform.appkit.{FileMockedErgoClient, BlockchainContext}
+import org.ergoplatform.appkit.FileMockedErgoClient
+import org.scalatest.matchers.should.Matchers
 
 trait CommandsTesting extends ConsoleTesting { self: Matchers =>
 
   def responsesDir: String
 
   def loadNodeResponse(name: String) = {
-    FileUtil.read(FileUtil.file(s"$responsesDir/node_responses/$name"))
+    appkit.FileUtil.read(SFileUtil.file(s"$responsesDir/node_responses/$name"))
   }
   def loadExplorerResponse(name: String) = {
-    FileUtil.read(FileUtil.file(s"$responsesDir/explorer_responses/$name"))
+    appkit.FileUtil.read(SFileUtil.file(s"$responsesDir/explorer_responses/$name"))
   }
 
   def testConfigFile: String

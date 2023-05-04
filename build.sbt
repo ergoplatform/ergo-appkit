@@ -8,6 +8,7 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val scala213 = "2.13.8"
 lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
 
@@ -18,8 +19,8 @@ lazy val scala211 = "2.11.12"
 
 lazy val commonSettings = Seq(
   organization := "org.ergoplatform",
-  crossScalaVersions := Seq(scala212, scala211),
-  scalaVersion := scala212,
+  crossScalaVersions := Seq(scala213, scala212, scala211),
+  scalaVersion := scala213,
   resolvers ++= Seq(sonatypeReleases,
     "SonaType" at "https://oss.sonatype.org/content/groups/public",
     "Typesafe maven releases" at "https://dl.bintray.com/typesafe/maven-releases/",
@@ -42,6 +43,9 @@ lazy val commonSettings = Seq(
   publishTo := sonatypePublishToBundle.value,
   scmInfo := Some(
     ScmInfo(url("https://github.com/ergoplatform/ergo-appkit"), "scm:git@github.com:ergoplatform/ergo-appkit.git")
+  ),
+  libraryDependencies ++= Seq(
+    "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
   )
 )
 
@@ -79,10 +83,11 @@ git.gitUncommittedChanges in ThisBuild := true
 val mockitoScalaVerstion = "1.11.4"
 
 lazy val testingDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalactic" %% "scalactic" % "3.0.+" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
-  "com.lihaoyi" %% "pprint" % "0.5.4" % "test",  // the last version with Scala 2.11 support
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+  "org.scalactic" %% "scalactic" % "3.2.14" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.15.2" % "test",        // last supporting Scala 2.11
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.3.0" % Test, // last supporting Scala 2.11
+  "com.lihaoyi" %% "pprint" % "0.6.3" % "test",  // the last version with Scala 2.11 support
   (sigmaState % Test).classifier("tests")
 )
 
@@ -116,6 +121,9 @@ credentials ++= (for {
 // these options applied only in "compile" task since scalac crashes on scaladoc compilation with "-release 8"
 // see https://github.com/scala/community-builds/issues/796#issuecomment-423395500
 //scalacOptions in(Compile, compile) ++= Seq("-release", "8")
+
+test in assembly := {}
+
 assemblyJarName in assembly := s"ergo-appkit-${version.value}.jar"
 
 assemblyMergeStrategy in assembly := {
@@ -126,8 +134,8 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "5.0.2"
-val ergoWalletVersion = "5.0.2"
+val sigmaStateVersion = "5.0.7"
+val ergoWalletVersion = "5.0.10"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
     .exclude("org.scorexfoundation", "scrypto")
@@ -142,8 +150,9 @@ libraryDependencies ++= Seq(
   sigmaState,
   (sigmaState % Test).classifier("tests"),
   ergoWallet,
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.+" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.15.2" % "test",        // last supporting Scala 2.11
+  "org.scalatestplus" %% "scalacheck-1-15" % "3.2.3.0" % Test, // last supporting Scala 2.11
   "com.squareup.retrofit2" % "retrofit" % "2.6.2",
   "com.squareup.retrofit2" % "converter-scalars" % "2.6.2",
   "com.squareup.retrofit2" % "converter-gson" % "2.6.2"
@@ -179,7 +188,9 @@ lazy val common = (project in file("common"))
       resolvers ++= allResolvers,
       libraryDependencies ++= Seq(
         sigmaState,
-        ergoWallet
+        ergoWallet,
+        "com.google.guava" % "guava" % "23.0",
+        "commons-io" % "commons-io" % "2.5"
       ),
       publish / skip := true
     )
