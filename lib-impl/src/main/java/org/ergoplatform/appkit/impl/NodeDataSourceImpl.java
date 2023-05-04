@@ -204,8 +204,8 @@ public class NodeDataSourceImpl implements BlockchainDataSource {
 
     public List<InputBox> getUnspentBoxesNodeApi(Address address, int offset, int limit) {
         if (isBlockchainApiEnabled()) {
-            // FIXME returns newest boxes first, need to be reversed
-            List<ErgoTransactionOutput> ergoTransactionOutput = executeCall(blockchainApi.getUnspentBoxesByAddress(address.toString(), limit, offset));
+            List<ErgoTransactionOutput> ergoTransactionOutput =
+                executeCall(blockchainApi.getUnspentBoxesByAddress(address.toString(), limit, offset, BlockchainApi.sortDirectionOldestFirst));
             List<InputBox> inputs = new ArrayList<>(ergoTransactionOutput.size());
             for (ErgoTransactionOutput transactionOutput : ergoTransactionOutput) {
                 inputs.add(new InputBoxImpl(transactionOutput));
