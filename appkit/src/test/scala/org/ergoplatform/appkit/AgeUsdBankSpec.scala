@@ -2,9 +2,10 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.impl.{AgeUsdBank, AgeUsdExchangeTransactionBuilder}
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatest.{Matchers, PropSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 
-class AgeUsdBankSpec extends PropSpec with Matchers
+class AgeUsdBankSpec extends AnyPropSpec with Matchers
   with AppkitTesting
   with HttpClientTesting {
 
