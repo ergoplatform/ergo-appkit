@@ -1,0 +1,48 @@
+{
+
+  "items": [
+    {
+      "boxId": "390a8fe7875910ba2fa7d836235afa10b81e878ccac9c5d61b3a3a5ab879560b",
+      "transactionId": "33ad33a0f81af1422ce784b10900cba682bbbffb4ff4fad3db76d3c9592490cb",
+      "blockId": "093ee04f0c8249963baa1c382787e9b8696cdfd5528d749722e5c78b47871c0d",
+      "value": 3471500000,
+      "index": 0,
+      "globalIndex": 15493690,
+      "creationHeight": 727095,
+      "settlementHeight": 727097,
+      "ergoTree": "1014040004000e208c27dd9d8a35aac1e3167d58858c0a8b4059b277da790552e37eba22df9b903504000400040204020101040205a0c21e040204080500040c040204a0c21e0402050a05c8010402d806d601b2a5730000d602b5db6501fed9010263ed93e4c67202050ec5a7938cb2db63087202730100017302d603b17202d604e4c6b272027303000605d605d90105049590720573047204e4c6b272029972057305000605d606b07202860273067307d901063c400163d803d6088c720601d6098c720801d60a8c72060286029a72097308ededed8c72080293c2b2a5720900d0cde4c6720a040792c1b2a5720900730992da720501997209730ae4c6720a0605ea02d1ededededededed93cbc27201e4c6a7060e927203730b93db63087201db6308a793e4c6720104059db07202730cd9010741639a8c720701e4c68c72070206057e72030593e4c6720105049ae4c6a70504730d92c1720199c1a77e9c9a7203730e730f058c72060292da720501998c72060173109972049d9c720473117312b2ad7202d9010763cde4c672070407e4c6b2a5731300040400",
+      "address": "NTkuk55NdwCXkF1e2nCABxq7bHjtinX3wH13zYPZ6qYT71dCoZBe1gZkh9FAr7GeHo2EpFoibzpNQmoi89atUjKRrhZEYrTapdtXrWU4kq319oY7BEWmtmRU9cMohX69XMuxJjJP5hRM8WQLfFnffbjshhEP3ck9CKVEkFRw1JDYkqVke2JVqoMED5yxLVkScbBUiJJLWq9BSbE1JJmmreNVskmWNxWE6V7ksKPxFMoqh1SVePh3UWAaBgGQRZ7TWf4dTBF5KMVHmRXzmQqEu2Fz2yeSLy23sM3pfqa78VuvoFHnTFXYFFxn3DNttxwq3EU3Zv25SmgrWjLKiZjFcEcqGgH6DJ9FZ1DfucVtTXwyDJutY3ksUBaEStRxoUQyRu4EhDobixL3PUWRcxaRJ8JKA9b64ALErGepRHkAoVmS8DaE6VbroskyMuhkTo7LbrzhTyJbqKurEzoEfhYxus7bMpLTePgKcktgRRyB7MjVxjSpxWzZedvzbjzZaHLZLkWZESk1WtdM25My33wtVLNXiTvficEUbjA23sNd24pv1YQ72nY1aqUHa2",
+      "assets": [
+        {
+          "tokenId": "011d3364de07e5a26f0c4eef0852cddb387039a921b7154ef3cab22c6eda887f",
+          "index": 0,
+          "amount": 1,
+          "name": "ERGUSD-NFT",
+          "decimals": 0,
+          "type": "EIP-004"
+        }
+      ],
+      "additionalRegisters": {
+        "R4": {
+          "serializedValue": "0584e19fdc01",
+          "sigmaType": "SLong",
+          "renderedValue": "230946882"
+        },
+        "R5": {
+          "serializedValue": "04fee058",
+          "sigmaType": "SInt",
+          "renderedValue": "727103"
+        },
+        "R6": {
+          "serializedValue": "0e20f7ef73c4a4ab91b84bb0a2905108d534114472ec057be3a57a9dfc9b1fbd85c1",
+          "sigmaType": "Coll[SByte]",
+          "renderedValue": "f7ef73c4a4ab91b84bb0a2905108d534114472ec057be3a57a9dfc9b1fbd85c1"
+        }
+      },
+      "spentTransactionId": null,
+      "mainChain": true
+    }
+  ],
+  "total": 1
+
+}

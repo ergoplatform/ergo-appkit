@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "boxId": "976c21fbd859cca4113a0711706c33b3d1f1052958a0196d61480f4b950fdf91",
+      "transactionId": "093eb4a9a963d52a304cb0f8f8150775854a55bd59db8b797fc2ae4d525dba65",
+      "blockId": "54406fd13168c6be1f4306e5d7b896783c12223e043e7ef2cc189bc72e6ee39e",
+      "value": 400000000981000000,
+      "creationHeight": 130509,
+      "settlementHeight": 505913,
+      "ergoTree": "0008cd02472963123ce32c057907c7a7268bc09f45d9ca57819d3327b9e7497d7b1cc347",
+      "address": "9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K",
+      "assets": [
+        {
+          "tokenId": "03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04",
+          "index": 0,
+          "amount": 1000,
+          "name": "SigUSD",
+          "decimals": 2,
+          "type": "EIP-004"
+        },
+        {
+          "tokenId": "003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0",
+          "index": 1,
+          "amount": 1000000000000,
+          "name": "SigRSV",
+          "decimals": 0,
+          "type": "EIP-004"
+        }
+      ],
+      "additionalRegisters": {},
+      "spentTransactionId": null,
+      "mainChain": true
+    }
+  ],
+  "total": 1
+}

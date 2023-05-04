@@ -92,6 +92,11 @@ public class BlockchainContextImplTest extends ApiTestBase {
         }
 
         @Override
+        public List<InputBox> getUnspentBoxesFor(ErgoToken token, int offset, int limit) {
+            return null;
+        }
+
+        @Override
         public BlockchainParameters getParameters() {
             return new MockedParameters();
         }

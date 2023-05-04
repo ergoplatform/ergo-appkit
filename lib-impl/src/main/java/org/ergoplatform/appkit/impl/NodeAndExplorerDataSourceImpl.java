@@ -9,6 +9,7 @@ import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;
+import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.Iso;
 import org.ergoplatform.appkit.OutBox;
@@ -200,6 +201,13 @@ public class NodeAndExplorerDataSourceImpl implements BlockchainDataSource {
     public List<InputBox> getUnspentBoxesFor(Address address, int offset, int limit) {
         Preconditions.checkNotNull(explorerApi, ErgoClient.explorerUrlNotSpecifiedMessage);
         List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentByaddressP1(address.toString(), offset, limit, "asc")).getItems();
+        return getInputBoxes(boxes);
+    }
+
+    @Override
+    public List<InputBox> getUnspentBoxesFor(ErgoToken token, int offset, int limit) {
+        Preconditions.checkNotNull(explorerApi, ErgoClient.explorerUrlNotSpecifiedMessage);
+        List<OutputInfo> boxes = executeCall(explorerApi.getApiV1BoxesUnspentBytokenidP1(token.getId().toString(), offset, limit)).getItems();
         return getInputBoxes(boxes);
     }
 
