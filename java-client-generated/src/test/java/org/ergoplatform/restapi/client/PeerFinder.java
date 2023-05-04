@@ -3,9 +3,10 @@ package org.ergoplatform.restapi.client;
 import org.ergoplatform.ApiTestBase;
 
 public class PeerFinder extends ApiTestBase {
-    public final String appVersion = "4.0.";
+    public final String appVersion = "5.0.";
 
     String[] knownPeers = {
+        "198.58.96.195",
         "159.65.11.55",
         "46.4.112.10",
         "213.239.193.208",
@@ -25,7 +26,7 @@ public class PeerFinder extends ApiTestBase {
         ApiClient res = null;
         for (String peer : knownPeers) {
             try {
-                String hostUrl = "http://" + peer + ":9053";
+                String hostUrl = (peer.startsWith("https://")) ? peer : "http://" + peer + ":9053";
                 System.out.println("Trying: " + hostUrl);
 
                 ApiClient client = new ApiClient(hostUrl);

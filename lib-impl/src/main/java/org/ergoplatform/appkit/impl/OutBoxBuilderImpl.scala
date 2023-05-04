@@ -80,7 +80,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
     val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
-      _value, tree, _tokens, _registers,
+      _value, tree, _tokens.toSeq, _registers.toSeq,
       creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
     new OutBoxImpl(ergoBoxCandidate)
   }

@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit
 
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, PropSpec}
 
-trait TestingBase extends PropSpec with Matchers with ScalaCheckDrivenPropertyChecks
+trait TestingBase extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks

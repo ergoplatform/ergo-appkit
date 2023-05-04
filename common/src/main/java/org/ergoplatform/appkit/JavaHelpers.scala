@@ -3,19 +3,19 @@ package org.ergoplatform.appkit
 import org.ergoplatform.wallet.secrets.{ExtendedSecretKey, DerivationPath}
 import scalan.RType
 import special.collection.Coll
-import com.google.common.base.{Preconditions, Strings}
 
-import scala.collection.{mutable, JavaConversions}
+import scala.collection.{mutable, JavaConverters}
+import scala.collection.compat.immutable.ArraySeq
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue, SValue, SigmaBoolean, SigmaPropConstant}
+import sigmastate.Values.{SValue, SigmaPropConstant, Value, ErgoTree, SigmaBoolean, Constant, EvaluatedValue}
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, IRContext}
 import sigmastate.eval.Extensions._
 import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
 import java.util
@@ -39,10 +39,14 @@ import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
-import org.ergoplatform.appkit.JavaHelpers.{TokenColl, TokenIdRType}
-import sigmastate.eval.Colls.outerJoin
+import org.ergoplatform.appkit.JavaHelpers.{TokenIdRType, TokenColl}
+import org.ergoplatform.appkit.scalaapi.Extensions.{PairCollOps, CollBuilderOps}
+import org.ergoplatform.appkit.scalaapi.Utils
+import scalan.util.StringUtil._
+import scalan.ExactIntegral.LongIsExactIntegral
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import special.collection.ExtensionMethods.PairCollOps
+import sigmastate.interpreter.Interpreter.ScriptEnv
+import sigmastate.lang.SigmaCompiler
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -172,11 +176,12 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit def isoJMapToMap[K,V1,V2](iso: Iso[V1, V2]): Iso[JMap[K, V1], scala.collection.Map[K,V2]] = new Iso[JMap[K, V1], scala.collection.Map[K,V2]] {
+    import JavaConverters._
     override def to(a: JMap[K, V1]): scala.collection.Map[K, V2] = {
-      JavaConversions.mapAsScalaMap(a).mapValues(iso.to)
+      a.asScala.mapValues(iso.to).toMap
     }
     override def from(b: scala.collection.Map[K, V2]): JMap[K, V1] = {
-      JavaConversions.mapAsJavaMap(b.mapValues(iso.from))
+      b.mapValues(iso.from).toMap.asJava
     }
   }
 
@@ -211,7 +216,7 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
-    override def to(a: JString): Option[String] = if (Strings.isNullOrEmpty(a)) None else Some(a)
+    override def to(a: JString): Option[String] = if (a.isNullOrEmpty) None else Some(a)
     override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
   }
 
@@ -225,8 +230,10 @@ object Iso extends LowPriorityIsos {
 
   implicit def JListToIndexedSeq[A, B](implicit itemIso: Iso[A, B]): Iso[JList[A], IndexedSeq[B]] =
     new Iso[JList[A], IndexedSeq[B]] {
+      import JavaConverters._
+
       override def to(as: JList[A]): IndexedSeq[B] = {
-        JavaConversions.asScalaIterator(as.iterator()).map(itemIso.to).toIndexedSeq
+       as.iterator().asScala.map(itemIso.to).toIndexedSeq
       }
 
       override def from(bs: IndexedSeq[B]): JList[A] = {
@@ -238,8 +245,9 @@ object Iso extends LowPriorityIsos {
 
   implicit def JListToColl[A, B](implicit itemIso: Iso[A, B], tB: RType[B]): Iso[JList[A], Coll[B]] =
     new Iso[JList[A], Coll[B]] {
+      import JavaConverters._
       override def to(as: JList[A]): Coll[B] = {
-        val bsIter = JavaConversions.asScalaIterator(as.iterator).map { a =>
+        val bsIter = as.iterator.asScala.map { a =>
           itemIso.to(a)
         }
         Colls.fromArray(bsIter.toArray(tB.classTag))
@@ -379,13 +387,35 @@ object JavaHelpers {
   }
 
   def toIndexedSeq[T](xs: util.List[T]): IndexedSeq[T] = {
-    JavaConversions.asScalaIterator(xs.iterator()).toIndexedSeq
+    import JavaConverters._
+    xs.iterator().asScala.toIndexedSeq
+  }
+
+  def toJavaList[T](xs: Seq[T]): util.List[T] = {
+    import JavaConverters._
+    xs.asJava
+  }
+
+  /** Wraps an array into sequence.
+    * This method in necessary because ArraySeq is not available from Java (for all Scala versions).
+    */
+  def arraySeq[T](arr: Array[T]): Seq[T] =
+    ArraySeq.unsafeWrapArray(arr)
+
+  // TODO remove when accessible from ErgoScriptPredef in Sigma
+  /** Compiles the given ErgoScript `code` into ErgoTree expression. */
+  def compileWithCosting(env: ScriptEnv, code: String, networkPrefix: NetworkPrefix)
+    (implicit IR: IRContext): Value[SType] = {
+    val compiler = new SigmaCompiler(networkPrefix)
+    val res = compiler.compile(env, code)
+    res.buildTree
   }
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
-    val env = JavaConversions.mapAsScalaMap(constants).toMap
+    import JavaConverters._
+    val env = constants.asScala.toMap
     implicit val IR = new CompiletimeIRContext
-    val prop = ErgoScriptPredef.compileWithCosting(env, contractText, networkPrefix).asSigmaProp
+    val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
   }
 
@@ -412,8 +442,8 @@ object JavaHelpers {
         registers: Seq[ErgoValue[_]], creationHeight: Int): ErgoBoxCandidate = {
     import ErgoBox.nonMandatoryRegisters
     val nRegs = registers.length
-    Preconditions.checkArgument(nRegs <= nonMandatoryRegisters.length,
-       "Too many additional registers %d. Max allowed %d", nRegs, nonMandatoryRegisters.length)
+    require(nRegs <= nonMandatoryRegisters.length,
+       s"Too many additional registers $nRegs. Max allowed ${nonMandatoryRegisters.length}")
     implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
     val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
     val rs = registers.zipWithIndex.map { case (ergoValue, i) =>
@@ -429,7 +459,7 @@ object JavaHelpers {
     * This method should be equivalent to [[org.ergoplatform.wallet.mnemonic.Mnemonic.toSeed()]].
     */
   def mnemonicToSeed(mnemonic: String, passOpt: Option[String] = None): Array[Byte] = {
-    val normalizedMnemonic = normalize(mnemonic.toCharArray, NFKD)
+    val normalizedMnemonic = normalize(ArrayCharSequence(mnemonic.toCharArray), NFKD)
     val normalizedPass = normalize(s"mnemonic${passOpt.getOrElse("")}", NFKD)
 
     val gen = new PKCS5S2ParametersGenerator(new SHA512Digest)
@@ -610,11 +640,13 @@ object JavaHelpers {
     reducedTokens: TokenColl,
     subtractedTokens: TokenColl
   ): TokenColl = {
+    val exactNumeric: Numeric[Long] = new Utils.IntegralFromExactIntegral(LongIsExactIntegral)
+    val b = reducedTokens.builder // any Coll has builder, which is suitable
     val reduced = checkAllTokensPositive(reducedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
+      .sumByKey(exactNumeric) // summation with overflow checking
     val subtracted = checkAllTokensPositive(subtractedTokens)
-      .sumByKey(Colls.Monoids.longPlusMonoid) // summation with overflow checking
-    val tokensDiff = outerJoin(subtracted, reduced)(
+      .sumByKey(exactNumeric) // summation with overflow checking
+    val tokensDiff = b.outerJoin(subtracted, reduced)(
       { case (_, sV) => -sV }, // for each token missing in reduced: amount to burn
       { case (_, rV) => rV }, // for each token missing in subtracted: amount to mint
       { case (_, (sV, rV)) => rV - sV } // for tokens both in subtracted and reduced: balance change

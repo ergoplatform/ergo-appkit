@@ -60,7 +60,7 @@ object CmdLineParser {
         i += 1
       }
     }
-    (resOptions, resArgs)
+    (resOptions, resArgs.toSeq)
   }
 
   def parseNetwork(network: String): NetworkType = network match {
