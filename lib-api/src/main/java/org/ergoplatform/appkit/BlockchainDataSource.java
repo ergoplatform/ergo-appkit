@@ -71,6 +71,31 @@ public interface BlockchainDataSource {
     List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit);
 
     /**
+     * Get all unspent boxes in the current node wallet, without unconfirmed boxes
+     * @return List of input boxes representing all known
+     */
+    List<InputBox> getUnspentWalletBoxes();
+    /**
+     * Get all unspent boxes in the current node wallet, without unconfirmed boxes
+     * @param minConfirmations Minimum number of confirmations for a box to be included in the returned list
+     * @param minInclusionHeight Minimum creation height for a box to be included in the returned list
+     * @return List of input boxes representing all known
+     */
+    List<InputBox> getUnspentWalletBoxes(int minConfirmations, int minInclusionHeight);
+
+    /**
+     * Get all unspent boxes in the current node wallet, including unconfirmed boxes from the MemPool
+     * @return List of all unspent boxes in this node's current wallet
+     */
+    List<InputBox> getUnconfirmedUnspentWalletBoxes();
+    /**
+     * Get all unspent boxes in the current node wallet, including unconfirmed boxes from the MemPool
+     * @param minInclusionHeight Minimum creation height for a box to be included in the returned list
+     * @return List of all unspent boxes in this node's current wallet
+     */
+    List<InputBox> getUnconfirmedUnspentWalletBoxes(int minInclusionHeight);
+
+    /**
      * @return unconfirmed transactions from mempool
      */
     List<Transaction> getUnconfirmedTransactions(int offset, int limit);
