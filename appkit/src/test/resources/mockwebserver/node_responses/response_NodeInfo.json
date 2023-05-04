@@ -26,7 +26,7 @@
     "minValuePerByte": 360,
     "maxBlockSize": 524288,
     "maxBlockCost": 1000000,
-    "blockVersion": 1,
+    "blockVersion": 3,
     "tokenAccessCost": 100,
     "inputCost": 2000,
     "dataInputCost": 100,

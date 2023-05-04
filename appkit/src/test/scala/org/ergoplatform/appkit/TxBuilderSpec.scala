@@ -36,6 +36,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     val out = ctx.newTxBuilder.outBoxBuilder
       .value(amount)
       .contract(ctx.compileContract(ConstantsBuilder.empty(), script))
+      .registers(ErgoValue.unit(), ErgoValue.unit(), ErgoValue.unit(), ErgoValue.of("sd".getBytes))
       .build()
 
     out.getCreationHeight shouldBe ctx.getHeight
@@ -308,6 +309,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     // together with ReducedTransaction
     val maxBlockCost = Parameters.ColdClientMaxBlockCost
     val coldClient = new ColdErgoClient(NetworkType.MAINNET, maxBlockCost, Parameters.ColdClientBlockVersion)
+    coldClient.params.getBlockVersion shouldBe Parameters.ColdClientBlockVersion
 
     coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold

@@ -84,6 +84,9 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public String toString() {
-        return "ReducedTransactionImpl(" + _tx.toString() + ")";
+        return "ReducedTransactionImpl(\n" +
+            _tx + ",\n" +
+            getCost() + "\n" +
+            ")";
     }
 }
