@@ -5,6 +5,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.appkit.impl.NodeAndExplorerDataSourceImpl;
+import org.ergoplatform.appkit.impl.NodeDataSourceImpl;
 import org.ergoplatform.explorer.client.ExplorerApiClient;
 import org.ergoplatform.restapi.client.ApiClient;
 
@@ -65,7 +66,12 @@ public class FileMockedErgoClient implements MockedErgoClient {
         HttpUrl explorerBaseUrl = explorer.url("/");
         ExplorerApiClient explorerClient = new ExplorerApiClient(explorerBaseUrl.toString());
 
-        NodeAndExplorerDataSourceImpl dataSource = new NodeAndExplorerDataSourceImpl(client, _nodeOnlyMode ? null : explorerClient);
+        BlockchainDataSource dataSource;
+        if (_nodeOnlyMode)
+            dataSource = new NodeDataSourceImpl(client);
+        else
+            dataSource = new NodeAndExplorerDataSourceImpl(client, explorerClient);
+
         BlockchainContext ctx = new BlockchainContextBuilderImpl(
             dataSource,
             NetworkType.MAINNET).build();
