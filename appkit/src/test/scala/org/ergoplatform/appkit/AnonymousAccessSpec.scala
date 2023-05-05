@@ -2,6 +2,7 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.BoxOperations.createProver
 import org.ergoplatform.appkit.Parameters.MinFee
+import org.ergoplatform.appkit.impl.{NodeAndExplorerDataSourceImpl, NodeDataSourceImpl}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
@@ -41,6 +42,8 @@ class AnonymousAccessSpec extends AnyPropSpec with Matchers
 
     ergoClient.execute { ctx: BlockchainContext =>
       ctx shouldNot be (null)
+      ctx.getDataSource.isInstanceOf[NodeDataSourceImpl] shouldBe true
+      ctx.getDataSource.isInstanceOf[NodeAndExplorerDataSourceImpl] shouldBe false
     }
   }
 
