@@ -101,9 +101,6 @@ public interface TransactionsApi {
    * @return Call&lt;Transactions&gt;
    */
   @POST("transactions/unconfirmed/byErgoTree")
-  @Headers({
-      "Content-Type:application/json"
-  })
   Call<Transactions> getUnconfirmedTransactionsByErgoTree(
       @retrofit2.http.Body String ergoTreeHex, @retrofit2.http.Query("offset") Integer offset,     @retrofit2.http.Query("limit") Integer limit
   );

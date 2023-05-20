@@ -1,3 +1,8 @@
+[5.0.3]
+- Node transactions API getUnconfirmedTransactionsByErgoTree: In past versions, it was needed to
+  wrap the ergotree param in quotes when ScalarsConverterFactory was used for Retrofit. This is fixed
+  and the workaround needs to be removed when used.
+
 [5.0.0]
 - block version now required to construct ColdErgoClient
 - getBoxById(String boxId) was replaced by getBoxById(String boxId, boolean findInPool, boolean findInSpent)
