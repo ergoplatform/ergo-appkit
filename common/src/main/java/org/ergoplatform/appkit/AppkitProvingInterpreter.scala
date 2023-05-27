@@ -7,25 +7,25 @@ import sigmastate.basics.DLogProtocol.{ProveDlog, DLogProverInput}
 
 import java.util
 import java.util.{Objects, List => JList}
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{SigmaProtocolCommonInput, DiffieHellmanTupleProverInput, SigmaProtocol, SigmaProtocolPrivateInput}
 import org.ergoplatform._
 import org.ergoplatform.appkit.JavaHelpers.TokenColl
 import org.ergoplatform.appkit.scalaapi.Extensions.CollOps
-import org.ergoplatform.utils.ArithUtils
-import org.ergoplatform.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
+import org.ergoplatform.sdk.Extensions.PairCollOps
+import org.ergoplatform.sdk.utils.ArithUtils
+import org.ergoplatform.sdk.wallet.protocol.context.{ErgoLikeStateContext, ErgoLikeParameters, TransactionContext}
 import sigmastate.Values.{SigmaBoolean, ErgoTree}
 
 import scala.util.Try
 import sigmastate.interpreter.Interpreter.{ReductionResult, ScriptEnv, estimateCryptoVerifyCost}
 import sigmastate.interpreter.{ProverResult, Interpreter, ContextExtension, ProverInterpreter, HintsBag}
-import sigmastate.lang.exceptions.CostLimitException
 import sigmastate.serialization.SigmaSerializer
-import special.collection.ExtensionMethods.PairCollOps
-import sigmastate.utils.Helpers._ // for Scala 2.11
+import sigmastate.utils.Helpers._
 import sigmastate.utils.{SigmaByteWriter, SigmaByteReader}
 import scalan.util.Extensions.LongOps
 import sigmastate.VersionContext
+import sigmastate.exceptions.CostLimitException
 
 import scala.collection.mutable
 

@@ -1,10 +1,10 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.wallet.secrets.{ExtendedSecretKey, DerivationPath}
+import org.ergoplatform.sdk.wallet.secrets.{ExtendedSecretKey, DerivationPath}
 import scalan.RType
 import special.collection.Coll
 
-import scala.collection.{mutable, JavaConverters}
+import scala.collection.{JavaConverters, mutable}
 import scala.collection.compat.immutable.ArraySeq
 import org.ergoplatform._
 import org.ergoplatform.ErgoBox.TokenId
@@ -12,41 +12,43 @@ import sigmastate.SType
 import sigmastate.Values.{SValue, SigmaPropConstant, Value, ErgoTree, SigmaBoolean, Constant, EvaluatedValue}
 import sigmastate.serialization.{ErgoTreeSerializer, GroupElementSerializer, SigmaSerializer, ValueSerializer}
 import scorex.crypto.authds.ADKey
-import scorex.crypto.hash.Digest32
 import org.ergoplatform.settings.ErgoAlgos
 import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{CompiletimeIRContext, Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, IRContext}
-import sigmastate.eval.Extensions._
-import special.sigma.{AnyValue, AvlTree, Header, GroupElement}
+import sigmastate.eval.{Evaluation, Colls, CostingSigmaDslBuilder, CPreHeader, IRContext, CompiletimeIRContext, Digest32Coll}
+import special.sigma.{Header, GroupElement, AnyValue, AvlTree}
+
 import java.util
-import java.lang.{Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString, Boolean => JBoolean}
+import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
 import java.math.BigInteger
 import java.text.Normalizer.Form.NFKD
 import java.text.Normalizer.normalize
-import java.util.{Map => JMap, List => JList}
-
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
+import java.util.{List => JList, Map => JMap}
+import sigmastate.utils.Helpers._
 import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import org.ergoplatform.appkit.Iso.{isoErgoTokenToPair, JListToColl}
-import org.ergoplatform.wallet.TokensMap
+import org.ergoplatform.appkit.Iso.{JListToColl, isoErgoTokenToPair}
+import org.ergoplatform.sdk.wallet.TokensMap
 import org.ergoplatform.wallet.mnemonic.Mnemonic.{Pbkdf2Iterations, Pbkdf2KeyLength}
 import scorex.util.encode.Base16
 import sigmastate.basics.DLogProtocol.ProveDlog
-import sigmastate.basics.{ProveDHTuple, DiffieHellmanTupleProverInput}
-import sigmastate.interpreter.CryptoConstants.EcPointType
+import sigmastate.basics.{DiffieHellmanTupleProverInput, ProveDHTuple}
 import scorex.util.{idToBytes, bytesToId, ModifierId}
 import sigmastate.interpreter.ContextExtension
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.ergoplatform.appkit.JavaHelpers.{TokenIdRType, TokenColl}
-import org.ergoplatform.appkit.scalaapi.Extensions.{PairCollOps, CollBuilderOps}
+import org.ergoplatform.sdk.Extensions.CollBuilderOps
 import org.ergoplatform.appkit.scalaapi.Utils
+import org.ergoplatform.sdk.Extensions._
 import scalan.util.StringUtil._
 import scalan.ExactIntegral.LongIsExactIntegral
+import sigmastate.basics.CryptoConstants.EcPointType
+import sigmastate.crypto.CryptoFacade
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
 import sigmastate.interpreter.Interpreter.ScriptEnv
 import sigmastate.lang.SigmaCompiler
+import sigmastate.utils.Extensions._
+import sigmastate.eval.Extensions._
 
 /** Type-class of isomorphisms between types.
   * Isomorphism between two types `A` and `B` essentially say that both types
@@ -118,24 +120,25 @@ object Iso extends LowPriorityIsos {
   }
 
   implicit val isoErgoTokenToPair: Iso[ErgoToken, (TokenId, Long)] = new Iso[ErgoToken, (TokenId, Long)] {
-    override def to(a: ErgoToken) = (Digest32 @@ a.getId.getBytes, a.getValue)
-    override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1, t._2)
+    override def to(a: ErgoToken) = (a.getId.getBytes.toTokenId, a.getValue)
+    override def from(t: (TokenId, Long)): ErgoToken = new ErgoToken(t._1.toArray, t._2)
   }
 
   implicit val isoJListErgoTokenToMapPair: Iso[JList[ErgoToken], mutable.LinkedHashMap[ModifierId, Long]] =
     new Iso[JList[ErgoToken], mutable.LinkedHashMap[ModifierId, Long]] {
+      import special.collection.Extensions._
       override def to(a: JList[ErgoToken]): mutable.LinkedHashMap[ModifierId, Long] = {
         import JavaHelpers._
         val lhm = new mutable.LinkedHashMap[ModifierId, Long]()
         a.convertTo[IndexedSeq[(TokenId, Long)]]
-          .map(t => bytesToId(t._1) -> t._2)
+          .map(t => t._1.toModifierId -> t._2)
           .foldLeft(lhm)(_ += _)
       }
 
       override def from(t: mutable.LinkedHashMap[ModifierId, Long]): JList[ErgoToken] = {
         import JavaHelpers._
         val pairs: IndexedSeq[(TokenId, Long)] = t.toIndexedSeq
-          .map(t => (Digest32 @@ idToBytes(t._1)) -> t._2)
+          .map(t => t._1.toTokenId -> t._2)
         pairs.convertTo[JList[ErgoToken]]
       }
     }
@@ -195,11 +198,15 @@ object Iso extends LowPriorityIsos {
   }
 
   val isoTokensListToTokenColl: Iso[JList[ErgoToken], TokenColl] = new Iso[JList[ErgoToken], TokenColl] {
-    override def to(ts: JList[ErgoToken]): TokenColl =
-      isoTokensListToPairsColl.to(ts).mapFirst(Colls.fromArray(_))
+    override def to(ts: JList[ErgoToken]): TokenColl = {
+      val tsColl = isoTokensListToPairsColl.to(ts)
+      tsColl.map { case (id, v) => (id.asInstanceOf[Coll[Byte]], v) }
+    }
 
     override def from(ts: TokenColl): JList[ErgoToken] = {
-      isoTokensListToPairsColl.from(ts.mapFirst(id => Digest32 @@ id.toArray))
+      isoTokensListToPairsColl.from(ts.map { case (id, v) =>
+        (Digest32Coll @@ id, v)
+      })
     }
   }
 
@@ -464,8 +471,8 @@ object JavaHelpers {
 
     val gen = new PKCS5S2ParametersGenerator(new SHA512Digest)
     gen.init(
-      normalizedMnemonic.getBytes(org.ergoplatform.wallet.Constants.Encoding),
-      normalizedPass.getBytes(org.ergoplatform.wallet.Constants.Encoding),
+      normalizedMnemonic.getBytes(CryptoFacade.Encoding),
+      normalizedPass.getBytes(CryptoFacade.Encoding),
       Pbkdf2Iterations)
     val dk = gen.generateDerivedParameters(Pbkdf2KeyLength).asInstanceOf[KeyParameter].getKey
     dk
@@ -575,11 +582,12 @@ object JavaHelpers {
    * @return a mapping from asset id to to balance and total assets number
    */
   def extractAssets(boxes: IndexedSeq[ErgoBoxCandidate]): (Map[Seq[Byte], Long], Int) = {
+    import special.collection.Extensions._
     val map: mutable.Map[Seq[Byte], Long] = mutable.Map[Seq[Byte], Long]()
     val assetsNum = boxes.foldLeft(0) { case (acc, box) =>
       require(box.additionalTokens.length <= SigmaConstants.MaxTokens.value, "too many assets in one box")
       box.additionalTokens.foreach { case (assetId, amount) =>
-        val aiWrapped = assetId: Seq[Byte]
+        val aiWrapped = assetId.toArray: Seq[Byte]
         val total = map.getOrElse(aiWrapped, 0L)
         map.put(aiWrapped, java7.compat.Math.addExact(total, amount))
       }
@@ -592,7 +600,7 @@ object JavaHelpers {
     * The resulting path corresponds to `m/44'/429'/0'/0/index` path.
     */
   def eip3DerivationWithLastIndex(index: Int) = {
-    val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
+    val firstPath = org.ergoplatform.sdk.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1) :+ index, firstPath.publicBranch)
   }
 
@@ -600,7 +608,7 @@ object JavaHelpers {
     * The resulting path is the `m/44'/429'/0'/0` path.
     */
   def eip3DerivationParent() = {
-    val firstPath = org.ergoplatform.wallet.Constants.eip3DerivationPath
+    val firstPath = org.ergoplatform.sdk.wallet.Constants.eip3DerivationPath
     DerivationPath(firstPath.decodedPath.dropRight(1), firstPath.publicBranch)
   }
 
