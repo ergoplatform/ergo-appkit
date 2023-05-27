@@ -4,7 +4,7 @@ import java.util
 
 import org.ergoplatform.P2PKAddress
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import sigmastate.eval.CostingSigmaDslBuilder
 import sigmastate.interpreter.HintsBag
 import special.sigma.BigInt

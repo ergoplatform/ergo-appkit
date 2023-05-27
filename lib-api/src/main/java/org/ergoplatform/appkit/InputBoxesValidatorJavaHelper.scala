@@ -4,7 +4,7 @@ import org.ergoplatform.ErgoBoxAssets
 import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
 import org.ergoplatform.appkit.Iso._
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.wallet.AssetUtils
+import org.ergoplatform.sdk.wallet.AssetUtils
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughCoinsForChangeBoxesError, NotEnoughErgsError, NotEnoughTokensError}
 import scorex.util.{ModifierId, bytesToId}
 

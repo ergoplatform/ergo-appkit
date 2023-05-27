@@ -2,10 +2,10 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.jcajce.provider.digest.RIPEMD160;
 import org.ergoplatform.appkit.NetworkType;
-import org.ergoplatform.wallet.Constants;
-import org.ergoplatform.wallet.secrets.DerivationPath;
-import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.wallet.Constants;
+import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;

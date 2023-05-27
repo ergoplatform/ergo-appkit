@@ -1,14 +1,14 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
+import org.ergoplatform.explorer.client.model.{OutputInfo, AssetInstanceInfo, AdditionalRegister, AssetInfo => EAsset, AdditionalRegisters => ERegisters}
 
 import java.util
 import java.util.List
 import java.util.{List => JList, Map => JMap}
 import java.lang.{Byte => JByte}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input, UnsignedErgoLikeTransaction, UnsignedInput}
+import org.ergoplatform.{UnsignedErgoLikeTransaction, ErgoLikeTransaction, UnsignedInput, Input, ErgoBox, DataInput}
 import org.ergoplatform.appkit.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
@@ -17,12 +17,14 @@ import org.ergoplatform.wallet.interpreter.ErgoInterpreter
 import scorex.crypto.hash.Digest32
 import scorex.util.ModifierId
 import sigmastate.SType
-import sigmastate.Values.{ErgoTree, EvaluatedValue}
-import sigmastate.eval.{CAvlTree, CHeader, Colls}
+import sigmastate.Values.{EvaluatedValue, ErgoTree}
+import sigmastate.eval.Extensions.ArrayByteOps
+import sigmastate.eval.{Colls, CHeader, CAvlTree}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
+
 import scala.collection.JavaConverters
 import JavaConverters._
 
@@ -91,12 +93,12 @@ object ScalaBridge {
   }
 
   implicit val isoAssetToPair: Iso[Asset, (TokenId, Long)] = new Iso[Asset, (TokenId, Long)] {
-    override def to(a: Asset) = (Digest32 @@ a.getTokenId.toBytes, a.getAmount)
+    override def to(a: Asset) = (a.getTokenId.toBytes.toTokenId, a.getAmount)
     override def from(t: (TokenId, Long)): Asset = new Asset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
   }
 
   implicit val isoExplorerAssetToPair: Iso[EAsset, (TokenId, Long)] = new Iso[EAsset, (TokenId, Long)] {
-    override def to(a: EAsset) = (Digest32 @@ a.getTokenId.toBytes, a.getAmount)
+    override def to(a: EAsset) = (a.getTokenId.toBytes.toTokenId, a.getAmount)
     override def from(t: (TokenId, Long)): EAsset = new EAsset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
   }
 

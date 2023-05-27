@@ -2,7 +2,6 @@ package org.ergoplatform.appkit
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
-import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 import JavaHelpers._
 
@@ -11,6 +10,7 @@ import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
+import sigmastate.basics.CryptoConstants
 
 class ChangeOutputSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks

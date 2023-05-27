@@ -298,7 +298,7 @@ object JavaHelpers {
     }
   }
 
-  implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+  implicit val TokenIdRType: RType[TokenId] = collRType(RType.ByteType).asInstanceOf[RType[TokenId]]
   implicit val JByteRType: RType[JByte] = RType.ByteType.asInstanceOf[RType[JByte]]
   implicit val JShortRType: RType[JShort] = RType.ShortType.asInstanceOf[RType[JShort]]
   implicit val JIntRType: RType[JInt] = RType.IntType.asInstanceOf[RType[JInt]]
@@ -451,7 +451,7 @@ object JavaHelpers {
     val nRegs = registers.length
     require(nRegs <= nonMandatoryRegisters.length,
        s"Too many additional registers $nRegs. Max allowed ${nonMandatoryRegisters.length}")
-    implicit val TokenIdRType: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
+    implicit val TokenIdRType: RType[TokenId] = collRType(RType.ByteType).asInstanceOf[RType[TokenId]]
     val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
     val rs = registers.zipWithIndex.map { case (ergoValue, i) =>
       val id = ErgoBox.nonMandatoryRegisters(i)
@@ -671,8 +671,8 @@ object JavaHelpers {
     subtractedTokens: IndexedSeq[(TokenId, Long)]
   ): TokenColl = {
     subtractTokenColls(
-      reducedTokens = Colls.fromItems(reducedTokens:_*).mapFirst(Colls.fromArray(_)),
-      subtractedTokens = Colls.fromItems(subtractedTokens:_*).mapFirst(Colls.fromArray(_))
+      reducedTokens = Colls.fromItems(reducedTokens:_*).mapFirst(_.asInstanceOf[Coll[Byte]]),
+      subtractedTokens = Colls.fromItems(subtractedTokens:_*).mapFirst(_.asInstanceOf[Coll[Byte]])
     )
   }
 }

@@ -4,7 +4,7 @@ import org.ergoplatform._
 import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import scorex.crypto.authds.ADDigest
 import sigmastate.eval.Colls

@@ -11,7 +11,7 @@ import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import org.ergoplatform.restapi.client.UnsignedErgoTransaction;
-import org.ergoplatform.wallet.protocol.context.ErgoLikeStateContext;
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,9 +1,9 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 import org.ergoplatform.wallet.secrets.JsonSecretStorage;
-import org.ergoplatform.wallet.settings.EncryptionSettings;
+import org.ergoplatform.sdk.wallet.settings.EncryptionSettings;
 import org.ergoplatform.wallet.settings.SecretStorageSettings;
 import scala.Option;
 import scala.runtime.BoxedUnit;

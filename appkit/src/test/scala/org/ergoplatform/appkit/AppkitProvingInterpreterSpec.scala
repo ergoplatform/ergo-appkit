@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction}
+import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction, ErgoTreePredef}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
 import org.ergoplatform.settings.ErgoAlgos
 import org.scalatest.matchers.should.Matchers
@@ -10,6 +10,7 @@ import sigmastate.helpers.NegativeTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.TestsBase
 import sigmastate.eval.Colls
+import sigmastate.eval.Extensions.ArrayByteOps
 import sigmastate.helpers.TestingHelpers.createBox
 
 import java.util
@@ -73,10 +74,10 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
       val prover = ctx.newProverBuilder()
         .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
-      val tree1 = ErgoScriptPredef.TrueProp(ergoTreeHeaderInTests)
-      val tree2 = ErgoScriptPredef.FalseProp(ergoTreeHeaderInTests)
-      val token1 = (ErgoAlgos.hash("id1"), 10L)
-      val token2 = (ErgoAlgos.hash("id2"), 20L)
+      val tree1 = ErgoTreePredef.TrueProp(ergoTreeHeaderInTests)
+      val tree2 = ErgoTreePredef.FalseProp(ergoTreeHeaderInTests)
+      val token1 = (ErgoAlgos.hash("id1").toTokenId, 10L)
+      val token2 = (ErgoAlgos.hash("id2").toTokenId, 20L)
       val ergoToken1 = Iso.isoErgoTokenToPair.from(token1)
       val ergoToken2 = Iso.isoErgoTokenToPair.from(token2)
 
@@ -106,7 +107,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
           {
             case e: TokenBalanceException =>
               val cond1 = exceptionLike[TokenBalanceException]("Transaction tries to burn tokens when no burning was requested")
-              cond1(e) && e.tokensDiff.exists(t => t == (Colls.fromArray(token2._1), -token2._2))
+              cond1(e) && e.tokensDiff.exists(t => t == (token2._1, -token2._2))
             case _ => false
           }
         )
@@ -121,7 +122,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
           {
             case e: TokenBalanceException =>
               val cond1 = exceptionLike[TokenBalanceException]("Transaction tries to burn tokens when no burning was requested")
-              cond1(e) && e.tokensDiff.exists(t => t == (Colls.fromArray(token2._1), -10))
+              cond1(e) && e.tokensDiff.exists(t => t == (token2._1, -10))
             case _ => false
           }
         )
@@ -148,7 +149,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
           {
             case e: TokenBalanceException =>
               val cond1 = exceptionLike[TokenBalanceException]("Transaction tries to burn tokens when no burning was requested")
-              cond1(e) && e.tokensDiff.exists(t => t == (Colls.fromArray(token1._1), -20))
+              cond1(e) && e.tokensDiff.exists(t => t == (token1._1, -20))
             case _ => false
           }
         )
@@ -167,8 +168,8 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
               val cond1 = exceptionLike[TokenBalanceException](
                 "Transaction tries to burn tokens, but not how it was requested")
               val ok = cond1(e)
-              val token2_BurningWasNotRequested = e.tokensDiff.exists(t => t == (Colls.fromArray(token2._1), 10))
-              val token1_WasRequestedButNotBurned = e.tokensDiff.exists(t => t == (Colls.fromArray(token1._1), -10))
+              val token2_BurningWasNotRequested = e.tokensDiff.exists(t => t == (token2._1, 10))
+              val token1_WasRequestedButNotBurned = e.tokensDiff.exists(t => t == (token1._1, -10))
               ok && token2_BurningWasNotRequested && token1_WasRequestedButNotBurned
             case _ => false
           }
@@ -188,8 +189,8 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
               val cond1 = exceptionLike[TokenBalanceException](
                 "Only one token can be minted in a transaction")
               val ok = cond1(e)
-              val token1_mint_attempted = e.tokensDiff.exists(t => t == (Colls.fromArray(token1._1), token1._2))
-              val token2_mint_attempted = e.tokensDiff.exists(t => t == (Colls.fromArray(token2._1), token2._2))
+              val token1_mint_attempted = e.tokensDiff.exists(t => t == (token1._1, token1._2))
+              val token2_mint_attempted = e.tokensDiff.exists(t => t == (token2._1, token2._2))
               ok && token1_mint_attempted && token2_mint_attempted && e.tokensDiff.length == 2
             case _ => false
           }
@@ -209,7 +210,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
               val cond1 = exceptionLike[TokenBalanceException](
                 "Cannot mint a token with invalid id")
               val ok = cond1(e)
-              val token1_mint_attempted = e.tokensDiff.exists(t => t == (Colls.fromArray(token1._1), token1._2))
+              val token1_mint_attempted = e.tokensDiff.exists(t => t == (token1._1, token1._2))
               ok && token1_mint_attempted && e.tokensDiff.length == 1
             case _ => false
           }

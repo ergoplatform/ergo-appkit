@@ -1,8 +1,8 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{DLogProtocol, DiffieHellmanTupleProverInput}
 import special.sigma.GroupElement
 import java.math.BigInteger
