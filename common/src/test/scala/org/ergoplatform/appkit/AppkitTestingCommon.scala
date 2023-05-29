@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.sdk.SecretString
 import scalan.RType
 import sigmastate.eval.SigmaDsl
 

@@ -3,11 +3,12 @@ package org.ergoplatform.appkit
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.eval._
 import special.sigma.GroupElement
-import JavaHelpers._
 
 import java.util.{Arrays, List => JList}
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.{ErgoToken, JavaHelpers}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import sigmastate.basics.CryptoConstants

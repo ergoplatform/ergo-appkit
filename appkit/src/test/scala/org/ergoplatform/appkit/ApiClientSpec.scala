@@ -2,6 +2,7 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.examples.ExampleScenarios
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.{SecretString, JavaHelpers}
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.validation.ValidationRules
 import org.scalatest.matchers.should.Matchers

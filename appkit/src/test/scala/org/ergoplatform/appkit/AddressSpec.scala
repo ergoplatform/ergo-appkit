@@ -3,6 +3,7 @@ package org.ergoplatform.appkit
 import org.ergoplatform.appkit.examples.RunMockedScala
 import org.ergoplatform.appkit.examples.RunMockedScala.createMockedErgoClient
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.{ErgoAddressEncoder, Pay2SAddress}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec

@@ -9,6 +9,8 @@ import org.ergoplatform.appkit.*;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.Iso;
 import sigmastate.Values;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteWriter;

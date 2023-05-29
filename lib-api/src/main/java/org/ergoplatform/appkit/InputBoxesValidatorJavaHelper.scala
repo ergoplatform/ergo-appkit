@@ -1,12 +1,13 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.ErgoBoxAssets
-import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
-import org.ergoplatform.appkit.Iso._
-import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughTokensException, NotEnoughErgsException}
+import org.ergoplatform.sdk.Iso._
+import org.ergoplatform.sdk.JavaHelpers._
+import org.ergoplatform.sdk.ErgoToken
 import org.ergoplatform.sdk.wallet.AssetUtils
-import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughCoinsForChangeBoxesError, NotEnoughErgsError, NotEnoughTokensError}
-import scorex.util.{ModifierId, bytesToId}
+import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughTokensError, NotEnoughErgsError, NotEnoughCoinsForChangeBoxesError}
+import scorex.util.{bytesToId, ModifierId}
 
 import java.util
 import java.util.{List => JList}

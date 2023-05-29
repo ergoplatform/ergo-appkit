@@ -1,8 +1,9 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction, ErgoTreePredef}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
+import org.ergoplatform.sdk.{ErgoToken, SecretString, JavaHelpers, Iso, ExtendedInputBox, TokenBalanceException}
 import org.ergoplatform.settings.ErgoAlgos
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec

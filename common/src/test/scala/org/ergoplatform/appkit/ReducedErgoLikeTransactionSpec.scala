@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.UnsignedErgoLikeTransaction
+import org.ergoplatform.sdk.{ReducedInputData, ReducedErgoLikeTransaction, ReducedErgoLikeTransactionSerializer}
 import org.scalacheck.Gen
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers

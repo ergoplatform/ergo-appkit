@@ -1,5 +1,8 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

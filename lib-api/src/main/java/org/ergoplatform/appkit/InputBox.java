@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ErgoId;
 import special.sigma.Box;
 
 /**

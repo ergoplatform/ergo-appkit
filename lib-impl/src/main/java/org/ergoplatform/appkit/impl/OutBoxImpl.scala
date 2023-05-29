@@ -1,7 +1,8 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
-import org.ergoplatform.appkit.{InputBox, OutBox, JavaHelpers, Iso, BoxAttachment, ErgoToken, ErgoValue}
+import org.ergoplatform.appkit.{InputBox, BoxAttachment, OutBox, ErgoValue, AppkitHelpers}
+import org.ergoplatform.sdk.{ErgoToken, Iso}
 import scorex.util.ModifierId
 import sigmastate.Values
 
@@ -14,7 +15,7 @@ class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
 
   override def getTokens: util.List[ErgoToken] = Iso.isoTokensListToPairsColl.from(_ergoBoxCandidate.additionalTokens)
 
-  override def getRegisters: util.List[ErgoValue[_]] = JavaHelpers.getBoxRegisters(_ergoBoxCandidate)
+  override def getRegisters: util.List[ErgoValue[_]] = AppkitHelpers.getBoxRegisters(_ergoBoxCandidate)
 
   override def getBytesWithNoRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
 

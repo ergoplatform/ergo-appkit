@@ -10,6 +10,7 @@ import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.Pay2SAddress;
 import org.ergoplatform.appkit.impl.ErgoTreeContract;
+import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
@@ -160,7 +161,7 @@ public class Address {
      */
     public Values.SigmaBoolean getSigmaBoolean() {
         Values.ErgoTree ergoTree = getErgoAddress().script();
-        return JavaHelpers$.MODULE$.toSigmaBoolean(ergoTree);
+        return org.ergoplatform.sdk.JavaHelpers$.MODULE$.toSigmaBoolean(ergoTree);
     }
 
     /**
@@ -202,10 +203,10 @@ public class Address {
      * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address fromMnemonic(
-            NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
-        ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
+        NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
+        ExtendedSecretKey masterKey = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
         DLogProtocol.ProveDlog pk = masterKey.publicImage();
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk,
+        P2PKAddress p2pkAddress = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(pk,
             networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
@@ -230,11 +231,11 @@ public class Address {
         SecretString mnemonic,
         SecretString mnemonicPass, 
         Boolean usePre1627KeyDerivation) {
-        ExtendedSecretKey rootSecret = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
+        ExtendedSecretKey rootSecret = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
 
         // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
         // is BIP-44 for Ergo)
-        DerivationPath path = JavaHelpers.eip3DerivationParent();
+        DerivationPath path = org.ergoplatform.sdk.JavaHelpers.eip3DerivationParent();
         ExtendedSecretKey secretKey = (ExtendedSecretKey) rootSecret.derive(path);
         ExtendedPublicKey pubkey = secretKey.publicKey();
 
@@ -254,9 +255,9 @@ public class Address {
         NetworkType networkType,
         ExtendedPublicKey extendedPublicKey) {
 
-        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
+        DerivationPath path = org.ergoplatform.sdk.JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
         ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path);
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
+        P2PKAddress p2pkAddress = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(
             pubkey.key(),
             networkType.networkPrefix);
         return new Address(p2pkAddress);
@@ -270,7 +271,7 @@ public class Address {
     }
 
     public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
-        Values.ErgoTree ergoTree = JavaHelpers$.MODULE$.toErgoTree(sigmaBoolean);
+        Values.ErgoTree ergoTree = org.ergoplatform.sdk.JavaHelpers$.MODULE$.toErgoTree(sigmaBoolean);
         return fromErgoTree(ergoTree, networkType);
     }
 

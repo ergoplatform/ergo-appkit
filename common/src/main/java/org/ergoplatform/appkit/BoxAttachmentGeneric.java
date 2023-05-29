@@ -63,7 +63,7 @@ public class BoxAttachmentGeneric implements BoxAttachment {
             throw new IllegalArgumentException(illegalArgumentException + r9.getType().toString());
         }
 
-        byte[] magicBytes = JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
+        byte[] magicBytes = org.ergoplatform.sdk.JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
         if (!Arrays.equals(BoxAttachment.MAGIC_BYTES, magicBytes)) {
             throw new IllegalArgumentException(illegalArgumentException + "Magic bytes not matched.");
         }

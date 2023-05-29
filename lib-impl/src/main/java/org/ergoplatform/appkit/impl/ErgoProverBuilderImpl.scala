@@ -5,9 +5,13 @@ import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import sigmastate.basics.{DLogProtocol, DiffieHellmanTupleProverInput}
 import special.sigma.GroupElement
+
 import java.math.BigInteger
 import java.util
-import JavaHelpers._
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, SecretString}
+import sigmastate.basics.DLogProtocol.DLogProverInput
+
 import scala.collection.mutable.ArrayBuffer
 
 class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuilder {
@@ -16,13 +20,13 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
   /** Generated EIP-3 secret keys paired with their derivation path index. */
   private var _eip2Keys =  ArrayBuffer.empty[(Int, ExtendedSecretKey)]
 
-  private val _dhtSecrets = new util.ArrayList[DiffieHellmanTupleProverInput]
-  private val _dLogSecrets = new util.ArrayList[DLogProtocol.DLogProverInput]
+  private val _dhtSecrets: util.List[DiffieHellmanTupleProverInput] = new util.ArrayList[DiffieHellmanTupleProverInput]
+  private val _dLogSecrets: util.List[DLogProverInput] = new util.ArrayList[DLogProtocol.DLogProverInput]
 
   override def withMnemonic(mnemonicPhrase: SecretString,
                             mnemonicPass: SecretString,
                             usePre1627KeyDerivation: java.lang.Boolean): ErgoProverBuilder = {
-    _masterKey = JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass, usePre1627KeyDerivation)
+    _masterKey = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonicPhrase, mnemonicPass, usePre1627KeyDerivation)
     this
   }
 
@@ -33,7 +37,7 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
     require(_masterKey != null, s"Mnemonic is not specified, use withMnemonic method.")
     require(!_eip2Keys.exists(_._1 == index),
             s"Secret key for derivation index $index has already been added.")
-    val path = JavaHelpers.eip3DerivationWithLastIndex(index)
+    val path = org.ergoplatform.sdk.JavaHelpers.eip3DerivationWithLastIndex(index)
     val secretKey = _masterKey.derive(path)
     _eip2Keys += (index -> secretKey)
     this
@@ -52,7 +56,7 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
                            u: GroupElement,
                            v: GroupElement,
                            x: BigInteger): ErgoProverBuilder = {
-    val dht = JavaHelpers.createDiffieHellmanTupleProverInput(g, h, u, v, x)
+    val dht = org.ergoplatform.sdk.JavaHelpers.createDiffieHellmanTupleProverInput(g, h, u, v, x)
     if (_dhtSecrets.contains(dht))
       throw new IllegalStateException("DHTuple secret already exists")
     _dhtSecrets.add(dht)
@@ -83,13 +87,16 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
       override def softForkVotesCollected: Option[Int] = ???
       override def blockVersion: Byte = _params.getBlockVersion.byteValue
     }
-    val keys = new util.ArrayList[ExtendedSecretKey]
+    val keys: java.util.List[ExtendedSecretKey] = new util.ArrayList[ExtendedSecretKey]
     if (_masterKey != null) {
       keys.add(_masterKey)
       val secretKeys: IndexedSeq[ExtendedSecretKey] = _eip2Keys.map(_._2).toIndexedSeq
       keys.addAll(secretKeys.convertTo[java.util.List[ExtendedSecretKey]])
     }
-    val interpreter = new AppkitProvingInterpreter(keys, _dLogSecrets, _dhtSecrets, parameters)
+    val interpreter = new AppkitProvingInterpreter(
+      keys.convertTo[IndexedSeq[ExtendedSecretKey]],
+      _dLogSecrets.convertTo[IndexedSeq[DLogProverInput]],
+      _dhtSecrets.convertTo[IndexedSeq[DiffieHellmanTupleProverInput]], parameters)
     new ErgoProverImpl(_ctx, interpreter)
   }
 }

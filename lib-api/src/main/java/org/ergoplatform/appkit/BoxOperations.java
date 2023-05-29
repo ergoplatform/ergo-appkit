@@ -5,6 +5,8 @@ import static org.ergoplatform.appkit.BlockchainContext.DEFAULT_LIMIT_FOR_API;
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
 import com.google.common.base.Preconditions;
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.SecretString;
 
 import java.util.ArrayList;
 import java.util.Collections;

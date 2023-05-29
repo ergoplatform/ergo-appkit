@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 import org.ergoplatform.wallet.secrets.JsonSecretStorage;
 import org.ergoplatform.sdk.wallet.settings.EncryptionSettings;
@@ -44,12 +45,13 @@ public class SecretStorage {
 
     public Address getAddressFor(NetworkType networkType) {
         DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().publicImage();
-        P2PKAddress p2pk = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
+        P2PKAddress p2pk = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pk);
     }
 
     public void unlock(SecretString encryptionPass) {
-        Try<BoxedUnit> resTry = _jsonStorage.unlock(encryptionPass.toInterface4JSecretString());
+        Try<BoxedUnit> resTry = _jsonStorage.unlock(
+            SecretStringConverter.toInterface4JSecretString(encryptionPass));
         if (resTry.isFailure()) {
             Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
@@ -74,10 +76,10 @@ public class SecretStorage {
         SecretString password = mnemonic.getPassword();
 
         JsonSecretStorage jsonStorage = JsonSecretStorage
-            .restore(mnemonic.getPhrase().toInterface4JSecretString(),
-                JavaHelpers.secretStringToOption(password != null ?
-                    password.toInterface4JSecretString() : null),
-                encryptionPassword.toInterface4JSecretString(),
+            .restore(SecretStringConverter.toInterface4JSecretString(mnemonic.getPhrase()),
+                AppkitHelpers.secretStringToOption(password != null ?
+                    SecretStringConverter.toInterface4JSecretString(password) : null),
+                SecretStringConverter.toInterface4JSecretString(encryptionPassword),
                 settings, usePre1627KeyDerivation);
 
         return new SecretStorage(jsonStorage);

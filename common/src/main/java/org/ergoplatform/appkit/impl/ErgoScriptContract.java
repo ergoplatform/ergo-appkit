@@ -42,7 +42,7 @@ public class ErgoScriptContract implements ErgoContract {
 
     @Override
     public Values.ErgoTree getErgoTree() {
-        Values.ErgoTree ergoTree = JavaHelpers.compile(
+        Values.ErgoTree ergoTree = AppkitHelpers.compile(
                 _constants, _code, _networkType.networkPrefix);
         return ergoTree;
     }

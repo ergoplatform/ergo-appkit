@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.ErgoAddress;
+import org.ergoplatform.sdk.ErgoToken;
 
 import javax.annotation.Nonnull;
 import java.util.List;

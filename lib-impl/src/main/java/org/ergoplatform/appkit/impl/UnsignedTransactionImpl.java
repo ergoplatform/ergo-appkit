@@ -11,6 +11,9 @@ import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import org.ergoplatform.restapi.client.UnsignedErgoTransaction;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.ExtendedInputBox;
 import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _boxesToSpend = boxesToSpend;
         _dataBoxes = dataBoxes;
         _tokensToBurn = tokensToBurn;
-        _outputs = JavaHelpers$.MODULE$.toJavaList(_tx.outputs());
+        _outputs = AppkitHelpers$.MODULE$.toJavaList(_tx.outputs());
         _changeAddress = changeAddress;
         _stateContext = stateContext;
         _ctx = ctx;

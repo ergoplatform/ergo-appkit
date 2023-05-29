@@ -1,15 +1,16 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform._
-import org.ergoplatform.appkit.JavaHelpers._
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import org.ergoplatform.appkit._
+import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, JavaHelpers, Iso}
 import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import scorex.crypto.authds.ADDigest
 import sigmastate.eval.Colls
 import special.collection.Coll
 import special.sigma.Header
+import AppkitHelpers._
 
 import java.util
 import java.util._

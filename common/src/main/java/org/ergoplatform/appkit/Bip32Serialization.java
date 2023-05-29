@@ -37,7 +37,7 @@ public class Bip32Serialization {
             throw new IllegalArgumentException("Master key expected for serialization");
         }
 
-        DerivationPath eip3ParentPath = JavaHelpers.eip3DerivationParent();
+        DerivationPath eip3ParentPath = org.ergoplatform.sdk.JavaHelpers.eip3DerivationParent();
         ExtendedPublicKey eip3ParentKey = ((ExtendedSecretKey) masterKey.derive(eip3ParentPath)).publicKey();
         // we need the parent's parent for its fingerprint
         ExtendedPublicKey eip3ParentParent = ((ExtendedSecretKey) masterKey.derive(

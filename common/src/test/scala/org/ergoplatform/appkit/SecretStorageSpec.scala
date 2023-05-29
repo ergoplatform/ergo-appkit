@@ -25,7 +25,7 @@ class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenP
       val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonicWithPassword, false)
       val secret = storage.getSecret()
       secret should not be(null)
-      val expSecret = JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword, false)
+      val expSecret = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword, false)
       expSecret shouldBe secret
       storage.getAddressFor(NetworkType.TESTNET) shouldBe addr
     }

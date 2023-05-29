@@ -19,14 +19,14 @@ public class ErgoType<T> {
     private static ErgoType<Integer> _integer = new ErgoType(RType.IntType());
     private static ErgoType<Long> _long = new ErgoType(RType.LongType());
     private static ErgoType<Boolean> _boolean = new ErgoType(RType.BooleanType());
-    private static ErgoType<BigInt> _bigInt = new ErgoType(JavaHelpers.BigIntRType());
+    private static ErgoType<BigInt> _bigInt = new ErgoType(org.ergoplatform.sdk.JavaHelpers.BigIntRType());
     private static ErgoType<Unit> _unit = new ErgoType(RType.UnitType());
-    private static ErgoType<GroupElement> _groupElement = new ErgoType(JavaHelpers.GroupElementRType());
-    private static ErgoType<special.sigma.SigmaProp> _sigmaProp = new ErgoType(JavaHelpers.SigmaPropRType());
-    private static ErgoType<AvlTree> _avlTree = new ErgoType(JavaHelpers.AvlTreeRType());
-    private static ErgoType<Box> _box = new ErgoType(JavaHelpers.BoxRType());
-    private static ErgoType<Header> _header = new ErgoType(JavaHelpers.HeaderRType());
-    private static ErgoType<special.sigma.PreHeader> _preHeader = new ErgoType(JavaHelpers.PreHeaderRType());
+    private static ErgoType<GroupElement> _groupElement = new ErgoType(org.ergoplatform.sdk.JavaHelpers.GroupElementRType());
+    private static ErgoType<special.sigma.SigmaProp> _sigmaProp = new ErgoType(org.ergoplatform.sdk.JavaHelpers.SigmaPropRType());
+    private static ErgoType<AvlTree> _avlTree = new ErgoType(org.ergoplatform.sdk.JavaHelpers.AvlTreeRType());
+    private static ErgoType<Box> _box = new ErgoType(org.ergoplatform.sdk.JavaHelpers.BoxRType());
+    private static ErgoType<Header> _header = new ErgoType(org.ergoplatform.sdk.JavaHelpers.HeaderRType());
+    private static ErgoType<special.sigma.PreHeader> _preHeader = new ErgoType(org.ergoplatform.sdk.JavaHelpers.PreHeaderRType());
 
     public RType<T> getRType() {
         return _rtype;
@@ -87,7 +87,7 @@ public class ErgoType<T> {
     }
 
     static public <A> ErgoType<Coll<A>> collType(ErgoType<A> tItem) {
-        return new ErgoType<>(JavaHelpers.collRType(tItem._rtype));
+        return new ErgoType<>(org.ergoplatform.sdk.JavaHelpers.collRType(tItem._rtype));
     }
 
     static public <A> ErgoType<A> ofRType(RType<A> rtype) {
