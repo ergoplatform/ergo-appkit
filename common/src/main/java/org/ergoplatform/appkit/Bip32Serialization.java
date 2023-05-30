@@ -1,19 +1,17 @@
 package org.ergoplatform.appkit;
 
 import org.bouncycastle.jcajce.provider.digest.RIPEMD160;
-import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.wallet.Constants;
 import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
+import scala.collection.immutable.Seq;
+import scorex.crypto.hash.Sha256;
+import scorex.util.encode.Base16;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-
-import scala.collection.immutable.Seq;
-import scorex.crypto.hash.Sha256;
-import scorex.util.encode.Base16$;
 
 /**
  * Methods to serialize and deserialize key according to bip32 standard
@@ -26,7 +24,7 @@ public class Bip32Serialization {
      */
     public static String serializeExtendedPublicKeyToHex(ExtendedSecretKey masterKey, NetworkType networkType) {
         byte[] serializedKey = serializeExtendedPublicKeyBip32(masterKey, networkType);
-        return Base16$.MODULE$.encode(serializedKey);
+        return Base16.encode(serializedKey);
     }
 
     /**
@@ -72,7 +70,7 @@ public class Bip32Serialization {
      * parses a hex-encoded serialized public key and returns it to use for address derivation
      */
     public static ExtendedPublicKey parseExtendedPublicKeyFromHex(String hexEncodedKey, NetworkType networkType) {
-        byte[] xpub = Base16$.MODULE$.decode(hexEncodedKey).get();
+        byte[] xpub = Base16.decode(hexEncodedKey).get();
         return parseExtendedPublicKey(xpub, networkType);
     }
 

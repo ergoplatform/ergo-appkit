@@ -3,21 +3,24 @@ package org.ergoplatform.appkit.impl;
 import com.google.gson.Gson;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.ErgoLikeTransactionSerializer$;
+import org.ergoplatform.ErgoLikeTransactionSerializer;
 import org.ergoplatform.Input;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.InputBox;
+import org.ergoplatform.appkit.OutBox;
+import org.ergoplatform.appkit.SignedInput;
+import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.sdk.Iso;
 import sigmastate.Values;
-import sigmastate.serialization.SigmaSerializer$;
+import sigmastate.serialization.SigmaSerializer;
 import sigmastate.utils.SigmaByteWriter;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 
 public class SignedTransactionImpl implements SignedTransaction {
 
@@ -114,8 +117,8 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public byte[] toBytes() {
-        SigmaByteWriter w = SigmaSerializer$.MODULE$.startWriter();
-        ErgoLikeTransactionSerializer$.MODULE$.serialize(_tx, w);
+        SigmaByteWriter w = SigmaSerializer.startWriter();
+        ErgoLikeTransactionSerializer.serialize(_tx, w);
         w.putUInt(_txCost);
         return w.toBytes();
     }

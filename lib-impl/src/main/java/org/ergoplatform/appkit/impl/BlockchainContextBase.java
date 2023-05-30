@@ -1,21 +1,12 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.ErgoLikeTransaction;
-import org.ergoplatform.ErgoLikeTransactionSerializer$;
-import org.ergoplatform.appkit.BlockchainContext;
-import org.ergoplatform.appkit.Constants;
-import org.ergoplatform.appkit.ErgoContract;
-import org.ergoplatform.appkit.NetworkType;
+import org.ergoplatform.ErgoLikeTransactionSerializer;
+import org.ergoplatform.appkit.*;
 import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
-import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer$;
-import org.ergoplatform.appkit.ReducedTransaction;
-import org.ergoplatform.appkit.SignedTransaction;
-import org.ergoplatform.appkit.BlockchainParameters;
-
-import scala.Function0;
+import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
 import sigmastate.Values;
-import sigmastate.VersionContext$;
-import sigmastate.serialization.SigmaSerializer$;
+import sigmastate.serialization.SigmaSerializer;
 import sigmastate.utils.SigmaByteReader;
 
 public abstract class BlockchainContextBase implements BlockchainContext {
@@ -44,15 +35,15 @@ public abstract class BlockchainContextBase implements BlockchainContext {
 
     @Override
     public ReducedTransaction parseReducedTransaction(byte[] txBytes) {
-        SigmaByteReader r = SigmaSerializer$.MODULE$.startReader(txBytes, 0);
-        ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer$.MODULE$.parse(r, getParameters().getBlockVersion());
+        SigmaByteReader r = SigmaSerializer.startReader(txBytes, 0);
+        ReducedErgoLikeTransaction tx = ReducedErgoLikeTransactionSerializer.parse(r, getParameters().getBlockVersion());
         return new ReducedTransactionImpl(this, tx);
     }
 
     @Override
     public SignedTransaction parseSignedTransaction(byte[] txBytes) {
-        SigmaByteReader r = SigmaSerializer$.MODULE$.startReader(txBytes, 0);
-        ErgoLikeTransaction tx = ErgoLikeTransactionSerializer$.MODULE$.parse(r);
+        SigmaByteReader r = SigmaSerializer.startReader(txBytes, 0);
+        ErgoLikeTransaction tx = ErgoLikeTransactionSerializer.parse(r);
         int cost = (int)r.getUInt(); // TODO use java7.compat.Math.toIntExact when it will available in Sigma
         return new SignedTransactionImpl(this, tx, cost);
     }

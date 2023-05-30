@@ -5,7 +5,7 @@ import org.ergoplatform.ErgoBox;
 import org.ergoplatform.sdk.Iso;
 import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
-import scorex.util.encode.Base16$;
+import scorex.util.encode.Base16;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
@@ -52,7 +52,7 @@ public class ErgoValue<T> {
     public String toHex() {
         Values.EvaluatedValue<SType> c = AppkitIso.isoErgoValueToSValue().to(this);
         byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
-        return Base16$.MODULE$.encode(bytes);
+        return Base16.encode(bytes);
     }
 
     @Override
