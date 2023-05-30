@@ -6,9 +6,10 @@ import org.ergoplatform.explorer.client.model.{OutputInfo, AssetInstanceInfo, Ad
 import java.util
 import java.util.{List => JList}
 import java.lang.{Byte => JByte}
-import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
+import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, Token, TokenId}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.{ErgoLikeTransaction, _}
-import org.ergoplatform.sdk.ErgoToken
+import org.ergoplatform.sdk.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
 import special.sigma.Header
 import scorex.crypto.authds.{ADDigest, ADKey}
@@ -17,7 +18,7 @@ import scorex.util.ModifierId
 import sigmastate.SType
 import sigmastate.Values.{EvaluatedValue, ErgoTree}
 import sigmastate.eval.Extensions.ArrayByteOps
-import sigmastate.eval.{CHeader, CAvlTree}
+import sigmastate.eval.{CHeader, CAvlTree, SigmaDsl}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
@@ -27,9 +28,8 @@ import scala.collection.JavaConverters
 import scala.collection.JavaConverters._
 
 object ScalaBridge {
-  import org.ergoplatform.sdk.Iso
-  import org.ergoplatform.sdk.Iso._
-  import org.ergoplatform.sdk.JavaHelpers._
+  import org.ergoplatform.sdk.Iso.JListToIndexedSeq
+  import org.ergoplatform.sdk.JavaHelpers.StringExtensions
 
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
@@ -157,8 +157,8 @@ object ScalaBridge {
 
   implicit val isoErgoTransactionOutput: Iso[ErgoTransactionOutput, ErgoBox] = new Iso[ErgoTransactionOutput, ErgoBox] {
     override def to(boxData: ErgoTransactionOutput): ErgoBox = {
-      val tree= boxData.getErgoTree.convertTo[ErgoTree]
-      val tokens = boxData.getAssets.convertTo[Coll[(TokenId, Long)]]
+      val tree = boxData.getErgoTree.convertTo[ErgoTree]
+      val tokens = boxData.getAssets.convertTo[Coll[Token]]
       val regs = boxData.getAdditionalRegisters.convertTo[AdditionalRegisters]
       new ErgoBox(boxData.getValue, tree,
         tokens, regs,
