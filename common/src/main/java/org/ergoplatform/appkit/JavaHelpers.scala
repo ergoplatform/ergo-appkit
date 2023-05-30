@@ -5,10 +5,9 @@ import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.ErgoScriptPredef.compileWithCosting
 import org.ergoplatform._
 import org.ergoplatform.sdk.Iso._
-import org.ergoplatform.sdk.JavaHelpers.{TokenIdRType, UniversalConverter, collRType}
-import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos, SecretString}
+import org.ergoplatform.sdk.JavaHelpers.{UniversalConverter, collRType}
+import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos}
 import scalan.RType
-import scalan.util.StringUtil._
 import sigmastate.SType
 import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue}
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
@@ -16,9 +15,7 @@ import sigmastate.eval.{Colls, CompiletimeIRContext, Evaluation}
 import sigmastate.interpreter.ContextExtension
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.serialization.ErgoTreeSerializer
-import special.collection.Coll
 
-import java.lang.{String => JString}
 import java.util
 import java.util.{List => JList}
 import scala.collection.JavaConverters
@@ -59,23 +56,6 @@ object AppkitIso extends LowPriorityIsos {
         .toIndexedSeq)
       vars
     }
-  }
-
-  val isoTokensListToPairsColl: Iso[JList[ErgoToken], Coll[(TokenId, Long)]] = {
-    JListToColl(isoErgoTokenToPair, RType[(TokenId, Long)])
-  }
-
-  implicit val jstringToOptionString: Iso[JString, Option[String]] = new Iso[JString, Option[String]] {
-    override def to(a: JString): Option[String] = if (a.isNullOrEmpty) None else Some(a)
-    override def from(b: Option[String]): JString = if (b.isEmpty) "" else b.get
-  }
-
-  implicit val arrayCharToOptionString: Iso[SecretString, Option[String]] = new Iso[SecretString, Option[String]] {
-    override def to(ss: SecretString): Option[String] = {
-      if (ss == null || ss.isEmpty) None else Some(ss.toStringUnsecure)
-    }
-    override def from(b: Option[String]): SecretString =
-      if (b.isEmpty) SecretString.empty() else SecretString.create(b.get)
   }
 
 }
