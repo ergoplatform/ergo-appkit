@@ -3,8 +3,8 @@ package org.ergoplatform.appkit.scalaapi
 import debox.cfor
 import org.ergoplatform.sdk.Extensions.CollBuilderOps
 import scalan.RType
-import special.collection.{CollBuilder, PairColl, Coll}
-import scalan.rtypeToClassTag
+import special.collection.Coll
+import scalan.rtypeToClassTag  // don't remove it is used
 
 import scala.collection.immutable
 import scala.reflect.ClassTag

@@ -1,30 +1,28 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.explorer.client.model.{OutputInfo, AssetInstanceInfo, AdditionalRegister, AssetInfo => EAsset, AdditionalRegisters => ERegisters}
-
-import java.util
-import java.util.{List => JList}
-import java.lang.{Byte => JByte}
 import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, Token, TokenId}
+import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import org.ergoplatform.{ErgoLikeTransaction, _}
 import org.ergoplatform.sdk.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
-import special.sigma.Header
-import scorex.crypto.authds.{ADDigest, ADKey}
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
+import org.ergoplatform.{ErgoLikeTransaction, _}
+import scorex.crypto.authds.{ADDigest, ADKey}
 import scorex.util.ModifierId
 import sigmastate.SType
-import sigmastate.Values.{EvaluatedValue, ErgoTree}
+import sigmastate.Values.{ErgoTree, EvaluatedValue}
 import sigmastate.eval.Extensions.ArrayByteOps
-import sigmastate.eval.{CHeader, CAvlTree, SigmaDsl}
+import sigmastate.eval.{CAvlTree, CHeader, SigmaDsl}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
+import special.sigma.Header
 
-import scala.collection.JavaConverters
+import java.lang.{Byte => JByte}
+import java.util
+import java.util.{List => JList}
 import scala.collection.JavaConverters._
 
 object ScalaBridge {

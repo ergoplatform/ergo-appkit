@@ -1,33 +1,28 @@
 package org.ergoplatform.appkit
 
+import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
+import org.ergoplatform.ErgoBox.TokenId
+import org.ergoplatform.ErgoScriptPredef.compileWithCosting
+import org.ergoplatform._
+import org.ergoplatform.sdk.Iso._
+import org.ergoplatform.sdk.JavaHelpers.{TokenIdRType, UniversalConverter, collRType}
+import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos, SecretString}
 import scalan.RType
+import scalan.util.StringUtil._
+import sigmastate.SType
+import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue}
+import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
+import sigmastate.eval.{Colls, CompiletimeIRContext, Evaluation}
+import sigmastate.interpreter.ContextExtension
+import sigmastate.lang.Terms.ValueOps
+import sigmastate.serialization.ErgoTreeSerializer
 import special.collection.Coll
 
-import scala.collection.{JavaConverters, mutable}
-import scala.collection.compat.immutable.ArraySeq
-import org.ergoplatform._
-import org.ergoplatform.ErgoBox.TokenId
-import sigmastate.SType
-import sigmastate.Values.{EvaluatedValue, Constant, SigmaBoolean, ErgoTree}
-import sigmastate.serialization.{ErgoTreeSerializer, SigmaSerializer}
-import sigmastate.lang.Terms.ValueOps
-import sigmastate.eval.{Evaluation, Colls, CompiletimeIRContext}
-
+import java.lang.{String => JString}
 import java.util
-import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte, String => JString}
-import java.util.{List => JList, Map => JMap}
-import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
-import scorex.util.ModifierId
-import sigmastate.interpreter.ContextExtension
-import org.ergoplatform.ErgoScriptPredef.compileWithCosting
-import org.ergoplatform.sdk
-import org.ergoplatform.sdk.JavaHelpers.{collRType, TokenIdRType, UniversalConverter}
-import org.ergoplatform.sdk.{LowPriorityIsos, ErgoToken, SecretString, Iso, InverseIso}
-import org.ergoplatform.sdk.Iso._
-import scalan.util.StringUtil._
-import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import sigmastate.utils.Extensions._
-import sigmastate.eval.Extensions._
+import java.util.{List => JList}
+import scala.collection.JavaConverters
+import scala.collection.compat.immutable.ArraySeq
 
 object AppkitIso extends LowPriorityIsos {
   import org.ergoplatform.sdk.Iso._

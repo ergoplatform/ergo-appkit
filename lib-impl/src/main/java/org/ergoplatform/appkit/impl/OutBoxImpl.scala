@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
-import org.ergoplatform.appkit.{InputBox, BoxAttachment, OutBox, ErgoValue, AppkitHelpers}
+import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.{ErgoToken, Iso}
 import scorex.util.ModifierId
 import sigmastate.Values

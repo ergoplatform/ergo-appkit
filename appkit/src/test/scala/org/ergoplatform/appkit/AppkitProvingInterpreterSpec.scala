@@ -1,22 +1,20 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.sdk.JavaHelpers._
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox, UnsignedErgoLikeTransaction, ErgoTreePredef}
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
-import org.ergoplatform.sdk.{ErgoToken, SecretString, JavaHelpers, Iso, ExtendedInputBox, TokenBalanceException}
+import org.ergoplatform.sdk.JavaHelpers._
+import org.ergoplatform.sdk._
 import org.ergoplatform.settings.ErgoAlgos
+import org.ergoplatform.{ErgoBox, ErgoTreePredef, UnsignedErgoLikeTransaction}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
-import sigmastate.helpers.NegativeTesting
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigmastate.TestsBase
-import sigmastate.eval.Colls
 import sigmastate.eval.Extensions.ArrayByteOps
+import sigmastate.helpers.NegativeTesting
 import sigmastate.helpers.TestingHelpers.createBox
 
 import java.util
-import java.util.Collections
-import util.{List => JList}
+import java.util.{Collections, List => JList}
 
 class AppkitProvingInterpreterSpec extends AnyPropSpec
   with Matchers

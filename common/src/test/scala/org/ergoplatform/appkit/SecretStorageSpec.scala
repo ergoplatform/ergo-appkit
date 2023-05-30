@@ -2,6 +2,7 @@ package org.ergoplatform.appkit
 
 import java.io.File
 import com.google.common.io.Files
+import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -25,7 +26,7 @@ class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenP
       val addr = Address.fromMnemonic(NetworkType.TESTNET, mnemonicWithPassword, false)
       val secret = storage.getSecret()
       secret should not be(null)
-      val expSecret = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword, false)
+      val expSecret = JavaHelpers.seedToMasterKey(mnemonicWithPassword.getPhrase, mnemonicWithPassword.getPassword, false)
       expSecret shouldBe secret
       storage.getAddressFor(NetworkType.TESTNET) shouldBe addr
     }

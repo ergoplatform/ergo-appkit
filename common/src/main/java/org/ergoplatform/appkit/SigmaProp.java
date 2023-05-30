@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import sigmastate.Values;
 
 /**
@@ -14,7 +15,7 @@ public class SigmaProp {
     }
 
     public SigmaProp(special.sigma.SigmaProp sigmaProp) {
-        this(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
+        this(JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
     }
 
     public Values.SigmaBoolean getSigmaBoolean() {

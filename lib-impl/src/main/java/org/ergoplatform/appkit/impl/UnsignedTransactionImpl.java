@@ -44,7 +44,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         _boxesToSpend = boxesToSpend;
         _dataBoxes = dataBoxes;
         _tokensToBurn = tokensToBurn;
-        _outputs = AppkitHelpers$.MODULE$.toJavaList(_tx.outputs());
+        _outputs = AppkitHelpers.toJavaList(_tx.outputs());
         _changeAddress = changeAddress;
         _stateContext = stateContext;
         _ctx = ctx;

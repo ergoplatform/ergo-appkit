@@ -2,11 +2,8 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
-
-import java.math.BigInteger;
-import java.util.Objects;
-
 import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
 import scorex.util.encode.Base16$;
 import sigmastate.AvlTreeData;
@@ -20,7 +17,9 @@ import special.sigma.AvlTree;
 import special.sigma.BigInt;
 import special.sigma.Box;
 import special.sigma.GroupElement;
-import special.sigma.SigmaProp;
+
+import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -101,11 +100,11 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
-        return new ErgoValue<>(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().BigInt(value), ErgoType.bigIntType());
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().BigInt(value), ErgoType.bigIntType());
     }
 
     static public ErgoValue<GroupElement> of(ECPoint value) {
-        GroupElement ge = org.ergoplatform.sdk.JavaHelpers.SigmaDsl().GroupElement(new Platform.Ecp(value));
+        GroupElement ge = JavaHelpers.SigmaDsl().GroupElement(new Platform.Ecp(value));
         return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
@@ -114,19 +113,19 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<special.sigma.SigmaProp> of(Values.SigmaBoolean value) {
-        return new ErgoValue<>(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 
     static public ErgoValue<special.sigma.SigmaProp> of(org.ergoplatform.appkit.SigmaProp value) {
-        return new ErgoValue<>(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().SigmaProp(value.getSigmaBoolean()), ErgoType.sigmaPropType());
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value.getSigmaBoolean()), ErgoType.sigmaPropType());
     }
 
     static public ErgoValue<AvlTree> of(AvlTreeData value) {
-        return new ErgoValue<>(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
+        return new ErgoValue<>(JavaHelpers.SigmaDsl().avlTree(value), ErgoType.avlTreeType());
     }
 
     static public ErgoValue<Box> of(ErgoBox value) {
-        return of(org.ergoplatform.sdk.JavaHelpers.SigmaDsl().Box(value));
+        return of(JavaHelpers.SigmaDsl().Box(value));
     }
 
     static public ErgoValue<Box> of(Box value) {
@@ -134,28 +133,28 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<Coll<Byte>> of(byte[] arr) {
-        Coll value = org.ergoplatform.sdk.JavaHelpers.collFrom(arr);
+        Coll value = JavaHelpers.collFrom(arr);
         ErgoType<Coll<Byte>> type = ErgoType.collType(ErgoType.byteType());
         return new ErgoValue<Coll<Byte>>(value, type);
     }
 
     static public ErgoValue<Coll<Long>> of(long[] arr) {
-        return new ErgoValue<Coll<Long>>((Coll) org.ergoplatform.sdk.JavaHelpers.collFrom(arr),
+        return new ErgoValue<Coll<Long>>((Coll) JavaHelpers.collFrom(arr),
             ErgoType.collType(ErgoType.longType()));
     }
 
     static public ErgoValue<Coll<Boolean>> of(boolean[] arr) {
-        return new ErgoValue<Coll<Boolean>>((Coll) org.ergoplatform.sdk.JavaHelpers.collFrom(arr),
+        return new ErgoValue<Coll<Boolean>>((Coll) JavaHelpers.collFrom(arr),
             ErgoType.collType(ErgoType.booleanType()));
     }
 
     static public ErgoValue<Coll<Short>> of(short[] arr) {
-        return new ErgoValue<Coll<Short>>((Coll) org.ergoplatform.sdk.JavaHelpers.collFrom(arr),
+        return new ErgoValue<Coll<Short>>((Coll) JavaHelpers.collFrom(arr),
             ErgoType.collType(ErgoType.shortType()));
     }
 
     static public ErgoValue<Coll<Integer>> of(int[] arr) {
-        return new ErgoValue<Coll<Integer>>((Coll) org.ergoplatform.sdk.JavaHelpers.collFrom(arr),
+        return new ErgoValue<Coll<Integer>>((Coll) JavaHelpers.collFrom(arr),
             ErgoType.collType(ErgoType.integerType()));
     }
 
@@ -164,7 +163,7 @@ public class ErgoValue<T> {
             ErgoType.pairType(val1.getType(), val2.getType()));
     }
     static public <T> ErgoValue<Coll<T>> of(T[] arr, ErgoType<T> tT) {
-        Coll<T> value = org.ergoplatform.sdk.JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
+        Coll<T> value = JavaHelpers.SigmaDsl().Colls().fromArray(arr, tT.getRType());
         return new ErgoValue<>(value, ErgoType.collType(tT));
     }
 
@@ -191,7 +190,7 @@ public class ErgoValue<T> {
      * @return new deserialized ErgoValue instance
      */
     static public ErgoValue<?> fromHex(String hex) {
-        byte[] bytes = org.ergoplatform.sdk.JavaHelpers.decodeStringToBytes(hex);
+        byte[] bytes = JavaHelpers.decodeStringToBytes(hex);
         Values.EvaluatedValue<SType> c = (Values.EvaluatedValue<SType>)ValueSerializer.deserialize(bytes, 0);
         ErgoValue<?> res = AppkitIso.isoErgoValueToSValue().from(c);
         return res;

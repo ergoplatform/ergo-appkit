@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.appkit.babelfee.{BabelFeeOperations, BabelFeeBoxContract, BabelFeeBoxState}
-import org.ergoplatform.sdk.{ErgoToken, ErgoId, SecretString}
+import org.ergoplatform.appkit.babelfee.{BabelFeeBoxContract, BabelFeeBoxState, BabelFeeOperations}
+import org.ergoplatform.sdk.{ErgoId, ErgoToken, SecretString}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks

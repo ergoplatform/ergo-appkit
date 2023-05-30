@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.wallet.mnemonic.WordList;
 
@@ -88,7 +89,7 @@ public class Mnemonic {
 
     public byte[] toSeed() {
         Option<String> passOpt = Iso.arrayCharToOptionString().to(getPassword());
-        return org.ergoplatform.sdk.JavaHelpers.mnemonicToSeed(String.valueOf(_phrase), passOpt);
+        return JavaHelpers.mnemonicToSeed(String.valueOf(_phrase), passOpt);
     }
 
     /**
@@ -116,7 +117,7 @@ public class Mnemonic {
         int concatLenBits = words.size() * 11;
         boolean[] concatBits = new boolean[concatLenBits];
         int wordindex = 0;
-        List<String> wordList = AppkitHelpers$.MODULE$.toJavaList(WordList.load(languageId).get().words().toList());
+        List<String> wordList = AppkitHelpers.toJavaList(WordList.load(languageId).get().words().toList());
         for (String word : words) {
             // Find the words index in the wordlist.
             int ndx = Collections.binarySearch(wordList, word);

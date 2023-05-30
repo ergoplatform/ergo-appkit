@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
+import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
-import org.ergoplatform.wallet.secrets.JsonSecretStorage;
 import org.ergoplatform.sdk.wallet.settings.EncryptionSettings;
+import org.ergoplatform.wallet.secrets.JsonSecretStorage;
 import org.ergoplatform.wallet.settings.SecretStorageSettings;
 import scala.Option;
 import scala.runtime.BoxedUnit;
@@ -45,7 +46,7 @@ public class SecretStorage {
 
     public Address getAddressFor(NetworkType networkType) {
         DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().publicImage();
-        P2PKAddress p2pk = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
+        P2PKAddress p2pk = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pk);
     }
 

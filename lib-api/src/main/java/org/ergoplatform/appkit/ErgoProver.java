@@ -3,10 +3,8 @@ package org.ergoplatform.appkit;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.sdk.AppkitProvingInterpreter;
 import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters;
-import special.sigma.BigInt;
-
-import sigmastate.Values.SigmaBoolean;
 import sigmastate.interpreter.HintsBag;
+import special.sigma.BigInt;
 
 import java.util.List;
 

@@ -4,13 +4,13 @@ import org.ergoplatform.ErgoBox
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.sdk.JavaHelpers
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{EvaluatedValue, ByteArrayConstant, IntConstant}
-import sigmastate.{SType, TrivialProp}
-import sigmastate.helpers.TestingHelpers._
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
+import sigmastate.helpers.TestingHelpers._
+import sigmastate.{SType, TrivialProp}
 
 class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks

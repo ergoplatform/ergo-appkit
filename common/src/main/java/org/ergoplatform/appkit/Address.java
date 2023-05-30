@@ -1,20 +1,16 @@
 package org.ergoplatform.appkit;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.common.base.Objects;
-
-import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.Pay2SAddress;
 import org.ergoplatform.appkit.impl.ErgoTreeContract;
+import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
-
 import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
@@ -25,6 +21,8 @@ import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
 import special.sigma.GroupElement;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
     private final String _base58String;
@@ -161,7 +159,7 @@ public class Address {
      */
     public Values.SigmaBoolean getSigmaBoolean() {
         Values.ErgoTree ergoTree = getErgoAddress().script();
-        return org.ergoplatform.sdk.JavaHelpers$.MODULE$.toSigmaBoolean(ergoTree);
+        return JavaHelpers.toSigmaBoolean(ergoTree);
     }
 
     /**
@@ -204,10 +202,9 @@ public class Address {
      */
     public static Address fromMnemonic(
         NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
-        ExtendedSecretKey masterKey = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
+        ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
         DLogProtocol.ProveDlog pk = masterKey.publicImage();
-        P2PKAddress p2pkAddress = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(pk,
-            networkType.networkPrefix);
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
 
@@ -231,11 +228,11 @@ public class Address {
         SecretString mnemonic,
         SecretString mnemonicPass, 
         Boolean usePre1627KeyDerivation) {
-        ExtendedSecretKey rootSecret = org.ergoplatform.sdk.JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
+        ExtendedSecretKey rootSecret = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
 
         // Let's use "m/44'/429'/0'/0/index" path (this path is compliant with EIP-3 which
         // is BIP-44 for Ergo)
-        DerivationPath path = org.ergoplatform.sdk.JavaHelpers.eip3DerivationParent();
+        DerivationPath path = JavaHelpers.eip3DerivationParent();
         ExtendedSecretKey secretKey = (ExtendedSecretKey) rootSecret.derive(path);
         ExtendedPublicKey pubkey = secretKey.publicKey();
 
@@ -255,9 +252,9 @@ public class Address {
         NetworkType networkType,
         ExtendedPublicKey extendedPublicKey) {
 
-        DerivationPath path = org.ergoplatform.sdk.JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
-        ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path);
-        P2PKAddress p2pkAddress = org.ergoplatform.sdk.JavaHelpers.createP2PKAddress(
+        DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
+        ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path); // solves java: incompatible types: compile-time error
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
             pubkey.key(),
             networkType.networkPrefix);
         return new Address(p2pkAddress);
@@ -271,7 +268,7 @@ public class Address {
     }
 
     public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
-        Values.ErgoTree ergoTree = org.ergoplatform.sdk.JavaHelpers$.MODULE$.toErgoTree(sigmaBoolean);
+        Values.ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
         return fromErgoTree(ergoTree, networkType);
     }
 

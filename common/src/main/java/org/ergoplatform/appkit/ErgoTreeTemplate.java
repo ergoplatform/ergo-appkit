@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.collection.IndexedSeq;
 import scorex.util.encode.Base16;
 import sigmastate.SType;
@@ -26,7 +27,7 @@ public class ErgoTreeTemplate {
 
     private ErgoTreeTemplate(Values.ErgoTree tree) {
         _tree = tree;
-        _templateBytes = org.ergoplatform.sdk.JavaHelpers.ergoTreeTemplateBytes(_tree);
+        _templateBytes = JavaHelpers.ergoTreeTemplateBytes(_tree);
     }
 
     /**
@@ -46,7 +47,7 @@ public class ErgoTreeTemplate {
 
         if (integerHashSet.size() != positions.length)
             throw new IllegalArgumentException("Duplicate positions: " +
-                AppkitHelpers$.MODULE$.arraySeq(positions).mkString("[", ",", "]"));
+                AppkitHelpers.arraySeq(positions).mkString("[", ",", "]"));
 
         for (int p : positions)
             if (!_tree.constants().isDefinedAt(p))

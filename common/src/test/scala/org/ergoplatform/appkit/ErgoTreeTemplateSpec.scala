@@ -2,10 +2,10 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.AppkitIso.isoErgoTypeToSType
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import sigmastate.{SType, SInt, EQ, Plus}
-import sigmastate.Values.{IntConstant, ErgoTree}
+import sigmastate.Values.{ErgoTree, IntConstant}
 import sigmastate.helpers.NegativeTesting
 import sigmastate.serialization.generators.ObjectGenerators
+import sigmastate.{EQ, Plus, SInt, SType}
 
 import java.util.{List => JList}
 

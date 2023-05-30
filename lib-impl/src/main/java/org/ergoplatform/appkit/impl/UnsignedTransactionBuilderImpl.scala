@@ -1,21 +1,21 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform._
+import org.ergoplatform.appkit.AppkitHelpers._
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import org.ergoplatform.appkit._
-import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, JavaHelpers, Iso}
 import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext
+import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, Iso, JavaHelpers}
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import scorex.crypto.authds.ADDigest
 import sigmastate.eval.Colls
 import special.collection.Coll
 import special.sigma.Header
-import AppkitHelpers._
 
 import java.util
 import java.util._
 import scala.collection.JavaConverters
-import JavaConverters._
+import scala.collection.JavaConverters._
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
   private[impl] val _inputs: List[InputBoxImpl] = new ArrayList[InputBoxImpl]()
