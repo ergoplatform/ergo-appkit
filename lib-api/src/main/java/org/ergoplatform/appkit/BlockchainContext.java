@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ErgoToken;
 import sigmastate.Values;
 
 import java.util.List;

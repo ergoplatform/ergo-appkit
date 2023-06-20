@@ -45,7 +45,7 @@ public interface BlockchainDataSource {
     String sendTransaction(SignedTransaction tx);
 
     /**
-     * Get unspent boxes owned by the given address starting from the given offset up to
+     * Get confirmed unspent boxes owned by the given address starting from the given offset up to
      * the given limit (basically one page of the boxes).
      *
      * @param address owner of the boxes to be retrieved

@@ -2,7 +2,7 @@ package org.ergoplatform.appkit.cli
 
 import java.io.{BufferedReader, PrintStream}
 
-import org.ergoplatform.appkit.SecretString
+import org.ergoplatform.sdk.SecretString
 import org.ergoplatform.appkit.commands.UsageException
 
 /** Abstract interface for Console interactions (print and read operations).

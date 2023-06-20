@@ -2,13 +2,14 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.BoxOperations.createProver
 import org.ergoplatform.appkit.Parameters.MinFee
+import org.ergoplatform.appkit.impl.{NodeAndExplorerDataSourceImpl, NodeDataSourceImpl}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import sigmastate.basics.CryptoConstants
 import sigmastate.eval._
 import sigmastate.helpers.NegativeTesting
-import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
 class AnonymousAccessSpec extends AnyPropSpec with Matchers
@@ -41,10 +42,8 @@ class AnonymousAccessSpec extends AnyPropSpec with Matchers
 
     ergoClient.execute { ctx: BlockchainContext =>
       ctx shouldNot be (null)
-      assertExceptionThrown(
-        ctx.getDataSource.getUnspentBoxesFor(Address.create(addr1), 0, BlockchainContext.DEFAULT_LIMIT_FOR_API),
-        exceptionLike[NullPointerException](ErgoClient.explorerUrlNotSpecifiedMessage)
-      )
+      ctx.getDataSource.isInstanceOf[NodeDataSourceImpl] shouldBe true
+      ctx.getDataSource.isInstanceOf[NodeAndExplorerDataSourceImpl] shouldBe false
     }
   }
 

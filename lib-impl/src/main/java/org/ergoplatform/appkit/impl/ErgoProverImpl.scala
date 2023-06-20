@@ -1,15 +1,16 @@
 package org.ergoplatform.appkit.impl
 
-import java.util
-
-import org.ergoplatform.P2PKAddress
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, UnreducedTransaction}
+import org.ergoplatform.{P2PKAddress, sdk}
 import sigmastate.eval.CostingSigmaDslBuilder
 import sigmastate.interpreter.HintsBag
+import sigmastate.utils.Helpers._
 import special.sigma.BigInt
-import sigmastate.utils.Helpers._  // don't remove, required for Scala 2.11
-import JavaHelpers._
+
+import java.util
 
 class ErgoProverImpl(_ctx: BlockchainContextBase,
                      _prover: AppkitProvingInterpreter) extends ErgoProver {
@@ -23,7 +24,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
   override def getAddress = new Address(getP2PKAddress)
 
   override def getSecretKey: BigInt =
-    CostingSigmaDslBuilder.BigInt(_prover.secretKeys.get(0).privateInput.w)
+    CostingSigmaDslBuilder.BigInt(_prover.secretKeys(0).privateInput.w)
 
   override def getEip3Addresses: util.List[Address] = {
     val addresses = _prover.secretKeys
@@ -43,13 +44,13 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
     val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
-    val (signed, cost) = _prover.sign(
-      unsignedTx = txImpl.getTx,
-      boxesToSpend = boxesToSpend,
-      dataBoxes = dataBoxes,
+    val tokensToBurn = JavaHelpers.toIndexedSeq(txImpl.getTokensToBurn)
+    val unreduced = UnreducedTransaction(txImpl.getTx, boxesToSpend, dataBoxes, tokensToBurn)
+    val signed = _prover.sign(
+      unreducedTx = unreduced,
       stateContext = txImpl.getStateContext,
-      baseCost = baseCost, txImpl.getTokensToBurn).getOrThrow
-    new SignedTransactionImpl(_ctx, signed, cost)
+      baseCost = baseCost).getOrThrow
+    new SignedTransactionImpl(_ctx, signed.ergoTx, signed.cost)
   }
 
   override def signMessage(sigmaProp: SigmaProp, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
@@ -60,19 +61,20 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val txImpl = tx.asInstanceOf[UnsignedTransactionImpl]
     val boxesToSpend = JavaHelpers.toIndexedSeq(txImpl.getBoxesToSpend)
     val dataBoxes = JavaHelpers.toIndexedSeq(txImpl.getDataBoxes)
+    val tokensToBurn = JavaHelpers.toIndexedSeq(txImpl.getTokensToBurn)
     val reduced = _prover.reduceTransaction(
       unsignedTx = txImpl.getTx,
       boxesToSpend = boxesToSpend,
       dataBoxes = dataBoxes,
       stateContext = txImpl.getStateContext,
       baseCost = baseCost,
-      tokensToBurn = txImpl.getTokensToBurn)
+      tokensToBurn = tokensToBurn)
     new ReducedTransactionImpl(_ctx, reduced)
   }
 
   override def signReduced(tx: ReducedTransaction, baseCost: Int): SignedTransaction = {
-    val (signed, cost) = _prover.signReduced(tx.getTx, baseCost)
-    new SignedTransactionImpl(_ctx, signed, cost)
+    val signed = _prover.signReduced(sdk.ReducedTransaction(tx.getTx), baseCost)
+    new SignedTransactionImpl(_ctx, signed.ergoTx, signed.cost)
   }
 
 }

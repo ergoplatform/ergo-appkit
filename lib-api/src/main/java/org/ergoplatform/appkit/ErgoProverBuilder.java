@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.SecretString;
 import special.sigma.GroupElement;
 
 import java.math.BigInteger;

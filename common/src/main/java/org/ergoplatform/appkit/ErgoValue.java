@@ -2,12 +2,10 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
-
-import java.math.BigInteger;
-import java.util.Objects;
-
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
-import scorex.util.encode.Base16$;
+import scorex.util.encode.Base16;
 import sigmastate.AvlTreeData;
 import sigmastate.SType;
 import sigmastate.Values;
@@ -19,7 +17,9 @@ import special.sigma.AvlTree;
 import special.sigma.BigInt;
 import special.sigma.Box;
 import special.sigma.GroupElement;
-import special.sigma.SigmaProp;
+
+import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * This class is used to represent any valid value of ErgoScript language.
@@ -50,9 +50,9 @@ public class ErgoValue<T> {
      * @return hex string of serialized bytes
      */
     public String toHex() {
-        Values.EvaluatedValue<SType> c = Iso.isoErgoValueToSValue().to(this);
+        Values.EvaluatedValue<SType> c = AppkitIso.isoErgoValueToSValue().to(this);
         byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
-        return Base16$.MODULE$.encode(bytes);
+        return Base16.encode(bytes);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<?> unit() {
-        return JavaHelpers.UnitErgoVal();
+        return AppkitHelpers.UnitErgoVal();
     }
 
     static public ErgoValue<BigInt> of(BigInteger value) {
@@ -192,7 +192,7 @@ public class ErgoValue<T> {
     static public ErgoValue<?> fromHex(String hex) {
         byte[] bytes = JavaHelpers.decodeStringToBytes(hex);
         Values.EvaluatedValue<SType> c = (Values.EvaluatedValue<SType>)ValueSerializer.deserialize(bytes, 0);
-        ErgoValue<?> res = Iso.isoErgoValueToSValue().from(c);
+        ErgoValue<?> res = AppkitIso.isoErgoValueToSValue().from(c);
         return res;
     }
 }

@@ -9,7 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
+import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
+import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer$;
 import scala.collection.JavaConverters;
+import sigmastate.serialization.SigmaSerializer;
 import sigmastate.serialization.SigmaSerializer$;
 import sigmastate.utils.SigmaByteWriter;
 
@@ -31,7 +36,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<String> getInputBoxesIds() {
-        List<UnsignedInput> inputs = JavaHelpers$.MODULE$.toJavaList(getTx().unsignedTx().inputs());
+        List<UnsignedInput> inputs = AppkitHelpers.toJavaList(getTx().unsignedTx().inputs());
         List<String> returnVal = new ArrayList<>(inputs.size());
         for (UnsignedInput input : inputs) {
             returnVal.add(new ErgoId(input.boxId()).toString());
@@ -41,7 +46,7 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public List<OutBox> getOutputs() {
-        List<ErgoBox> outputs = JavaHelpers$.MODULE$.toJavaList(_tx.unsignedTx().outputs());
+        List<ErgoBox> outputs = AppkitHelpers.toJavaList(_tx.unsignedTx().outputs());
         List<OutBox> returnVal = new ArrayList<>(outputs.size());
         for (ErgoBoxCandidate output : outputs) {
             returnVal.add(new OutBoxImpl(output));
@@ -63,8 +68,8 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public byte[] toBytes() {
-        SigmaByteWriter w = SigmaSerializer$.MODULE$.startWriter();
-        ReducedErgoLikeTransactionSerializer$.MODULE$.serialize(_tx, w);
+        SigmaByteWriter w = SigmaSerializer.startWriter();
+        ReducedErgoLikeTransactionSerializer.serialize(_tx, w);
         return w.toBytes();
     }
 
@@ -84,6 +89,9 @@ public class ReducedTransactionImpl implements ReducedTransaction {
 
     @Override
     public String toString() {
-        return "ReducedTransactionImpl(" + _tx.toString() + ")";
+        return "ReducedTransactionImpl(\n" +
+            _tx + ",\n" +
+            getCost() + "\n" +
+            ")";
     }
 }

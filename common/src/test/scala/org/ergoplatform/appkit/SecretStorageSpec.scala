@@ -2,6 +2,7 @@ package org.ergoplatform.appkit
 
 import java.io.File
 import com.google.common.io.Files
+import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks

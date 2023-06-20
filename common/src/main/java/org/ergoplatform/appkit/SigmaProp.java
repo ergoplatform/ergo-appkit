@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import sigmastate.Values;
 
 /**

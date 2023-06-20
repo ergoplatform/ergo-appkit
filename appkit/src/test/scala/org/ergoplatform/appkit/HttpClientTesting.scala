@@ -1,8 +1,8 @@
 package org.ergoplatform.appkit
 
 import scalan.util.{FileUtil => SFileUtil}
-import JavaHelpers._
 import org.ergoplatform.appkit
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 
 import java.util.{List => JList}
 import java.lang.{String => JString}

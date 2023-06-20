@@ -1,33 +1,33 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
+import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, Token, TokenId}
 import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
-
-import java.util
-import java.util.List
-import java.util.{List => JList, Map => JMap}
-import java.lang.{Byte => JByte}
-import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, TokenId}
-import org.ergoplatform.{DataInput, ErgoBox, ErgoLikeTransaction, Input, UnsignedErgoLikeTransaction, UnsignedInput}
-import org.ergoplatform.appkit.{ErgoToken, Iso}
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.{ErgoToken, Iso}
 import org.ergoplatform.settings.ErgoAlgos
-import special.sigma.Header
-import scorex.crypto.authds.{ADDigest, ADKey}
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
-import scorex.crypto.hash.Digest32
+import org.ergoplatform.{ErgoLikeTransaction, _}
+import scorex.crypto.authds.{ADDigest, ADKey}
 import scorex.util.ModifierId
 import sigmastate.SType
 import sigmastate.Values.{ErgoTree, EvaluatedValue}
-import sigmastate.eval.{CAvlTree, CHeader, Colls}
+import sigmastate.eval.Extensions.ArrayByteOps
+import sigmastate.eval.{CAvlTree, CHeader, SigmaDsl}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
 import special.collection.Coll
-import scala.collection.JavaConverters
-import JavaConverters._
+import special.sigma.Header
+
+import java.lang.{Byte => JByte}
+import java.util
+import java.util.{List => JList}
+import scala.collection.JavaConverters._
 
 object ScalaBridge {
-  import org.ergoplatform.appkit.JavaHelpers._
+  import org.ergoplatform.sdk.Iso.JListToIndexedSeq
+  import org.ergoplatform.sdk.JavaHelpers.StringExtensions
 
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
@@ -91,12 +91,12 @@ object ScalaBridge {
   }
 
   implicit val isoAssetToPair: Iso[Asset, (TokenId, Long)] = new Iso[Asset, (TokenId, Long)] {
-    override def to(a: Asset) = (Digest32 @@ a.getTokenId.toBytes, a.getAmount)
+    override def to(a: Asset) = (a.getTokenId.toBytes.toTokenId, a.getAmount)
     override def from(t: (TokenId, Long)): Asset = new Asset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
   }
 
   implicit val isoExplorerAssetToPair: Iso[EAsset, (TokenId, Long)] = new Iso[EAsset, (TokenId, Long)] {
-    override def to(a: EAsset) = (Digest32 @@ a.getTokenId.toBytes, a.getAmount)
+    override def to(a: EAsset) = (a.getTokenId.toBytes.toTokenId, a.getAmount)
     override def from(t: (TokenId, Long)): EAsset = new EAsset().tokenId(ErgoAlgos.encode(t._1)).amount(t._2)
   }
 
@@ -155,8 +155,8 @@ object ScalaBridge {
 
   implicit val isoErgoTransactionOutput: Iso[ErgoTransactionOutput, ErgoBox] = new Iso[ErgoTransactionOutput, ErgoBox] {
     override def to(boxData: ErgoTransactionOutput): ErgoBox = {
-      val tree= boxData.getErgoTree.convertTo[ErgoTree]
-      val tokens = boxData.getAssets.convertTo[Coll[(TokenId, Long)]]
+      val tree = boxData.getErgoTree.convertTo[ErgoTree]
+      val tokens = boxData.getAssets.convertTo[Coll[Token]]
       val regs = boxData.getAdditionalRegisters.convertTo[AdditionalRegisters]
       new ErgoBox(boxData.getValue, tree,
         tokens, regs,
@@ -166,7 +166,7 @@ object ScalaBridge {
     }
 
     override def from(box: ErgoBox): ErgoTransactionOutput = {
-      val assets = box.additionalTokens.convertTo[List[Asset]]
+      val assets = Iso.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
       val regs = isoRegistersToMap.from(box.additionalRegisters)
       val out = new ErgoTransactionOutput()
           .boxId(ErgoAlgos.encode(box.id))
@@ -195,7 +195,7 @@ object ScalaBridge {
     }
 
     override def from(box: ErgoBox): OutputInfo = {
-      val assets = box.additionalTokens.convertTo[List[Asset]]
+      val assets = Iso.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
       val regs = isoExplRegistersToMap.from(box.additionalRegisters)
       val out = new OutputInfo()
           .boxId(ErgoAlgos.encode(box.id))
@@ -265,9 +265,9 @@ object ScalaBridge {
     override def from(tx: ErgoLikeTransaction): ErgoTransaction =
       new ErgoTransaction()
         .id(tx.id)
-        .inputs(tx.inputs.convertTo[List[ErgoTransactionInput]])
-        .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
-        .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])
+        .inputs(JListToIndexedSeq[ErgoTransactionInput, Input].from(tx.inputs))
+        .dataInputs(JListToIndexedSeq[ErgoTransactionDataInput, DataInput].from(tx.dataInputs))
+        .outputs(JListToIndexedSeq[ErgoTransactionOutput, ErgoBox].from(tx.outputs))
   }
 
   implicit val isoUnsignedErgoTransaction: Iso[UnsignedErgoTransaction, UnsignedErgoLikeTransaction] = new Iso[UnsignedErgoTransaction, UnsignedErgoLikeTransaction] {
@@ -281,8 +281,8 @@ object ScalaBridge {
     override def from(tx: UnsignedErgoLikeTransaction): UnsignedErgoTransaction =
       new UnsignedErgoTransaction()
         .id(tx.id)
-        .inputs(tx.inputs.convertTo[List[ErgoTransactionUnsignedInput]])
-        .dataInputs(tx.dataInputs.convertTo[List[ErgoTransactionDataInput]])
-        .outputs(tx.outputs.convertTo[List[ErgoTransactionOutput]])
+        .inputs(JListToIndexedSeq[ErgoTransactionUnsignedInput, UnsignedInput].from(tx.inputs))
+        .dataInputs(JListToIndexedSeq[ErgoTransactionDataInput, DataInput].from(tx.dataInputs))
+        .outputs(JListToIndexedSeq[ErgoTransactionOutput, ErgoBox].from(tx.outputs))
   }
 }

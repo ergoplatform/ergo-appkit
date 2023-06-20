@@ -2,6 +2,7 @@ package org.ergoplatform.appkit;
 
 import java.util.Arrays;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
 import special.collection.Coll;
 
@@ -63,7 +64,7 @@ public class BoxAttachmentGeneric implements BoxAttachment {
             throw new IllegalArgumentException(illegalArgumentException + r9.getType().toString());
         }
 
-        byte[] magicBytes = JavaHelpers$.MODULE$.collToByteArray((Coll<Object>) attachmentWrapper._1);
+        byte[] magicBytes = JavaHelpers.collToByteArray((Coll<Object>) attachmentWrapper._1);
         if (!Arrays.equals(BoxAttachment.MAGIC_BYTES, magicBytes)) {
             throw new IllegalArgumentException(illegalArgumentException + "Magic bytes not matched.");
         }

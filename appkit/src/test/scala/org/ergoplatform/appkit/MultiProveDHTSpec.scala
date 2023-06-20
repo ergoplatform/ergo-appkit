@@ -1,11 +1,12 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import sigmastate.basics.CryptoConstants
 import sigmastate.eval._
-import sigmastate.interpreter.CryptoConstants
 import special.sigma.GroupElement
 
 import scala.util.Try

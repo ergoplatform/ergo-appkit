@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.collection.IndexedSeq;
 import scorex.util.encode.Base16;
 import sigmastate.SType;
@@ -46,7 +47,7 @@ public class ErgoTreeTemplate {
 
         if (integerHashSet.size() != positions.length)
             throw new IllegalArgumentException("Duplicate positions: " +
-                JavaHelpers$.MODULE$.arraySeq(positions).mkString("[", ",", "]"));
+                AppkitHelpers.arraySeq(positions).mkString("[", ",", "]"));
 
         for (int p : positions)
             if (!_tree.constants().isDefinedAt(p))
@@ -112,7 +113,7 @@ public class ErgoTreeTemplate {
         IndexedSeq<Constant<SType>> constants = _tree.constants();
         for (int position : _parameterPositions) {
             SType tpe = constants.apply(position).tpe();
-            types.add(Iso.isoErgoTypeToSType().from(tpe));
+            types.add(AppkitIso.isoErgoTypeToSType().from(tpe));
         }
         return types;
     }
@@ -123,7 +124,7 @@ public class ErgoTreeTemplate {
      */
     public ErgoValue<?> getParameterValue(int paramIndex) {
         Constant<SType> c = _tree.constants().apply(_parameterPositions[paramIndex]);
-        return Iso.isoErgoValueToSValue().from(c);
+        return AppkitIso.isoErgoValueToSValue().from(c);
     }
 
     /**
@@ -144,7 +145,7 @@ public class ErgoTreeTemplate {
             throw new IllegalArgumentException(
                 "Wrong number of newValues. Expected " + _parameterPositions.length +
                     " but was " + newValues.length);
-        return JavaHelpers.substituteErgoTreeConstants(_tree.bytes(), _parameterPositions, newValues);
+        return AppkitHelpers.substituteErgoTreeConstants(_tree.bytes(), _parameterPositions, newValues);
     }
 
     public static ErgoTreeTemplate fromErgoTree(Values.ErgoTree tree) {

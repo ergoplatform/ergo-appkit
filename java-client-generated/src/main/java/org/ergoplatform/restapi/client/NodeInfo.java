@@ -428,7 +428,21 @@ public class NodeInfo {
     return this;
   }
 
-   /**
+  @SerializedName("isExplorer")
+  private boolean isExplorer = false;
+
+  /**
+   * @return true when additional /blockchain API methods and indices are enabled on this node
+   */
+  public boolean isExplorer() {
+    return isExplorer;
+  }
+
+  public void setExplorer(boolean explorer) {
+    isExplorer = explorer;
+  }
+
+    /**
    * Time when the node was started
    * @return launchTime
   **/
@@ -551,12 +565,13 @@ public class NodeInfo {
         Objects.equals(this.fullBlocksScore, nodeInfo.fullBlocksScore) &&
         Objects.equals(this.genesisBlockId, nodeInfo.genesisBlockId) &&
         Objects.equals(this.restApiUrl, nodeInfo.restApiUrl) &&
+        Objects.equals(this.isExplorer, nodeInfo.isExplorer) &&
         Objects.equals(this.parameters, nodeInfo.parameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, appVersion, fullHeight, headersHeight, bestFullHeaderId, previousFullHeaderId, bestHeaderId, stateRoot, stateType, stateVersion, isMining, peersCount, unconfirmedCount, difficulty, currentTime, launchTime, headersScore, fullBlocksScore, genesisBlockId, restApiUrl, parameters);
+    return Objects.hash(name, appVersion, fullHeight, headersHeight, bestFullHeaderId, previousFullHeaderId, bestHeaderId, stateRoot, stateType, stateVersion, isMining, peersCount, unconfirmedCount, difficulty, currentTime, launchTime, headersScore, fullBlocksScore, genesisBlockId, restApiUrl, parameters, isExplorer);
   }
 
 
@@ -585,6 +600,7 @@ public class NodeInfo {
     sb.append("    fullBlocksScore: ").append(toIndentedString(fullBlocksScore)).append("\n");
     sb.append("    genesisBlockId: ").append(toIndentedString(genesisBlockId)).append("\n");
     sb.append("    restApiUrl: ").append(toIndentedString(restApiUrl)).append("\n");
+    sb.append("    isExplorer: ").append(toIndentedString(isExplorer)).append("\n");
     sb.append("    parameters: ").append(toIndentedString(parameters)).append("\n");
     sb.append("}");
     return sb.toString();

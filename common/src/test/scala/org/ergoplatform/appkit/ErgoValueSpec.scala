@@ -5,7 +5,8 @@ import sigmastate._
 import sigmastate.Values.Constant
 import sigmastate.serialization.ValueSerializer
 import sigmastate.serialization.generators.ObjectGenerators
-import JavaHelpers._
+import org.ergoplatform.sdk.JavaHelpers._
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import sigmastate.eval.Evaluation.fromDslTuple
 import special.collection.Coll
 

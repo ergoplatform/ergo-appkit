@@ -2,20 +2,20 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.ErgoBox
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{EvaluatedValue, ByteArrayConstant, IntConstant}
-import sigmastate.{SType, TrivialProp}
-import sigmastate.helpers.TestingHelpers._
+import org.ergoplatform.sdk.JavaHelpers
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
+import sigmastate.helpers.TestingHelpers._
+import sigmastate.{SType, TrivialProp}
 
 class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
     with AppkitTesting {
   import ErgoBox._
-  import Iso._
-  import JavaHelpers.UniversalConverter
 
   type Registers = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
 
@@ -25,7 +25,7 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
 
   def check(regs: Registers, expRegs: IndexedSeq[ErgoValue[_]]) = {
     val box = boxWithRegs(regs)
-    val res = JavaHelpers.getBoxRegisters(box).convertTo[IndexedSeq[ErgoValue[_]]]
+    val res = AppkitHelpers.getBoxRegisters(box).convertTo[IndexedSeq[ErgoValue[_]]]
     res shouldBe expRegs
   }
 

@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
+import org.ergoplatform.sdk.ErgoToken
 
 import java.util
 

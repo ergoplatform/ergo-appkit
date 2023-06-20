@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.SigmaConstants;
-
+import org.ergoplatform.sdk.ErgoToken;
 
 /**
  * This interface is used to build a new output box, which can be included

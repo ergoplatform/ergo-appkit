@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ErgoId;
+
 import java.util.Map;
 
 /**

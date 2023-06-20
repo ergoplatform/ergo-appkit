@@ -1,7 +1,5 @@
 package org.ergoplatform.appkit.babelfee;
 
-import org.ergoplatform.appkit.ErgoId;
-import org.ergoplatform.appkit.ErgoToken;
 import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.OutBox;
@@ -11,6 +9,8 @@ import org.ergoplatform.appkit.SigmaProp;
 import org.ergoplatform.appkit.TransactionBox;
 import org.ergoplatform.appkit.UnsignedTransactionBuilder;
 import org.ergoplatform.appkit.impl.ErgoTreeContract;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
 
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit.examples;
 
 import org.ergoplatform.appkit.*;
+import org.ergoplatform.sdk.SecretString;
 
 import java.util.Arrays;
 
@@ -30,7 +31,7 @@ public class ExampleScenarios {
      * @param boxIds      string encoded (base16) ids of the boxes to be spent and agregated into the new box.
      */
     public SignedTransaction aggregateUtxoBoxes(
-            String storageFile, SecretString storagePass, String changeAddr, int deadline, String... boxIds) {
+        String storageFile, SecretString storagePass, String changeAddr, int deadline, String... boxIds) {
         UnsignedTransactionBuilder txB = _ctx.newTxBuilder();
         InputBox[] boxes = _ctx.getBoxesById(boxIds);
         Long total = Arrays.stream(boxes).map(b -> b.getValue()).reduce(0L, (x, y) -> x + y);
