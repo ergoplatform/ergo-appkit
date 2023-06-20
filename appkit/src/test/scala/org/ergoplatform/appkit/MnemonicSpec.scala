@@ -3,6 +3,7 @@ package org.ergoplatform.appkit
 import java.util
 import org.ergoplatform.appkit.Mnemonic._
 import org.ergoplatform.appkit.MnemonicValidationException.{MnemonicWrongListSizeException, MnemonicChecksumException, MnemonicWordException, MnemonicEmptyException}
+import org.ergoplatform.sdk.{JavaHelpers, SecretString}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks

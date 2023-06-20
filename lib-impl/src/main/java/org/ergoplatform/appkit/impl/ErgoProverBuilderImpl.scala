@@ -1,13 +1,16 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
-import org.ergoplatform.wallet.protocol.context.ErgoLikeParameters
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, SecretString}
+import sigmastate.basics.DLogProtocol.DLogProverInput
 import sigmastate.basics.{DLogProtocol, DiffieHellmanTupleProverInput}
 import special.sigma.GroupElement
+
 import java.math.BigInteger
 import java.util
-import JavaHelpers._
 import scala.collection.mutable.ArrayBuffer
 
 class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuilder {
@@ -16,8 +19,8 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
   /** Generated EIP-3 secret keys paired with their derivation path index. */
   private var _eip2Keys =  ArrayBuffer.empty[(Int, ExtendedSecretKey)]
 
-  private val _dhtSecrets = new util.ArrayList[DiffieHellmanTupleProverInput]
-  private val _dLogSecrets = new util.ArrayList[DLogProtocol.DLogProverInput]
+  private val _dhtSecrets: util.List[DiffieHellmanTupleProverInput] = new util.ArrayList[DiffieHellmanTupleProverInput]
+  private val _dLogSecrets: util.List[DLogProverInput] = new util.ArrayList[DLogProtocol.DLogProverInput]
 
   override def withMnemonic(mnemonicPhrase: SecretString,
                             mnemonicPass: SecretString,
@@ -83,13 +86,16 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
       override def softForkVotesCollected: Option[Int] = ???
       override def blockVersion: Byte = _params.getBlockVersion.byteValue
     }
-    val keys = new util.ArrayList[ExtendedSecretKey]
+    val keys: java.util.List[ExtendedSecretKey] = new util.ArrayList[ExtendedSecretKey]
     if (_masterKey != null) {
       keys.add(_masterKey)
       val secretKeys: IndexedSeq[ExtendedSecretKey] = _eip2Keys.map(_._2).toIndexedSeq
       keys.addAll(secretKeys.convertTo[java.util.List[ExtendedSecretKey]])
     }
-    val interpreter = new AppkitProvingInterpreter(keys, _dLogSecrets, _dhtSecrets, parameters)
+    val interpreter = new AppkitProvingInterpreter(
+      keys.convertTo[IndexedSeq[ExtendedSecretKey]],
+      _dLogSecrets.convertTo[IndexedSeq[DLogProverInput]],
+      _dhtSecrets.convertTo[IndexedSeq[DiffieHellmanTupleProverInput]], parameters)
     new ErgoProverImpl(_ctx, interpreter)
   }
 }

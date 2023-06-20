@@ -2,12 +2,14 @@ package org.ergoplatform.appkit
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException, NotEnoughCoinsForChangeException}
-import org.ergoplatform.appkit.JavaHelpers._
+import org.ergoplatform.appkit.AppkitHelpers._
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
-import org.ergoplatform.{ErgoScriptPredef, ErgoBox, appkit}
+import org.ergoplatform.sdk.JavaHelpers._
+import org.ergoplatform.sdk.{ErgoToken, SecretString}
+import org.ergoplatform.{ErgoBox, ErgoTreePredef, appkit}
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
@@ -157,7 +159,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
         .contract(truePropContract(ctx)).build()
       val feeOut = txB.outBoxBuilder()
         .value(1000000)
-        .contract(ctx.newContract(ErgoScriptPredef.feeProposition()))
+        .contract(ctx.newContract(ErgoTreePredef.feeProposition()))
         .build()
 
       val changeAddr = Address.fromErgoTree(input.getErgoTree, NetworkType.MAINNET).getErgoAddress

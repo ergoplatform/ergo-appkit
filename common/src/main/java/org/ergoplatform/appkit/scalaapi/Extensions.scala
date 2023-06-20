@@ -1,9 +1,11 @@
 package org.ergoplatform.appkit.scalaapi
 
 import debox.cfor
+import org.ergoplatform.sdk.Extensions.CollBuilderOps
 import scalan.RType
-import special.collection.{PairColl, Coll, CollBuilder}
-import scalan.rtypeToClassTag
+import special.collection.Coll
+import scalan.rtypeToClassTag  // don't remove it is used
+
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
@@ -106,73 +108,4 @@ object Extensions {
 
   }
 
-  implicit class PairCollOps [A,B](val source: Coll[ (A,B)]) extends AnyVal {
-    implicit def tA = source.tItem.tFst
-    implicit def tB = source.tItem.tSnd
-
-    /** Maps the first component of each pair in the collection. */
-    @inline def mapFirst[A1: RType](f: A => A1): Coll[(A1, B)] = source.asInstanceOf[PairColl[A, B]].mapFirst(f)
-
-    /** Maps the first component of each pair in the collection. */
-    @inline def mapSecond[B1: RType](f: B => B1): Coll[(A, B1)] = source.asInstanceOf[PairColl[A, B]].mapSecond(f)
-
-    /** Uses the first component of each pair in the collection as a key for
-      * grouping and reducing the corresponding values.
-      *
-      * @return collection with each found unique key as first component and the reduction
-      *         result of the corresponding values.
-      */
-    def reduceByKey(r: ((B, B)) => B): Coll[(A, B)] = {
-      source.mapReduce(identity, r)
-    }
-
-    /** Uses the first component of each pair in the collection as a key for
-      * grouping and summing the corresponding values using the given Numeric.
-      *
-      * @return collection with each found unique key as first component and the summation
-      *         result of the corresponding values.
-      */
-    def sumByKey(implicit m: Numeric[B]): Coll[(A, B)] =
-      reduceByKey(r => m.plus(r._1, r._2))
-
-    /** Uses the first component of each pair in the collection as a key for
-      * grouping the corresponding values into a new collection.
-      *
-      * @return collection with each found unique key as first component and the
-      *         collection of the corresponding values.
-      */
-    def groupByKey: Coll[(A, Coll[B])] = {
-      source.groupByProjecting(_._1, _._2)
-    }
-  }
-
-  implicit class CollBuilderOps(val builder: CollBuilder) extends AnyVal {
-    /** Performs outer join operation between left and right collections.
-      *
-      * @param l     projection function executed for each element of `left`
-      * @param r     projection function executed for each element of `right`
-      * @param inner projection function which is executed for matching items (K, L) and (K, R) with the same K
-      * @return collection of (K, O) pairs, where each key comes form either left or right
-      *         collection and values are produced by projections
-      */
-    def outerJoin[K: RType, L, R, O: RType]
-      (left: Coll[(K, L)], right: Coll[(K, R)])
-        (
-          l: ((K, L)) => O,
-          r: ((K, R)) => O,
-          inner: ((K, (L, R))) => O): Coll[(K, O)] = {
-      val res = Utils.outerJoin[K, L, R, O](left.toMap, right.toMap)(
-        (k, lv) => l((k, lv)),
-        (k, rv) => r((k, rv)),
-        (k, lv, rv) => inner((k, (lv, rv))))
-      fromMap(res)
-    }
-
-    /** Construct a collection of (K,V) pairs using PairColl representation,
-      * in which keys and values are stored as separate unboxed arrays. */
-    def fromMap[K: RType, V: RType](m: Map[K, V]): Coll[(K, V)] = {
-      val (ks, vs) = Utils.mapToArrays(m)
-      builder.pairCollFromArrays(ks, vs)
-    }
-  }
 }

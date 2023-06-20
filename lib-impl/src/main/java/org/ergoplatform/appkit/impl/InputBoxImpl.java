@@ -11,6 +11,10 @@ import org.ergoplatform.restapi.client.JSON;
 import java.util.Arrays;
 import java.util.List;
 
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ErgoToken;
+import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.JavaHelpers;
 import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
 import special.sigma.Box;
@@ -65,7 +69,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public List<ErgoValue<?>> getRegisters() {
-        return JavaHelpers.getBoxRegisters(_ergoBox);
+        return AppkitHelpers.getBoxRegisters(_ergoBox);
     }
 
     @Override
@@ -80,7 +84,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public InputBox withContextVars(ContextVar... variables) {
-        ContextExtension extension = Iso.isoContextVarsToContextExtension().to(
+        ContextExtension extension = AppkitIso.isoContextVarsToContextExtension().to(
             Arrays.asList(variables)
         );
         InputBoxImpl res =  new InputBoxImpl(_ergoBox);

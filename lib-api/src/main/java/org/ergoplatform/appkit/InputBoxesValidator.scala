@@ -1,10 +1,10 @@
 package org.ergoplatform.appkit
 
-import org.ergoplatform.wallet.Constants.MaxAssetsPerBox
+import org.ergoplatform.sdk.wallet.Constants.MaxAssetsPerBox
+import org.ergoplatform.sdk.wallet.{AssetUtils, TokensMap}
 import org.ergoplatform.wallet.boxes.BoxSelector._
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector._
 import org.ergoplatform.wallet.boxes.{BoxSelector, ReemissionData}
-import org.ergoplatform.wallet.{AssetUtils, TokensMap}
 import org.ergoplatform.{ErgoBoxAssets, ErgoBoxAssetsHolder}
 import scorex.util.ModifierId
 

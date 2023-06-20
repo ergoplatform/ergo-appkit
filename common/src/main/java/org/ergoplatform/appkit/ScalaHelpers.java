@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import special.collection.Coll;
 
 /**
@@ -14,6 +15,6 @@ public class ScalaHelpers {
      * Instead of having this all over the project, we do this in a single place here.
      */
     public static byte[] collByteToByteArray(Coll<Byte> byteColl) {
-        return JavaHelpers$.MODULE$.collToByteArray((Coll) byteColl);
+        return JavaHelpers.collToByteArray((Coll) byteColl);
     }
 }

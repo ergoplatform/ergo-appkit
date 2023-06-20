@@ -13,7 +13,7 @@ import org.ergoplatform.appkit.BoxOperations;
 import org.ergoplatform.appkit.CoveringBoxes;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.ErgoProverBuilder;
-import org.ergoplatform.appkit.ErgoToken;
+import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.appkit.InputBox;
 import org.ergoplatform.appkit.NetworkType;
 import org.ergoplatform.appkit.PreHeaderBuilder;

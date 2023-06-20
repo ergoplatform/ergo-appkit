@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import com.google.common.base.Preconditions.checkState
 import org.ergoplatform.SigmaConstants
 import org.ergoplatform.appkit._
+import org.ergoplatform.sdk.ErgoToken
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -79,7 +80,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   override def build: OutBox = {
     checkState(_contract != null, "Contract is not defined": Any)
     val tree = _contract.getErgoTree
-    val ergoBoxCandidate = JavaHelpers.createBoxCandidate(
+    val ergoBoxCandidate = AppkitHelpers.createBoxCandidate(
       _value, tree, _tokens.toSeq, _registers.toSeq,
       creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight))
     new OutBoxImpl(ergoBoxCandidate)

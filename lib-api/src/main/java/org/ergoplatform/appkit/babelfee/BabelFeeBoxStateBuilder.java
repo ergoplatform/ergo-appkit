@@ -1,8 +1,8 @@
 package org.ergoplatform.appkit.babelfee;
 
 import org.ergoplatform.appkit.Address;
-import org.ergoplatform.appkit.ErgoId;
 import org.ergoplatform.appkit.SigmaProp;
+import org.ergoplatform.sdk.ErgoId;
 
 import java.util.Objects;
 

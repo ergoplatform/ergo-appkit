@@ -1,5 +1,6 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import scala.Option;
 import scala.Tuple2;
 import scala.Unit;

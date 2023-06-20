@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.JavaHelpers;
+import org.ergoplatform.appkit.AppkitHelpers;
 
 import java.math.BigInteger;
 
+import org.ergoplatform.sdk.JavaHelpers;
 import special.collection.Coll;
 import special.sigma.AvlTree;
 import special.sigma.GroupElement;

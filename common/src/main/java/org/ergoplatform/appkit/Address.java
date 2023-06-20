@@ -1,19 +1,16 @@
 package org.ergoplatform.appkit;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.common.base.Objects;
-
-import org.bouncycastle.math.ec.custom.sec.SecP256K1Point;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.Pay2SAddress;
 import org.ergoplatform.appkit.impl.ErgoTreeContract;
-import org.ergoplatform.wallet.secrets.DerivationPath;
-import org.ergoplatform.wallet.secrets.ExtendedPublicKey;
-import org.ergoplatform.wallet.secrets.ExtendedSecretKey;
-
+import org.ergoplatform.sdk.JavaHelpers;
+import org.ergoplatform.sdk.SecretString;
+import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
+import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
@@ -24,6 +21,8 @@ import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
 import special.sigma.GroupElement;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class Address {
     private final String _base58String;
@@ -160,7 +159,7 @@ public class Address {
      */
     public Values.SigmaBoolean getSigmaBoolean() {
         Values.ErgoTree ergoTree = getErgoAddress().script();
-        return JavaHelpers$.MODULE$.toSigmaBoolean(ergoTree);
+        return JavaHelpers.toSigmaBoolean(ergoTree);
     }
 
     /**
@@ -202,11 +201,10 @@ public class Address {
      * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
      */
     public static Address fromMnemonic(
-            NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
+        NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
         DLogProtocol.ProveDlog pk = masterKey.publicImage();
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk,
-            networkType.networkPrefix);
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
 
@@ -255,7 +253,7 @@ public class Address {
         ExtendedPublicKey extendedPublicKey) {
 
         DerivationPath path = JavaHelpers.eip3DerivationWithLastIndex(index).toPublicBranch();
-        ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path);
+        ExtendedPublicKey pubkey = (ExtendedPublicKey) extendedPublicKey.derive(path); // solves java: incompatible types: compile-time error
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(
             pubkey.key(),
             networkType.networkPrefix);
@@ -270,7 +268,7 @@ public class Address {
     }
 
     public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
-        Values.ErgoTree ergoTree = JavaHelpers$.MODULE$.toErgoTree(sigmaBoolean);
+        Values.ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
         return fromErgoTree(ergoTree, networkType);
     }
 

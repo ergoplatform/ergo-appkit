@@ -1,5 +1,7 @@
 package org.ergoplatform.appkit;
 
+import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
+
 /**
  * Contains unsigned transaction augmented with one `ReductionResult` for each
  * `UnsignedInput`.
