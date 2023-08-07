@@ -120,6 +120,7 @@ object AppkitHelpers {
     res
   }
 
+  //TODO refactor: when similar method is avaialble in Sigma
   def createBoxCandidate(
         value: Long, tree: ErgoTree,
         tokens: Seq[ErgoToken],

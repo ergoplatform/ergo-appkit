@@ -12,6 +12,11 @@ import scala.reflect.ClassTag
 // TODO refactor: removed and reuse from Sigma SDK module when available
 object Extensions {
 
+  // TODO remove and reuse from Sigma SDK DoubleOps
+  implicit class IntOps(val i: Double) extends AnyVal {
+    def erg: Long = (i * 1000000000L).toLong
+  }
+
   implicit class CollOps[A](val coll: Coll[A]) extends AnyVal {
     /** Partitions this $coll in two $colls according to a predicate.
       *
@@ -108,4 +113,9 @@ object Extensions {
 
   }
 
+  // TODO remove and reuse from Sigma
+  implicit class AnyOps[A](val source: A) extends AnyVal {
+    /** Performs a specified action on the source value and returns the result. */
+    def perform(action: A => A): A = action(source)
+  }
 }
