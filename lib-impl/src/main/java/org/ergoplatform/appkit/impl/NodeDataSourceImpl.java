@@ -218,7 +218,7 @@ public class NodeDataSourceImpl implements BlockchainDataSource {
 
     @Override
     public List<InputBox> getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit) {
-        Transactions poolTransactions = executeCall(nodeTransactionsApi.getUnconfirmedTransactions(offset, limit));
+        Transactions poolTransactions = executeCall(nodeTransactionsApi.getUnconfirmedTransactions(limit, offset));
 
         // first prepare a list of box ids that are spent so that we don't return output boxes that
         // are already spent in chained transactions
