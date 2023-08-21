@@ -113,9 +113,4 @@ object Extensions {
 
   }
 
-  // TODO remove and reuse from Sigma
-  implicit class AnyOps[A](val source: A) extends AnyVal {
-    /** Performs a specified action on the source value and returns the result. */
-    def perform(action: A => A): A = action(source)
-  }
 }
