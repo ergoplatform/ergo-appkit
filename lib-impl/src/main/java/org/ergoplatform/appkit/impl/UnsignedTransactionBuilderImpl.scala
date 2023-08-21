@@ -170,8 +170,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
     override def sigmaLastHeaders: Coll[Header] = _headers
 
-    override def previousStateDigest: ADDigest =
-      ADDigest @@ JavaHelpers.getStateDigest(_headers.apply(0).stateRoot)
+    override def previousStateDigest: Coll[Byte] =
+      _headers.apply(0).stateRoot.digest
 
     override def sigmaPreHeader: special.sigma.PreHeader = _preHeader
   }

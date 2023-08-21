@@ -219,7 +219,7 @@ object ScalaBridge {
         version = h.getVersion.toByte,
         parentId = h.getParentId.toColl,
         ADProofsRoot = h.getAdProofsRoot.toColl,
-        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(ADDigest @@ h.getStateRoot.toBytes)),
+        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(h.getStateRoot.toColl)),
         transactionsRoot = h.getTransactionsRoot.toColl,
         timestamp = h.getTimestamp(),
         nBits = h.getNBits(),

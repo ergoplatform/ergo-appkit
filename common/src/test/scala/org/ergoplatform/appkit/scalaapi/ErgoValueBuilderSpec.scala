@@ -1,12 +1,12 @@
 package org.ergoplatform.appkit.scalaapi
 
-import org.ergoplatform.appkit.{BoxAttachment, BoxAttachmentGeneric, ErgoValue, TestingBase, ErgoType, AppkitTestingCommon}
+import org.ergoplatform.appkit.{AppkitTestingCommon, BoxAttachment, BoxAttachmentGeneric, ErgoType, ErgoValue, TestingBase}
 import scalan.RType
 import sigmastate.eval.SigmaDsl
-import special.collection.Coll
+import special.collection.{Coll, CollType}
 import special.sigma.Box
 
-import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte}
+import java.lang.{Boolean => JBoolean, Byte => JByte, Integer => JInt, Long => JLong, Short => JShort}
 import java.math.BigInteger
 
 class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
@@ -57,6 +57,9 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
     val jCollBigInt = ErgoValue.of(Coll(SigmaDsl.BigInt(BigInteger.ONE)), ErgoType.bigIntType())
     vCollBigInt shouldBe jCollBigInt
   }
+
+  // TODO move to Sigma
+  implicit def extendCollType[A](ct: RType[Coll[A]]): CollType[A] = ct.asInstanceOf[CollType[A]]
 
   property("buildFor some complex type") {
     val x: ErgoValue[Coll[(Coll[(JByte, JLong)], Coll[JShort])]] = ErgoValueBuilder.buildFor(
