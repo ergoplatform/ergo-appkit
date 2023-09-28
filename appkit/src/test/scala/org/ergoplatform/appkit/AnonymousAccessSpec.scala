@@ -7,10 +7,10 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.basics.CryptoConstants
+import sigmastate.crypto.CryptoConstants
 import sigmastate.eval._
 import sigmastate.helpers.NegativeTesting
-import special.sigma.GroupElement
+import sigma.GroupElement
 
 class AnonymousAccessSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks

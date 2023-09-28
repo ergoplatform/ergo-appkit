@@ -4,17 +4,15 @@ import org.ergoplatform._
 import org.ergoplatform.appkit.AppkitHelpers._
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import org.ergoplatform.appkit._
-import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext
+import org.ergoplatform.sdk.Extensions.HeaderOps
+import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
+import org.ergoplatform.sdk.wallet.protocol.context.BlockchainStateContext
 import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, Iso, JavaHelpers}
 import org.ergoplatform.wallet.transactions.TransactionBuilder
-import scorex.crypto.authds.ADDigest
-import sigmastate.eval.Colls
-import special.collection.Coll
-import special.sigma.Header
+import sigma.{Coll, Colls, Header}
 
 import java.util
 import java.util._
-import scala.collection.JavaConverters
 import scala.collection.JavaConverters._
 
 class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends UnsignedTransactionBuilder {
@@ -131,7 +129,8 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     val inputBoxesSeq = boxesToSpendSeq.map(eb => eb.box)
     val requestedToBurn = _tokensToBurn.getOrElse(new ArrayList[ErgoToken])
     val burnTokens = JavaHelpers.createTokensMap(
-      Iso.isoJListErgoTokenToMapPair.to(requestedToBurn))
+      Iso.isoErgoTokenSeqToLinkedMap.to(requestedToBurn.convertTo[IndexedSeq[ErgoToken]])
+    )
     val rewardDelay = if (_ctx.getNetworkType == NetworkType.MAINNET)
       Parameters.MinerRewardDelay_Mainnet
     else
@@ -157,7 +156,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx, requestedToBurn)
   }
 
-  private[appkit] def createErgoLikeStateContext: ErgoLikeStateContext = new ErgoLikeStateContext() {
+  private[appkit] def createErgoLikeStateContext: BlockchainStateContext = new BlockchainStateContext() {
     private val _allHeaders = Colls.fromArray(
       _ctx.getHeaders.iterator.asScala.map(h => ScalaBridge.toSigmaHeader(h)).toArray)
 
@@ -165,7 +164,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
 
     private val _preHeader = _ph match {
       case Some(ph) => ph._ph
-      case _ => JavaHelpers.toPreHeader(_allHeaders.apply(0))
+      case _ => _allHeaders.apply(0).toPreHeader
     }
 
     override def sigmaLastHeaders: Coll[Header] = _headers
@@ -173,7 +172,7 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     override def previousStateDigest: Coll[Byte] =
       _headers.apply(0).stateRoot.digest
 
-    override def sigmaPreHeader: special.sigma.PreHeader = _preHeader
+    override def sigmaPreHeader: sigma.PreHeader = _preHeader
   }
 
   override def getCtx: BlockchainContext = _ctx

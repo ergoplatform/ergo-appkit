@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit
 
-import scalan.util.{FileUtil => SFileUtil}
+import sigma.util.{FileUtil => SFileUtil}
 import org.ergoplatform.appkit
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 

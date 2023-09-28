@@ -2,9 +2,8 @@ package org.ergoplatform.appkit;
 
 import org.ergoplatform.P2PKAddress;
 import org.ergoplatform.sdk.AppkitProvingInterpreter;
-import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters;
 import sigmastate.interpreter.HintsBag;
-import special.sigma.BigInt;
+import sigma.BigInt;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public interface ErgoProver {
      *                 the validation starts with this value and shouldn't exceed the
      *                 total block limit known to the prover (see
      *                 {@link AppkitProvingInterpreter} and
-     *                 {@link ErgoLikeParameters#maxBlockCost()})
+     *                 {@link BlockchainParameters#maxBlockCost()})
      * @return new instance of {@link SignedTransaction} which contains necessary
      * proofs
      */

@@ -4,7 +4,7 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
 import sigmastate.AvlTreeData;
 import sigmastate.Values;
-import special.sigma.GroupElement;
+import sigma.GroupElement;
 
 import java.math.BigInteger;
 import java.util.Objects;

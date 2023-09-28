@@ -2,9 +2,9 @@ package org.ergoplatform.appkit;
 
 import java.math.BigInteger;
 
-import special.sigma.AvlTree;
-import special.collection.Coll;
-import special.sigma.GroupElement;
+import sigma.AvlTree;
+import sigma.Coll;
+import sigma.GroupElement;
 
 /**
  * Header of a block

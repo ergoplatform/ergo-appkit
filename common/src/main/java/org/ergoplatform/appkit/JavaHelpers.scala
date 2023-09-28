@@ -7,11 +7,12 @@ import org.ergoplatform._
 import org.ergoplatform.sdk.Iso._
 import org.ergoplatform.sdk.JavaHelpers.{UniversalConverter, collRType}
 import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos}
-import scalan.RType
+import sigma.Colls
+import sigma.data.RType
 import sigmastate.SType
 import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue}
 import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import sigmastate.eval.{Colls, CompiletimeIRContext, Evaluation}
+import sigmastate.eval.{CompiletimeIRContext, Evaluation}
 import sigmastate.interpreter.ContextExtension
 import sigmastate.lang.Terms.ValueOps
 import sigmastate.serialization.ErgoTreeSerializer
@@ -129,7 +130,7 @@ object AppkitHelpers {
     val nRegs = registers.length
     require(nRegs <= nonMandatoryRegisters.length,
        s"Too many additional registers $nRegs. Max allowed ${nonMandatoryRegisters.length}")
-    implicit val TokenIdRType: RType[TokenId] = collRType(RType.ByteType).asInstanceOf[RType[TokenId]]
+    implicit val TokenIdRType: RType[TokenId] = collRType(sigma.ByteType).asInstanceOf[RType[TokenId]]
     val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
     val rs = registers.zipWithIndex.map { case (ergoValue, i) =>
       val id = ErgoBox.nonMandatoryRegisters(i)

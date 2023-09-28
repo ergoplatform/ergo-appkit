@@ -8,7 +8,7 @@ import org.ergoplatform.{P2PKAddress, sdk}
 import sigmastate.eval.CostingSigmaDslBuilder
 import sigmastate.interpreter.HintsBag
 import sigmastate.utils.Helpers._
-import special.sigma.BigInt
+import sigma.BigInt
 
 import java.util
 

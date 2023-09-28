@@ -2,9 +2,9 @@ package org.ergoplatform.appkit.scalaapi
 
 import debox.cfor
 import org.ergoplatform.sdk.Extensions.CollBuilderOps
-import scalan.RType
-import special.collection.Coll
-import scalan.rtypeToClassTag  // don't remove it is used
+import sigma.data.RType
+import sigma.Coll
+import sigma.rtypeToClassTag  // don't remove it is used
 
 import scala.collection.immutable
 import scala.reflect.ClassTag

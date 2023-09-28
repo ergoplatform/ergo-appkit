@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
-import special.collection.Coll;
-import special.sigma.GroupElement;
+import sigma.Coll;
+import sigma.GroupElement;
 
 /**
  * Allow building of PreHeaders to be used for transaction signing.

@@ -14,7 +14,7 @@ public class SigmaProp {
         this.sigmaBoolean = sigmaBoolean;
     }
 
-    public SigmaProp(special.sigma.SigmaProp sigmaProp) {
+    public SigmaProp(sigma.SigmaProp sigmaProp) {
         this(JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
     }
 

@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit.scalaapi
 
 import org.ergoplatform.appkit.{AppkitTestingCommon, BoxAttachment, BoxAttachmentGeneric, ErgoType, ErgoValue, TestingBase}
-import scalan.RType
+import org.ergoplatform.sdk.JavaHelpers
+import sigma.data.{CollType, RType}
 import sigmastate.eval.SigmaDsl
-import special.collection.{Coll, CollType}
-import special.sigma.Box
+import sigma.Coll
+import sigma.Box
 
 import java.lang.{Boolean => JBoolean, Byte => JByte, Integer => JInt, Long => JLong, Short => JShort}
 import java.math.BigInteger
@@ -72,9 +73,9 @@ class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {
 
     // check that type descriptor constructed via Iso is correct
     val xRT = x.getType.getRType
-    xRT.tItem.tFst.tItem.tFst shouldBe RType.ByteType
-    xRT.tItem.tFst.tItem.tSnd shouldBe RType.LongType
-    xRT.tItem.tSnd.tItem shouldBe RType.ShortType
+    xRT.tItem.tFst.tItem.tFst shouldBe JavaHelpers.JByteRType
+    xRT.tItem.tFst.tItem.tSnd shouldBe JavaHelpers.JLongRType
+    xRT.tItem.tSnd.tItem shouldBe JavaHelpers.JShortRType
   }
 
   property("Use ErgoValueBuilder in Appkit API") {

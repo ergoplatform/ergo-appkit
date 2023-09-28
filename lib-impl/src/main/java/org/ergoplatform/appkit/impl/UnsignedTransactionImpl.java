@@ -14,12 +14,11 @@ import org.ergoplatform.restapi.client.UnsignedErgoTransaction;
 import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.sdk.ExtendedInputBox;
-import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeStateContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import scala.collection.JavaConverters;
+import org.ergoplatform.sdk.wallet.protocol.context.BlockchainStateContext;
 import sigmastate.Values;
 
 import javax.annotation.Nonnull;
@@ -31,14 +30,14 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     private List<ErgoToken> _tokensToBurn;
     private List<ErgoBox> _outputs;
     private ErgoAddress _changeAddress;
-    private ErgoLikeStateContext _stateContext;
+    private BlockchainStateContext _stateContext;
     private BlockchainContextImpl _ctx;
 
 
     public UnsignedTransactionImpl(
         UnsignedErgoLikeTransaction tx, List<ExtendedInputBox> boxesToSpend,
         List<ErgoBox> dataBoxes, ErgoAddress changeAddress,
-        ErgoLikeStateContext stateContext, BlockchainContextImpl ctx,
+        BlockchainStateContext stateContext, BlockchainContextImpl ctx,
         List<ErgoToken> tokensToBurn) {
         _tx = tx;
         _boxesToSpend = boxesToSpend;
@@ -67,7 +66,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
        return _dataBoxes;
     }
 
-    public ErgoLikeStateContext getStateContext() {
+    public BlockchainStateContext getStateContext() {
         return _stateContext;
     }
 

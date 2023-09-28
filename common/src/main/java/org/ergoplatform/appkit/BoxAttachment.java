@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import scala.Tuple2;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * Represents an attachment according to EIP-29.
