@@ -23,4 +23,9 @@ public interface ReducedTransaction extends Transaction {
      * Returns the serialized bytes of this transaction.
      */
     byte[] toBytes();
+
+    /**
+     * @return tree of participants required or able to sign for the transaction
+     */
+    SigningParticipants getSignersRequired();
 }

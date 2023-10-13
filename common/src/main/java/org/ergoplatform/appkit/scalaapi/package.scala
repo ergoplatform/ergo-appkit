@@ -1,6 +1,8 @@
 package org.ergoplatform.appkit
 
 import scalan.RType
+import sigmastate.Values.{SigmaBoolean, ErgoTree, SigmaPropConstant}
+import sigmastate.eval.SigmaDsl
 import special.sigma
 import special.sigma.{Header, Box, GroupElement, AvlTree, PreHeader}
 
@@ -36,4 +38,20 @@ package object scalaapi {
   implicit val headerType: ErgoType[Header] = ErgoType.headerType()
   implicit val preHeaderType: ErgoType[sigma.PreHeader] = ErgoType.preHeaderType()
 
+  /** Extractors of SigmaBoolean value to be use in Scala pattern matching. */
+  object SigmaProp {
+    def unapply(prop: special.sigma.SigmaProp): Option[SigmaBoolean] = Some(SigmaDsl.toSigmaBoolean(prop))
+  }
+
+  /** Extractor of SigmaBoolean from Pay-to-SigmaProp tree, which is the spedial case of the tree. */
+  object Pay2SigmaProp {
+    def unapply(ergoTree: ErgoTree): Option[SigmaBoolean] = {
+      // get ErgoTree expression respecting constant segregation flag
+      val prop = ergoTree.toProposition(ergoTree.isConstantSegregation)
+      prop match {
+        case SigmaPropConstant(SigmaProp(sb)) => Some(sb)
+        case _ => None
+      }
+    }
+  }
 }
