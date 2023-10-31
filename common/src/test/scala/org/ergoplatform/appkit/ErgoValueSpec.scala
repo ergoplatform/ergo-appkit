@@ -8,7 +8,7 @@ import sigmastate.serialization.generators.ObjectGenerators
 import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import sigmastate.eval.Evaluation.fromDslTuple
-import special.collection.Coll
+import sigma.Coll
 
 class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGenerators {
 

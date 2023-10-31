@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.cli
 
 import org.ergoplatform.appkit
-import scalan.util.{FileUtil => SFileUtil}
+import sigma.util.{FileUtil => SFileUtil}
 import org.ergoplatform.sdk.JavaHelpers._
 
 import java.util.{List => JList}

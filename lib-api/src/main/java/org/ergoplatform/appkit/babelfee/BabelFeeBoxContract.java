@@ -7,7 +7,7 @@ import org.ergoplatform.appkit.ScalaHelpers;
 
 import scorex.util.encode.Base16;
 import sigmastate.Values;
-import special.collection.Coll;
+import sigma.Coll;
 
 public class BabelFeeBoxContract {
 

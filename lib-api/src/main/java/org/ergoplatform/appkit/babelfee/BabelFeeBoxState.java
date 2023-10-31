@@ -35,7 +35,7 @@ public class BabelFeeBoxState {
     public BabelFeeBoxState(TransactionBox ergoBox) {
         value = ergoBox.getValue();
         List<ErgoValue<?>> registers = ergoBox.getRegisters();
-        boxCreator = new SigmaProp((special.sigma.SigmaProp) registers.get(0).getValue());
+        boxCreator = new SigmaProp((sigma.SigmaProp) registers.get(0).getValue());
         pricePerToken = (Long) registers.get(1).getValue();
         this.tokenId = new BabelFeeBoxContract(ergoBox.getErgoTree()).getTokenId();
 

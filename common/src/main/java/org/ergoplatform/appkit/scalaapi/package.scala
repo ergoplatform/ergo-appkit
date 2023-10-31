@@ -1,8 +1,6 @@
 package org.ergoplatform.appkit
 
-import scalan.RType
-import special.sigma
-import special.sigma.{Header, Box, GroupElement, AvlTree, PreHeader}
+import sigma.{Header, Box, GroupElement, AvlTree}
 
 import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte}
 
@@ -20,11 +18,11 @@ package object scalaapi {
   implicit val booleanType: ErgoType[JBoolean] = ErgoType.booleanType()
 
   /** For Scala types. */
-  implicit val scalaByteType: ErgoType[Byte] = ErgoType.ofRType(RType.ByteType)
-  implicit val scalaShortType: ErgoType[Short] = ErgoType.ofRType(RType.ShortType)
-  implicit val scalaIntType: ErgoType[Int] = ErgoType.ofRType(RType.IntType)
-  implicit val scalaLongType: ErgoType[Long] = ErgoType.ofRType(RType.LongType)
-  implicit val scalaBooleanType: ErgoType[Boolean] = ErgoType.ofRType(RType.BooleanType)
+  implicit val scalaByteType: ErgoType[Byte] = ErgoType.ofRType(sigma.ByteType)
+  implicit val scalaShortType: ErgoType[Short] = ErgoType.ofRType(sigma.ShortType)
+  implicit val scalaIntType: ErgoType[Int] = ErgoType.ofRType(sigma.IntType)
+  implicit val scalaLongType: ErgoType[Long] = ErgoType.ofRType(sigma.LongType)
+  implicit val scalaBooleanType: ErgoType[Boolean] = ErgoType.ofRType(sigma.BooleanType)
 
   /** For type which are the same in Scala and Java */
   implicit val unitType: ErgoType[Unit] = ErgoType.unitType()

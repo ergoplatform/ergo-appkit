@@ -15,12 +15,12 @@ import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigmastate.Values;
-import sigmastate.basics.DLogProtocol;
+import sigmastate.crypto.DLogProtocol;
 import sigmastate.crypto.Platform;
 import sigmastate.eval.CostingSigmaDslBuilder$;
 import sigmastate.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
-import special.sigma.GroupElement;
+import sigma.GroupElement;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

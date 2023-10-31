@@ -1,22 +1,21 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.BlockHeader;
-import org.ergoplatform.appkit.AppkitHelpers;
 
 import java.math.BigInteger;
 
-import org.ergoplatform.sdk.JavaHelpers;
-import special.collection.Coll;
-import special.sigma.AvlTree;
-import special.sigma.GroupElement;
-import special.sigma.Header;
+import org.ergoplatform.sdk.Extensions;
+import sigma.Coll;
+import sigma.AvlTree;
+import sigma.GroupElement;
+import sigma.Header;
 
 public class BlockHeaderImpl extends PreHeaderImpl implements BlockHeader {
     private final Header sigmaHeader;
     private final org.ergoplatform.restapi.client.BlockHeader header;
 
     public BlockHeaderImpl(Header h, org.ergoplatform.restapi.client.BlockHeader header) {
-        super(JavaHelpers.toPreHeader(h));
+        super(new Extensions.HeaderOps(h).toPreHeader());
         this.sigmaHeader = h;
         this.header = header;
     }

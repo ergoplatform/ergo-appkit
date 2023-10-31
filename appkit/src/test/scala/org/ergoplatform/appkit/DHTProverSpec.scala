@@ -5,9 +5,9 @@ import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.basics.CryptoConstants
+import sigmastate.crypto.CryptoConstants
 import sigmastate.eval._
-import special.sigma.GroupElement
+import sigma.GroupElement
 
 class DHTProverSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks

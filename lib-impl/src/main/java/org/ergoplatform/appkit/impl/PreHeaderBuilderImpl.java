@@ -5,8 +5,8 @@ import org.ergoplatform.appkit.PreHeaderBuilder;
 import org.ergoplatform.appkit.BlockHeader;
 
 import sigmastate.eval.CPreHeader;
-import special.collection.Coll;
-import special.sigma.GroupElement;
+import sigma.Coll;
+import sigma.GroupElement;
 
 public class PreHeaderBuilderImpl implements PreHeaderBuilder {
     private final BlockchainContextImpl _ctx;

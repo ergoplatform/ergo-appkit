@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
-import special.collection.Coll;
-import special.sigma.GroupElement;
+import sigma.Coll;
+import sigma.GroupElement;
 
 /**
  * Only header fields that can be predicted by a miner.

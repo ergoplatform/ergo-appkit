@@ -2,9 +2,8 @@ package org.ergoplatform.appkit.scalaapi
 
 import org.ergoplatform.appkit.ErgoType
 import org.ergoplatform.appkit.scalaapi.Iso.IdentityIso
-import special.collection.Coll
-import special.sigma
-import special.sigma.{Header, Box, SigmaProp, GroupElement, AvlTree, PreHeader}
+import sigma.Coll
+import sigma.{Header, Box, SigmaProp, GroupElement, AvlTree, PreHeader}
 
 /** Isomorphism between Scala type S and Java type J.
   * Note, each conversion function is actually type cast of the argument to the resulting
