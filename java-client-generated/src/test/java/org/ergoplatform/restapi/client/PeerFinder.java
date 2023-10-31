@@ -6,9 +6,7 @@ public class PeerFinder extends ApiTestBase {
     public final String appVersion = "5.0.";
 
     String[] knownPeers = {
-        "198.58.96.195",
         "159.65.11.55",
-        "46.4.112.10",
         "213.239.193.208",
         "51.75.52.63",
         "159.65.11.55",
