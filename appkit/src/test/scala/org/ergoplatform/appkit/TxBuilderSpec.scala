@@ -14,7 +14,7 @@ import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import scalan.util.{FileUtil => SFileUtil}
+import sigma.util.{FileUtil => SFileUtil}
 import scorex.util.ModifierId
 import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting

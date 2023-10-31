@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * Represents an EIP-4 compliant token.

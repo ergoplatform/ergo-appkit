@@ -33,7 +33,7 @@ object InputBoxesValidatorJavaHelper {
                     tokensToSpend: JList[ErgoToken]): Unit = {
     val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
       .map(InputBoxWrapper.apply)
-    val targetAssets = tokensToSpend.convertTo[mutable.LinkedHashMap[ModifierId, Long]].toMap
+    val targetAssets =  isoErgoTokenSeqToLinkedMap.to(tokensToSpend.convertTo[IndexedSeq[ErgoToken]]).toMap
     new InputBoxesValidator().select(inputBoxes.toIterator, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
         throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)

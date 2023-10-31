@@ -1,8 +1,9 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
+import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, Iso, JavaHelpers, SecretString, TokenBalanceException}
 import org.ergoplatform.sdk.JavaHelpers._
-import org.ergoplatform.sdk._
+import org.ergoplatform.sdk.Iso._
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.{ErgoBox, ErgoTreePredef, UnsignedErgoLikeTransaction}
 import org.scalatest.matchers.should.Matchers
@@ -12,7 +13,6 @@ import sigmastate.TestsBase
 import sigmastate.eval.Extensions.ArrayByteOps
 import sigmastate.helpers.NegativeTesting
 import sigmastate.helpers.TestingHelpers.createBox
-
 import java.util
 import java.util.{Collections, List => JList}
 
@@ -51,10 +51,12 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
     val stateContext = txB.createErgoLikeStateContext
     val changeAddress = prover.getAddress.getErgoAddress
 
-    val boxesToSpend = inputs
-      .map(b => new InputBoxImpl(b))
-      .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
-      .convertTo[util.List[ExtendedInputBox]]
+    val boxesToSpend =
+      JListToIndexedSeq(identityIso[ExtendedInputBox]).from(
+        inputs
+          .map(b => new InputBoxImpl(b))
+          .map(b => ExtendedInputBox(b.getErgoBox, b.getExtension))
+      )
     val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
     val tx = new UnsignedErgoLikeTransaction(
       inputs = boxesToSpendSeq.map(_.toUnsignedInput),

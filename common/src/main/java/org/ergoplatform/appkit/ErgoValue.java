@@ -12,11 +12,11 @@ import sigmastate.Values;
 import sigmastate.crypto.Platform;
 import sigmastate.serialization.ValueSerializer;
 import sigmastate.serialization.ValueSerializer$;
-import special.collection.Coll;
-import special.sigma.AvlTree;
-import special.sigma.BigInt;
-import special.sigma.Box;
-import special.sigma.GroupElement;
+import sigma.Coll;
+import sigma.AvlTree;
+import sigma.BigInt;
+import sigma.Box;
+import sigma.GroupElement;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -112,11 +112,11 @@ public class ErgoValue<T> {
         return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
-    static public ErgoValue<special.sigma.SigmaProp> of(Values.SigmaBoolean value) {
+    static public ErgoValue<sigma.SigmaProp> of(Values.SigmaBoolean value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 
-    static public ErgoValue<special.sigma.SigmaProp> of(org.ergoplatform.appkit.SigmaProp value) {
+    static public ErgoValue<sigma.SigmaProp> of(org.ergoplatform.appkit.SigmaProp value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value.getSigmaBoolean()), ErgoType.sigmaPropType());
     }
 

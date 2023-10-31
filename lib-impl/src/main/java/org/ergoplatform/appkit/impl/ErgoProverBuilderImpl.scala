@@ -2,12 +2,11 @@ package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import org.ergoplatform.sdk.wallet.protocol.context.ErgoLikeParameters
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, SecretString}
-import sigmastate.basics.DLogProtocol.DLogProverInput
-import sigmastate.basics.{DLogProtocol, DiffieHellmanTupleProverInput}
-import special.sigma.GroupElement
+import sigmastate.crypto.DLogProtocol.DLogProverInput
+import sigmastate.crypto.{DLogProtocol, DiffieHellmanTupleProverInput}
+import sigma.GroupElement
 
 import java.math.BigInteger
 import java.util
@@ -71,7 +70,7 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
   }
 
   override def build: ErgoProver = {
-    val parameters = new ErgoLikeParameters() {
+    val parameters = new org.ergoplatform.sdk.BlockchainParameters() {
       private[impl] val _params = _ctx.getParameters
 
       override def storageFeeFactor: Int = _params.getStorageFeeFactor

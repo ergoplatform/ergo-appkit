@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scala.Tuple2;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * EIP-29 Attachment containing list of EIP-29 attachments

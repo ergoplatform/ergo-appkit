@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * Represents an attachment according to EIP-29.

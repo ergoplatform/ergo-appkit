@@ -7,8 +7,8 @@ import org.junit.Test;
 import java.math.BigInteger;
 
 import sigmastate.eval.CBigInt;
-import special.collection.Coll;
-import special.sigma.BigInt;
+import sigma.Coll;
+import sigma.BigInt;
 
 public class ErgoValueTest {
 

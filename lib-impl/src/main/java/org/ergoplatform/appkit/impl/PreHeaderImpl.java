@@ -1,12 +1,12 @@
 package org.ergoplatform.appkit.impl;
 import org.ergoplatform.appkit.PreHeader;
-import special.collection.Coll;
-import special.sigma.GroupElement;
+import sigma.Coll;
+import sigma.GroupElement;
 
 public class PreHeaderImpl implements PreHeader {
-    final special.sigma.PreHeader _ph;
+    final sigma.PreHeader _ph;
 
-    public PreHeaderImpl(special.sigma.PreHeader ph) {
+    public PreHeaderImpl(sigma.PreHeader ph) {
         _ph = ph;
     }
 

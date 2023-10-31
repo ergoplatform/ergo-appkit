@@ -2,15 +2,20 @@ package org.ergoplatform.appkit.scalaapi
 
 import debox.cfor
 import org.ergoplatform.sdk.Extensions.CollBuilderOps
-import scalan.RType
-import special.collection.Coll
-import scalan.rtypeToClassTag  // don't remove it is used
+import sigma.data.RType
+import sigma.Coll
+import sigma.rtypeToClassTag  // don't remove it is used
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
 // TODO refactor: removed and reuse from Sigma SDK module when available
 object Extensions {
+
+  // TODO remove and reuse from Sigma SDK DoubleOps
+  implicit class IntOps(val i: Double) extends AnyVal {
+    def erg: Long = (i * 1000000000L).toLong
+  }
 
   implicit class CollOps[A](val coll: Coll[A]) extends AnyVal {
     /** Partitions this $coll in two $colls according to a predicate.

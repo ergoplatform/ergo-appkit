@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.ErgoId;
-import special.sigma.Box;
+import sigma.Box;
 
 /**
  * Interface of UTXO boxes which can be accessed in the blockchain node.

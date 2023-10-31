@@ -7,9 +7,9 @@ import org.ergoplatform.sdk.{ErgoToken, JavaHelpers}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.basics.CryptoConstants
+import sigmastate.crypto.CryptoConstants
 import sigmastate.eval._
-import special.sigma.GroupElement
+import sigma.GroupElement
 
 import java.util.{Arrays, List => JList}
 

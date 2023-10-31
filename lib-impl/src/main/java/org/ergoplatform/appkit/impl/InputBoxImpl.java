@@ -17,7 +17,7 @@ import org.ergoplatform.sdk.Iso;
 import org.ergoplatform.sdk.JavaHelpers;
 import sigmastate.Values;
 import sigmastate.interpreter.ContextExtension;
-import special.sigma.Box;
+import sigma.Box;
 
 public class InputBoxImpl implements InputBox {
     private final ErgoId _id;

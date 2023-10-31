@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import retrofit2.Response;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * Convenience methods to build an {@link Eip4Token}

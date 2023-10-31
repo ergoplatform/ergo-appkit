@@ -11,7 +11,7 @@ import scala.Option;
 import scala.runtime.BoxedUnit;
 import scala.util.Failure;
 import scala.util.Try;
-import sigmastate.basics.DLogProtocol;
+import sigmastate.crypto.DLogProtocol;
 
 import java.io.File;
 

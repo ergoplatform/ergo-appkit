@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.sdk.SecretString
-import scalan.RType
+import sigma.data.RType
 import sigmastate.eval.SigmaDsl
 
 trait AppkitTestingCommon {

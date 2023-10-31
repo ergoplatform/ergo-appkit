@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, Token, TokenId}
+import org.ergoplatform.ErgoBox.{AdditionalRegisters, NonMandatoryRegisterId, Token, TokenId}
 import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.{ErgoToken, Iso}
@@ -17,8 +17,8 @@ import sigmastate.eval.{CAvlTree, CHeader, SigmaDsl}
 import sigmastate.interpreter.{ContextExtension, ProverResult}
 import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
 import sigmastate.serialization.ValueSerializer
-import special.collection.Coll
-import special.sigma.Header
+import sigma.Coll
+import sigma.Header
 
 import java.lang.{Byte => JByte}
 import java.util
@@ -110,8 +110,6 @@ object ScalaBridge {
       ErgoAlgos.encode(TreeSerializer.serializeErgoTree(tree))
     }
   }
-
-  type AdditionalRegisters = Map[NonMandatoryRegisterId, EvaluatedValue[_ <: SType]]
 
   implicit val isoRegistersToMap: Iso[Registers, AdditionalRegisters] = new Iso[Registers, AdditionalRegisters] {
     override def to(regs: Registers): AdditionalRegisters = {
@@ -219,7 +217,7 @@ object ScalaBridge {
         version = h.getVersion.toByte,
         parentId = h.getParentId.toColl,
         ADProofsRoot = h.getAdProofsRoot.toColl,
-        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(ADDigest @@ h.getStateRoot.toBytes)),
+        stateRoot = CAvlTree(ErgoInterpreter.avlTreeFromDigest(h.getStateRoot.toColl)),
         transactionsRoot = h.getTransactionsRoot.toColl,
         timestamp = h.getTimestamp(),
         nBits = h.getNBits(),

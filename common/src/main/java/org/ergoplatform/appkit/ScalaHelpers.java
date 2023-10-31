@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.JavaHelpers;
-import special.collection.Coll;
+import sigma.Coll;
 
 /**
  * set of Scala/Java conversion helper methods that need to be written in Java
