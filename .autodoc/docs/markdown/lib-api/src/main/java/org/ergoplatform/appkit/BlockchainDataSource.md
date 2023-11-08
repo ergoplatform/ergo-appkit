@@ -1,0 +1,28 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/BlockchainDataSource.java)
+
+The `BlockchainDataSource` interface provides a way to access blockchain data source. This interface is a part of the `ergo-appkit` project. The data source always performs a request to the blockchain data and does not hold or cache any information. 
+
+The `BlockchainDataSource` interface has several methods that allow the user to interact with the blockchain. The `getParameters()` method returns the blockchain parameters that the data source is working with. The returned value might be cached by the data source as it is not subject to change frequently.
+
+The `getLastBlockHeaders(int count, boolean onlyFullHeaders)` method returns the last headers objects sorted by descending order. The `count` parameter specifies the number of block headers that the user wants to retrieve. The `onlyFullHeaders` parameter restricts the returned list to full headers. If set to true, the amount of returned block headers might be less than `count`.
+
+The `getBoxById(String boxId, boolean findInPool, boolean findInSpent)` method returns box contents for an unspent box by a unique identifier for use as an Input, including mempool boxes. The `boxId` parameter specifies the ID of the wanted box. The `findInPool` parameter specifies whether to find boxes that are currently in the mempool. The `findInSpent` parameter specifies whether to find boxes that are spent.
+
+The `sendTransaction(SignedTransaction tx)` method sends an Ergo transaction. The `tx` parameter specifies the signed transaction to be posted to the blockchain. The method returns the transaction ID of the submitted transaction.
+
+The `getUnspentBoxesFor(Address address, int offset, int limit)` method returns unspent boxes owned by the given address starting from the given offset up to the given limit (basically one page of the boxes). The `address` parameter specifies the owner of the boxes to be retrieved. The `offset` parameter specifies the optional zero-based offset of the first box in the list, default = 0. The `limit` parameter specifies the optional number of boxes to retrieve. Note that the returned list might contain fewer elements if data for some boxes couldn't be retrieved.
+
+The `getUnconfirmedUnspentBoxesFor(Address address, int offset, int limit)` method returns unspent boxes owned by the given address starting from the given offset up to the given limit (basically one page of the boxes), restricted to mempool. The `address` parameter specifies the owner of the boxes to be retrieved. The `offset` parameter specifies the optional zero-based offset of the first box in the list, default = 0. The `limit` parameter specifies the optional number of boxes to retrieve. Note that the returned list might contain fewer elements if data for some boxes couldn't be retrieved.
+
+The `getUnconfirmedTransactions(int offset, int limit)` method returns unconfirmed transactions from mempool. The `offset` parameter specifies the optional zero-based offset of the first transaction in the list, default = 0. The `limit` parameter specifies the optional number of transactions to retrieve. Note that the returned list might contain fewer elements if data for some transactions couldn't be retrieved.
+
+Overall, the `BlockchainDataSource` interface provides a way to interact with the blockchain data source. The methods in this interface allow the user to retrieve blockchain parameters, block headers, unspent boxes, and unconfirmed transactions. The user can also send an Ergo transaction using this interface. This interface is a part of the `ergo-appkit` project and can be used to build applications that interact with the Ergo blockchain.
+## Questions: 
+ 1. What is the purpose of this interface and what methods does it provide?
+- This interface provides methods to access blockchain data source, including getting blockchain parameters, retrieving block headers, boxes, and transactions, and sending transactions to the blockchain.
+
+2. What is the difference between `getUnspentBoxesFor` and `getUnconfirmedUnspentBoxesFor` methods?
+- `getUnspentBoxesFor` retrieves unspent boxes owned by the given address from the blockchain, while `getUnconfirmedUnspentBoxesFor` retrieves unspent boxes owned by the given address from the mempool.
+
+3. What is the purpose of the `BlockchainParameters` class and how is it used in this interface?
+- The `BlockchainParameters` class represents the parameters of the blockchain that this data source is working with, and is used in the `getParameters` method to return the blockchain parameters that might be cached by the data source.

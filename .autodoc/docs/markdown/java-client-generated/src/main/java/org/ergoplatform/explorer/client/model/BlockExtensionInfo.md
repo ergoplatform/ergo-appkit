@@ -1,0 +1,33 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/explorer/client/model/BlockExtensionInfo.java)
+
+This code defines a Java class called `BlockExtensionInfo` which represents a block extension in the Ergo Explorer API. A block extension is an additional data structure that can be included in a block header in the Ergo blockchain. The purpose of this class is to provide a way to represent block extensions in Java code and to serialize/deserialize them to/from JSON format.
+
+The class has three instance variables: `headerId`, `digest`, and `fields`. `headerId` is a string that represents the ID of the corresponding block header. `digest` is a string that represents the hex-encoded extension digest. `fields` is an instance of the `Fields` class, which is defined in another file and represents the actual data contained in the block extension.
+
+The class provides getter and setter methods for each instance variable, as well as methods for converting the object to a string representation and for checking equality with another object.
+
+This class is likely used in the larger Ergo Explorer API project to represent block extensions in Java code and to serialize/deserialize them to/from JSON format. It may be used in conjunction with other classes and methods to provide a complete API for interacting with the Ergo blockchain. Here is an example of how this class might be used:
+
+```
+// Create a new BlockExtensionInfo object
+BlockExtensionInfo extension = new BlockExtensionInfo()
+    .headerId("12345")
+    .digest("abcdef")
+    .fields(new Fields());
+
+// Serialize the object to JSON format
+Gson gson = new Gson();
+String json = gson.toJson(extension);
+
+// Deserialize the object from JSON format
+BlockExtensionInfo deserialized = gson.fromJson(json, BlockExtensionInfo.class);
+```
+## Questions: 
+ 1. What is the purpose of this code and what does it do?
+- This code is a model class for BlockExtensionInfo in the Ergo Explorer API. It contains information about a block's extension, including the header ID, extension digest, and fields.
+
+2. What is the significance of the @SerializedName and @Schema annotations?
+- The @SerializedName annotation is used to specify the name of the JSON property that corresponds to a Java field. The @Schema annotation is used to provide additional information about a field, such as its description and whether it is required.
+
+3. What is the purpose of the equals and hashCode methods?
+- The equals and hashCode methods are used to compare two instances of the BlockExtensionInfo class for equality. They compare the header ID, extension digest, and fields of the two instances and return true if they are equal, false otherwise. These methods are commonly used in collections such as sets and maps.
