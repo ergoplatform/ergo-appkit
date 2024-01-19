@@ -3,7 +3,7 @@ package org.ergoplatform.appkit.cli
 import org.ergoplatform.appkit
 import sigma.util.{FileUtil => SFileUtil}
 import org.ergoplatform.sdk.JavaHelpers._
-
+import org.ergoplatform.sdk.SdkIsos._
 import java.util.{List => JList}
 import java.lang.{String => JString}
 import org.ergoplatform.appkit.FileMockedErgoClient

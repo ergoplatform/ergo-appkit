@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit;
 
-import sigmastate.lang.SigmaBuilder;
+import sigma.ast.SigmaBuilder;
 
 import java.util.LinkedHashMap;
 

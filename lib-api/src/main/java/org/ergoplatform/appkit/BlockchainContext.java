@@ -1,14 +1,15 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.ErgoToken;
-import sigmastate.Values;
+
 
 import java.util.List;
 import java.util.function.Function;
+import sigma.ast.ErgoTree;
 
 /**
  * This interface represent a specific context of blockchain for execution
- * of transaction transaction building scenario.
+ * of transaction building scenario.
  * It contains methods for accessing blockchain data, current blockchain state,
  * node information etc.
  * An instance of this interface can also be used to create new builders
@@ -78,7 +79,7 @@ public interface BlockchainContext {
      */
     String sendTransaction(SignedTransaction tx);
 
-    ErgoContract newContract(Values.ErgoTree ergoTree);
+    ErgoContract newContract(ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
 

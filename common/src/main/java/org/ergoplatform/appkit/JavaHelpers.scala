@@ -4,26 +4,24 @@ import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.ErgoScriptPredef.compileWithCosting
 import org.ergoplatform._
-import org.ergoplatform.sdk.Iso._
-import org.ergoplatform.sdk.JavaHelpers.{UniversalConverter, collRType}
-import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos}
-import sigma.Colls
-import sigma.data.RType
-import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue}
-import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import sigmastate.eval.{CompiletimeIRContext, Evaluation}
-import sigmastate.interpreter.ContextExtension
-import sigmastate.lang.Terms.ValueOps
-import sigmastate.serialization.ErgoTreeSerializer
-
+import org.ergoplatform.sdk.JavaHelpers.{collRType, UniversalConverter}
+import org.ergoplatform.sdk.{ErgoToken, SdkIsos, LowPriorityIsos}
+import sigma.{Evaluation, Colls}
+import sigma.data.{Iso, RType}
+import sigma.ast.SType
+import sigma.ast.syntax.ValueOps
+import sigma.ast.{EvaluatedValue, Constant, ErgoTree}
+import sigma.data.CSigmaDslBuilder.validationSettings
+import sigma.interpreter.ContextExtension
+import sigma.serialization.ErgoTreeSerializer
+import sigmastate.eval.CompiletimeIRContext
+import org.ergoplatform.sdk.SdkIsos._
 import java.util
 import java.util.{List => JList}
 import scala.collection.JavaConverters
 import scala.collection.compat.immutable.ArraySeq
 
 object AppkitIso extends LowPriorityIsos {
-  import org.ergoplatform.sdk.Iso._
   implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
     override def to(et: ErgoType[_]): SType = Evaluation.rtypeToSType(et.getRType)
     override def from(st: SType): ErgoType[_] = new ErgoType(Evaluation.stypeToRType(st))
@@ -51,7 +49,7 @@ object AppkitIso extends LowPriorityIsos {
       ContextExtension(values)
     }
     override def from(b: ContextExtension): JList[ContextVar] = {
-      val iso = JListToIndexedSeq[ContextVar, ContextVar]
+      val iso = SdkIsos.JListToIndexedSeq[ContextVar, ContextVar]
       val vars = iso.from(b.values
         .map { case (id, v) => new ContextVar(id, isoErgoValueToSValue.from(v)) }
         .toIndexedSeq)
@@ -62,6 +60,7 @@ object AppkitIso extends LowPriorityIsos {
 }
 
 object AppkitHelpers {
+
   implicit class ListOps[A](val xs: JList[A]) extends AnyVal {
     def map[B](f: A => B): JList[B] = {
       xs.convertTo[IndexedSeq[A]].map(f).convertTo[JList[B]]

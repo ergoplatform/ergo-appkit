@@ -3,20 +3,18 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.ErgoBox;
 import org.ergoplatform.ErgoBoxCandidate;
 import org.ergoplatform.UnsignedInput;
-import org.ergoplatform.appkit.*;
+import org.ergoplatform.appkit.AppkitHelpers;
+import org.ergoplatform.appkit.OutBox;
+import org.ergoplatform.appkit.ReducedTransaction;
+import org.ergoplatform.sdk.ErgoId;
+import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
+import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
+import sigma.serialization.SigmaByteWriter;
+import sigma.serialization.SigmaSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import org.ergoplatform.sdk.ErgoId;
-import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
-import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
-import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer$;
-import scala.collection.JavaConverters;
-import sigmastate.serialization.SigmaSerializer;
-import sigmastate.serialization.SigmaSerializer$;
-import sigmastate.utils.SigmaByteWriter;
 
 public class ReducedTransactionImpl implements ReducedTransaction {
     private final BlockchainContextBase _ctx;

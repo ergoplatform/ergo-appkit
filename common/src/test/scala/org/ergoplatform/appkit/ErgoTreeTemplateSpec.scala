@@ -2,18 +2,19 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.AppkitIso.isoErgoTypeToSType
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import sigmastate.Values.{ErgoTree, IntConstant}
+import sigma.ast.{IntConstant, ErgoTree}
 import sigmastate.helpers.NegativeTesting
-import sigmastate.serialization.generators.ObjectGenerators
-import sigmastate.{EQ, Plus, SInt, SType}
-
+import sigma.serialization.generators.ObjectGenerators
+import sigma.ast.{SType, SInt, EQ}
+import sigmastate.Plus
+import org.ergoplatform.sdk.SdkIsos._
 import java.util.{List => JList}
 
 class ErgoTreeTemplateSpec extends TestingBase
   with AppkitTestingCommon
   with ObjectGenerators
   with NegativeTesting {
-  val tree = ErgoTree.fromProposition(EQ(IntConstant(10), Plus(IntConstant(9), IntConstant(1))))
+  val tree = ErgoTree.fromProposition(EQ(IntConstant(10), Plus(IntConstant(9), IntConstant(1))).toSigmaProp)
 
   property("should create template without parameters") {
     tree.constants.length shouldBe 3
@@ -35,7 +36,7 @@ class ErgoTreeTemplateSpec extends TestingBase
       .withParameterPositions(Array(0))
     val newTree = template.applyParameters(ErgoValue.of(11))
     val expectedTree = ErgoTree.fromProposition(
-      EQ(IntConstant(11), Plus(IntConstant(9), IntConstant(1)))
+      EQ(IntConstant(11), Plus(IntConstant(9), IntConstant(1))).toSigmaProp
     )
     newTree shouldBe expectedTree
 

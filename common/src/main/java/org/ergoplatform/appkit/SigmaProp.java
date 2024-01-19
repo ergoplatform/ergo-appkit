@@ -1,16 +1,16 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.SdkIsos;
 import org.ergoplatform.sdk.JavaHelpers;
-import sigmastate.Values;
+import sigma.data.SigmaBoolean;
 
 /**
  * Proposition which can be proven and verified by sigma protocol.
  */
 public class SigmaProp {
-    private final Values.SigmaBoolean sigmaBoolean;
+    private final SigmaBoolean sigmaBoolean;
 
-    public SigmaProp(Values.SigmaBoolean sigmaBoolean) {
+    public SigmaProp(SigmaBoolean sigmaBoolean) {
         this.sigmaBoolean = sigmaBoolean;
     }
 
@@ -18,7 +18,7 @@ public class SigmaProp {
         this(JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
     }
 
-    public Values.SigmaBoolean getSigmaBoolean() {
+    public SigmaBoolean getSigmaBoolean() {
         return sigmaBoolean;
     }
 
@@ -26,7 +26,7 @@ public class SigmaProp {
      * Serializes this SigmaProp.
      */
     public byte[] toBytes() {
-        return Iso.isoSigmaBooleanToByteArray().to(sigmaBoolean);
+        return SdkIsos.isoSigmaBooleanToByteArray().to(sigmaBoolean);
     }
 
     public Address toAddress(NetworkType networkType) {
@@ -37,7 +37,7 @@ public class SigmaProp {
      * @return SigmaProp equal to the one that was serialized with {@link #toBytes()}
      */
     public static SigmaProp parseFromBytes(byte[] serializedBytes) {
-        return new SigmaProp(Iso.isoSigmaBooleanToByteArray().from(serializedBytes));
+        return new SigmaProp(SdkIsos.isoSigmaBooleanToByteArray().from(serializedBytes));
     }
 
     /**

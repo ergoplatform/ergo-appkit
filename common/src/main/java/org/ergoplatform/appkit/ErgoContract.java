@@ -1,10 +1,11 @@
 package org.ergoplatform.appkit;
 
-import sigmastate.Values;
+import sigma.ast.ErgoTree;
+
 
 /**
  * Representation of ErgoScript contract using source code and named constants.
- * This information is enough to compile contract into {@link Values.ErgoTree}.
+ * This information is enough to compile contract into {@link ErgoTree}.
  * Once constructed the instances are immutable.
  * Methods which do transformations produce new instances.
  */
@@ -27,7 +28,7 @@ public interface ErgoContract {
     /**
      * Returns the underlying ErgoTree used by this contract
      */
-    Values.ErgoTree getErgoTree();
+    ErgoTree getErgoTree();
 
     /**
      * Get the base58 encoded address that represents this contract

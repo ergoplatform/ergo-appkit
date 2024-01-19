@@ -3,7 +3,7 @@ package org.ergoplatform.appkit;
 import java.util.List;
 
 import org.ergoplatform.sdk.ErgoToken;
-import sigmastate.Values;
+import sigma.ast.ErgoTree;
 
 /**
  * This interface represents a box on a transaction, either an InputBox or an OutBox.
@@ -37,7 +37,7 @@ public interface TransactionBox {
     /**
      * Returns the ErgoTree of the script guarding the box
      */
-    Values.ErgoTree getErgoTree();
+    ErgoTree getErgoTree();
 
     /** Returns {@link BoxAttachment} stored in this box or null. */
     BoxAttachment getAttachment();

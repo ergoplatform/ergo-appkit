@@ -8,8 +8,8 @@ import org.ergoplatform.validation.ValidationRules
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.SigmaPropConstant
-import sigmastate.serialization.ErgoTreeSerializer
+import sigma.ast.SigmaPropConstant
+import sigma.serialization.ErgoTreeSerializer
 
 class ApiClientSpec
     extends AnyPropSpec

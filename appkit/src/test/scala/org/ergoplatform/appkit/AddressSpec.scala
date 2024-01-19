@@ -9,7 +9,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scorex.util.encode.Base16
-import sigmastate.serialization.ErgoTreeSerializer
+import sigma.ast.ErgoTree
+import sigma.serialization.ErgoTreeSerializer
 
 
 
@@ -97,7 +98,7 @@ class AddressSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropert
     val ergoTree = ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(Base16.decode(tree).get)
     val addr = Address.fromErgoTree(ergoTree, NetworkType.MAINNET)
     val addr2 = encoder.fromProposition(ergoTree).get
-    val addr3 = encoder.fromProposition(ergoTree.proposition).get
+    val addr3 = encoder.fromProposition(ErgoTree.fromProposition(ergoTree.toProposition(ergoTree.isConstantSegregation))).get
     val addr4 = Address.fromPropositionBytes(NetworkType.MAINNET, Base16.decode(tree).get)
     addr.getErgoAddress shouldBe addr2
     addr.getErgoAddress shouldBe addr3

@@ -1,24 +1,24 @@
 package org.ergoplatform.appkit.impl
 
 import _root_.org.ergoplatform.restapi.client._
-import org.ergoplatform.ErgoBox.{AdditionalRegisters, NonMandatoryRegisterId, Token, TokenId}
-import org.ergoplatform.explorer.client.model.{AdditionalRegister, AssetInstanceInfo, OutputInfo, AdditionalRegisters => ERegisters, AssetInfo => EAsset}
+import org.ergoplatform.ErgoBox.{NonMandatoryRegisterId, Token, AdditionalRegisters, TokenId}
+import org.ergoplatform.explorer.client.model.{OutputInfo, AssetInstanceInfo, AdditionalRegister, AssetInfo => EAsset, AdditionalRegisters => ERegisters}
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import org.ergoplatform.sdk.{ErgoToken, Iso}
+import org.ergoplatform.sdk.{ErgoToken, SdkIsos}
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter
 import org.ergoplatform.{ErgoLikeTransaction, _}
-import scorex.crypto.authds.{ADDigest, ADKey}
+import scorex.crypto.authds.ADKey
 import scorex.util.ModifierId
-import sigmastate.SType
-import sigmastate.Values.{ErgoTree, EvaluatedValue}
+import sigma.ast.{EvaluatedValue, SType, ErgoTree}
 import sigmastate.eval.Extensions.ArrayByteOps
-import sigmastate.eval.{CAvlTree, CHeader, SigmaDsl}
-import sigmastate.interpreter.{ContextExtension, ProverResult}
-import sigmastate.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
-import sigmastate.serialization.ValueSerializer
-import sigma.Coll
-import sigma.Header
+import sigmastate.eval.CHeader
+import sigma.interpreter.{ContextExtension, ProverResult}
+import sigma.serialization.ErgoTreeSerializer.{DefaultSerializer => TreeSerializer}
+import sigma.serialization.ValueSerializer
+import sigma.{Header, Coll}
+import sigma.data.{Iso, CAvlTree}
+import sigma.eval.SigmaDsl
 
 import java.lang.{Byte => JByte}
 import java.util
@@ -26,7 +26,7 @@ import java.util.{List => JList}
 import scala.collection.JavaConverters._
 
 object ScalaBridge {
-  import org.ergoplatform.sdk.Iso.JListToIndexedSeq
+  import org.ergoplatform.sdk.SdkIsos._
   import org.ergoplatform.sdk.JavaHelpers.StringExtensions
 
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
@@ -164,7 +164,7 @@ object ScalaBridge {
     }
 
     override def from(box: ErgoBox): ErgoTransactionOutput = {
-      val assets = Iso.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
+      val assets = SdkIsos.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
       val regs = isoRegistersToMap.from(box.additionalRegisters)
       val out = new ErgoTransactionOutput()
           .boxId(ErgoAlgos.encode(box.id))
@@ -193,7 +193,7 @@ object ScalaBridge {
     }
 
     override def from(box: ErgoBox): OutputInfo = {
-      val assets = Iso.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
+      val assets = SdkIsos.JListToColl[Asset, (TokenId, Long)].from(box.additionalTokens)
       val regs = isoExplRegistersToMap.from(box.additionalRegisters)
       val out = new OutputInfo()
           .boxId(ErgoAlgos.encode(box.id))
@@ -237,19 +237,19 @@ object ScalaBridge {
       CHeader(
         id = h.getId.toColl,
         version = h.getVersion,
-        parentId = h.getParentId.map(Iso.jbyteToByte.to),
-        ADProofsRoot = h.getAdProofsRoot.map(Iso.jbyteToByte.to),
+        parentId = h.getParentId.map(SdkIsos.jbyteToByte.to),
+        ADProofsRoot = h.getAdProofsRoot.map(SdkIsos.jbyteToByte.to),
         stateRoot = h.getStateRoot,
-        transactionsRoot = h.getTransactionsRoot.map(Iso.jbyteToByte.to),
+        transactionsRoot = h.getTransactionsRoot.map(SdkIsos.jbyteToByte.to),
         timestamp = h.getTimestamp,
         nBits = h.getNBits,
         height = h.getHeight,
-        extensionRoot = h.getExtensionHash.map(Iso.jbyteToByte.to),
+        extensionRoot = h.getExtensionHash.map(SdkIsos.jbyteToByte.to),
         minerPk = h.getPowSolutionsPk,
         powOnetimePk = h.getPowSolutionsW,
-        powNonce = h.getPowSolutionsN.map(Iso.jbyteToByte.to),
+        powNonce = h.getPowSolutionsN.map(SdkIsos.jbyteToByte.to),
         powDistance = SigmaDsl.BigInt(h.getPowSolutionsD),
-        votes = h.getVotes.map(Iso.jbyteToByte.to)
+        votes = h.getVotes.map(SdkIsos.jbyteToByte.to)
       )
 
   implicit val isoErgoTransaction: Iso[ErgoTransaction, ErgoLikeTransaction] = new Iso[ErgoTransaction, ErgoLikeTransaction] {

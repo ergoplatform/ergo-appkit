@@ -5,12 +5,12 @@ import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.Constants;
 import org.ergoplatform.appkit.ErgoContract;
 import org.ergoplatform.appkit.NetworkType;
-import sigmastate.Values;
+import sigma.ast.ErgoTree;
 
 public class ErgoTreeContract implements ErgoContract {
-    private final Values.ErgoTree _ergoTree;
+    private final ErgoTree _ergoTree;
     private final NetworkType _networkType;
-    public ErgoTreeContract(Values.ErgoTree ergoTree, NetworkType networkType) {
+    public ErgoTreeContract(ErgoTree ergoTree, NetworkType networkType) {
         _ergoTree = ergoTree;
         _networkType = networkType;
     }
@@ -31,7 +31,7 @@ public class ErgoTreeContract implements ErgoContract {
     }
 
     @Override
-    public Values.ErgoTree getErgoTree() {
+    public ErgoTree getErgoTree() {
         return _ergoTree;
     }
 
