@@ -161,9 +161,12 @@ public class Address {
      */
     public SigmaBoolean getSigmaBoolean() {
         ErgoTree ergoTree = getErgoAddress().script();
-        return ergoTree.toSigmaBooleanOpt().getOrElse(
-            () -> { throw new IllegalStateException("Cannot extract SigmaBoolean from ErgoTree: " + ergoTree); }
-        );
+        var sbOpt = ergoTree.toSigmaBooleanOpt();
+        if (sbOpt.isDefined())
+            return sbOpt.get();
+        else
+            throw new IllegalStateException(
+                "Cannot extract SigmaBoolean from ErgoTree: " + ergoTree);
     }
 
     /**
