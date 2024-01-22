@@ -1,6 +1,5 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.SigmaConstants;
 import org.ergoplatform.sdk.ErgoToken;
 
 /**
@@ -29,7 +28,7 @@ public interface OutBoxBuilder {
     OutBoxBuilder contract(ErgoContract contract);
 
     /**
-     * Configures amounts for one or more tokens (up to {@link SigmaConstants.MaxTokens}).
+     * Configures amounts for one or more tokens (up to {@link sigma.data.SigmaConstants.MaxTokens}).
      * Each Ergo box can store zero or more tokens (aka assets).
      *
      * @param tokens one or more tokens to be added to the constructed output box.

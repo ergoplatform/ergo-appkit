@@ -14,11 +14,13 @@ import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
-import sigmastate.Values;
-import sigmastate.crypto.DLogProtocol;
-import sigmastate.crypto.Platform;
-import sigmastate.eval.CostingSigmaDslBuilder$;
-import sigmastate.serialization.ErgoTreeSerializer;
+import sigma.ast.ErgoTree;
+import sigma.data.CGroupElement;
+import sigma.data.ProveDlog;
+import sigma.data.SigmaBoolean;
+
+import sigma.crypto.Platform;
+import sigma.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
 import sigma.GroupElement;
 
@@ -116,14 +118,14 @@ public class Address {
     /**
      * Extract public key from P2PKAddress.
      */
-    public DLogProtocol.ProveDlog getPublicKey() { return asP2PK().pubkey(); }
+    public ProveDlog getPublicKey() { return asP2PK().pubkey(); }
 
     /**
      * Extract public key from P2PKAddress and return its group element
      */
     public GroupElement getPublicKeyGE() {
         Platform.Ecp point = getPublicKey().value();
-        return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
+        return new CGroupElement(point);
     }
 
     /**
@@ -157,9 +159,14 @@ public class Address {
      * @return SigmaBoolean value of this address. Throws an error if
      * {@link #isSigmaBoolean()} is false
      */
-    public Values.SigmaBoolean getSigmaBoolean() {
-        Values.ErgoTree ergoTree = getErgoAddress().script();
-        return JavaHelpers.toSigmaBoolean(ergoTree);
+    public SigmaBoolean getSigmaBoolean() {
+        ErgoTree ergoTree = getErgoAddress().script();
+        scala.Option<SigmaBoolean> sbOpt = ergoTree.toSigmaBooleanOpt();
+        if (sbOpt.isDefined())
+            return sbOpt.get();
+        else
+            throw new IllegalStateException(
+                "Cannot extract SigmaBoolean from ErgoTree: " + ergoTree);
     }
 
     /**
@@ -203,7 +210,7 @@ public class Address {
     public static Address fromMnemonic(
         NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
-        DLogProtocol.ProveDlog pk = masterKey.publicImage();
+        ProveDlog pk = masterKey.publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
@@ -260,15 +267,15 @@ public class Address {
         return new Address(p2pkAddress);
     }
 
-    public static Address fromErgoTree(Values.ErgoTree ergoTree, NetworkType networkType) {
+    public static Address fromErgoTree(ErgoTree ergoTree, NetworkType networkType) {
         ErgoAddressEncoder encoder =
             ErgoAddressEncoder.apply(networkType.networkPrefix);
         ErgoAddress ergoAddress = encoder.fromProposition(ergoTree).get();
         return new Address(ergoAddress);
     }
 
-    public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
-        Values.ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
+    public static Address fromSigmaBoolean(SigmaBoolean sigmaBoolean, NetworkType networkType) {
+        ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
         return fromErgoTree(ergoTree, networkType);
     }
 

@@ -5,10 +5,11 @@ import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.crypto.CryptoConstants
-import sigmastate.eval._
+import sigma.crypto.CryptoConstants
 import sigma.GroupElement
+import sigma.data.{CGroupElement, CBigInt}
 
+import java.math.BigInteger
 import scala.util.Try
 
 class MultiProveDlogSpec extends AnyPropSpec with Matchers
@@ -18,9 +19,9 @@ class MultiProveDlogSpec extends AnyPropSpec with Matchers
 
   property("Multi DlogProver") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
-    val x = BigInt("187235612876647164378132684712638457631278").bigInteger
-    val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
+    val x = CBigInt(new BigInteger("187235612876647164378132684712638457631278"))
+    val y = CBigInt(new BigInteger("340956873409567839086738967389673896738906"))
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
 
@@ -55,10 +56,16 @@ class MultiProveDlogSpec extends AnyPropSpec with Matchers
       val unsigned = txB.boxesToSpend(inputs).outputs(output).fee(10000000).sendChangeTo(changeAddr).build()
 
       // Dlog with two different secrets
-      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(y).build().sign(unsigned)).isSuccess shouldBe true
+      Try(ctx.newProverBuilder()
+        .withDLogSecret(x)
+        .withDLogSecret(y)
+        .build().sign(unsigned)).isSuccess shouldBe true
 
       // Dlog with wrong secret(s)
-      Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(BigInt(1).bigInteger).build().sign(unsigned)).isSuccess shouldBe false
+      Try(ctx.newProverBuilder()
+        .withDLogSecret(x)
+        .withDLogSecret(BigInt(1).bigInteger)
+        .build().sign(unsigned)).isSuccess shouldBe false
 
       // Dlog with duplicate secrets
       Try(ctx.newProverBuilder().withDLogSecret(x).withDLogSecret(y).withDLogSecret(x).build().sign(unsigned)).isSuccess shouldBe false

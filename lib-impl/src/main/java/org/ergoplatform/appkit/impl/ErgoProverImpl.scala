@@ -2,13 +2,13 @@ package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
-import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, UnreducedTransaction}
-import org.ergoplatform.{P2PKAddress, sdk}
-import sigmastate.eval.CostingSigmaDslBuilder
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, UnreducedTransaction, JavaHelpers}
+import org.ergoplatform.{sdk, P2PKAddress}
 import sigmastate.interpreter.HintsBag
 import sigmastate.utils.Helpers._
 import sigma.BigInt
+import sigma.eval.SigmaDsl
+import org.ergoplatform.sdk.SdkIsos._
 
 import java.util
 
@@ -24,17 +24,16 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
   override def getAddress = new Address(getP2PKAddress)
 
   override def getSecretKey: BigInt =
-    CostingSigmaDslBuilder.BigInt(_prover.secretKeys(0).privateInput.w)
+    SigmaDsl.BigInt(_prover.secretKeys(0).privateInput.w)
 
   override def getEip3Addresses: util.List[Address] = {
     val addresses = _prover.secretKeys
-      .convertTo[IndexedSeq[ExtendedSecretKey]]
       .drop(1)
       .map { k =>
         val p2pkAddress = JavaHelpers.createP2PKAddress(k.publicImage, networkPrefix)
         new Address(p2pkAddress)
       }
-    addresses.convertTo[util.List[Address]]
+    addresses.convertTo[java.util.List[Address]]
   }
 
   override def sign(tx: UnsignedTransaction): SignedTransaction =

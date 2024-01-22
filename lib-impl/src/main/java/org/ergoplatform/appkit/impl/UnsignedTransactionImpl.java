@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ergoplatform.sdk.wallet.protocol.context.BlockchainStateContext;
-import sigmastate.Values;
+import sigma.ast.ErgoTree;
 
 import javax.annotation.Nonnull;
 
@@ -126,7 +126,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
         UnsignedErgoTransaction tx = ScalaBridge.isoUnsignedErgoTransaction().from(_tx);
         if (prettyPrint) {
             for (ErgoTransactionOutput o : tx.getOutputs()) {
-                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+                ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
                 o.ergoTree(tree.toString());
             }
         }

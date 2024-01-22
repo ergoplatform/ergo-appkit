@@ -13,10 +13,12 @@ import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.ErgoTransactionOutput;
 import org.ergoplatform.restapi.client.JSON;
 import org.ergoplatform.sdk.ErgoId;
-import org.ergoplatform.sdk.Iso;
-import sigmastate.Values;
-import sigmastate.serialization.SigmaSerializer;
-import sigmastate.utils.SigmaByteWriter;
+import org.ergoplatform.sdk.SdkIsos;
+import sigma.ast.ErgoTree;
+import sigma.data.Iso;
+
+import sigma.serialization.SigmaByteWriter;
+import sigma.serialization.SigmaSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +63,7 @@ public class SignedTransactionImpl implements SignedTransaction {
     	ErgoTransaction tx = ScalaBridge.isoErgoTransaction().from(_tx);
     	if (prettyPrint) {
             for (ErgoTransactionOutput o : tx.getOutputs()) {
-                Values.ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
+                ErgoTree tree = ScalaBridge.isoStringToErgoTree().to(o.getErgoTree());
                 o.ergoTree(tree.toString());
             }
     	}
@@ -72,7 +74,7 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public List<SignedInput> getSignedInputs() {
-        List<Input> inputs = Iso.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
+        List<Input> inputs = SdkIsos.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
         List<SignedInput> res = new ArrayList<>(inputs.size());
         for (Input input : inputs) {
             res.add(new SignedInputImpl(this, input));
@@ -82,7 +84,7 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public List<InputBox> getOutputsToSpend() {
-        List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
+        List<ErgoBox> outputs = SdkIsos.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
         List<InputBox> res = new ArrayList<>(outputs.size());
         for (ErgoBox ergoBox : outputs) {
             res.add(new InputBoxImpl(ergoBox));
@@ -92,7 +94,7 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public List<String> getInputBoxesIds() {
-        List<Input> inputs = Iso.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
+        List<Input> inputs = SdkIsos.JListToIndexedSeq(Iso.<Input>identityIso()).from(_tx.inputs());
         List<String> res = new ArrayList<>(inputs.size());
         for (Input input : inputs) {
             res.add(new ErgoId(input.boxId()).toString());
@@ -102,7 +104,7 @@ public class SignedTransactionImpl implements SignedTransaction {
 
     @Override
     public List<OutBox> getOutputs() {
-        List<ErgoBox> outputs = Iso.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
+        List<ErgoBox> outputs = SdkIsos.JListToIndexedSeq(Iso.<ErgoBox>identityIso()).from(_tx.outputs());
         List<OutBox> res = new ArrayList<>(outputs.size());
         for (ErgoBox ergoBox : outputs) {
             res.add(new OutBoxImpl(ergoBox));

@@ -6,8 +6,9 @@ import org.ergoplatform.appkit.ErgoValue;
 import org.ergoplatform.appkit.ScalaHelpers;
 
 import scorex.util.encode.Base16;
-import sigmastate.Values;
+
 import sigma.Coll;
+import sigma.ast.ErgoTree;
 
 public class BabelFeeBoxContract {
 
@@ -26,7 +27,7 @@ public class BabelFeeBoxContract {
     }
 
     private final ErgoId tokenId;
-    private final Values.ErgoTree ergoTree;
+    private final ErgoTree ergoTree;
 
     public BabelFeeBoxContract(ErgoId tokenId) {
         this.tokenId = tokenId;
@@ -36,7 +37,7 @@ public class BabelFeeBoxContract {
             .applyParameters(new ErgoValue[]{ErgoValue.of(idBytes)});
     }
 
-    public BabelFeeBoxContract(Values.ErgoTree ergoTree) {
+    public BabelFeeBoxContract(ErgoTree ergoTree) {
         this.ergoTree = ergoTree;
         tokenId = new ErgoId(ScalaHelpers.collByteToByteArray(
             (Coll<Byte>) ErgoTreeTemplate.fromErgoTree(ergoTree)
@@ -45,7 +46,7 @@ public class BabelFeeBoxContract {
         ));
     }
 
-    public Values.ErgoTree getErgoTree() {
+    public ErgoTree getErgoTree() {
         return ergoTree;
     }
 

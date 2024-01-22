@@ -2,7 +2,6 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.sdk.SecretString
 import sigma.data.RType
-import sigmastate.eval.SigmaDsl
 
 trait AppkitTestingCommon {
   /** The mnemonic used in tests and test vectors. */
@@ -30,5 +29,5 @@ trait AppkitTestingCommon {
     false)
 
   /** Helper method to construct a collection from items. */
-  def Coll[T](items: T*)(implicit cT: RType[T]) = SigmaDsl.Colls.fromItems(items:_*)
+  def Coll[T](items: T*)(implicit cT: RType[T]) = sigma.Colls.fromItems(items:_*)
 }

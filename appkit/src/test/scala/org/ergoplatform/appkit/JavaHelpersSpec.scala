@@ -8,9 +8,10 @@ import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
+import sigma.ast.{EvaluatedValue, ByteArrayConstant, SType, IntConstant, ErgoTree}
+import sigma.data.TrivialProp
 import sigmastate.helpers.TestingHelpers._
-import sigmastate.{SType, TrivialProp}
+import org.ergoplatform.sdk.SdkIsos._
 
 class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -20,7 +21,7 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
   type Registers = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
 
   def boxWithRegs(regs: Registers) = {
-    testBox(10, TrivialProp.TrueProp, 100, Nil, regs)
+    testBox(10, ErgoTree.fromSigmaBoolean(TrivialProp.TrueProp), 100, Nil, regs)
   }
 
   def check(regs: Registers, expRegs: IndexedSeq[ErgoValue[_]]) = {

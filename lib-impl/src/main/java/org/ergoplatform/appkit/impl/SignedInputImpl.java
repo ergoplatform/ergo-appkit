@@ -3,9 +3,11 @@ package org.ergoplatform.appkit.impl;
 import org.ergoplatform.Input;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.sdk.ErgoId;
-import org.ergoplatform.sdk.Iso;
-import sigmastate.SType;
-import sigmastate.Values;
+import org.ergoplatform.sdk.SdkIsos;
+import sigma.ast.EvaluatedValue;
+import sigma.data.Iso;
+import sigma.ast.SType;
+
 
 import java.util.Map;
 
@@ -27,8 +29,8 @@ public class SignedInputImpl implements SignedInput {
 
     @Override
     public Map<Byte, ErgoValue<?>> getContextVars() {
-        Iso<Map<Byte, ErgoValue<?>>, scala.collection.Map<Byte, Values.EvaluatedValue<SType>>> iso = Iso.isoJMapToMap(AppkitIso.isoErgoValueToSValue());
-        scala.collection.Map<Byte, Values.EvaluatedValue<SType>> map = (scala.collection.Map<Byte, Values.EvaluatedValue<SType>>)(Object)_input.spendingProof().extension().values();
+        Iso<Map<Byte, ErgoValue<?>>, scala.collection.Map<Byte, EvaluatedValue<SType>>> iso = SdkIsos.isoJMapToMap(AppkitIso.isoErgoValueToSValue());
+        scala.collection.Map<Byte, EvaluatedValue<SType>> map = (scala.collection.Map<Byte, EvaluatedValue<SType>>)(Object)_input.spendingProof().extension().values();
         return iso.from(map);
     }
 

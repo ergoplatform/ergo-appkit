@@ -3,20 +3,20 @@ package org.ergoplatform.appkit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.ergoplatform.appkit.AppkitHelpers._
-import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
+import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughErgsException, NotEnoughCoinsForChangeException}
 import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
 import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.sdk.{ErgoToken, SecretString}
-import org.ergoplatform.{ErgoBox, ErgoTreePredef, appkit}
+import org.ergoplatform.sdk.SdkIsos._
+import org.ergoplatform.{appkit, ErgoBox, ErgoTreePredef}
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigma.util.{FileUtil => SFileUtil}
 import scorex.util.ModifierId
-import sigmastate.eval.CBigInt
 import sigmastate.helpers.NegativeTesting
 import sigmastate.interpreter.HintsBag
 
@@ -112,7 +112,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     ergoClient.execute { ctx: BlockchainContext =>
       val contextVars = Seq(
         ContextVar.of(1.toByte, 100),
-        ContextVar.of(10.toByte, CBigInt(BigInteger.valueOf(100)))
+        ContextVar.of(10.toByte, BigInteger.valueOf(100))
       )
       val input = createTestInput(ctx)
         .withContextVars(contextVars:_*)
@@ -133,7 +133,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       // alice signing bob's box. Does not work here but works in other cases.
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
-      signed.getCost shouldBe 14565
+      signed.getCost shouldBe 12310
 
       // check the signed transaction contains all the context variables
       // we attached to the input box
