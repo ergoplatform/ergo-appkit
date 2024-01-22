@@ -161,7 +161,7 @@ public class Address {
      */
     public SigmaBoolean getSigmaBoolean() {
         ErgoTree ergoTree = getErgoAddress().script();
-        var sbOpt = ergoTree.toSigmaBooleanOpt();
+        scala.Option<SigmaBoolean> sbOpt = ergoTree.toSigmaBooleanOpt();
         if (sbOpt.isDefined())
             return sbOpt.get();
         else
