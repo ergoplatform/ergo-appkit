@@ -14,7 +14,7 @@ import sigma.ast.{EvaluatedValue, Constant, ErgoTree}
 import sigma.data.CSigmaDslBuilder.validationSettings
 import sigma.interpreter.ContextExtension
 import sigma.serialization.ErgoTreeSerializer
-import sigmastate.eval.CompiletimeIRContext
+import sigma.compiler.ir.CompiletimeIRContext
 import org.ergoplatform.sdk.SdkIsos._
 import java.util
 import java.util.{List => JList}

@@ -72,7 +72,7 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
   }
 
   override def signReduced(tx: ReducedTransaction, baseCost: Int): SignedTransaction = {
-    val signed = _prover.signReduced(sdk.ReducedTransaction(tx.getTx), baseCost)
+    val signed = _prover.signReduced(sdk.ReducedTransaction(tx.getTx), baseCost, None)
     new SignedTransactionImpl(_ctx, signed.ergoTx, signed.cost)
   }
 
