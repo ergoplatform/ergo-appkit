@@ -11,10 +11,10 @@ import sigma.data.{Iso, RType}
 import sigma.ast.SType
 import sigma.ast.syntax.ValueOps
 import sigma.ast.{EvaluatedValue, Constant, ErgoTree}
+import sigma.compiler.ir.CompiletimeIRContext
 import sigma.data.CSigmaDslBuilder.validationSettings
 import sigma.interpreter.ContextExtension
 import sigma.serialization.ErgoTreeSerializer
-import sigmastate.eval.CompiletimeIRContext
 import org.ergoplatform.sdk.SdkIsos._
 import java.util
 import java.util.{List => JList}
