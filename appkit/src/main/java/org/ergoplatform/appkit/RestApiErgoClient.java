@@ -1,7 +1,5 @@
 package org.ergoplatform.appkit;
 
-import com.google.common.base.Strings;
-
 import org.ergoplatform.appkit.config.ErgoNodeConfig;
 import org.ergoplatform.appkit.impl.BlockchainContextBuilderImpl;
 import org.ergoplatform.appkit.impl.NodeAndExplorerDataSourceImpl;
@@ -52,7 +50,7 @@ public class RestApiErgoClient implements ErgoClient {
         nodeClient.configureFromOkClientBuilder(httpClientBuilder);
 
         ExplorerApiClient explorerClient;
-        if (!Strings.isNullOrEmpty(explorerUrl)) {
+        if (explorerUrl != null && !explorerUrl.isEmpty()) {
             explorerClient = new ExplorerApiClient(explorerUrl);
             explorerClient.configureFromOkClientBuilder(httpClientBuilder);
         } else {

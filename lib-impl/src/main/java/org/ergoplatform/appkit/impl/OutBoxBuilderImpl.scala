@@ -1,7 +1,5 @@
 package org.ergoplatform.appkit.impl
 
-import com.google.common.base.Preconditions
-import com.google.common.base.Preconditions.checkState
 import sigma.data.SigmaConstants
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.ErgoToken
@@ -65,7 +63,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
 
 
   override def registers(registers: ErgoValue[_]*): OutBoxBuilderImpl = {
-    Preconditions.checkArgument(registers.nonEmpty,
+    InternalUtil.checkArgument(registers.nonEmpty,
       "At least one register should be specified": Any)
     _registers.clear()
     _registers ++= registers
@@ -78,7 +76,7 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   }
 
   override def build: OutBox = {
-    checkState(_contract != null, "Contract is not defined": Any)
+    InternalUtil.checkState(_contract != null, "Contract is not defined")
     val tree = _contract.getErgoTree
     val ergoBoxCandidate = AppkitHelpers.createBoxCandidate(
       _value, tree, _tokens.toSeq, _registers.toSeq,

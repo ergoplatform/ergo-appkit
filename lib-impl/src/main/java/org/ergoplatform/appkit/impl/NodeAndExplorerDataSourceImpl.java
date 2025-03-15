@@ -1,7 +1,5 @@
 package org.ergoplatform.appkit.impl;
 
-import com.google.common.base.Preconditions;
-
 import org.ergoplatform.appkit.Address;
 import org.ergoplatform.appkit.ErgoClient;
 import org.ergoplatform.appkit.ErgoClientException;

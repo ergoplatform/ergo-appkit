@@ -1,10 +1,8 @@
 package org.ergoplatform.appkit;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.ergoplatform.appkit.BlockchainContext.DEFAULT_LIMIT_FOR_API;
 import static org.ergoplatform.appkit.Parameters.MinFee;
 
-import com.google.common.base.Preconditions;
 import org.ergoplatform.sdk.ErgoToken;
 import org.ergoplatform.sdk.SecretString;
 
@@ -63,7 +61,7 @@ public class BoxOperations {
      */
     public static BoxOperations createForEip3Prover(ErgoProver senderProver, BlockchainContext ctx) {
         List<Address> eip3Addresses = senderProver.getEip3Addresses();
-        checkState(eip3Addresses.size() > 0,
+        InternalUtil.checkState(!eip3Addresses.isEmpty(),
             "EIP-3 addresses are not derived in the prover (use ErgoProverBuilder.withEip3Secret)");
         return new BoxOperations(ctx, eip3Addresses, senderProver);
     }
@@ -433,7 +431,7 @@ public class BoxOperations {
                                                      Function<Integer, List<InputBox>> inputBoxesLoader,
                                                      int maxBoxesToSelect) {
         SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
-        Preconditions.checkArgument(amountToSpend > 0 ||
+        InternalUtil.checkArgument(amountToSpend > 0 ||
             !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
         ArrayList<InputBox> selectedCoveringBoxes = new ArrayList<>();
         long remainingAmountToCover = amountToSpend;

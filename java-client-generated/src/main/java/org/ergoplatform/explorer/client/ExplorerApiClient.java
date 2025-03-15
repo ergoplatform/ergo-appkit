@@ -64,11 +64,6 @@ public class ExplorerApiClient {
     return this;
   }
 
-  public ExplorerApiClient setSqlDateFormat(DateFormat dateFormat) {
-    this.json.setSqlDateFormat(dateFormat);
-    return this;
-  }
-
   public ExplorerApiClient setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
     this.json.setOffsetDateTimeFormat(dateFormat);
     return this;

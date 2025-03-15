@@ -1,11 +1,12 @@
 package org.ergoplatform.appkit
 
 import java.io.File
-import com.google.common.io.Files
 import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+
+import java.nio.file.Files
 
 class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropertyChecks
     with AppkitTestingCommon {
@@ -69,7 +70,7 @@ class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenP
   }
 
   def withTempDir(block: File => Unit): Unit = {
-    val dir = Files.createTempDir()
+    val dir = Files.createTempDirectory("").toFile
     try {
       block(dir)
     }

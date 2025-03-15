@@ -1,6 +1,5 @@
 package org.ergoplatform.appkit;
 
-import com.google.common.base.Objects;
 import org.ergoplatform.ErgoAddress;
 import org.ergoplatform.ErgoAddressEncoder;
 import org.ergoplatform.P2PKAddress;
@@ -24,7 +23,7 @@ import sigma.serialization.ErgoTreeSerializer;
 import sigmastate.utils.Helpers;
 import sigma.GroupElement;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.Objects;
 
 public class Address {
     private final String _base58String;
@@ -88,7 +87,7 @@ public class Address {
      * @throws IllegalArgumentException if this instance is not P2PK address
      */
     public P2PKAddress asP2PK() {
-        checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
+        InternalUtil.checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
         return (P2PKAddress) _address;
     }
 
@@ -102,7 +101,7 @@ public class Address {
      * @throws IllegalArgumentException if this instance is not P2S address
      */
     public Pay2SAddress asP2S() {
-        checkArgument(isP2S(), "This instance %s is not Pay2SAddress", this);
+        InternalUtil.checkArgument(isP2S(), "This instance %s is not Pay2SAddress", this);
         return (Pay2SAddress) _address;
     }
 
@@ -286,7 +285,7 @@ public class Address {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(_address.hashCode(), _address.networkPrefix());
+        return Objects.hash(_address.hashCode(), _address.networkPrefix());
     }
 
     @Override
