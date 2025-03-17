@@ -8,8 +8,8 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-lazy val scala213 = "2.13.8"
-lazy val scala212 = "2.12.10"
+lazy val scala213 = "2.13.16"
+lazy val scala212 = "2.12.20"
 lazy val scala211 = "2.11.12"
 
 //javacOptions ++=
