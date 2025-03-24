@@ -119,11 +119,6 @@ public class ApiClient {
     return this;
   }
 
-  public ApiClient setSqlDateFormat(DateFormat dateFormat) {
-    this.json.setSqlDateFormat(dateFormat);
-    return this;
-  }
-
   public ApiClient setOffsetDateTimeFormat(DateTimeFormatter dateFormat) {
     this.json.setOffsetDateTimeFormat(dateFormat);
     return this;

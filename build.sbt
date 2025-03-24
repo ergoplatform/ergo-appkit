@@ -189,8 +189,7 @@ lazy val common = (project in file("common"))
       libraryDependencies ++= Seq(
         sigmaState,
         ergoWallet,
-        "com.google.guava" % "guava" % "23.0",
-        "commons-io" % "commons-io" % "2.5"
+        "com.google.code.findbugs" % "jsr305" % "1.3.9"
       ),
       publish / skip := true
     )
