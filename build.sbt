@@ -126,6 +126,9 @@ test in assembly := {}
 
 assemblyJarName in assembly := s"ergo-appkit-${version.value}.jar"
 
+Compile / packageBin / packageOptions +=
+  Package.ManifestAttributes("Automatic-Module-Name" -> "org.ergoplatform.appkit")
+
 assemblyMergeStrategy in assembly := {
   case "logback.xml" => MergeStrategy.first
   case "module-info.class" => MergeStrategy.discard
