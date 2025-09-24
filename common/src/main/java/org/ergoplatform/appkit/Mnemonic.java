@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.SdkIsos;
 import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.wallet.mnemonic.WordList;
@@ -88,7 +88,7 @@ public class Mnemonic {
     }
 
     public byte[] toSeed() {
-        Option<String> passOpt = Iso.arrayCharToOptionString().to(getPassword());
+        Option<String> passOpt = SdkIsos.arrayCharToOptionString().to(getPassword());
         return JavaHelpers.mnemonicToSeed(String.valueOf(_phrase), passOpt);
     }
 

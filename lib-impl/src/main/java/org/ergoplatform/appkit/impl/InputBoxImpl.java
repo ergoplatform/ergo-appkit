@@ -13,10 +13,11 @@ import java.util.List;
 
 import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.sdk.ErgoToken;
-import org.ergoplatform.sdk.Iso;
+import org.ergoplatform.sdk.SdkIsos;
+import sigma.ast.ErgoTree;
 import org.ergoplatform.sdk.JavaHelpers;
-import sigmastate.Values;
-import sigmastate.interpreter.ContextExtension;
+
+import sigma.interpreter.ContextExtension;
 import sigma.Box;
 
 public class InputBoxImpl implements InputBox {
@@ -63,7 +64,7 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public List<ErgoToken> getTokens() {
-        List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
+        List<ErgoToken> tokens = SdkIsos.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
         return tokens;
     }
 
@@ -73,7 +74,7 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
-    public Values.ErgoTree getErgoTree() {
+    public ErgoTree getErgoTree() {
         return _ergoBox.ergoTree();
     }
 

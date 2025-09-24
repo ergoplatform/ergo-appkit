@@ -1,8 +1,7 @@
 package org.ergoplatform.appkit.impl;
 
 import org.ergoplatform.appkit.*;
-import sigmastate.Values;
-
+import sigma.ast.ErgoTree;
 
 public class ErgoScriptContract implements ErgoContract {
     final private Constants _constants;
@@ -41,8 +40,8 @@ public class ErgoScriptContract implements ErgoContract {
     }
 
     @Override
-    public Values.ErgoTree getErgoTree() {
-        Values.ErgoTree ergoTree = AppkitHelpers.compile(
+    public ErgoTree getErgoTree() {
+        ErgoTree ergoTree = AppkitHelpers.compile(
                 _constants, _code, _networkType.networkPrefix);
         return ergoTree;
     }

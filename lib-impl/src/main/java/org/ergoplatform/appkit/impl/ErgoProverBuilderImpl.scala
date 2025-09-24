@@ -3,10 +3,12 @@ package org.ergoplatform.appkit.impl
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
-import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, SecretString}
+import org.ergoplatform.sdk.{AppkitProvingInterpreter, SecretString, JavaHelpers}
+import sigma.GroupElement
 import sigmastate.crypto.DLogProtocol.DLogProverInput
 import sigmastate.crypto.{DLogProtocol, DiffieHellmanTupleProverInput}
-import sigma.GroupElement
+import org.ergoplatform.sdk.SdkIsos._
+import sigma.util.Extensions.BigIntOps
 
 import java.math.BigInteger
 import java.util
@@ -61,12 +63,23 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
     this
   }
 
+  override def withDHTData(
+    g: GroupElement,
+    h: GroupElement,
+    u: GroupElement,
+    v: GroupElement,
+    x: sigma.BigInt): ErgoProverBuilder = withDHTData(g, h, u, v, x.toBigInteger)
+
   override def withDLogSecret(x: BigInteger): ErgoProverBuilder = {
     val dLog = new DLogProtocol.DLogProverInput(x)
     if (_dLogSecrets.contains(dLog))
       throw new IllegalStateException("Dlog secret already exists")
     _dLogSecrets.add(dLog)
     this
+  }
+
+  override def withDLogSecret(x: sigma.BigInt): ErgoProverBuilder = {
+    withDLogSecret(x.toBigInteger)
   }
 
   override def build: ErgoProver = {

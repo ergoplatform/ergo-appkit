@@ -11,7 +11,7 @@ import scala.Option;
 import scala.runtime.BoxedUnit;
 import scala.util.Failure;
 import scala.util.Try;
-import sigmastate.crypto.DLogProtocol;
+import sigma.data.ProveDlog;
 
 import java.io.File;
 
@@ -45,7 +45,7 @@ public class SecretStorage {
     }
 
     public Address getAddressFor(NetworkType networkType) {
-        DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().publicImage();
+        ProveDlog pk = _jsonStorage.secret().get().publicImage();
         P2PKAddress p2pk = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pk);
     }
@@ -66,7 +66,7 @@ public class SecretStorage {
     /**
      * Initializes storage with the seed derived from an existing mnemonic phrase.
      * @param mnemonic - mnemonic phase
-     * @param encryptionPass - encryption password
+     * @param encryptionPassword - encryption password
      * @param usePre1627KeyDerivation use incorrect(previous) BIP32 derivation, expected to be false for new 
      * wallets, and true for old pre-1627 wallets (see https://github.com/ergoplatform/ergo/issues/1627 for details)
     */

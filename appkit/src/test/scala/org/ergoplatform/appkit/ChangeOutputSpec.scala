@@ -7,10 +7,13 @@ import org.ergoplatform.sdk.{ErgoToken, JavaHelpers}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.crypto.CryptoConstants
-import sigmastate.eval._
+import sigma.crypto.CryptoConstants
 import sigma.GroupElement
+import sigma.data.{CGroupElement, CBigInt}
+import sigma.util.Extensions.{BigIntegerOps, BigIntOps}
+import org.ergoplatform.sdk.SdkIsos._
 
+import java.math.BigInteger
 import java.util.{Arrays, List => JList}
 
 class ChangeOutputSpec extends AnyPropSpec with Matchers
@@ -20,9 +23,9 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("YesChangeOutput") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
-    val x = BigInt("187235612876647164378132684712638457631278").bigInteger
-    val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
+    val x = CBigInt(new BigInteger("187235612876647164378132684712638457631278"))
+    val y = CBigInt(new BigInteger("340956873409567839086738967389673896738906"))
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
     val gXY:GroupElement = gX.exp(y)
@@ -68,9 +71,9 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("NoChangeOutput") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
-    val x = BigInt("187235612876647164378132684712638457631278").bigInteger
-    val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
+    val x = CBigInt(new BigInteger("187235612876647164378132684712638457631278"))
+    val y = CBigInt(new BigInteger("340956873409567839086738967389673896738906"))
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
     val gXY:GroupElement = gX.exp(y)
@@ -117,9 +120,9 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("NoTokenChangeOutput + token burning") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
-    val x = BigInt("187235612876647164378132684712638457631278").bigInteger
-    val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
+    val x = CBigInt(new BigInteger("187235612876647164378132684712638457631278"))
+    val y = CBigInt(new BigInteger("340956873409567839086738967389673896738906"))
     val gX:GroupElement = g.exp(x)
     val gY:GroupElement = g.exp(y)
     val gXY:GroupElement = gX.exp(y)

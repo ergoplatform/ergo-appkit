@@ -1,9 +1,9 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.impl.{BlockchainContextImpl, InputBoxImpl, UnsignedTransactionBuilderImpl, UnsignedTransactionImpl}
-import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, Iso, JavaHelpers, SecretString, TokenBalanceException}
+import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, SdkIsos, JavaHelpers, SecretString, TokenBalanceException}
 import org.ergoplatform.sdk.JavaHelpers._
-import org.ergoplatform.sdk.Iso._
+import sigma.data.Iso._
 import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.{ErgoBox, ErgoTreePredef, UnsignedErgoLikeTransaction}
 import org.scalatest.matchers.should.Matchers
@@ -15,6 +15,7 @@ import sigmastate.helpers.NegativeTesting
 import sigmastate.helpers.TestingHelpers.createBox
 import java.util
 import java.util.{Collections, List => JList}
+import SdkIsos._
 
 class AppkitProvingInterpreterSpec extends AnyPropSpec
   with Matchers
@@ -79,8 +80,8 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
       val tree2 = ErgoTreePredef.FalseProp(ergoTreeHeaderInTests)
       val token1 = (ErgoAlgos.hash("id1").toTokenId, 10L)
       val token2 = (ErgoAlgos.hash("id2").toTokenId, 20L)
-      val ergoToken1 = Iso.isoErgoTokenToPair.from(token1)
-      val ergoToken2 = Iso.isoErgoTokenToPair.from(token2)
+      val ergoToken1 = SdkIsos.isoErgoTokenToPair.from(token1)
+      val ergoToken2 = SdkIsos.isoErgoTokenToPair.from(token2)
 
       val input1 = createBox(oneErg + Parameters.MinFee, tree1, additionalTokens = Seq(token1))
       val input2 = createBox(oneErg, tree2, additionalTokens = Seq(token2))

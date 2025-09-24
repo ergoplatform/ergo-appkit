@@ -3,7 +3,7 @@ package org.ergoplatform.appkit
 import sigma.util.{FileUtil => SFileUtil}
 import org.ergoplatform.appkit
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-
+import org.ergoplatform.sdk.SdkIsos._
 import java.util.{List => JList}
 import java.lang.{String => JString}
 

@@ -7,10 +7,12 @@ import org.ergoplatform.appkit.testing.AppkitTesting
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.crypto.CryptoConstants
-import sigmastate.eval._
+import sigma.crypto.CryptoConstants
 import sigmastate.helpers.NegativeTesting
 import sigma.GroupElement
+import sigma.data.{CGroupElement, CBigInt}
+
+import java.math.BigInteger
 
 class AnonymousAccessSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -63,9 +65,9 @@ class AnonymousAccessSpec extends AnyPropSpec with Matchers
     )
     val firstTxSenderStorage = "storage/E2.json"
     val secondTxSenderStorage = "storage/E1.json"
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
-    val x = BigInt("187235612876647164378132684712638457631278").bigInteger
-    val y = BigInt("340956873409567839086738967389673896738906").bigInteger
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
+    val x = CBigInt(new BigInteger("187235612876647164378132684712638457631278"))
+    val y = CBigInt(new BigInteger("340956873409567839086738967389673896738906"))
     val g_x:GroupElement = g.exp(x)
     val g_y:GroupElement = g.exp(y)
     val g_xy = g_x.exp(y)

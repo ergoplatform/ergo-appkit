@@ -3,7 +3,6 @@ package org.ergoplatform.appkit
 import org.ergoplatform.ErgoBoxAssets
 import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
 import org.ergoplatform.sdk.ErgoToken
-import org.ergoplatform.sdk.Iso._
 import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.sdk.wallet.AssetUtils
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughCoinsForChangeBoxesError, NotEnoughErgsError, NotEnoughTokensError}
@@ -15,8 +14,8 @@ import scala.collection.mutable
 
 
 object InputBoxesValidatorJavaHelper {
-
-  final case class InputBoxWrapper(val inputBox: InputBox) extends ErgoBoxAssets {
+  import org.ergoplatform.sdk.SdkIsos._
+  final case class InputBoxWrapper(inputBox: InputBox) extends ErgoBoxAssets {
     override def value: Long = inputBox.getValue
 
     override def tokens: Map[ModifierId, Long] = {

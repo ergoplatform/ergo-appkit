@@ -8,10 +8,11 @@ import java.util.List;
 import org.ergoplatform.sdk.JavaHelpers;
 import scala.collection.IndexedSeq;
 import scorex.util.encode.Base16;
-import sigmastate.SType;
-import sigmastate.Values;
-import sigmastate.Values.Constant;
-import sigmastate.serialization.ErgoTreeSerializer;
+import sigma.ast.ErgoTree;
+import sigma.ast.SType;
+
+import sigma.ast.Constant;
+import sigma.serialization.ErgoTreeSerializer;
 
 /**
  * Represents ErgoTree template, which is an ErgoTree instance with placeholders.
@@ -21,11 +22,11 @@ import sigmastate.serialization.ErgoTreeSerializer;
 public class ErgoTreeTemplate {
 
     private static int[] _noParameters = new int[0]; // immutable and shared by all instances
-    private final Values.ErgoTree _tree;
+    private final ErgoTree _tree;
     private final byte[] _templateBytes;
     private int[] _parameterPositions = _noParameters;
 
-    private ErgoTreeTemplate(Values.ErgoTree tree) {
+    private ErgoTreeTemplate(ErgoTree tree) {
         _tree = tree;
         _templateBytes = JavaHelpers.ergoTreeTemplateBytes(_tree);
     }
@@ -37,7 +38,7 @@ public class ErgoTreeTemplate {
      * @param positions zero-based indexes in `ErgoTree.constants` array which can be
      *                  substituted as parameters using
      *                  {@link ErgoTreeTemplate#applyParameters(ErgoValue[])} method.
-     * @see sigmastate.Values.ErgoTree
+     * @see ErgoTree
      */
     public ErgoTreeTemplate withParameterPositions(int[] positions) {
         HashSet<Integer> integerHashSet = new HashSet<>(positions.length);
@@ -140,7 +141,7 @@ public class ErgoTreeTemplate {
      * @return new ErgoTree with the same template as this but with all it's parameters
      * replaced with `newValues`
      */
-    public Values.ErgoTree applyParameters(ErgoValue<?>... newValues) {
+    public ErgoTree applyParameters(ErgoValue<?>... newValues) {
         if (newValues.length != _parameterPositions.length)
             throw new IllegalArgumentException(
                 "Wrong number of newValues. Expected " + _parameterPositions.length +
@@ -148,12 +149,12 @@ public class ErgoTreeTemplate {
         return AppkitHelpers.substituteErgoTreeConstants(_tree.bytes(), _parameterPositions, newValues);
     }
 
-    public static ErgoTreeTemplate fromErgoTree(Values.ErgoTree tree) {
+    public static ErgoTreeTemplate fromErgoTree(ErgoTree tree) {
         return new ErgoTreeTemplate(tree);
     }
 
     public static ErgoTreeTemplate fromErgoTreeBytes(byte[] treeBytes) {
-        Values.ErgoTree ergoTree =
+        ErgoTree ergoTree =
             ErgoTreeSerializer.DefaultSerializer().deserializeErgoTree(treeBytes);
         return fromErgoTree(ergoTree);
     }

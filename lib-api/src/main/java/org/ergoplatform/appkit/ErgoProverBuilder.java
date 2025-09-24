@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.SecretString;
+import sigma.BigInt;
 import sigma.GroupElement;
 
 import java.math.BigInteger;
@@ -71,6 +72,9 @@ public interface ErgoProverBuilder {
      */
     ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, BigInteger x);
 
+    /** See the other overload for detailed description. */
+    ErgoProverBuilder withDHTData(GroupElement g, GroupElement h, GroupElement u, GroupElement v, sigma.BigInt x);
+
     /**
      * This allows adding additional secret for use in proveDlog, when the secret is not
      * part of the wallet.
@@ -81,6 +85,17 @@ public interface ErgoProverBuilder {
      * as proveDlog(a) && proveDlog(b), where a and b are two group elements.
      */
     ErgoProverBuilder withDLogSecret(BigInteger x);
+
+    /**
+     * This allows adding additional secret for use in proveDlog, when the secret is not
+     * part of the wallet.
+     *
+     * Multiple secrets can be added by calling this method multiple times.
+     *
+     * Multiple secrets are necessary for statements that need multiple proveDlogs, such
+     * as proveDlog(a) && proveDlog(b), where a and b are two group elements.
+     */
+    ErgoProverBuilder withDLogSecret(BigInt x);
 
     /**
      * Builds a new prover using provided configuration.

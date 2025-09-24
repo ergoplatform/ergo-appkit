@@ -1,14 +1,13 @@
 package org.ergoplatform.appkit
 
 import scorex.util.encode.Base16
-import sigmastate._
-import sigmastate.Values.Constant
-import sigmastate.serialization.ValueSerializer
-import sigmastate.serialization.generators.ObjectGenerators
+import sigma.ast._
+import sigma.serialization.ValueSerializer
+import sigma.serialization.generators.ObjectGenerators
 import org.ergoplatform.sdk.JavaHelpers._
+import org.ergoplatform.sdk.SdkIsos._
 import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import sigmastate.eval.Evaluation.fromDslTuple
-import sigma.Coll
+import sigma.{Coll, Evaluation}
 
 class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGenerators {
 
@@ -43,7 +42,7 @@ class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGene
   property("ErgoValue with pair (hex test vector)") {
     val tuple = (10.toByte, 20L)
     val tupSType = STuple(SByte, SLong)
-    val c = Constant[STuple](fromDslTuple(tuple, tupSType), tupSType)
+    val c = Constant[STuple](Evaluation.fromDslTuple(tuple, tupSType), tupSType)
     val hex = constToHex(c)
     hex shouldBe "3e050a28"
 

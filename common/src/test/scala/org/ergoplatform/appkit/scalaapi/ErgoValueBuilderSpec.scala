@@ -1,13 +1,13 @@
 package org.ergoplatform.appkit.scalaapi
 
-import org.ergoplatform.appkit.{AppkitTestingCommon, BoxAttachment, BoxAttachmentGeneric, ErgoType, ErgoValue, TestingBase}
+import org.ergoplatform.appkit.{BoxAttachment, BoxAttachmentGeneric, ErgoValue, TestingBase, ErgoType, AppkitTestingCommon}
 import org.ergoplatform.sdk.JavaHelpers
 import sigma.data.{CollType, RType}
-import sigmastate.eval.SigmaDsl
+import sigma.eval.SigmaDsl
 import sigma.Coll
 import sigma.Box
 
-import java.lang.{Boolean => JBoolean, Byte => JByte, Integer => JInt, Long => JLong, Short => JShort}
+import java.lang.{Boolean => JBoolean, Short => JShort, Integer => JInt, Long => JLong, Byte => JByte}
 import java.math.BigInteger
 
 class ErgoValueBuilderSpec extends TestingBase with AppkitTestingCommon {

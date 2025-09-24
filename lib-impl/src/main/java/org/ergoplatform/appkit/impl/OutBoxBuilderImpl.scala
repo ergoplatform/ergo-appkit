@@ -1,6 +1,6 @@
 package org.ergoplatform.appkit.impl
 
-import org.ergoplatform.SigmaConstants
+import sigma.data.SigmaConstants
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.ErgoToken
 
