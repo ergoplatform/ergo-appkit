@@ -6,6 +6,7 @@
 
 ### Contents
 - [Introduction](#introduction)
+- [Sigma 6.0 Support](#sigma-60-support)
 - [Setup](#setup)
 - [How to use](#how-to-use)
 - [Repository organisation](#repository-organization)
@@ -71,7 +72,24 @@ responsive command line utility applications such as
 4. Appkit is used in [Ergo Wallet App](https://github.com/ergoplatform/ergo-wallet-app)
    and hence can be used to develop Andoid, iOS and Desktop applications.
 
+### Sigma 6.0 Support
+
+Appkit now supports **Sigma State 6.0** (EIP-50), which introduces powerful new features for smart contracts:
+
+- **UnsignedBigInt** - 256-bit unsigned integers for advanced cryptography
+- **Cross-input context variables** - Access context data from other transaction inputs  
+- **Enhanced serialization** - Full support for complex type serialization
+- **New collection methods** - `startsWith()`, improved `getOrElse()`
+- **Bitwise & shift operations** - Low-level numeric operations
+- **Header.checkPow()** - Built-in Autolykos2 PoW validation  
+- **Lazy evaluation** - Performance optimizations for Option and Collection methods
+
+**Backward Compatible**: Existing contracts and applications continue to work without changes. To use new features, contracts must use **ErgoTree v3**.
+
+See [Sigma60FeaturesSpec](appkit/src/test/scala/org/ergoplatform/appkit/Sigma60FeaturesSpec.scala) for comprehensive examples and test coverage of all new features.
+
 ### Setup
+
 
 #### Maven
 
