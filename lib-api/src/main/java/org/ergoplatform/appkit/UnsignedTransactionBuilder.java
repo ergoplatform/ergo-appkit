@@ -36,6 +36,15 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder addInputs(InputBox... boxes);
 
     /**
+     * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
+     * as the boxes to spend. The order is preserved.
+     * The boxes that will be spent by the transaction when it will be included in a block.
+     *
+     * @param boxes list of boxes to be spent by the transaction.
+     */
+    UnsignedTransactionBuilder addInputs(List<InputBox> boxes);
+
+    /**
      * @deprecated use {@link #addInputs(InputBox...)}
      */
     @Deprecated
@@ -52,6 +61,14 @@ public interface UnsignedTransactionBuilder {
      *              {@link InputBox}.
      */
     UnsignedTransactionBuilder addDataInputs(InputBox... boxes);
+
+    /**
+     * Adds input boxes to an already specified list of data inputs or, if no data input boxes
+     * defined yet, set the boxes as the data input boxes to be used. The order is preserved.
+     *
+     * @param boxes list of boxes to be used as data-inputs by the transaction.
+     */
+    UnsignedTransactionBuilder addDataInputs(List<InputBox> boxes);
 
     /**
      * @deprecated use {@link #addDataInputs(InputBox...)}
@@ -78,6 +95,14 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder addOutputs(OutBox... outBoxes);
 
     /**
+     * Adds output boxes to an already specified list of outputs or, if no output boxes defined yet,
+     * as the boxes to be output. The order is preserved.
+     *
+     * @param outBoxes output boxes created by the transaction
+     */
+    UnsignedTransactionBuilder addOutputs(List<OutBox> outBoxes);
+
+    /**
      * Adds transaction fee output.
      *
      * @param feeAmount transaction fee amount in NanoErgs
@@ -97,6 +122,13 @@ public interface UnsignedTransactionBuilder {
      * @see ErgoToken
      */
     UnsignedTransactionBuilder tokensToBurn(ErgoToken... tokens);
+
+    /**
+     * Configures amounts for tokens to be burnt.
+     *
+     * @param tokens one or more tokens to be burnt as part of the transaction.
+     */
+    UnsignedTransactionBuilder tokensToBurn(List<ErgoToken> tokens);
 
     /**
      * Adds change output to the specified address if needed.
