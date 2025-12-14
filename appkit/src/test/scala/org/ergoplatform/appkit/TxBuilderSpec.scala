@@ -273,7 +273,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
       val recipient = senderProver.getEip3Addresses.get(1)
       val amountToSend = 1000000
-      val signed = BoxOperations.createForProver(senderProver, ctx).withAmountToSpend(amountToSend)
+      val signed = BoxOperations.createForProver(senderProver, ctx).value(amountToSend)
         .send(recipient)
       assert(signed != null)
     }
@@ -290,8 +290,8 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       val amountToSend = 1000000
 
       val unsigned = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withMessage("Test message")
+        .value(amountToSend)
+        .message("Test message")
         .putToContractTxUnsigned(pkContract)
       unsigned.getOutputs.get(0).getRegisters.size() shouldBe 6
       unsigned.getOutputs.get(0).getAttachment.getType shouldBe BoxAttachment.Type.PLAIN_TEXT
@@ -358,8 +358,8 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
         val amountToSend = 1000000
         val unsigned = BoxOperations.createForSenders(senders, ctx)
-          .withAmountToSpend(amountToSend)
-          .withInputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
+          .value(amountToSend)
+          .inputBoxesLoader(new ExplorerAndPoolUnspentBoxesLoader())
           .putToContractTxUnsigned(recipientContract)
 
         val prover = ctx.newProverBuilder.build // prover without secrets
@@ -395,9 +395,9 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
         .build().convertToInputWith(mockTxId, 1)
 
       val operations = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 1)))
-        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
+        .value(amountToSend)
+        .tokens(Arrays.asList(new ErgoToken(mockTxId, 1)))
+        .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val inputsSelected = operations.loadTop()
 
       // both boxes should be selected
@@ -405,14 +405,14 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
       // if we restrict to a single box, we face InputBoxLimitExceededException
       assertExceptionThrown(
-        operations.withMaxInputBoxesToSelect(1).loadTop(),
+        operations.maxInputBoxes(1).loadTop(),
         exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
       )
 
       // if there is only a single input box, we face NotEnoughCoinsForChangeException
       val operations2 = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withInputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
+        .value(amountToSend)
+        .inputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
 
       assertExceptionThrown(
         operations2.loadTop(),
@@ -499,8 +499,8 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
         .build().convertToInputWith(mockTxId, 1)
 
       val operations = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
+        .value(amountToSend)
+        .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1, input2)))
       val unsigned = operations.putToContractTxUnsigned(pkContract)
 
       // all outputs should have 100 tokens at max, and it should contain all input tokens
@@ -545,8 +545,8 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
         .build().convertToInputWith(mockTxId, 0)
 
       val unsigned = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .value(amountToSend)
+        .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
         .putToContractTxUnsigned(pkContract)
 
       // check if this succeeds without token burning, but with tokens in change box
@@ -563,9 +563,9 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
       // check if this suceeds finding all tokens and not raising any exception
       val spendAllTokens = BoxOperations.createForSenders(senders, ctx)
-        .withAmountToSpend(amountToSend)
-        .withTokensToSpend(Arrays.asList(new ErgoToken(mockTxId, 2)))
-        .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
+        .value(amountToSend)
+        .tokens(Arrays.asList(new ErgoToken(mockTxId, 2)))
+        .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1)))
         .putToContractTxUnsigned(pkContract)
 
       val reduced2 = prover.reduce(spendAllTokens, 0)
@@ -618,7 +618,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
   property("Mint a token and rebuild it from BoxCandidate") {
     val ergoClient = createMockedErgoClient(data)
     ergoClient.execute { ctx: BlockchainContext =>
-      val unsigned = BoxOperations.createForSender(address, ctx).withAmountToSpend(15000000)
+      val unsigned = BoxOperations.createForSender(address, ctx).value(15000000)
         .mintTokenToContractTxUnsigned(new ErgoTreeContract(address.getErgoAddress.script, address.getNetworkType), { tokenId: String =>
           new Eip4Token(tokenId, 1, "Test name", "Test desc", 0)
         })

@@ -77,7 +77,7 @@ public class BoxOperations {
     /**
      * @param amountToSpend nanoerg value to be collected in inboxes
      */
-    public BoxOperations withAmountToSpend(long amountToSpend) {
+    public BoxOperations value(long amountToSpend) {
         if (amountToSpend < 0) {
             throw new IllegalArgumentException("Amount to send must be >= 0");
         }
@@ -89,7 +89,7 @@ public class BoxOperations {
     /**
      * @param tokensToSpend tokens to be collected in inboxes
      */
-    public BoxOperations withTokensToSpend(@Nonnull List<ErgoToken> tokensToSpend) {
+    public BoxOperations tokens(@Nonnull List<ErgoToken> tokensToSpend) {
         this.tokensToSpend = tokensToSpend;
         return this;
     }
@@ -97,7 +97,7 @@ public class BoxOperations {
     /**
      * @param feeAmount fee amount in nanoerg to be used for generated transactions
      */
-    public BoxOperations withFeeAmount(long feeAmount) {
+    public BoxOperations fee(long feeAmount) {
         if (feeAmount < MinFee) {
             throw new IllegalArgumentException("Amount to send must be >= " + MinFee);
         }
@@ -109,7 +109,7 @@ public class BoxOperations {
     /**
      * @param attachment attachment to be set for outboxes
      */
-    public BoxOperations withAttachment(@Nullable BoxAttachment attachment) {
+    public BoxOperations attachment(@Nullable BoxAttachment attachment) {
         this.attachment = attachment;
         return this;
     }
@@ -126,7 +126,7 @@ public class BoxOperations {
      *                              if set to <= 0 (or not set), there is no input box restriction
      *                              checked by loadTop.
      */
-    public BoxOperations withMaxInputBoxesToSelect(int maxInputBoxesToSelect) {
+    public BoxOperations maxInputBoxes(int maxInputBoxesToSelect) {
         this.maxInputBoxesToSelect = maxInputBoxesToSelect;
         return this;
     }
@@ -134,11 +134,11 @@ public class BoxOperations {
     /**
      * @param message message to be set for outboxes as {@link BoxAttachmentPlainText}
      */
-    public BoxOperations withMessage(@Nullable String message) {
+    public BoxOperations message(@Nullable String message) {
         if (message != null) {
-            withAttachment(BoxAttachmentPlainText.buildForText(message));
+            attachment(BoxAttachmentPlainText.buildForText(message));
         } else {
-            withAttachment(null);
+            attachment(null);
         }
         return this;
     }
@@ -148,7 +148,7 @@ public class BoxOperations {
      *                         See {@link IUnspentBoxesLoader for more information}
      *                         Default is {@link ExplorerApiUnspentLoader}
      */
-    public BoxOperations withInputBoxesLoader(@Nonnull IUnspentBoxesLoader inputBoxesSource) {
+    public BoxOperations inputBoxesLoader(@Nonnull IUnspentBoxesLoader inputBoxesSource) {
         this.inputBoxesLoader = inputBoxesSource;
         return this;
     }
@@ -231,7 +231,7 @@ public class BoxOperations {
      * list.
      * The list is then used to select covering boxes.
      *
-     * The method respects a max amount of boxes to be selected set by {@link #withMaxInputBoxesToSelect(int)}.
+     * The method respects a max amount of boxes to be selected set by {@link #maxInputBoxes(int)}.
      * If this limit is exceeded, a {@link org.ergoplatform.appkit.InputBoxesSelectionException.InputBoxLimitExceededException}
      * is thrown and no further boxes are loaded.
      *

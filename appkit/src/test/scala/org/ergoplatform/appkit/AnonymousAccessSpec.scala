@@ -116,7 +116,7 @@ object DhtUtils {
        |  proveDHTuple(groupGenerator, g_y, g_x, g_xy)    // for alice
        |}""".stripMargin);
 
-    val dhtBoxCreationTx = BoxOperations.createForProver(sender, ctx).withAmountToSpend(amountToSend).putToContractTx(contract)
+    val dhtBoxCreationTx = BoxOperations.createForProver(sender, ctx).value(amountToSend).putToContractTx(contract)
     dhtBoxCreationTx
   }
 

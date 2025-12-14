@@ -34,7 +34,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
         is
       }
     }
-    ops.withAmountToSpend(oneErg * 2)
+    ops.value(oneErg * 2)
   }
 
   /** This method creates an UnsignedTransaction instance directly bypassing builders and
@@ -92,7 +92,7 @@ class AppkitProvingInterpreterSpec extends AnyPropSpec
         tokens.add(ergoToken1)
         tokens.add(ergoToken2)
         val unsigned = ops
-          .withTokensToSpend(tokens)
+          .tokens(tokens)
           .putToContractTxUnsigned(address.toErgoContract)
         val reduced = prover.reduce(unsigned, 0)
         reduced.getInputBoxesIds.size() shouldBe 2
