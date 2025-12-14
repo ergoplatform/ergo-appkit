@@ -38,7 +38,12 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
-  override def boxesToSpend(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
+  override def addInputs(boxes: util.List[InputBox]): UnsignedTransactionBuilder = {
+    addInputs(JavaHelpers.toIndexedSeq(boxes): _*)
+    this
+  }
+
+  override def boxesToSpend(inputBoxes: util.List[InputBox]): UnsignedTransactionBuilder = {
     require(_inputs.isEmpty, "inputs already specified")
     addInputs(JavaHelpers.toIndexedSeq(inputBoxes): _*)
     this
@@ -51,7 +56,12 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     this
   }
 
-  override def withDataInputs(inputBoxes: List[InputBox]): UnsignedTransactionBuilder = {
+  override def addDataInputs(boxes: util.List[InputBox]): UnsignedTransactionBuilder = {
+    addDataInputs(JavaHelpers.toIndexedSeq(boxes): _*)
+    this
+  }
+
+  override def withDataInputs(inputBoxes: util.List[InputBox]): UnsignedTransactionBuilder = {
     require(_dataInputs.isEmpty, "dataInputs list is already specified")
     addDataInputs(JavaHelpers.toIndexedSeq(inputBoxes): _*)
     this
@@ -61,6 +71,11 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     outBoxes.foreach { case b: OutBoxImpl =>
       _outputs.add(b)
     }
+    this
+  }
+
+  override def addOutputs(outBoxes: util.List[OutBox]): UnsignedTransactionBuilder = {
+    addOutputs(JavaHelpers.toIndexedSeq(outBoxes): _*)
     this
   }
 
@@ -83,6 +98,12 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       Collections.addAll(res, tokens: _*)
       res
     })
+    this
+  }
+
+  override def tokensToBurn(tokens: util.List[ErgoToken]): UnsignedTransactionBuilder = {
+    require(_tokensToBurn.isEmpty, "Tokens to burn already specified.")
+    _tokensToBurn = Some(new util.ArrayList[ErgoToken](tokens))
     this
   }
 
