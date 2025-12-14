@@ -29,8 +29,8 @@ class BabelFeeSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenProper
 
       val txCreate = BabelFeeOperations.createNewBabelContractTx(
         BoxOperations.createForSender(creator, ctx)
-          .withAmountToSpend(amountToSend)
-          .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))),
+          .value(amountToSend)
+          .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))),
         ErgoId.create(mockTokenId),
         Parameters.OneErg
       )
@@ -42,7 +42,7 @@ class BabelFeeSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenProper
       // now we cancel the babel box
       val txCancel = BabelFeeOperations.cancelBabelFeeContract(
         BoxOperations.createForSender(creator, ctx)
-          .withInputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))),
+          .inputBoxesLoader(new MockedBoxesLoader(Arrays.asList(input1))),
         babelFeeErgoBox)
 
       ctx.newProverBuilder()
