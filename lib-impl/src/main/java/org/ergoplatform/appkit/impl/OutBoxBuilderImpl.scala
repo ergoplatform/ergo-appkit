@@ -25,7 +25,6 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   }
 
   override def tokens(tokens: ErgoToken*): OutBoxBuilderImpl = {
-    require(tokens.nonEmpty, "At least one token should be specified")
     val maxTokens = SigmaConstants.MaxTokens.value
     require(tokens.size <= maxTokens, SigmaConstants.MaxTokens.description + s": $maxTokens")
     _tokens ++= tokens
