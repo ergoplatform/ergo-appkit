@@ -84,9 +84,23 @@ public class Address {
      * @return underlying {@link P2PKAddress}.
      * @throws IllegalArgumentException if this instance is not P2PK address
      */
-    public P2PKAddress asP2PK() {
+    /**
+     * @return underlying {@link P2PKAddress}.
+     * @throws IllegalArgumentException if this instance is not P2PK address
+     */
+    public P2PKAddress toP2PK() {
         InternalUtil.checkArgument(isP2PK(), "This instance %s is not P2PKAddress", this);
         return (P2PKAddress) _address;
+    }
+
+    /**
+     * @return underlying {@link P2PKAddress}.
+     * @throws IllegalArgumentException if this instance is not P2PK address
+     * @deprecated use {@link #toP2PK()}
+     */
+    @Deprecated
+    public P2PKAddress asP2PK() {
+        return toP2PK();
     }
 
     /**
@@ -98,9 +112,19 @@ public class Address {
      * @return underlying {@link Pay2SAddress}.
      * @throws IllegalArgumentException if this instance is not P2S address
      */
-    public Pay2SAddress asP2S() {
+    public Pay2SAddress toP2S() {
         InternalUtil.checkArgument(isP2S(), "This instance %s is not Pay2SAddress", this);
         return (Pay2SAddress) _address;
+    }
+
+    /**
+     * @return underlying {@link Pay2SAddress}.
+     * @throws IllegalArgumentException if this instance is not P2S address
+     * @deprecated use {@link #toP2S()}
+     */
+    @Deprecated
+    public Pay2SAddress asP2S() {
+        return toP2S();
     }
 
     /**
@@ -115,7 +139,7 @@ public class Address {
     /**
      * Extract public key from P2PKAddress.
      */
-    public DLogProtocol.ProveDlog getPublicKey() { return asP2PK().pubkey(); }
+    public DLogProtocol.ProveDlog getPublicKey() { return toP2PK().pubkey(); }
 
     /**
      * Extract public key from P2PKAddress and return its group element
