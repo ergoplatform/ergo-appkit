@@ -4,16 +4,14 @@ import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.sdk.{ReducedErgoLikeTransaction, ReducedErgoLikeTransactionSerializer, ReducedInputData}
 import org.scalacheck.Gen
 import org.scalatest.Assertion
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.CrossVersionProps
-import sigmastate.interpreter.ContextExtension
+import sigma.VersionContext
+import sigma.interpreter.ContextExtension
 import sigmastate.interpreter.Interpreter.ReductionResult
-import sigmastate.serialization.SigmaSerializer
-import sigmastate.serialization.generators.ObjectGenerators
+import sigma.serialization.SigmaSerializer
+import sigma.serialization.generators.ObjectGenerators
 
-class ReducedErgoLikeTransactionSpec extends CrossVersionProps
-    with Matchers with ScalaCheckDrivenPropertyChecks with ObjectGenerators {
+class ReducedErgoLikeTransactionSpec extends TestingBase
+    with ObjectGenerators {
 
   override val printDebugInfo: Boolean = false
 

@@ -1,7 +1,7 @@
 package org.ergoplatform.appkit;
 
 import org.ergoplatform.sdk.ErgoToken;
-import sigmastate.Values;
+import sigma.ast.ErgoTree;
 
 import java.util.List;
 import java.util.function.Function;
@@ -78,7 +78,7 @@ public interface BlockchainContext {
      */
     String sendTransaction(SignedTransaction tx);
 
-    ErgoContract newContract(Values.ErgoTree ergoTree);
+    ErgoContract newContract(ErgoTree ergoTree);
 
     ErgoContract compileContract(Constants constants, String ergoScript);
 

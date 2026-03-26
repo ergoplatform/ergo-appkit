@@ -5,9 +5,9 @@ import org.ergoplatform.restapi.client.SpendingProof
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{ByteArrayConstant, IntConstant}
-import sigmastate.interpreter.{ContextExtension, ProverResult}
-import sigmastate.serialization.generators.ObjectGenerators
+import sigma.ast.{ByteArrayConstant, IntConstant}
+import sigma.interpreter.{ContextExtension, ProverResult}
+import sigma.serialization.generators.ObjectGenerators
 
 import scala.collection.JavaConverters
 import JavaConverters._

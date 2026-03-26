@@ -14,9 +14,9 @@ import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
 import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
 import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer$;
 import scala.collection.JavaConverters;
-import sigmastate.serialization.SigmaSerializer;
-import sigmastate.serialization.SigmaSerializer$;
-import sigmastate.utils.SigmaByteWriter;
+import sigma.serialization.SigmaSerializer;
+import sigma.serialization.SigmaSerializer$;
+import sigma.serialization.SigmaByteWriter;
 
 public class ReducedTransactionImpl implements ReducedTransaction {
     private final BlockchainContextBase _ctx;

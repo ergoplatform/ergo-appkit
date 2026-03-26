@@ -2,8 +2,8 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
-import sigmastate.AvlTreeData;
-import sigmastate.Values;
+import sigma.data.AvlTreeData;
+import sigma.data.SigmaBoolean;
 import sigma.GroupElement;
 
 import java.math.BigInteger;
@@ -13,7 +13,7 @@ import java.util.Objects;
  * Represents one context variable binding (id -> value), where
  * id is in range [0 .. Byte.MaxValue].
  * Can be attached to each input box of the unsigned transaction.
- * @see sigmastate.interpreter.ContextExtension
+ * @see sigma.interpreter.ContextExtension
  */
 public class ContextVar {
     /** Minimal valid id of a context variable. */
@@ -30,7 +30,7 @@ public class ContextVar {
      *
      * @param id    identifier of the variable in range [0 .. Byte.MaxValue].
      * @param value value of the variable
-     * @see sigmastate.interpreter.ContextExtension
+     * @see sigma.interpreter.ContextExtension
      * @see ErgoValue
      */
     public ContextVar(byte id, ErgoValue<?> value) {
@@ -94,7 +94,7 @@ public class ContextVar {
         return new ContextVar(id, ErgoValue.of(value));
     }
 
-    static public ContextVar of(byte id, Values.SigmaBoolean value) {
+    static public ContextVar of(byte id, SigmaBoolean value) {
         return new ContextVar(id, ErgoValue.of(value));
     }
 

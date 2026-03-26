@@ -5,8 +5,8 @@ import org.ergoplatform.sdk.JavaHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.crypto.CryptoConstants
-import sigmastate.eval._
+import sigma.crypto.CryptoConstants
+import sigma.data.{CBigInt, CGroupElement}
 import sigma.GroupElement
 
 import scala.util.Try
@@ -18,11 +18,11 @@ class MultiProveDlogSpec extends AnyPropSpec with Matchers
 
   property("Multi DlogProver") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
-    val gX:GroupElement = g.exp(x)
-    val gY:GroupElement = g.exp(y)
+    val gX:GroupElement = g.exp(CBigInt(x))
+    val gY:GroupElement = g.exp(CBigInt(y))
 
     ergoClient.execute { ctx: BlockchainContext =>
       val input1 = ctx.newTxBuilder.outBoxBuilder.registers(

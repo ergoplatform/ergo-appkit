@@ -1,13 +1,12 @@
 package org.ergoplatform.appkit
 
 import scorex.util.encode.Base16
-import sigmastate._
-import sigmastate.Values.Constant
-import sigmastate.serialization.ValueSerializer
-import sigmastate.serialization.generators.ObjectGenerators
+import sigma.ast._
+import sigma.ast.Constant
+import sigma.serialization.ValueSerializer
+import sigma.serialization.generators.ObjectGenerators
 import org.ergoplatform.sdk.JavaHelpers._
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
-import sigmastate.eval.Evaluation.fromDslTuple
+import sigma.Evaluation.fromDslTuple
 import sigma.Coll
 
 class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGenerators {
@@ -36,7 +35,7 @@ class ErgoValueSpec extends TestingBase with AppkitTestingCommon with ObjectGene
     hex shouldBe "1a0203010203020a14"
 
     val t = ErgoType.collType(ErgoType.byteType)
-    val collV = ErgoValue.of(coll.convertTo[Coll[Coll[java.lang.Byte]]], t)
+    val collV = ErgoValue.of(coll.asInstanceOf[Coll[Coll[java.lang.Byte]]], t)
     collV.toHex shouldBe hex
   }
 

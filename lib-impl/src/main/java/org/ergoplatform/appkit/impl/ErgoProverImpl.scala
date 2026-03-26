@@ -1,16 +1,15 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, UnreducedTransaction}
 import org.ergoplatform.{P2PKAddress, sdk}
-import sigmastate.eval.CostingSigmaDslBuilder
+import sigma.data.CSigmaDslBuilder
 import sigmastate.interpreter.HintsBag
-import sigmastate.utils.Helpers._
 import sigma.BigInt
 
 import java.util
+import scala.collection.JavaConverters._
 
 class ErgoProverImpl(_ctx: BlockchainContextBase,
                      _prover: AppkitProvingInterpreter) extends ErgoProver {
@@ -24,17 +23,16 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
   override def getAddress = new Address(getP2PKAddress)
 
   override def getSecretKey: BigInt =
-    CostingSigmaDslBuilder.BigInt(_prover.secretKeys(0).privateInput.w)
+    CSigmaDslBuilder.BigInt(_prover.secretKeys(0).privateInput.w)
 
   override def getEip3Addresses: util.List[Address] = {
-    val addresses = _prover.secretKeys
-      .convertTo[IndexedSeq[ExtendedSecretKey]]
+    val addresses = _prover.secretKeys.toIndexedSeq
       .drop(1)
       .map { k =>
         val p2pkAddress = JavaHelpers.createP2PKAddress(k.publicImage, networkPrefix)
         new Address(p2pkAddress)
       }
-    addresses.convertTo[util.List[Address]]
+    addresses.asJava
   }
 
   override def sign(tx: UnsignedTransaction): SignedTransaction =
@@ -49,12 +47,12 @@ class ErgoProverImpl(_ctx: BlockchainContextBase,
     val signed = _prover.sign(
       unreducedTx = unreduced,
       stateContext = txImpl.getStateContext,
-      baseCost = baseCost).getOrThrow
+      baseCost = baseCost).get
     new SignedTransactionImpl(_ctx, signed.ergoTx, signed.cost)
   }
 
   override def signMessage(sigmaProp: SigmaProp, message:  Array[Byte], hintsBag: HintsBag): Array[Byte] = {
-    _prover.signMessage(sigmaProp.getSigmaBoolean, message, hintsBag).getOrThrow
+    _prover.signMessage(sigmaProp.getSigmaBoolean, message, hintsBag).get
   }
 
   override def reduce(tx: UnsignedTransaction, baseCost: Int): ReducedTransaction = {

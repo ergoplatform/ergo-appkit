@@ -1,7 +1,6 @@
 package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.appkit._
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey
 import org.ergoplatform.sdk.{AppkitProvingInterpreter, JavaHelpers, SecretString}
 import sigmastate.crypto.DLogProtocol.DLogProverInput
@@ -10,6 +9,7 @@ import sigma.GroupElement
 
 import java.math.BigInteger
 import java.util
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuilder {
@@ -89,12 +89,12 @@ class ErgoProverBuilderImpl(_ctx: BlockchainContextBase) extends ErgoProverBuild
     if (_masterKey != null) {
       keys.add(_masterKey)
       val secretKeys: IndexedSeq[ExtendedSecretKey] = _eip2Keys.map(_._2).toIndexedSeq
-      keys.addAll(secretKeys.convertTo[java.util.List[ExtendedSecretKey]])
+      keys.addAll(secretKeys.asJava)
     }
     val interpreter = new AppkitProvingInterpreter(
-      keys.convertTo[IndexedSeq[ExtendedSecretKey]],
-      _dLogSecrets.convertTo[IndexedSeq[DLogProverInput]],
-      _dhtSecrets.convertTo[IndexedSeq[DiffieHellmanTupleProverInput]], parameters)
+      keys.asScala.toIndexedSeq,
+      _dLogSecrets.asScala.toIndexedSeq,
+      _dhtSecrets.asScala.toIndexedSeq, parameters)
     new ErgoProverImpl(_ctx, interpreter)
   }
 }

@@ -5,9 +5,8 @@ import org.ergoplatform.appkit.AppkitHelpers._
 import org.ergoplatform.appkit.Parameters.{MinChangeValue, MinFee}
 import org.ergoplatform.appkit._
 import org.ergoplatform.sdk.Extensions.HeaderOps
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.wallet.protocol.context.BlockchainStateContext
-import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, Iso, JavaHelpers}
+import org.ergoplatform.sdk.{ErgoToken, ExtendedInputBox, JavaHelpers}
 import org.ergoplatform.wallet.transactions.TransactionBuilder
 import sigma.{Coll, Colls, Header}
 
@@ -128,9 +127,15 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
     val boxesToSpendSeq = JavaHelpers.toIndexedSeq(boxesToSpend)
     val inputBoxesSeq = boxesToSpendSeq.map(eb => eb.box)
     val requestedToBurn = _tokensToBurn.getOrElse(new ArrayList[ErgoToken])
-    val burnTokens = JavaHelpers.createTokensMap(
-      Iso.isoErgoTokenSeqToLinkedMap.to(requestedToBurn.convertTo[IndexedSeq[ErgoToken]])
-    )
+    val burnTokens = {
+      import scala.collection.mutable.LinkedHashMap
+      val lhm = LinkedHashMap.empty[scorex.util.ModifierId, Long]
+      requestedToBurn.asScala.foreach { t =>
+        val id = scorex.util.ModifierId @@ t.getId.toString
+        lhm.put(id, t.getValue)
+      }
+      JavaHelpers.createTokensMap(lhm)
+    }
     val rewardDelay = if (_ctx.getNetworkType == NetworkType.MAINNET)
       Parameters.MinerRewardDelay_Mainnet
     else

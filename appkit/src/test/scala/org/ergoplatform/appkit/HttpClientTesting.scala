@@ -2,10 +2,10 @@ package org.ergoplatform.appkit
 
 import sigma.util.{FileUtil => SFileUtil}
 import org.ergoplatform.appkit
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 
 import java.util.{List => JList}
 import java.lang.{String => JString}
+import scala.collection.JavaConverters._
 
 trait HttpClientTesting {
   val responsesDir = "appkit/src/test/resources/mockwebserver"
@@ -38,8 +38,8 @@ trait HttpClientTesting {
       loadNodeResponse("response_LastHeaders.json")) ++ data.nodeResponses
     val explorerResponses: IndexedSeq[String] = data.explorerResponses.toIndexedSeq
     new FileMockedErgoClient(
-      nodeResponses.convertTo[JList[JString]],
-      explorerResponses.convertTo[JList[JString]],
+      nodeResponses.asJava,
+      explorerResponses.asJava,
       nodeOnlyMode)
   }
 }

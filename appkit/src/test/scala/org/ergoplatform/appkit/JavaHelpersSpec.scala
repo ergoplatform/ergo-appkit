@@ -3,14 +3,15 @@ package org.ergoplatform.appkit
 import org.ergoplatform.ErgoBox
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.sdk.JavaHelpers
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.wallet.mnemonic.{Mnemonic => WMnemonic}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.Values.{ByteArrayConstant, EvaluatedValue, IntConstant}
+import sigma.ast.{ByteArrayConstant, EvaluatedValue, IntConstant, SType}
+import sigma.data.TrivialProp
 import sigmastate.helpers.TestingHelpers._
-import sigmastate.{SType, TrivialProp}
+
+import scala.collection.JavaConverters._
 
 class JavaHelpersSpec extends AnyPropSpec with Matchers
     with ScalaCheckDrivenPropertyChecks
@@ -20,12 +21,12 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
   type Registers = Map[NonMandatoryRegisterId, _ <: EvaluatedValue[_ <: SType]]
 
   def boxWithRegs(regs: Registers) = {
-    testBox(10, TrivialProp.TrueProp, 100, Nil, regs)
+    testBox(10, sigma.ast.ErgoTree.fromProposition(TrivialProp.TrueProp), 100, Nil, regs)
   }
 
   def check(regs: Registers, expRegs: IndexedSeq[ErgoValue[_]]) = {
     val box = boxWithRegs(regs)
-    val res = AppkitHelpers.getBoxRegisters(box).convertTo[IndexedSeq[ErgoValue[_]]]
+    val res = AppkitHelpers.getBoxRegisters(box).asScala.toIndexedSeq
     res shouldBe expRegs
   }
 
@@ -58,7 +59,9 @@ class JavaHelpersSpec extends AnyPropSpec with Matchers
     // original Java8-based implementation
     forAll(MinSuccessful(50)) { (mnemonic: String, passOpt: Option[String]) =>
       val seed = JavaHelpers.mnemonicToSeed(mnemonic, passOpt)
-      val expSeed = WMnemonic.toSeed(org.ergoplatform.wallet.interface4j.SecretString.create(mnemonic), passOpt.map(a => org.ergoplatform.wallet.interface4j.SecretString.create(a)))
+      val expSeed = WMnemonic.toSeed(
+        org.ergoplatform.sdk.SecretString.create(mnemonic),
+        passOpt.map(a => org.ergoplatform.sdk.SecretString.create(a)))
       seed shouldBe expSeed
       println(s"Mnemonic: $mnemonic, Password: $passOpt")
     }

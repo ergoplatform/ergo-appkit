@@ -16,8 +16,7 @@ import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import sigma.util.{FileUtil => SFileUtil}
 import scorex.util.ModifierId
-import sigmastate.eval.CBigInt
-import sigmastate.helpers.NegativeTesting
+import sigma.data.CBigInt
 import sigmastate.interpreter.HintsBag
 
 import java.io.File
@@ -25,12 +24,12 @@ import java.math.BigInteger
 import java.util
 import java.util.Arrays
 import java.util.function.Consumer
+import scala.collection.JavaConverters._
 
 class TxBuilderSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
   with AppkitTesting
-  with HttpClientTesting
-  with NegativeTesting {
+  with HttpClientTesting {
 
   val mockTxId = "f9e5ce5aa0d95f5d54a7bc89c46730d9662397067250aa18a0039631c0f5b809"
 
@@ -67,11 +66,10 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     }
 
     def checkFailed(invalidId: Int) = {
-      assertExceptionThrown(
-        ContextVar.of(invalidId.toByte, 10),
-        exceptionLike[IllegalArgumentException]("Context variable id should be in range"),
-        clue = s"id: $invalidId"
-      )
+      val ex = intercept[IllegalArgumentException] {
+        ContextVar.of(invalidId.toByte, 10)
+      }
+      ex.getMessage should include("Context variable id should be in range")
     }
 
     for (id <- Byte.MinValue to -1) {
@@ -112,7 +110,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     ergoClient.execute { ctx: BlockchainContext =>
       val contextVars = Seq(
         ContextVar.of(1.toByte, 100),
-        ContextVar.of(10.toByte, CBigInt(BigInteger.valueOf(100)))
+        ContextVar.of(10.toByte, BigInteger.valueOf(100))
       )
       val input = createTestInput(ctx)
         .withContextVars(contextVars:_*)
@@ -133,7 +131,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       // alice signing bob's box. Does not work here but works in other cases.
       val prover = ctx.newProverBuilder().build()
       val signed = prover.sign(unsigned)
-      signed.getCost shouldBe 14565
+      signed.getCost shouldBe 12310
 
       // check the signed transaction contains all the context variables
       // we attached to the input box
@@ -207,30 +205,28 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
   property("ErgoProverBuilder.withEip3Secret require mnemonic") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    assertExceptionThrown(
+    val ex1 = intercept[IllegalArgumentException] {
       ergoClient.execute { ctx: BlockchainContext =>
         ctx.newProverBuilder()
           .withEip3Secret(0)
           .build()
-      },
-      exceptionLike[IllegalArgumentException](
-        "Mnemonic is not specified, use withMnemonic method.")
-    )
+      }
+    }
+    ex1.getMessage should include("Mnemonic is not specified")
   }
 
   property("ErgoProverBuilder.withEip3Secret check uniqueness of derivation index") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    assertExceptionThrown(
+    val ex2 = intercept[IllegalArgumentException] {
       ergoClient.execute { ctx: BlockchainContext =>
         ctx.newProverBuilder()
           .withMnemonic(mnemonic, SecretString.empty(), false)
           .withEip3Secret(0)
           .withEip3Secret(0) // attempt to add the same index
           .build()
-      },
-      exceptionLike[IllegalArgumentException](
-        "Secret key for derivation index 0 has already been added.")
-    )
+      }
+    }
+    ex2.getMessage should include("Secret key for derivation index 0 has already been added.")
   }
 
   private def testEip3Address(ctx: BlockchainContext, index: Int): Address = {
@@ -315,10 +311,10 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
     coldClient.execute { ctx: BlockchainContext =>
       // test that context is cold
-      assertExceptionThrown(ctx.getHeight, exceptionLike[NotImplementedError]())
-      assertExceptionThrown(
-        ctx.getBoxesById("d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328"),
-        exceptionLike[NotImplementedError]())
+      intercept[NotImplementedError] { ctx.getHeight }
+      intercept[NotImplementedError] {
+        ctx.getBoxesById("d47f958b201dc7162f641f7eb055e9fa7a9cb65cc24d4447a10f86675fc58328")
+      }
 
       // create prover with secrets in the cold context
       val prover = BoxOperations.createProver(ctx,
@@ -404,20 +400,19 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       inputsSelected.size() shouldBe 2
 
       // if we restrict to a single box, we face InputBoxLimitExceededException
-      assertExceptionThrown(
-        operations.withMaxInputBoxesToSelect(1).loadTop(),
-        exceptionLike[InputBoxLimitExceededException]("could not cover 1000000 nanoERG")
-      )
+      val ex3 = intercept[InputBoxLimitExceededException] {
+        operations.withMaxInputBoxesToSelect(1).loadTop()
+      }
+      ex3.getMessage should include("could not cover 1000000 nanoERG")
 
       // if there is only a single input box, we face NotEnoughCoinsForChangeException
       val operations2 = BoxOperations.createForSenders(senders, ctx)
         .withAmountToSpend(amountToSend)
         .withInputBoxesLoader(new MockedBoxesLoader(util.Arrays.asList(input1)))
 
-      assertExceptionThrown(
-        operations2.loadTop(),
-        exceptionLike[NotEnoughCoinsForChangeException]()
-      )
+      intercept[NotEnoughCoinsForChangeException] {
+        operations2.loadTop()
+      }
     }
 
   }
@@ -479,8 +474,7 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
 
       val senders = Arrays.asList(storage.getAddressFor(NetworkType.MAINNET))
 
-      val ergoTokens = tokenList.getItems
-        .convertTo[IndexedSeq[TokenInfo]]
+      val ergoTokens = tokenList.getItems.asScala.toIndexedSeq
         .map { ti => new ErgoToken(ti.getId, ti.getEmissionAmount) }
 
       val tokenList1 = ergoTokens.take(150)
@@ -515,9 +509,9 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
           }
         })
       }
-      val outTokenNum = unsigned.getOutputs
+      val outTokenNum = unsigned.getOutputs.asScala
         .map(_.getTokens.size())
-        .convertTo[IndexedSeq[Int]].sum
+        .sum
       (tokenList1.length + tokenList2.length) shouldBe outTokenNum
     }
 
@@ -555,9 +549,8 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       val reduced = prover.reduce(unsigned, 0)
 
       // outputs should contain the two tokens going in
-      unsigned.getOutputs.convertTo[IndexedSeq[OutBox]]
-        .map(_.getTokens.convertTo[IndexedSeq[ErgoToken]])
-        .flatten(identity)
+      unsigned.getOutputs.asScala.toIndexedSeq
+        .flatMap(_.getTokens.asScala.toIndexedSeq)
         .filter(_.getId.toString.equals(mockTxId))
         .map(_.getValue).sum shouldBe 2L
 

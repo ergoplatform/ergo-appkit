@@ -1,16 +1,16 @@
 package org.ergoplatform.appkit;
 
-import org.ergoplatform.sdk.Iso;
+import sigma.data.SigmaBoolean;
+import sigma.ast.ErgoTree;
 import org.ergoplatform.sdk.JavaHelpers;
-import sigmastate.Values;
 
 /**
  * Proposition which can be proven and verified by sigma protocol.
  */
 public class SigmaProp {
-    private final Values.SigmaBoolean sigmaBoolean;
+    private final sigma.data.SigmaBoolean sigmaBoolean;
 
-    public SigmaProp(Values.SigmaBoolean sigmaBoolean) {
+    public SigmaProp(sigma.data.SigmaBoolean sigmaBoolean) {
         this.sigmaBoolean = sigmaBoolean;
     }
 
@@ -18,15 +18,16 @@ public class SigmaProp {
         this(JavaHelpers.SigmaDsl().toSigmaBoolean(sigmaProp));
     }
 
-    public Values.SigmaBoolean getSigmaBoolean() {
+    public sigma.data.SigmaBoolean getSigmaBoolean() {
         return sigmaBoolean;
     }
 
     /**
-     * Serializes this SigmaProp.
+     * Serializes this SigmaProp via ErgoTree container.
      */
     public byte[] toBytes() {
-        return Iso.isoSigmaBooleanToByteArray().to(sigmaBoolean);
+        ErgoTree tree = ErgoTree.fromSigmaBoolean(sigmaBoolean);
+        return tree.bytes();
     }
 
     public Address toAddress(NetworkType networkType) {
@@ -37,7 +38,9 @@ public class SigmaProp {
      * @return SigmaProp equal to the one that was serialized with {@link #toBytes()}
      */
     public static SigmaProp parseFromBytes(byte[] serializedBytes) {
-        return new SigmaProp(Iso.isoSigmaBooleanToByteArray().from(serializedBytes));
+        ErgoTree tree = ErgoTree.fromBytes(serializedBytes);
+        SigmaBoolean sb = tree.toSigmaBooleanOpt().get();
+        return new SigmaProp(sb);
     }
 
     /**

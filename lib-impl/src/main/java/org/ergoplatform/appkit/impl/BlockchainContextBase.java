@@ -5,9 +5,9 @@ import org.ergoplatform.ErgoLikeTransactionSerializer;
 import org.ergoplatform.appkit.*;
 import org.ergoplatform.sdk.ReducedErgoLikeTransaction;
 import org.ergoplatform.sdk.ReducedErgoLikeTransactionSerializer;
-import sigmastate.Values;
-import sigmastate.serialization.SigmaSerializer;
-import sigmastate.utils.SigmaByteReader;
+import sigma.ast.ErgoTree;
+import sigma.serialization.SigmaSerializer;
+import sigma.serialization.SigmaByteReader;
 
 public abstract class BlockchainContextBase implements BlockchainContext {
     protected final NetworkType _networkType;
@@ -17,13 +17,13 @@ public abstract class BlockchainContextBase implements BlockchainContext {
     }
 
     @Override
-    public ErgoContract newContract(Values.ErgoTree ergoTree) {
+    public ErgoContract newContract(ErgoTree ergoTree) {
         return new ErgoTreeContract(ergoTree, _networkType);
     }
 
     @Override
     public ErgoContract compileContract(Constants constants, String ergoScript) {
-        return ErgoScriptContract.create(constants, ergoScript, _networkType);
+        return ErgoScriptContract.create(constants, ergoScript, _networkType, getParameters().getBlockVersion());
     }
 
     @Override

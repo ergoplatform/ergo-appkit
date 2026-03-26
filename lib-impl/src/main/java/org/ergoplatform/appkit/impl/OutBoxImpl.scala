@@ -2,24 +2,29 @@ package org.ergoplatform.appkit.impl
 
 import org.ergoplatform.ErgoBoxCandidate
 import org.ergoplatform.appkit._
-import org.ergoplatform.sdk.{ErgoToken, Iso}
+import org.ergoplatform.sdk.ErgoToken
 import scorex.util.ModifierId
-import sigmastate.Values
+import sigma.ast.ErgoTree
 
 import java.util
+import scala.collection.JavaConverters._
 
 class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
   override def getValue: Long = _ergoBoxCandidate.value
 
   override def getCreationHeight: Int = _ergoBoxCandidate.creationHeight
 
-  override def getTokens: util.List[ErgoToken] = Iso.isoTokensListToPairsColl.from(_ergoBoxCandidate.additionalTokens)
+  override def getTokens: util.List[ErgoToken] = {
+    _ergoBoxCandidate.additionalTokens.toArray.map { case (id, value) =>
+      new ErgoToken(scorex.util.encode.Base16.encode(id.toArray), value)
+    }.toList.asJava
+  }
 
   override def getRegisters: util.List[ErgoValue[_]] = AppkitHelpers.getBoxRegisters(_ergoBoxCandidate)
 
   override def getBytesWithNoRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
 
-  override def getErgoTree: Values.ErgoTree = _ergoBoxCandidate.ergoTree
+  override def getErgoTree: ErgoTree = _ergoBoxCandidate.ergoTree
 
   /** Returns {@link BoxAttachment} stored in this box of null. */
   override def getAttachment: BoxAttachment =

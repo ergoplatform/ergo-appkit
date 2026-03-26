@@ -4,18 +4,20 @@ import org.ergoplatform.ErgoAddressEncoder.NetworkPrefix
 import org.ergoplatform.ErgoBox.TokenId
 import org.ergoplatform.ErgoScriptPredef.compileWithCosting
 import org.ergoplatform._
-import org.ergoplatform.sdk.Iso._
-import org.ergoplatform.sdk.JavaHelpers.{UniversalConverter, collRType}
-import org.ergoplatform.sdk.{ErgoToken, Iso, LowPriorityIsos}
+import sigma.data.Iso._
+import org.ergoplatform.sdk.JavaHelpers.collRType
+import org.ergoplatform.sdk.ErgoToken
+import sigma.data.Iso
+import org.ergoplatform.sdk.LowPriorityIsos
 import sigma.Colls
 import sigma.data.RType
-import sigmastate.SType
-import sigmastate.Values.{Constant, ErgoTree, EvaluatedValue}
-import sigmastate.eval.CostingSigmaDslBuilder.validationSettings
-import sigmastate.eval.{CompiletimeIRContext, Evaluation}
-import sigmastate.interpreter.ContextExtension
-import sigmastate.lang.Terms.ValueOps
-import sigmastate.serialization.ErgoTreeSerializer
+import sigma.ast.SType
+import sigma.ast.{Constant, ErgoTree, EvaluatedValue}
+import sigma.compiler.ir.CompiletimeIRContext
+import sigma.Evaluation
+import sigma.interpreter.ContextExtension
+import sigma.ast.syntax._
+import sigma.serialization.ErgoTreeSerializer
 
 import java.util
 import java.util.{List => JList}
@@ -23,7 +25,7 @@ import scala.collection.JavaConverters
 import scala.collection.compat.immutable.ArraySeq
 
 object AppkitIso extends LowPriorityIsos {
-  import org.ergoplatform.sdk.Iso._
+  import sigma.data.Iso._
   implicit val isoErgoTypeToSType: Iso[ErgoType[_], SType] = new Iso[ErgoType[_], SType] {
     override def to(et: ErgoType[_]): SType = Evaluation.rtypeToSType(et.getRType)
     override def from(st: SType): ErgoType[_] = new ErgoType(Evaluation.stypeToRType(st))
@@ -39,23 +41,23 @@ object AppkitIso extends LowPriorityIsos {
   }
 
   implicit val isoContextVarsToContextExtension: Iso[JList[ContextVar], ContextExtension] = new Iso[JList[ContextVar], ContextExtension] {
-    import org.ergoplatform.sdk.JavaHelpers._
+    import scala.collection.JavaConverters._
+
     override def to(vars: JList[ContextVar]): ContextExtension = {
       var values: Map[Byte, EvaluatedValue[SType]] = Map.empty
-      vars.convertTo[IndexedSeq[ContextVar]].foreach { v =>
+      vars.asScala.foreach { v =>
         val id = v.getId
         val value = v.getValue
-        if (values.contains(id)) sys.error(s"Duplicate variable id: ($id -> $value")
-        values += (v.getId() -> isoErgoValueToSValue.to(v.getValue))
+        if (values.contains(id)) sys.error(s"Duplicate variable id: ($id -> $value)")
+        values += (id -> isoErgoValueToSValue.to(value))
       }
       ContextExtension(values)
     }
+
     override def from(b: ContextExtension): JList[ContextVar] = {
-      val iso = JListToIndexedSeq[ContextVar, ContextVar]
-      val vars = iso.from(b.values
+      b.values
         .map { case (id, v) => new ContextVar(id, isoErgoValueToSValue.from(v)) }
-        .toIndexedSeq)
-      vars
+        .toSeq.asJava
     }
   }
 
@@ -64,7 +66,8 @@ object AppkitIso extends LowPriorityIsos {
 object AppkitHelpers {
   implicit class ListOps[A](val xs: JList[A]) extends AnyVal {
     def map[B](f: A => B): JList[B] = {
-      xs.convertTo[IndexedSeq[A]].map(f).convertTo[JList[B]]
+      import scala.collection.JavaConverters._
+      xs.asScala.map(f).asJava
     }
   }
 
@@ -103,10 +106,33 @@ object AppkitHelpers {
 
   def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix): ErgoTree = {
     import JavaConverters._
+    import sigma.ast.syntax._
     val env = constants.asScala.toMap
     implicit val IR = new CompiletimeIRContext
     val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
     ErgoTree.fromProposition(prop)
+  }
+
+  /** Compile an ErgoScript contract with v6 activation context awareness.
+    * When blockVersion >= 4, the compiler enables v6 opcodes (serialize, deserializeTo,
+    * getReg, checkPow, decodeNBits, bitwise ops, etc.) by setting the VersionContext.
+    * @param constants named constants to substitute in the script
+    * @param contractText ErgoScript source code
+    * @param networkPrefix mainnet or testnet prefix
+    * @param blockVersion protocol blockVersion from node parameters (determines activation)
+    */
+  def compile(constants: util.Map[String, Object], contractText: String, networkPrefix: NetworkPrefix, blockVersion: Byte): ErgoTree = {
+    val activatedVersion: Byte = (blockVersion - 1).toByte
+    val ergoTreeVersion: Byte = if (activatedVersion >= sigma.VersionContext.V6SoftForkVersion) 3.toByte else activatedVersion
+    sigma.VersionContext.withVersions(activatedVersion, ergoTreeVersion) {
+      import JavaConverters._
+      import sigma.ast.syntax._
+      val env = constants.asScala.toMap
+      implicit val IR = new CompiletimeIRContext
+      val prop = compileWithCosting(env, contractText, networkPrefix).asSigmaProp
+      val header = ErgoTree.headerWithVersion(ErgoTree.ZeroHeader, ergoTreeVersion)
+      ErgoTree.fromProposition(header, prop)
+    }
   }
 
   /** Extracts registers as a list of ErgoValue instances (containing type descriptors). */
@@ -131,7 +157,10 @@ object AppkitHelpers {
     require(nRegs <= nonMandatoryRegisters.length,
        s"Too many additional registers $nRegs. Max allowed ${nonMandatoryRegisters.length}")
     implicit val TokenIdRType: RType[TokenId] = collRType(sigma.ByteType).asInstanceOf[RType[TokenId]]
-    val ts = Colls.fromItems(tokens.map(isoErgoTokenToPair.to(_)):_*)
+    val ts = Colls.fromItems(tokens.map { t =>
+      val idColl = sigma.Colls.fromArray(t.getId.getBytes).asInstanceOf[TokenId]
+      (idColl, t.getValue)
+    }:_*)
     val rs = registers.zipWithIndex.map { case (ergoValue, i) =>
       val id = ErgoBox.nonMandatoryRegisters(i)
       val value = AppkitIso.isoErgoValueToSValue.to(ergoValue)
