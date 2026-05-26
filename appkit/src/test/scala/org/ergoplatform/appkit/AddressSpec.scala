@@ -51,6 +51,22 @@ class AddressSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropert
     addr6 shouldBe addr
   }
 
+  property("SigmaProp bytes roundtrip through ErgoTree container") {
+    val addr = Address.create(addrStr)
+    val prop = SigmaProp.createFromAddress(addr)
+    val parsed = SigmaProp.parseFromBytes(prop.toBytes)
+
+    parsed.getSigmaBoolean shouldBe prop.getSigmaBoolean
+    parsed.toAddress(NetworkType.TESTNET) shouldBe addr
+    ErgoValue.of(parsed).toHex shouldBe ErgoValue.of(prop).toHex
+  }
+
+  property("SigmaProp parse rejects invalid ErgoTree bytes") {
+    an[Throwable] shouldBe thrownBy {
+      SigmaProp.parseFromBytes(Array[Byte](1, 2, 3))
+    }
+  }
+
   property("Address from ErgoAddress") {
     implicit val encoder: ErgoAddressEncoder = ErgoAddressEncoder(ErgoAddressEncoder.TestnetNetworkPrefix);
     val ergoAddr = encoder.fromString(addrStr).get

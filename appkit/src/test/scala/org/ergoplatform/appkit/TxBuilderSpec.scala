@@ -108,8 +108,10 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
   property("InputBox support context variables") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
+      val contextBytes = Array[Byte](1, 2, 3, 4)
       val contextVars = Seq(
         ContextVar.of(1.toByte, 100),
+        ContextVar.of(2.toByte, contextBytes),
         ContextVar.of(10.toByte, BigInteger.valueOf(100))
       )
       val input = createTestInput(ctx)
@@ -136,10 +138,53 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       // check the signed transaction contains all the context variables
       // we attached to the input box
       val extensions = signed.getSignedInputs.get(0).getContextVars
+      extensions.size shouldBe contextVars.size
       contextVars.foreach { cv =>
         extensions.containsKey(cv.getId) shouldBe true
-        extensions.get(cv.getId) shouldBe cv.getValue
+        extensions.get(cv.getId).toHex shouldBe cv.getValue.toHex
       }
+      extensions.get(2.toByte).toHex shouldBe ErgoValue.of(contextBytes).toHex
+    }
+  }
+
+  property("OutBox and SignedTransaction preserve token ids and registers through conversions") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val token1 = new ErgoToken("01" * 32, 7L)
+      val token2 = new ErgoToken("02" * 32, 11L)
+      val registerValue = ErgoValue.of(Array[Byte](10, 20, 30))
+      def tokenPairs(tokens: util.List[ErgoToken]) =
+        tokens.asScala.toSeq.map(t => t.getId.toString -> t.getValue)
+
+      val input = ctx.newTxBuilder.outBoxBuilder()
+        .value(30000000L)
+        .contract(truePropContract(ctx))
+        .tokens(token1, token2)
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      tokenPairs(input.getTokens) shouldBe Seq(token1, token2).map(t => t.getId.toString -> t.getValue)
+
+      val txB = ctx.newTxBuilder()
+      val output = txB.outBoxBuilder()
+        .value(15000000L)
+        .contract(truePropContract(ctx))
+        .tokens(token1, token2)
+        .registers(ErgoValue.of(10), registerValue)
+        .build()
+
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output)
+        .fee(Parameters.MinFee)
+        .sendChangeTo(address.getErgoAddress)
+        .build()
+      val signed = ctx.newProverBuilder().build().sign(unsigned)
+      val signedOutput = signed.getOutputs.get(0)
+      val spendableOutput = signed.getOutputsToSpend.get(0)
+
+      tokenPairs(signedOutput.getTokens) shouldBe Seq(token1, token2).map(t => t.getId.toString -> t.getValue)
+      tokenPairs(spendableOutput.getTokens) shouldBe Seq(token1, token2).map(t => t.getId.toString -> t.getValue)
+      signedOutput.getRegisters.asScala.map(_.toHex).toSeq shouldBe Seq(ErgoValue.of(10).toHex, registerValue.toHex)
+      spendableOutput.getRegisters.asScala.map(_.toHex).toSeq shouldBe Seq(ErgoValue.of(10).toHex, registerValue.toHex)
     }
   }
 

@@ -4,7 +4,6 @@ import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.sdk.{ReducedErgoLikeTransaction, ReducedErgoLikeTransactionSerializer, ReducedInputData}
 import org.scalacheck.Gen
 import org.scalatest.Assertion
-import sigma.VersionContext
 import sigma.interpreter.ContextExtension
 import sigmastate.interpreter.Interpreter.ReductionResult
 import sigma.serialization.SigmaSerializer
@@ -43,7 +42,7 @@ class ReducedErgoLikeTransactionSpec extends TestingBase
     if (printDebugInfo) println(bytes.length)
     val r = SigmaSerializer.startReader(bytes)
     val positionLimitBefore = r.positionLimit
-    serializer.parse(r) shouldBe v
+    serializer.toBytes(serializer.parse(r)) shouldBe bytes
     r.positionLimit shouldBe positionLimitBefore
   }
 
