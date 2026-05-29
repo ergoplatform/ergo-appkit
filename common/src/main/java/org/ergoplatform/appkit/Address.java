@@ -14,8 +14,8 @@ import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigma.ast.ErgoTree;
-import sigmastate.crypto.DLogProtocol;
 import sigma.crypto.Platform;
+import sigma.data.ProveDlog;
 import sigma.serialization.ErgoTreeSerializer;
 import sigma.GroupElement;
 
@@ -113,13 +113,13 @@ public class Address {
     /**
      * Extract public key from P2PKAddress.
      */
-    public sigma.data.SigmaBoolean getPublicKey() { return asP2PK().pubkey(); }
+    public ProveDlog getPublicKey() { return asP2PK().pubkey(); }
 
     /**
      * Extract public key from P2PKAddress and return its group element
      */
     public GroupElement getPublicKeyGE() {
-        Platform.Ecp point = ((sigma.data.ProveDlog) getPublicKey()).value();
+        Platform.Ecp point = getPublicKey().value();
         return org.ergoplatform.sdk.JavaHelpers.SigmaDsl().GroupElement(point);
     }
 
@@ -200,8 +200,8 @@ public class Address {
     public static Address fromMnemonic(
         NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
-        sigma.data.SigmaBoolean pk = masterKey.publicImage();
-        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress((sigma.data.ProveDlog) pk, networkType.networkPrefix);
+        ProveDlog pk = masterKey.publicImage();
+        P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
 
