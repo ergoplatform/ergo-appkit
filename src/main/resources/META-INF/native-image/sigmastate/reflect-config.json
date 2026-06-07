@@ -205,6 +205,221 @@
     "allPublicConstructors":true
   },
   {
+    "name":"sigma.ast.SAvlTreeMethods$",
+    "methods":[
+      {"name":"contains_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"get_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"getMany_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"insert_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"insertOrUpdate_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"remove_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"update_eval","parameterTypes":["sigma.ast.MethodCall","sigma.AvlTree","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] }
+    ]
+  },
+  {
+    "name":"sigma.ast.SCollectionMethods$",
+    "methods":[
+      {"name":"endsWith_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"flatMap_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","scala.Function1","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"getOrElse_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","int","java.lang.Object","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"indexOf_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","java.lang.Object","int","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"indices_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"map_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","scala.Function1","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"patch_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","int","sigma.Coll","int","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"reverse_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"startsWith_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"updateMany_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"updated_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","int","java.lang.Object","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"zip_eval","parameterTypes":["sigma.ast.MethodCall","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] }
+    ]
+  },
+  {
+    "name":"sigma.ast.SGlobalMethods$",
+    "methods":[
+      {"name":"deserializeTo_eval","parameterTypes":["sigma.ast.MethodCall","sigma.SigmaDslBuilder","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"powHit_eval","parameterTypes":["sigma.ast.MethodCall","sigma.SigmaDslBuilder","int","sigma.Coll","sigma.Coll","sigma.Coll","int","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"serialize_eval","parameterTypes":["sigma.ast.MethodCall","sigma.SigmaDslBuilder","java.lang.Object","sigma.eval.ErgoTreeEvaluator"] },
+      {"name":"xor_eval","parameterTypes":["sigma.ast.MethodCall","sigma.SigmaDslBuilder","sigma.Coll","sigma.Coll","sigma.eval.ErgoTreeEvaluator"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.scala.WOptions$WOption",
+    "methods":[
+      {"name":"filter","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"get","parameterTypes":[] },
+      {"name":"getOrElse","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"isDefined","parameterTypes":[] },
+      {"name":"map","parameterTypes":["sigma.compiler.ir.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.Colls$Coll",
+    "methods":[
+      {"name":"append","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"apply","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"endsWith","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"exists","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"filter","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"flatMap","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"foldLeft","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"forall","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"get","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"getOrElse","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"indexOf","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"indices","parameterTypes":[] },
+      {"name":"length","parameterTypes":[] },
+      {"name":"map","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"patch","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"reverse","parameterTypes":[] },
+      {"name":"slice","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"startsWith","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"updateMany","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"updated","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"zip","parameterTypes":["sigma.compiler.ir.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.Colls$CollBuilder",
+    "methods":[
+      {"name":"fromItems","parameterTypes":["scala.collection.immutable.Seq","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"replicate","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"xor","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$AvlTree",
+    "methods":[
+      {"name":"contains","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"digest","parameterTypes":[] },
+      {"name":"enabledOperations","parameterTypes":[] },
+      {"name":"get","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"getMany","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"insert","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"insertOrUpdate","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"isInsertAllowed","parameterTypes":[] },
+      {"name":"isRemoveAllowed","parameterTypes":[] },
+      {"name":"isUpdateAllowed","parameterTypes":[] },
+      {"name":"keyLength","parameterTypes":[] },
+      {"name":"remove","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"update","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"updateDigest","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"updateOperations","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"valueLengthOpt","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$BigInt",
+    "methods":[
+      {"name":"add","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"divide","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"max","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"min","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"mod","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"multiply","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"subtract","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"toUnsigned","parameterTypes":[] },
+      {"name":"toUnsignedMod","parameterTypes":["sigma.compiler.ir.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$Context",
+    "methods":[
+      {"name":"HEIGHT","parameterTypes":[] },
+      {"name":"INPUTS","parameterTypes":[] },
+      {"name":"LastBlockUtxoRootHash","parameterTypes":[] },
+      {"name":"OUTPUTS","parameterTypes":[] },
+      {"name":"SELF","parameterTypes":[] },
+      {"name":"dataInputs","parameterTypes":[] },
+      {"name":"getVar","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"getVarFromInput","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"headers","parameterTypes":[] },
+      {"name":"minerPubKey","parameterTypes":[] },
+      {"name":"preHeader","parameterTypes":[] },
+      {"name":"selfBoxIndex","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$GroupElement",
+    "methods":[
+      {"name":"exp","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"expUnsigned","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"getEncoded","parameterTypes":[] },
+      {"name":"multiply","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"negate","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$Header",
+    "methods":[
+      {"name":"ADProofsRoot","parameterTypes":[] },
+      {"name":"checkPow","parameterTypes":[] },
+      {"name":"extensionRoot","parameterTypes":[] },
+      {"name":"height","parameterTypes":[] },
+      {"name":"id","parameterTypes":[] },
+      {"name":"minerPk","parameterTypes":[] },
+      {"name":"nBits","parameterTypes":[] },
+      {"name":"parentId","parameterTypes":[] },
+      {"name":"powDistance","parameterTypes":[] },
+      {"name":"powNonce","parameterTypes":[] },
+      {"name":"powOnetimePk","parameterTypes":[] },
+      {"name":"stateRoot","parameterTypes":[] },
+      {"name":"timestamp","parameterTypes":[] },
+      {"name":"transactionsRoot","parameterTypes":[] },
+      {"name":"version","parameterTypes":[] },
+      {"name":"votes","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$SigmaDslBuilder",
+    "methods":[
+      {"name":"Colls","parameterTypes":[] },
+      {"name":"allOf","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"allZK","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"anyOf","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"anyZK","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"atLeast","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"avlTree","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"blake2b256","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"byteArrayToBigInt","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"byteArrayToLong","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"decodeNbits","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"decodePoint","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"deserializeTo","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"encodeNbits","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"fromBigEndianBytes","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"groupGenerator","parameterTypes":[] },
+      {"name":"longToByteArray","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"none","parameterTypes":["sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"powHit","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"proveDHTuple","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"proveDlog","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"serialize","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"sha256","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"sigmaProp","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"some","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.TypeDescs$Elem"] },
+      {"name":"substConstants","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"xor","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"xorOf","parameterTypes":["sigma.compiler.ir.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"sigma.compiler.ir.wrappers.sigma.SigmaDsl$UnsignedBigInt",
+    "methods":[
+      {"name":"add","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"divide","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"max","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"min","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"mod","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"modInverse","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"multiply","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"multiplyMod","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"plusMod","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"subtract","parameterTypes":["sigma.compiler.ir.Base$Ref"] },
+      {"name":"subtractMod","parameterTypes":["sigma.compiler.ir.Base$Ref","sigma.compiler.ir.Base$Ref"] },
+      {"name":"toSigned","parameterTypes":[] }
+    ]
+  },
+  {
     "name":"sigmastate.eval.CostingRules$AvlTreeCoster",
     "methods":[
       {"name":"contains","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
@@ -213,6 +428,7 @@
       {"name":"get","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"getMany","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"insert","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"insertOrUpdate","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"isInsertAllowed","parameterTypes":[] },
       {"name":"isRemoveAllowed","parameterTypes":[] },
       {"name":"isUpdateAllowed","parameterTypes":[] },
@@ -235,12 +451,17 @@
   {
     "name":"sigmastate.eval.CostingRules$CollCoster",
     "methods":[
+      {"name":"endsWith","parameterTypes":["scalan.Base$Ref"] },
       {"name":"filter","parameterTypes":["scalan.Base$Ref"] },
       {"name":"flatMap","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"get","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"getOrElse","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"indexOf","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"indices","parameterTypes":[] },
       {"name":"map","parameterTypes":["scalan.Base$Ref"] },
       {"name":"patch","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"reverse","parameterTypes":[] },
+      {"name":"startsWith","parameterTypes":["scalan.Base$Ref"] },
       {"name":"updateMany","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"updated","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"zip","parameterTypes":["scalan.Base$Ref"] }
@@ -255,6 +476,7 @@
       {"name":"OUTPUTS","parameterTypes":[] },
       {"name":"SELF","parameterTypes":[] },
       {"name":"dataInputs","parameterTypes":[] },
+      {"name":"getVarFromInput","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.TypeDescs$Elem"] },
       {"name":"headers","parameterTypes":[] },
       {"name":"minerPubKey","parameterTypes":[] },
       {"name":"preHeader","parameterTypes":[] },
@@ -264,6 +486,7 @@
   {
     "name":"sigmastate.eval.CostingRules$GroupElementCoster",
     "methods":[
+      {"name":"expUnsigned","parameterTypes":["scalan.Base$Ref"] },
       {"name":"getEncoded","parameterTypes":[] },
       {"name":"negate","parameterTypes":[] }
     ]
@@ -272,6 +495,7 @@
     "name":"sigmastate.eval.CostingRules$HeaderCoster",
     "methods":[
       {"name":"ADProofsRoot","parameterTypes":[] },
+      {"name":"checkPow","parameterTypes":[] },
       {"name":"extensionRoot","parameterTypes":[] },
       {"name":"height","parameterTypes":[] },
       {"name":"id","parameterTypes":[] },
@@ -312,7 +536,18 @@
   },
   {
     "name":"sigmastate.eval.CostingRules$SigmaDslBuilderCoster",
-    "methods":[{"name":"groupGenerator","parameterTypes":[] }]
+    "methods":[
+      {"name":"decodeNbits","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"deserializeTo","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"encodeNbits","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"fromBigEndianBytes","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"groupGenerator","parameterTypes":[] },
+      {"name":"none","parameterTypes":["scalan.TypeDescs$Elem"] },
+      {"name":"powHit","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"serialize","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"some","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"xor","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] }
+    ]
   },
   {
     "name":"sigmastate.lang.Terms$Apply",
@@ -449,13 +684,17 @@
       {"name":"flatMap","parameterTypes":["scalan.Base$Ref"] },
       {"name":"foldLeft","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"forall","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"endsWith","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"get","parameterTypes":["scalan.Base$Ref"] },
       {"name":"getOrElse","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"indexOf","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"indices","parameterTypes":[] },
       {"name":"length","parameterTypes":[] },
       {"name":"map","parameterTypes":["scalan.Base$Ref"] },
       {"name":"patch","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"reverse","parameterTypes":[] },
       {"name":"slice","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"startsWith","parameterTypes":["scalan.Base$Ref"] },
       {"name":"sum","parameterTypes":["scalan.Base$Ref"] },
       {"name":"updateMany","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"updated","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
@@ -681,6 +920,7 @@
       {"name":"get","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"getMany","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"insert","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"insertOrUpdate","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"isInsertAllowed","parameterTypes":[] },
       {"name":"isRemoveAllowed","parameterTypes":[] },
       {"name":"isUpdateAllowed","parameterTypes":[] },
@@ -702,7 +942,9 @@
       {"name":"min","parameterTypes":["scalan.Base$Ref"] },
       {"name":"mod","parameterTypes":["scalan.Base$Ref"] },
       {"name":"multiply","parameterTypes":["scalan.Base$Ref"] },
-      {"name":"subtract","parameterTypes":["scalan.Base$Ref"] }
+      {"name":"subtract","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"toUnsigned","parameterTypes":[] },
+      {"name":"toUnsignedMod","parameterTypes":["scalan.Base$Ref"] }
     ]
   },
   {
@@ -731,6 +973,7 @@
       {"name":"SELF","parameterTypes":[] },
       {"name":"dataInputs","parameterTypes":[] },
       {"name":"getVar","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"getVarFromInput","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.TypeDescs$Elem"] },
       {"name":"headers","parameterTypes":[] },
       {"name":"minerPubKey","parameterTypes":[] },
       {"name":"preHeader","parameterTypes":[] },
@@ -752,6 +995,7 @@
     "allDeclaredMethods":true,
     "methods":[
       {"name":"exp","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"expUnsigned","parameterTypes":["scalan.Base$Ref"] },
       {"name":"getEncoded","parameterTypes":[] },
       {"name":"multiply","parameterTypes":["scalan.Base$Ref"] },
       {"name":"negate","parameterTypes":[] }
@@ -762,6 +1006,7 @@
     "allDeclaredMethods":true,
     "methods":[
       {"name":"ADProofsRoot","parameterTypes":[] },
+      {"name":"checkPow","parameterTypes":[] },
       {"name":"extensionRoot","parameterTypes":[] },
       {"name":"height","parameterTypes":[] },
       {"name":"id","parameterTypes":[] },
@@ -804,15 +1049,42 @@
       {"name":"blake2b256","parameterTypes":["scalan.Base$Ref"] },
       {"name":"byteArrayToBigInt","parameterTypes":["scalan.Base$Ref"] },
       {"name":"byteArrayToLong","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"decodeNbits","parameterTypes":["scalan.Base$Ref"] },
       {"name":"decodePoint","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"deserializeTo","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"encodeNbits","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"fromBigEndianBytes","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
       {"name":"groupGenerator","parameterTypes":[] },
       {"name":"longToByteArray","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"none","parameterTypes":["scalan.TypeDescs$Elem"] },
+      {"name":"powHit","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"proveDHTuple","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"proveDlog","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"serialize","parameterTypes":["scalan.Base$Ref"] },
       {"name":"sha256","parameterTypes":["scalan.Base$Ref"] },
       {"name":"sigmaProp","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"some","parameterTypes":["scalan.Base$Ref","scalan.TypeDescs$Elem"] },
       {"name":"substConstants","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref","scalan.Base$Ref","scalan.TypeDescs$Elem"] },
+      {"name":"xor","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
       {"name":"xorOf","parameterTypes":["scalan.Base$Ref"] }
+    ]
+  },
+  {
+    "name":"special.sigma.SigmaDsl$UnsignedBigInt",
+    "allDeclaredMethods":true,
+    "methods":[
+      {"name":"add","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"divide","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"max","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"min","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"mod","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"modInverse","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"multiply","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"multiplyMod","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"plusMod","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"subtract","parameterTypes":["scalan.Base$Ref"] },
+      {"name":"subtractMod","parameterTypes":["scalan.Base$Ref","scalan.Base$Ref"] },
+      {"name":"toSigned","parameterTypes":[] }
     ]
   },
   {
