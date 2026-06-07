@@ -4,16 +4,13 @@ import org.ergoplatform.UnsignedErgoLikeTransaction
 import org.ergoplatform.sdk.{ReducedErgoLikeTransaction, ReducedErgoLikeTransactionSerializer, ReducedInputData}
 import org.scalacheck.Gen
 import org.scalatest.Assertion
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.CrossVersionProps
-import sigmastate.interpreter.ContextExtension
+import sigma.interpreter.ContextExtension
 import sigmastate.interpreter.Interpreter.ReductionResult
-import sigmastate.serialization.SigmaSerializer
-import sigmastate.serialization.generators.ObjectGenerators
+import sigma.serialization.SigmaSerializer
+import sigma.serialization.generators.ObjectGenerators
 
-class ReducedErgoLikeTransactionSpec extends CrossVersionProps
-    with Matchers with ScalaCheckDrivenPropertyChecks with ObjectGenerators {
+class ReducedErgoLikeTransactionSpec extends TestingBase
+    with ObjectGenerators {
 
   override val printDebugInfo: Boolean = false
 
@@ -49,11 +46,34 @@ class ReducedErgoLikeTransactionSpec extends CrossVersionProps
     r.positionLimit shouldBe positionLimitBefore
   }
 
+  protected def reducedTxRoundTripTest(v: ReducedErgoLikeTransaction): Assertion = {
+    val bytes = ReducedErgoLikeTransactionSerializer.toBytes(v)
+    bytes.nonEmpty shouldBe true
+    if (printDebugInfo) println(bytes.length)
+
+    val r = SigmaSerializer.startReader(bytes)
+    val positionLimitBefore = r.positionLimit
+    val parsed = ReducedErgoLikeTransactionSerializer.parse(r)
+
+    // ContextExtension values are stored in a Map, so assert the converted content.
+    parsed.cost shouldBe v.cost
+    parsed.unsignedTx.inputs.length shouldBe v.unsignedTx.inputs.length
+    parsed.unsignedTx.inputs.zip(v.unsignedTx.inputs).foreach { case (actual, expected) =>
+      actual.boxId.sameElements(expected.boxId) shouldBe true
+      actual.extension.values shouldBe expected.extension.values
+    }
+    parsed.unsignedTx.dataInputs shouldBe v.unsignedTx.dataInputs
+    parsed.unsignedTx.outputCandidates shouldBe v.unsignedTx.outputCandidates
+    parsed.reducedInputs.map(_.reductionResult) shouldBe v.reducedInputs.map(_.reductionResult)
+    parsed.reducedInputs.map(_.extension.values) shouldBe v.reducedInputs.map(_.extension.values)
+    r.positionLimit shouldBe positionLimitBefore
+  }
+
   property("serialization roundtrip") {
     forAll { reducedTx: ReducedErgoLikeTransaction =>
       if (printDebugInfo)
         println(s"Ins: ${reducedTx.unsignedTx.inputs.size}; Outs: ${reducedTx.unsignedTx.outputCandidates.length}")
-      roundTripTest(reducedTx)(ReducedErgoLikeTransactionSerializer)
+      reducedTxRoundTripTest(reducedTx)
     }
   }
 }

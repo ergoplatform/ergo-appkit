@@ -13,12 +13,10 @@ import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
 import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
-import sigmastate.Values;
-import sigmastate.crypto.DLogProtocol;
-import sigmastate.crypto.Platform;
-import sigmastate.eval.CostingSigmaDslBuilder$;
-import sigmastate.serialization.ErgoTreeSerializer;
-import sigmastate.utils.Helpers;
+import sigma.ast.ErgoTree;
+import sigma.crypto.Platform;
+import sigma.data.ProveDlog;
+import sigma.serialization.ErgoTreeSerializer;
 import sigma.GroupElement;
 
 import java.util.Objects;
@@ -50,7 +48,7 @@ public class Address {
         if (res.isFailure())
             throw new RuntimeException(
                 "Invalid address encoding, expected base58 string: " + base58String,
-                (Throwable) new Helpers.TryOps(res).toEither().left().get());
+                (Throwable) res.failed().get());
         _addrBytes = res.get();
         ErgoAddressEncoder encoder =
             ErgoAddressEncoder.apply(getNetworkType().networkPrefix);
@@ -58,7 +56,7 @@ public class Address {
         if (addrTry.isFailure())
             throw new RuntimeException(
                 "Invalid address encoding, expected base58 string: " + base58String,
-                (Throwable) new Helpers.TryOps(addrTry).toEither().left().get());
+                (Throwable) addrTry.failed().get());
         _address = addrTry.get();
     }
 
@@ -115,14 +113,14 @@ public class Address {
     /**
      * Extract public key from P2PKAddress.
      */
-    public DLogProtocol.ProveDlog getPublicKey() { return asP2PK().pubkey(); }
+    public ProveDlog getPublicKey() { return asP2PK().pubkey(); }
 
     /**
      * Extract public key from P2PKAddress and return its group element
      */
     public GroupElement getPublicKeyGE() {
         Platform.Ecp point = getPublicKey().value();
-        return CostingSigmaDslBuilder$.MODULE$.GroupElement(point);
+        return org.ergoplatform.sdk.JavaHelpers.SigmaDsl().GroupElement(point);
     }
 
     /**
@@ -156,9 +154,9 @@ public class Address {
      * @return SigmaBoolean value of this address. Throws an error if
      * {@link #isSigmaBoolean()} is false
      */
-    public Values.SigmaBoolean getSigmaBoolean() {
-        Values.ErgoTree ergoTree = getErgoAddress().script();
-        return JavaHelpers.toSigmaBoolean(ergoTree);
+    public sigma.data.SigmaBoolean getSigmaBoolean() {
+        ErgoTree ergoTree = getErgoAddress().script();
+        return ergoTree.toSigmaBooleanOpt().get();
     }
 
     /**
@@ -202,7 +200,7 @@ public class Address {
     public static Address fromMnemonic(
         NetworkType networkType, SecretString mnemonic, SecretString mnemonicPass, Boolean usePre1627KeyDerivation) {
         ExtendedSecretKey masterKey = JavaHelpers.seedToMasterKey(mnemonic, mnemonicPass, usePre1627KeyDerivation);
-        DLogProtocol.ProveDlog pk = masterKey.publicImage();
+        ProveDlog pk = masterKey.publicImage();
         P2PKAddress p2pkAddress = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pkAddress);
     }
@@ -259,15 +257,15 @@ public class Address {
         return new Address(p2pkAddress);
     }
 
-    public static Address fromErgoTree(Values.ErgoTree ergoTree, NetworkType networkType) {
+    public static Address fromErgoTree(ErgoTree ergoTree, NetworkType networkType) {
         ErgoAddressEncoder encoder =
             ErgoAddressEncoder.apply(networkType.networkPrefix);
         ErgoAddress ergoAddress = encoder.fromProposition(ergoTree).get();
         return new Address(ergoAddress);
     }
 
-    public static Address fromSigmaBoolean(Values.SigmaBoolean sigmaBoolean, NetworkType networkType) {
-        Values.ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
+    public static Address fromSigmaBoolean(sigma.data.SigmaBoolean sigmaBoolean, NetworkType networkType) {
+        ErgoTree ergoTree = JavaHelpers.toErgoTree(sigmaBoolean);
         return fromErgoTree(ergoTree, networkType);
     }
 

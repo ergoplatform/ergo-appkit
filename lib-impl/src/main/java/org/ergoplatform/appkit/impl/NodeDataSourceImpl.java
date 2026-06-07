@@ -7,7 +7,6 @@ import org.ergoplatform.appkit.BlockchainDataSource;
 import org.ergoplatform.appkit.BlockchainParameters;
 import org.ergoplatform.appkit.ErgoClientException;
 import org.ergoplatform.appkit.InputBox;
-import org.ergoplatform.sdk.Iso;
 import org.ergoplatform.appkit.OutBox;
 import org.ergoplatform.appkit.SignedTransaction;
 import org.ergoplatform.appkit.Transaction;
@@ -174,12 +173,18 @@ public class NodeDataSourceImpl implements BlockchainDataSource {
     @Override
     public String sendTransaction(SignedTransaction tx) {
         ErgoLikeTransaction ergoTx = ((SignedTransactionImpl) tx).getTx();
-        List<ErgoTransactionDataInput> dataInputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionDataInput()).from(ergoTx.dataInputs());
-        List<ErgoTransactionInput> inputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionInput()).from(ergoTx.inputs());
-        List<ErgoTransactionOutput> outputsData =
-            Iso.JListToIndexedSeq(ScalaBridge.isoErgoTransactionOutput()).from(ergoTx.outputs());
+        List<ErgoTransactionDataInput> dataInputsData = new ArrayList<>();
+        for (org.ergoplatform.DataInput di : ScalaBridge.txDataInputsAsJava(ergoTx)) {
+            dataInputsData.add(ScalaBridge.isoErgoTransactionDataInput().from(di));
+        }
+        List<ErgoTransactionInput> inputsData = new ArrayList<>();
+        for (org.ergoplatform.Input in : ScalaBridge.txInputsAsJava(ergoTx)) {
+            inputsData.add(ScalaBridge.isoErgoTransactionInput().from(in));
+        }
+        List<ErgoTransactionOutput> outputsData = new ArrayList<>();
+        for (org.ergoplatform.ErgoBox out : ScalaBridge.txOutputsAsJava(ergoTx)) {
+            outputsData.add(ScalaBridge.isoErgoTransactionOutput().from(out));
+        }
         ErgoTransaction txData = new ErgoTransaction()
             .id(ergoTx.id())
             .dataInputs(dataInputsData)

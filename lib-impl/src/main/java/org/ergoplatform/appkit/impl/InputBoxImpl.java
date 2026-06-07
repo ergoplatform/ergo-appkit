@@ -13,11 +13,12 @@ import java.util.List;
 
 import org.ergoplatform.sdk.ErgoId;
 import org.ergoplatform.sdk.ErgoToken;
-import org.ergoplatform.sdk.Iso;
 import org.ergoplatform.sdk.JavaHelpers;
-import sigmastate.Values;
-import sigmastate.interpreter.ContextExtension;
+import sigma.ast.ErgoTree;
+import sigma.interpreter.ContextExtension;
 import sigma.Box;
+import scala.collection.JavaConverters;
+import scala.Tuple2;
 
 public class InputBoxImpl implements InputBox {
     private final ErgoId _id;
@@ -63,7 +64,14 @@ public class InputBoxImpl implements InputBox {
 
     @Override
     public List<ErgoToken> getTokens() {
-        List<ErgoToken> tokens = Iso.isoTokensListToPairsColl().from(_ergoBox.additionalTokens());
+        List<ErgoToken> tokens = new java.util.ArrayList<>();
+        sigma.Coll<Object> scalaTokens = (sigma.Coll<Object>)(Object) _ergoBox.additionalTokens();
+        for (int i = 0; i < scalaTokens.length(); i++) {
+            scala.Tuple2<Object, Object> t = (scala.Tuple2<Object, Object>) scalaTokens.apply(i);
+            byte[] idBytes = (byte[]) ((sigma.Coll<Object>) t._1()).toArray();
+            long value = (Long) t._2();
+            tokens.add(new ErgoToken(new ErgoId(idBytes).toString(), value));
+        }
         return tokens;
     }
 
@@ -73,7 +81,7 @@ public class InputBoxImpl implements InputBox {
     }
 
     @Override
-    public Values.ErgoTree getErgoTree() {
+    public ErgoTree getErgoTree() {
         return _ergoBox.ergoTree();
     }
 

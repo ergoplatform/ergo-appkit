@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 
-import sigmastate.eval.CBigInt;
+import sigma.data.CBigInt;
 import sigma.Coll;
 import sigma.BigInt;
 

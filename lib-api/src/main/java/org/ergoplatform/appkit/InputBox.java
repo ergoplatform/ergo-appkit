@@ -18,7 +18,7 @@ public interface InputBox extends TransactionBox {
 
     /**
      * Extends the given input with context variables (aka {@link
-     * sigmastate.interpreter.ContextExtension}.
+     * sigma.interpreter.ContextExtension}.
      * Note, this method don't change `this` instance.
      *
      * @param variables a list of variables

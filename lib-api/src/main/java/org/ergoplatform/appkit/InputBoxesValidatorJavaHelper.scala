@@ -3,14 +3,13 @@ package org.ergoplatform.appkit
 import org.ergoplatform.ErgoBoxAssets
 import org.ergoplatform.appkit.InputBoxesSelectionException.{NotEnoughErgsException, NotEnoughTokensException}
 import org.ergoplatform.sdk.ErgoToken
-import org.ergoplatform.sdk.Iso._
-import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.sdk.wallet.AssetUtils
 import org.ergoplatform.wallet.boxes.DefaultBoxSelector.{NotEnoughCoinsForChangeBoxesError, NotEnoughErgsError, NotEnoughTokensError}
 import scorex.util.{ModifierId, bytesToId}
 
 import java.util
 import java.util.{List => JList}
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 
@@ -21,7 +20,7 @@ object InputBoxesValidatorJavaHelper {
 
     override def tokens: Map[ModifierId, Long] = {
       val tokens = mutable.Map[ModifierId, Long]()
-      inputBox.getTokens.convertTo[IndexedSeq[ErgoToken]].foreach { token: ErgoToken =>
+      inputBox.getTokens.asScala.foreach { token: ErgoToken =>
         AssetUtils.mergeAssetsMut(tokens, Map.apply(bytesToId(token.getId.getBytes) -> token.getValue))
       }
       tokens.toMap
@@ -31,9 +30,11 @@ object InputBoxesValidatorJavaHelper {
   def validateBoxes(unspentBoxes: JList[InputBox],
                     amountToSpend: Long,
                     tokensToSpend: JList[ErgoToken]): Unit = {
-    val inputBoxes = unspentBoxes.convertTo[IndexedSeq[InputBox]]
-      .map(InputBoxWrapper.apply)
-    val targetAssets =  isoErgoTokenSeqToLinkedMap.to(tokensToSpend.convertTo[IndexedSeq[ErgoToken]]).toMap
+    val inputBoxes = unspentBoxes.asScala.toIndexedSeq
+      .map(InputBoxWrapper(_))
+    val targetAssets = tokensToSpend.asScala.map { t =>
+      bytesToId(t.getId.getBytes) -> t.getValue
+    }.toMap
     new InputBoxesValidator().select(inputBoxes.toIterator, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
         throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
@@ -47,7 +48,7 @@ object InputBoxesValidatorJavaHelper {
       }
       case Left(err: NotEnoughTokensError) => {
         val tokensHm = err.tokensFound.foldLeft(new util.HashMap[String, java.lang.Long])((hm, elem) => {
-          hm.put(elem._1.base16, elem._2)
+          hm.put(elem._1.toString, elem._2)
           hm
         })
         throw new NotEnoughTokensException(err.message, tokensHm)

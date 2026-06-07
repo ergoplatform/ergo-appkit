@@ -3,7 +3,7 @@ package org.ergoplatform.appkit.scalaapi
 import org.ergoplatform.appkit.{AppkitTestingCommon, BoxAttachment, BoxAttachmentGeneric, ErgoType, ErgoValue, TestingBase}
 import org.ergoplatform.sdk.JavaHelpers
 import sigma.data.{CollType, RType}
-import sigmastate.eval.SigmaDsl
+import sigma.eval.SigmaDsl
 import sigma.Coll
 import sigma.Box
 

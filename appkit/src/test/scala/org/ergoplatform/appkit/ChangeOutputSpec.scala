@@ -2,16 +2,16 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.Parameters.MinFee
 import org.ergoplatform.appkit.testing.AppkitTesting
-import org.ergoplatform.sdk.JavaHelpers.UniversalConverter
 import org.ergoplatform.sdk.{ErgoToken, JavaHelpers}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import sigmastate.crypto.CryptoConstants
-import sigmastate.eval._
+import sigma.crypto.CryptoConstants
+import sigma.data.{CBigInt, CGroupElement}
 import sigma.GroupElement
 
 import java.util.{Arrays, List => JList}
+import scala.collection.JavaConverters._
 
 class ChangeOutputSpec extends AnyPropSpec with Matchers
   with ScalaCheckDrivenPropertyChecks
@@ -20,12 +20,12 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("YesChangeOutput") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
-    val gX:GroupElement = g.exp(x)
-    val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gX.exp(y)
+    val gX:GroupElement = g.exp(CBigInt(x))
+    val gY:GroupElement = g.exp(CBigInt(y))
+    val gXY:GroupElement = gX.exp(CBigInt(y))
 
     ergoClient.execute { ctx: BlockchainContext =>
       val input = ctx.newTxBuilder.outBoxBuilder.registers(
@@ -68,12 +68,12 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("NoChangeOutput") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
-    val gX:GroupElement = g.exp(x)
-    val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gX.exp(y)
+    val gX:GroupElement = g.exp(CBigInt(x))
+    val gY:GroupElement = g.exp(CBigInt(y))
+    val gXY:GroupElement = gX.exp(CBigInt(y))
 
     ergoClient.execute { ctx: BlockchainContext =>
       val input = ctx.newTxBuilder.outBoxBuilder.registers(
@@ -117,12 +117,12 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
 
   property("NoTokenChangeOutput + token burning") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
-    val g: GroupElement = CryptoConstants.dlogGroup.generator
+    val g: GroupElement = CGroupElement(CryptoConstants.dlogGroup.generator)
     val x = BigInt("187235612876647164378132684712638457631278").bigInteger
     val y = BigInt("340956873409567839086738967389673896738906").bigInteger
-    val gX:GroupElement = g.exp(x)
-    val gY:GroupElement = g.exp(y)
-    val gXY:GroupElement = gX.exp(y)
+    val gX:GroupElement = g.exp(CBigInt(x))
+    val gY:GroupElement = g.exp(CBigInt(y))
+    val gXY:GroupElement = gX.exp(CBigInt(y))
 
     ergoClient.execute { ctx: BlockchainContext =>
 
@@ -192,7 +192,7 @@ class ChangeOutputSpec extends AnyPropSpec with Matchers
           ))
           .build()
         val unsigned = txB
-          .boxesToSpend(IndexedSeq(boxWithToken).convertTo[JList[InputBox]])
+          .boxesToSpend(IndexedSeq(boxWithToken).asJava)
           .outputs(out)
           .tokensToBurn(new ErgoToken(tokenId, tokenAmountToBurn))
           .fee(MinFee)

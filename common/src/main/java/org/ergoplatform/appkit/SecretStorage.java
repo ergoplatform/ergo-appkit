@@ -11,7 +11,7 @@ import scala.Option;
 import scala.runtime.BoxedUnit;
 import scala.util.Failure;
 import scala.util.Try;
-import sigmastate.crypto.DLogProtocol;
+import sigma.data.ProveDlog;
 
 import java.io.File;
 
@@ -45,14 +45,14 @@ public class SecretStorage {
     }
 
     public Address getAddressFor(NetworkType networkType) {
-        DLogProtocol.ProveDlog pk = _jsonStorage.secret().get().publicImage();
+        ProveDlog pk = _jsonStorage.secret().get().publicImage();
         P2PKAddress p2pk = JavaHelpers.createP2PKAddress(pk, networkType.networkPrefix);
         return new Address(p2pk);
     }
 
     public void unlock(SecretString encryptionPass) {
         Try<BoxedUnit> resTry = _jsonStorage.unlock(
-            SecretStringConverter.toInterface4JSecretString(encryptionPass));
+            encryptionPass);
         if (resTry.isFailure()) {
             Throwable cause = ((Failure)resTry).exception();
             throw new RuntimeException("Cannot unlock secrete storage.", cause);
@@ -77,10 +77,9 @@ public class SecretStorage {
         SecretString password = mnemonic.getPassword();
 
         JsonSecretStorage jsonStorage = JsonSecretStorage
-            .restore(SecretStringConverter.toInterface4JSecretString(mnemonic.getPhrase()),
-                AppkitHelpers.secretStringToOption(password != null ?
-                    SecretStringConverter.toInterface4JSecretString(password) : null),
-                SecretStringConverter.toInterface4JSecretString(encryptionPassword),
+            .restore(mnemonic.getPhrase(),
+                (password != null && !password.isEmpty()) ? scala.Option.apply(password) : scala.Option.<org.ergoplatform.sdk.SecretString>empty(),
+                encryptionPassword,
                 settings, usePre1627KeyDerivation);
 
         return new SecretStorage(jsonStorage);

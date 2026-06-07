@@ -2,7 +2,7 @@ package org.ergoplatform.appkit
 
 import org.ergoplatform.sdk.SecretString
 import sigma.data.RType
-import sigmastate.eval.SigmaDsl
+import sigma.eval.SigmaDsl
 
 trait AppkitTestingCommon {
   /** The mnemonic used in tests and test vectors. */

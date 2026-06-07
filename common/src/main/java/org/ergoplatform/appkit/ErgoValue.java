@@ -2,16 +2,16 @@ package org.ergoplatform.appkit;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.ergoplatform.ErgoBox;
-import org.ergoplatform.sdk.Iso;
+import sigma.data.Iso;
 import org.ergoplatform.sdk.JavaHelpers;
 import scala.Tuple2;
 import scorex.util.encode.Base16;
-import sigmastate.AvlTreeData;
-import sigmastate.SType;
-import sigmastate.Values;
-import sigmastate.crypto.Platform;
-import sigmastate.serialization.ValueSerializer;
-import sigmastate.serialization.ValueSerializer$;
+import sigma.data.AvlTreeData;
+import sigma.ast.SType;
+
+import sigma.crypto.Platform;
+import sigma.serialization.ValueSerializer;
+import sigma.serialization.ValueSerializer$;
 import sigma.Coll;
 import sigma.AvlTree;
 import sigma.BigInt;
@@ -45,13 +45,13 @@ public class ErgoValue<T> {
     /**
      * Encode this value as Base16 hex string.
      * 1) it transforms this value into {@link Values.ConstantNode} of sigma.
-     * 2) it serializes the constant into byte array using {@link sigmastate.serialization.ConstantSerializer}
+     * 2) it serializes the constant into byte array using {@link sigma.serialization.ConstantSerializer}
      * 3) the bytes are encoded using Base16 encoder into string
      * @return hex string of serialized bytes
      */
     public String toHex() {
-        Values.EvaluatedValue<SType> c = AppkitIso.isoErgoValueToSValue().to(this);
-        byte[] bytes = ValueSerializer$.MODULE$.serialize(c);
+        sigma.ast.EvaluatedValue<SType> c = AppkitIso.isoErgoValueToSValue().to(this);
+        byte[] bytes = ValueSerializer$.MODULE$.serialize((sigma.ast.Value<SType>) c);
         return Base16.encode(bytes);
     }
 
@@ -76,23 +76,23 @@ public class ErgoValue<T> {
     }
 
     static public ErgoValue<Byte> of(byte value) {
-        return new ErgoValue(Iso.jbyteToByte().to(Byte.valueOf(value)), ErgoType.byteType());
+        return new ErgoValue((Object) value, ErgoType.byteType());
     }
 
     static public ErgoValue<Short> of(short value) {
-        return new ErgoValue(Iso.jshortToShort().to(Short.valueOf(value)), ErgoType.shortType());
+        return new ErgoValue((Object) value, ErgoType.shortType());
     }
 
     static public ErgoValue<Integer> of(int value) {
-        return new ErgoValue(Iso.jintToInt().to(value), ErgoType.integerType());
+        return new ErgoValue((Object) value, ErgoType.integerType());
     }
 
     static public ErgoValue<Long> of(long value) {
-        return new ErgoValue(Iso.jlongToLong().to(Long.valueOf(value)), ErgoType.longType());
+        return new ErgoValue((Object) value, ErgoType.longType());
     }
 
     static public ErgoValue<Boolean> of(boolean value) {
-        return new ErgoValue(Iso.jboolToBool().to(Boolean.valueOf(value)), ErgoType.booleanType());
+        return new ErgoValue((Object) value, ErgoType.booleanType());
     }
 
     static public ErgoValue<?> unit() {
@@ -112,7 +112,7 @@ public class ErgoValue<T> {
         return new ErgoValue<>(ge, ErgoType.groupElementType());
     }
 
-    static public ErgoValue<sigma.SigmaProp> of(Values.SigmaBoolean value) {
+    static public ErgoValue<sigma.SigmaProp> of(sigma.data.SigmaBoolean value) {
         return new ErgoValue<>(JavaHelpers.SigmaDsl().SigmaProp(value), ErgoType.sigmaPropType());
     }
 
@@ -191,7 +191,7 @@ public class ErgoValue<T> {
      */
     static public ErgoValue<?> fromHex(String hex) {
         byte[] bytes = JavaHelpers.decodeStringToBytes(hex);
-        Values.EvaluatedValue<SType> c = (Values.EvaluatedValue<SType>)ValueSerializer.deserialize(bytes, 0);
+        sigma.ast.EvaluatedValue<SType> c = (sigma.ast.EvaluatedValue<SType>)ValueSerializer.deserialize(bytes, 0);
         ErgoValue<?> res = AppkitIso.isoErgoValueToSValue().from(c);
         return res;
     }
