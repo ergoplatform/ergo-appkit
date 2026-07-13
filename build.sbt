@@ -1,4 +1,5 @@
 import sbt.Keys.{publishMavenStyle, scalaVersion}
+import xerial.sbt.Sonatype.sonatypeCentralHost
 
 import scala.util.Try
 
@@ -7,6 +8,8 @@ name := "ergo-appkit"
 lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
 lazy val scala213 = "2.13.16"
 lazy val scala212 = "2.12.20"
@@ -112,7 +115,7 @@ publishArtifact in Test := true
 credentials ++= (for {
   username <- Option(System.getenv().get("SONATYPE_USERNAME"))
   password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
-} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
+} yield Credentials("Sonatype Nexus Repository Manager", "central.sonatype.com", username, password)).toSeq
 
 // set bytecode version to 8 to fix NoSuchMethodError for various ByteBuffer methods
 // see https://github.com/eclipse/jetty.project/issues/3244
