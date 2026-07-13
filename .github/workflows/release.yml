@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java and Scala
         uses: olafurpg/setup-scala@v10
@@ -35,6 +37,15 @@ jobs:
         run: ci/import_gpg.sh
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+
+      - name: Verify release version
+        run: |
+          VERSION=$(sbt -error 'print version' | tail -n1)
+          echo "Resolved version: $VERSION"
+          if [[ "$VERSION" == *-SNAPSHOT* ]]; then
+            echo "Refusing to publish a SNAPSHOT version (git tag not resolved). Aborting."
+            exit 1
+          fi
 
       - name: Publish release ${{ github.ref }}
         run: sbt +publishSigned sonatypeBundleRelease

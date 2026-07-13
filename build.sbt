@@ -78,8 +78,6 @@ version in ThisBuild := {
   }
 }
 
-git.gitUncommittedChanges in ThisBuild := true
-
 val mockitoScalaVerstion = "1.11.4"
 
 lazy val testingDependencies = Seq(
@@ -251,6 +249,7 @@ lazy val root = (project in file("."))
     .settings(commonSettings ++ testSettings, rootSettings)
     .settings(publish / aggregate := false)
     .settings(publishLocal / aggregate := false)
+    .settings(version := (ThisBuild / version).value)
 
 
 // PGP key for signing a release build published to sonatype
