@@ -48,7 +48,7 @@ jobs:
           fi
 
       - name: Publish release ${{ github.ref }}
-        run: sbt +publishSigned sonatypeBundleRelease
+        run: sbt +publishSigned sonaRelease
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

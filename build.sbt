@@ -1,5 +1,4 @@
 import sbt.Keys.{publishMavenStyle, scalaVersion}
-import xerial.sbt.Sonatype.sonatypeCentralHost
 
 import scala.util.Try
 
@@ -8,8 +7,6 @@ name := "ergo-appkit"
 lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
-
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 
 lazy val scala213 = "2.13.16"
 lazy val scala212 = "2.12.20"
@@ -43,7 +40,12 @@ lazy val commonSettings = Seq(
   publishArtifact in (Compile, packageSrc) := true,
   publishArtifact in (Compile, packageDoc) := true,
   publishMavenStyle := true,
-  publishTo := sonatypePublishToBundle.value,
+  pomIncludeRepository := { _ => false },
+  publishTo := {
+    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+    else localStaging.value
+  },
   scmInfo := Some(
     ScmInfo(url("https://github.com/ergoplatform/ergo-appkit"), "scm:git@github.com:ergoplatform/ergo-appkit.git")
   ),
@@ -112,10 +114,7 @@ lazy val allResolvers = Seq(
 publishArtifact in Compile := true
 publishArtifact in Test := true
 
-credentials ++= (for {
-  username <- Option(System.getenv().get("SONATYPE_USERNAME"))
-  password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
-} yield Credentials("Sonatype Nexus Repository Manager", "central.sonatype.com", username, password)).toSeq
+// sbt 1.11+ reads SONATYPE_USERNAME / SONATYPE_PASSWORD for central.sonatype.com automatically.
 
 // set bytecode version to 8 to fix NoSuchMethodError for various ByteBuffer methods
 // see https://github.com/eclipse/jetty.project/issues/3244
