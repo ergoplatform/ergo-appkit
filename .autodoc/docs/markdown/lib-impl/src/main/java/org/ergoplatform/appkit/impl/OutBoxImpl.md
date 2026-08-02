@@ -1,0 +1,34 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-impl/src/main/java/org/ergoplatform/appkit/impl/OutBoxImpl.scala)
+
+The `OutBoxImpl` class is a part of the `ergo-appkit` project and is used to represent an output box in the Ergo blockchain. An output box is a data structure that contains a certain amount of value, tokens, and registers, and is created by a transaction. The purpose of this class is to provide methods to access the properties of an output box.
+
+The class implements the `OutBox` interface, which defines the methods that can be used to access the properties of an output box. The `OutBoxImpl` class provides implementations for all the methods defined in the `OutBox` interface.
+
+The `getValue` method returns the value of the output box, which is the amount of Ergs (the native cryptocurrency of the Ergo blockchain) contained in the box. The `getCreationHeight` method returns the height of the block in which the output box was created. The `getTokens` method returns a list of `ErgoToken` objects, which represent the tokens contained in the box. The `getRegisters` method returns a list of `ErgoValue` objects, which represent the values stored in the registers of the box. The `getBytesWithNoRef` method returns the serialized bytes of the box without the reference to the transaction that created it. The `getErgoTree` method returns the ErgoTree of the box, which is a script that defines the spending conditions for the box.
+
+The `getAttachment` method returns the `BoxAttachment` stored in the box, if any. A `BoxAttachment` is an arbitrary piece of data that can be attached to a box and can be used to store additional information about the box.
+
+The `getErgoBoxCandidate` method is a package-private method that returns the `ErgoBoxCandidate` object that was used to create the output box.
+
+The `convertToInputWith` method is used to convert the output box to an input box, which can be used as an input to a new transaction. The method takes two parameters: the transaction ID and the index of the output box in the transaction. The method creates a new `InputBoxImpl` object using the `ErgoBoxCandidate` object and returns it.
+
+Overall, the `OutBoxImpl` class provides a convenient way to access the properties of an output box in the Ergo blockchain and can be used in the larger `ergo-appkit` project to build applications that interact with the Ergo blockchain. Here is an example of how to use the `OutBoxImpl` class to get the value of an output box:
+
+```scala
+import org.ergoplatform.appkit.impl.OutBoxImpl
+
+val outBox = new OutBoxImpl(ergoBoxCandidate)
+val value = outBox.getValue
+```
+## Questions: 
+ 1. What is the purpose of the `OutBoxImpl` class?
+    
+    Answer: The `OutBoxImpl` class is an implementation of the `OutBox` interface, which represents an output box of a transaction in the Ergo blockchain.
+
+2. What is the `BoxAttachment` and how is it related to the `OutBoxImpl` class?
+
+    Answer: The `BoxAttachment` is an object that can be stored in an output box of a transaction. The `OutBoxImpl` class has a method `getAttachment` that returns the `BoxAttachment` stored in the box, or null if there is none.
+
+3. What is the purpose of the `convertToInputWith` method in the `OutBoxImpl` class?
+
+    Answer: The `convertToInputWith` method takes a transaction ID and a box index as arguments, and returns an `InputBox` object that represents the same box as an input box in the specified transaction. This method is useful for spending an output box in a subsequent transaction.

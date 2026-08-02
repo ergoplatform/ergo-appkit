@@ -1,0 +1,28 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/restapi/client/ProofOfUpcomingTransactions.java)
+
+This code defines a Java class called `ProofOfUpcomingTransactions` that represents a proof that a block corresponding to a given header without Proof-of-Work contains some transactions. The class has two properties: `msgPreimage` and `txProofs`. 
+
+The `msgPreimage` property is a string that represents a base16-encoded serialized header without Proof-of-Work. The `txProofs` property is a list of `MerkleProof` objects that represent Merkle proofs of transactions included in the block (not necessarily all the block transactions). 
+
+The class provides getter and setter methods for both properties. It also overrides the `equals`, `hashCode`, and `toString` methods inherited from the `Object` class. 
+
+This class is part of the Ergo Node API and is used to provide proof that a block contains transactions without requiring the full Proof-of-Work. It can be used in conjunction with other classes in the API to verify the validity of a block and its transactions. 
+
+Example usage:
+
+```java
+ProofOfUpcomingTransactions proof = new ProofOfUpcomingTransactions();
+proof.setMsgPreimage("0112e03c6d39d32509855be7cee9b62ff921f7a0cf6883e232474bd5b54d816dd056f846980d34c3b23098bdcf41222f8cdee5219224aa67750055926c3a2310a483accc4f9153e7a760615ea972ac67911cff111f8c17f563d6147205f58f85133ae695d1d4157e4aecdbbb29952cfa42b75129db55bddfce3bc53b8fd5b5465f10d8be8ddda62ed3b86afb0497ff2d381ed884bdae5287d20667def224a28d2b6e3ebfc78709780702c70bd8df0e000000");
+MerkleProof txProof = new MerkleProof();
+txProof.setProof("proof");
+proof.addTxProofsItem(txProof);
+```
+## Questions: 
+ 1. What is the purpose of this class and how does it relate to the Ergo Node API?
+- This class represents a proof that a block corresponding to a given header without PoW contains some transactions. It is part of the Ergo Node API and its purpose is to provide a way to verify the validity of upcoming transactions.
+
+2. What is the format of the msgPreimage field and why is it important?
+- The msgPreimage field is a Base16-encoded serialized header without Proof-of-Work. It is important because it allows for the verification of the header without the need for PoW, which can be computationally expensive.
+
+3. What is the purpose of the txProofs field and what kind of data does it contain?
+- The txProofs field contains Merkle proofs of transactions included into blocks (not necessarily all the block transactions). Its purpose is to provide a way to verify the validity of the transactions included in the block.

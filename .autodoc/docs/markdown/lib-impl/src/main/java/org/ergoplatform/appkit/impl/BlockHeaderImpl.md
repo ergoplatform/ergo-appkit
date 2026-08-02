@@ -1,0 +1,22 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-impl/src/main/java/org/ergoplatform/appkit/impl/BlockHeaderImpl.java)
+
+The `BlockHeaderImpl` class is a concrete implementation of the `BlockHeader` interface in the `ergoplatform.appkit` package. It extends the `PreHeaderImpl` class and provides methods to access various properties of a block header in the Ergo blockchain. 
+
+The `BlockHeaderImpl` class has two instance variables: `sigmaHeader` of type `Header` and `header` of type `org.ergoplatform.restapi.client.BlockHeader`. The `sigmaHeader` variable is an instance of the `Header` class from the `special.sigma` package, which represents the header of a block in the Ergo blockchain. The `header` variable is an instance of the `org.ergoplatform.restapi.client.BlockHeader` class, which is a REST API representation of a block header.
+
+The `BlockHeaderImpl` class provides a constructor that takes a `Header` object and a `BlockHeader` object as arguments. The constructor calls the constructor of the `PreHeaderImpl` class with the `Header` object as an argument and initializes the `sigmaHeader` and `header` instance variables.
+
+The `BlockHeaderImpl` class also provides a static method `createFromRestApi` that takes a `BlockHeader` object as an argument and returns a new instance of the `BlockHeaderImpl` class. This method converts the `BlockHeader` object to a `Header` object using the `ScalaBridge.isoBlockHeader()` method and then calls the constructor of the `BlockHeaderImpl` class with the `Header` and `BlockHeader` objects as arguments.
+
+The `BlockHeaderImpl` class implements the methods of the `BlockHeader` interface. These methods provide access to various properties of a block header, such as the ID, state root, AD proofs root, transactions root, extension hash, PoW solutions public key, PoW solutions W, PoW solutions D, and PoW solutions nonce. These properties are obtained from the `sigmaHeader` and `header` instance variables.
+
+This class can be used in the larger project to retrieve information about a block header in the Ergo blockchain. For example, a developer can use the `createFromRestApi` method to create a `BlockHeaderImpl` object from a `BlockHeader` object obtained from the Ergo REST API. The developer can then use the methods of the `BlockHeader` interface to access various properties of the block header.
+## Questions: 
+ 1. What is the purpose of the `BlockHeaderImpl` class?
+- The `BlockHeaderImpl` class is an implementation of the `BlockHeader` interface and provides methods for accessing various properties of a block header.
+
+2. What is the relationship between `sigmaHeader` and `header`?
+- `sigmaHeader` is an instance of the `Header` class from the `special.sigma` package, while `header` is an instance of the `org.ergoplatform.restapi.client.BlockHeader` class. The constructor of `BlockHeaderImpl` takes both of these objects as arguments and assigns them to instance variables.
+
+3. What is the purpose of the `createFromRestApi` method?
+- The `createFromRestApi` method is a static factory method that creates a new instance of `BlockHeaderImpl` from an instance of `org.ergoplatform.restapi.client.BlockHeader`. It does this by converting the `BlockHeader` object to a `Header` object using a ScalaBridge and then passing both objects to the `BlockHeaderImpl` constructor.
