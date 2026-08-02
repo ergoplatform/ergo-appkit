@@ -23,7 +23,12 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder preHeader(PreHeader ph);
 
     /**
-     * Adds input boxes to an already specified list of inputs or, if no input boxes defined yet,
+     * @see #addInputs(List)
+     */
+    UnsignedTransactionBuilder addInputs(InputBox... boxes);
+
+    /**
+     * Adds input boxes to an already specified list of inputs or, if no input boxes are defined yet,
      * as the boxes to spend. The order is preserved.
      * The boxes that will be spent by the transaction when it will be included in a block.
      *
@@ -33,17 +38,28 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
-    UnsignedTransactionBuilder addInputs(InputBox... boxes);
+    UnsignedTransactionBuilder addInputs(List<InputBox> boxes);
 
     /**
-     * @deprecated use {@link #addInputs(InputBox...)}
+     * @deprecated Use {@link #addInputs(List)} instead.
      */
     @Deprecated
     UnsignedTransactionBuilder boxesToSpend(List<InputBox> boxes);
 
     /**
+     * @see #addDataInputs(List)
+     */
+    UnsignedTransactionBuilder addDataInputs(InputBox... boxes);
+
+    /**
+     * @deprecated Use {@link #addDataInputs(List)} instead.
+     */
+    @Deprecated
+    UnsignedTransactionBuilder withDataInputs(List<InputBox> boxes);
+
+    /**
      * Adds input boxes to an already specified list of data inputs or, if no data input boxes
-     * defined yet, set the boxes as the data input boxes to be used. The order is preserved.
+     * are defined yet, set the boxes as the data input boxes to be used. The order is preserved.
      *
      * @param boxes list of boxes to be used as data-inputs by the transaction. The boxes can either be
      *              {@link BlockchainContext#getBoxesById(String...) obtained} from context of created from
@@ -51,13 +67,7 @@ public interface UnsignedTransactionBuilder {
      *              as {@link OutBox} and then {@link OutBox#convertToInputWith(String, short) converted} to
      *              {@link InputBox}.
      */
-    UnsignedTransactionBuilder addDataInputs(InputBox... boxes);
-
-    /**
-     * @deprecated use {@link #addDataInputs(InputBox...)}
-     */
-    @Deprecated
-    UnsignedTransactionBuilder withDataInputs(List<InputBox> boxes);
+    UnsignedTransactionBuilder addDataInputs(List<InputBox> boxes);
 
     /**
      * @deprecated use {@link #addOutputs(OutBox...)}
@@ -66,7 +76,12 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder outputs(OutBox... outputs);
 
     /**
-     * Adds output boxes to an already specified list of outputs or, if no output boxes defined yet,
+     * @see #addOutputs(List)
+     */
+    UnsignedTransactionBuilder addOutputs(OutBox... outBoxes);
+
+    /**
+     * Adds output boxes to an already specified list of outputs or, if no output boxes are defined yet,
      * as the boxes to be output. The order is preserved.
      * After this transaction is {@link UnsignedTransactionBuilder#build() built},
      * {@link ErgoProver#sign(UnsignedTransaction)} signed,
@@ -75,7 +90,7 @@ public interface UnsignedTransactionBuilder {
      *
      * @param outBoxes output boxes created by the transaction
      */
-    UnsignedTransactionBuilder addOutputs(OutBox... outBoxes);
+    UnsignedTransactionBuilder addOutputs(List<OutBox> outBoxes);
 
     /**
      * Adds transaction fee output.
@@ -85,10 +100,15 @@ public interface UnsignedTransactionBuilder {
     UnsignedTransactionBuilder fee(long feeAmount);
 
     /**
+     * @see #tokensToBurn(List)
+     */
+    UnsignedTransactionBuilder tokensToBurn(ErgoToken... tokens);
+
+    /**
      * Configures amounts for tokens to be burnt.
      * Each Ergo box can store zero or more tokens (aka assets).
      * In contrast to strict requirement on ERG balance between transaction inputs and outputs,
-     * the amounts of output tokens can be less then the amounts of input tokens.
+     * the amounts of output tokens can be less than the amounts of input tokens.
      * This is interpreted as token burning i.e. reducing the total amount of tokens in
      * circulation in the blockchain.
      * Note, once issued/burnt, the amount of tokens in circulation cannot be increased.
@@ -96,7 +116,7 @@ public interface UnsignedTransactionBuilder {
      * @param tokens one or more tokens to be burnt as part of the transaction.
      * @see ErgoToken
      */
-    UnsignedTransactionBuilder tokensToBurn(ErgoToken... tokens);
+    UnsignedTransactionBuilder tokensToBurn(List<ErgoToken> tokens);
 
     /**
      * Adds change output to the specified address if needed.

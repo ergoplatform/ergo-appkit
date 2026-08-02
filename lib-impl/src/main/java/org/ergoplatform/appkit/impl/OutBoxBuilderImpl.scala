@@ -25,10 +25,19 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   }
 
   override def tokens(tokens: ErgoToken*): OutBoxBuilderImpl = {
-    require(tokens.nonEmpty, "At least one token should be specified")
     val maxTokens = SigmaConstants.MaxTokens.value
     require(tokens.size <= maxTokens, SigmaConstants.MaxTokens.description + s": $maxTokens")
     _tokens ++= tokens
+    this
+  }
+
+  override def tokens(tokens: java.util.List[ErgoToken]): OutBoxBuilderImpl = {
+    val maxTokens = SigmaConstants.MaxTokens.value
+    require(tokens.size <= maxTokens, SigmaConstants.MaxTokens.description + s": $maxTokens")
+    val iterator = tokens.iterator()
+    while (iterator.hasNext) {
+      _tokens += iterator.next
+    }
     this
   }
 
@@ -67,6 +76,16 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
       "At least one register should be specified": Any)
     _registers.clear()
     _registers ++= registers
+    this
+  }
+
+  override def registers(registers: java.util.List[ErgoValue[_]]): OutBoxBuilderImpl = {
+    InternalUtil.checkArgument(!registers.isEmpty,
+      "At least one register should be specified": Any)
+    _registers.clear()
+    val iterator = registers.iterator()
+    while (iterator.hasNext)
+      _registers += iterator.next()
     this
   }
 
