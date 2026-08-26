@@ -543,6 +543,40 @@ class Sigma60FeaturesSpec extends AnyPropSpec with Matchers
     }
   }
 
+  property("Global.some and Global.none construct Options under v6") {
+    val ergoClient = createV6MockedErgoClient()
+    ergoClient.execute { ctx: BlockchainContext =>
+      val txB = ctx.newTxBuilder()
+      val contract = ctx.compileContract(ConstantsBuilder.empty(),
+        """{
+          |  val x: Option[Int] = some[Int](42)
+          |  val y: Option[Int] = none[Int]
+          |  sigmaProp(x.isDefined && x.get == 42 && !y.isDefined)
+          |}""".stripMargin)
+
+      val input = txB.outBoxBuilder()
+        .value(30000000)
+        .contract(contract)
+        .build()
+        .convertToInputWith(mockTxId, 0)
+
+      val output = txB.outBoxBuilder()
+        .value(29000000)
+        .contract(truePropContract(ctx))
+        .build()
+
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output)
+        .fee(1000000)
+        .sendChangeTo(address.getErgoAddress)
+        .build()
+
+      val prover = ctx.newProverBuilder().build()
+      val signed = prover.sign(unsigned)
+      signed should not be null
+    }
+  }
+
   property("Global.decodeNBits and encodeNBits roundtrip") {
     val ergoClient = createV6MockedErgoClient()
     ergoClient.execute { ctx: BlockchainContext =>

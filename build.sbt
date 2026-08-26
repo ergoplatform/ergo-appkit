@@ -8,7 +8,7 @@ lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
 lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-lazy val scala213 = "2.13.16"
+lazy val scala213 = "2.13.18"
 lazy val scala212 = "2.12.20"
 lazy val scala211 = "2.11.12"
 
@@ -46,6 +46,14 @@ lazy val commonSettings = Seq(
   ),
   libraryDependencies ++= Seq(
     "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
+  ),
+  // sigma-state 6.0.6 depends on circe 0.14.x while ergo-wallet 6.0.0 depends on circe 0.13.0;
+  // circe 0.14.x is binary compatible with 0.13.x, so allow the newer version to be selected
+  libraryDependencySchemes ++= Seq(
+    "io.circe" %% "circe-core" % VersionScheme.Always,
+    "io.circe" %% "circe-generic" % VersionScheme.Always,
+    "io.circe" %% "circe-parser" % VersionScheme.Always,
+    "io.circe" %% "circe-jawn" % VersionScheme.Always
   )
 )
 
@@ -137,7 +145,7 @@ assemblyMergeStrategy in assembly := {
 
 lazy val allConfigDependency = "compile->compile;test->test"
 
-val sigmaStateVersion = "6.0.2"
+val sigmaStateVersion = "6.0.6"
 val ergoWalletVersion = "6.0.0"
 lazy val sigmaState = ("org.scorexfoundation" %% "sigma-state" % sigmaStateVersion).force()
     .exclude("ch.qos.logback", "logback-classic")
