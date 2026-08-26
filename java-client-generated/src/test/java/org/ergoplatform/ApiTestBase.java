@@ -1,6 +1,23 @@
 package org.ergoplatform;
 
+import org.junit.Assume;
+import org.junit.Before;
+
 public class ApiTestBase {
+
+    /**
+     * These tests run against the live Ergo network (public nodes and explorer),
+     * so they are inherently dependent on network availability and current
+     * blockchain state. They are skipped by default and can be enabled with
+     * {@code sbt -Dergo.test.integration=true test}.
+     */
+    @Before
+    public void assumeIntegrationTestsEnabled() {
+        Assume.assumeTrue(
+            "Skipping integration tests against the live network, " +
+            "enable with -Dergo.test.integration=true",
+            Boolean.getBoolean("ergo.test.integration"));
+    }
 
     public String address = "9hHDQb26AjnJUXxcqriqY1mnhpLuUeC81C4pggtK7tupr92Ea1K";
 

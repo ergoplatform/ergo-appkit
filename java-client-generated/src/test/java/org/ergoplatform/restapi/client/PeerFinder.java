@@ -3,7 +3,7 @@ package org.ergoplatform.restapi.client;
 import org.ergoplatform.ApiTestBase;
 
 public class PeerFinder extends ApiTestBase {
-    public final String appVersion = "5.0.";
+    public final String appVersion = "6.0.";
 
     String[] knownPeers = {
         "159.65.11.55",

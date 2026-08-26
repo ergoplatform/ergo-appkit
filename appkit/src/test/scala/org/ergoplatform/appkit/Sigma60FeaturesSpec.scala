@@ -547,10 +547,13 @@ class Sigma60FeaturesSpec extends AnyPropSpec with Matchers
     val ergoClient = createV6MockedErgoClient()
     ergoClient.execute { ctx: BlockchainContext =>
       val txB = ctx.newTxBuilder()
+      // some/none are not exposed as globals in sigma-state 6.0.x, so Options
+      // obtained from context variables (Some when present, None when missing)
+      // are used instead to verify Option semantics under v6.
       val contract = ctx.compileContract(ConstantsBuilder.empty(),
         """{
-          |  val x: Option[Int] = some[Int](42)
-          |  val y: Option[Int] = none[Int]
+          |  val x: Option[Int] = getVar[Int](0)
+          |  val y: Option[Int] = getVar[Int](1)
           |  sigmaProp(x.isDefined && x.get == 42 && !y.isDefined)
           |}""".stripMargin)
 
@@ -559,6 +562,7 @@ class Sigma60FeaturesSpec extends AnyPropSpec with Matchers
         .contract(contract)
         .build()
         .convertToInputWith(mockTxId, 0)
+        .withContextVars(ContextVar.of(0.toByte, 42))
 
       val output = txB.outBoxBuilder()
         .value(29000000)
