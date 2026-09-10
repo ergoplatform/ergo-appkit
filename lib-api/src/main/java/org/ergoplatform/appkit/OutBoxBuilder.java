@@ -3,6 +3,8 @@ package org.ergoplatform.appkit;
 import sigma.data.SigmaConstants;
 import org.ergoplatform.sdk.ErgoToken;
 
+import java.util.List;
+
 /**
  * This interface is used to build a new output box, which can be included
  * in the new unsigned transaction. When transaction is signed, sent to the
@@ -32,13 +34,22 @@ public interface OutBoxBuilder {
      * Configures amounts for one or more tokens (up to {@link SigmaConstants.MaxTokens}).
      * Each Ergo box can store zero or more tokens (aka assets).
      *
-     * @param tokens one or more tokens to be added to the constructed output box.
+     * @param tokens tokens to be added to the constructed output box.
      * @see ErgoToken
      */
     OutBoxBuilder tokens(ErgoToken... tokens);
 
     /**
-     * Mints new token according to https://github.com/ergoplatform/eips/blob/master/eip-0004.md
+     * Configures amounts for tokens (up to {@link SigmaConstants.MaxTokens}).
+     * Each Ergo box can store zero or more tokens (aka assets).
+     *
+     * @param tokens tokens to be added to the constructed output box.
+     * @see ErgoToken
+     */
+    OutBoxBuilder tokens(List<ErgoToken> tokens);
+
+    /**
+     * Mints new token according to <a href="https://github.com/ergoplatform/eips/blob/master/eip-0004.md">EIP-0004</a>
      *
      * @param token token to mint
      * @see Eip4Token and Eip4TokenBuilder
@@ -59,6 +70,19 @@ public interface OutBoxBuilder {
     OutBoxBuilder registers(ErgoValue<?>... registers);
 
     /**
+     * Configures one or more optional registers of the output box.
+     * Each box have 4 mandatory registers holding value of NanoErgs, guarding script,
+     * tokens, creation info.
+     * Optional (aka non-mandatory) registers numbered from index 4 up to 9.
+     *
+     * @param registers list of optional register values,
+     *                  where registers[0] corresponds to R4, registers[1] - R5, etc.
+     * @see ErgoValue
+     * @see org.ergoplatform.ErgoBox.NonMandatoryRegisterId
+     */
+    OutBoxBuilder registers(List<ErgoValue<?>> registers);
+
+    /**
      * Configure the height when the transaction containing the box was created.
      * This height, when explicitly specified, should not exceed height of the block,
      * containing the transaction with this output box.
@@ -71,7 +95,7 @@ public interface OutBoxBuilder {
     /**
      * Creates {@link OutBox} instance using specified parameters.
      *
-     * @return output box which can be {@link UnsignedTransactionBuilder#outputs(OutBox...) added}
+     * @return output box which can be {@link UnsignedTransactionBuilder#addOutputs(List) added}
      * to {@link UnsignedTransaction}
      * @see UnsignedTransaction
      */
