@@ -14,9 +14,11 @@ import org.ergoplatform.sdk.ErgoToken;
 public interface OutBoxBuilder {
     /**
      * Configure the Erg amount of the output box.
-     * Each transaction is required to
+     * The value must be positive: a box carrying zero or negative ERG can
+     * never be accepted by a node, since every box must cover at least the
+     * minimum value per byte of its serialized size.
      *
-     * @param value amount in NanoErg
+     * @param value amount in NanoErg, must be positive
      */
     OutBoxBuilder value(long value);
 
