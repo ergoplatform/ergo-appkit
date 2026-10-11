@@ -36,10 +36,46 @@ public class Eip4Token extends ErgoToken {
                      @Nonnull ErgoValue<Coll<Object>> r5, @Nonnull ErgoValue<Coll<Object>> r6,
                      @Nullable ErgoValue<?> r7, @Nullable ErgoValue<?> r8, @Nullable ErgoValue<?> r9) {
         this(id, amount,
-            new String(JavaHelpers.collToByteArray(r4.getValue()), StandardCharsets.UTF_8),
-            new String(JavaHelpers.collToByteArray(r5.getValue()), StandardCharsets.UTF_8),
-            Integer.parseInt(new String(JavaHelpers.collToByteArray(r6.getValue()), StandardCharsets.UTF_8)),
+            new String(decodeCollByteRegister(r4, "R4"), StandardCharsets.UTF_8),
+            new String(decodeCollByteRegister(r5, "R5"), StandardCharsets.UTF_8),
+            parseDecimalsRegister(r6),
             r7, r8, r9);
+    }
+
+    /**
+     * Registers of a token minting box are untrusted chain data: R4 to R6 must hold a
+     * Coll[Byte] value, but a box can contain any register values. Checks the register
+     * content before converting it, so malformed registers are rejected with an
+     * IllegalArgumentException naming the register instead of a ClassCastException.
+     *
+     * @return byte content of the register
+     */
+    private static byte[] decodeCollByteRegister(@Nonnull ErgoValue<?> register, String registerName) {
+        if (register.getValue() instanceof Coll) {
+            Coll<?> coll = (Coll<?>) register.getValue();
+            // an empty collection holds no bytes to misinterpret, whatever its element type
+            if (coll.length() == 0 || coll.tItem() == ErgoType.byteType().getRType()) {
+                return JavaHelpers.collToByteArray((Coll<Object>) register.getValue());
+            }
+        }
+        throw new IllegalArgumentException(
+            "EIP-4 register " + registerName + " must be of type Coll[Byte], actual type: " +
+                register.getType());
+    }
+
+    /**
+     * @return decimals value read from register R6, which must hold the decimals as a
+     * Coll[Byte] encoded number string according to EIP-4
+     */
+    private static int parseDecimalsRegister(@Nonnull ErgoValue<Coll<Object>> r6) {
+        String decimalsString = new String(decodeCollByteRegister(r6, "R6"), StandardCharsets.UTF_8);
+        try {
+            return Integer.parseInt(decimalsString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                "EIP-4 register R6 must contain the token decimals as a number string, actual: \"" +
+                    decimalsString + "\"", e);
+        }
     }
 
     /**
