@@ -669,4 +669,38 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
     }
   }
 
+  property("OutBoxBuilder.tokens accepts an empty token collection") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      // The token list passed to a builder is often computed and can turn out
+      // empty; calling tokens() with no tokens must not throw (see #245).
+      val noTokens = ctx.newTxBuilder.outBoxBuilder()
+        .value(15000000L)
+        .contract(truePropContract(ctx))
+        .tokens()
+        .build()
+      noTokens.getTokens.size() shouldBe 0
+
+      val emptySeq: Seq[ErgoToken] = Seq.empty
+      val fromEmptySeq = ctx.newTxBuilder.outBoxBuilder()
+        .value(15000000L)
+        .contract(truePropContract(ctx))
+        .tokens(emptySeq: _*)
+        .build()
+      fromEmptySeq.getTokens.size() shouldBe 0
+
+      // An empty call must not disturb tokens added by another call.
+      val token = new ErgoToken(mockTxId, 5L)
+      val mixed = ctx.newTxBuilder.outBoxBuilder()
+        .value(15000000L)
+        .contract(truePropContract(ctx))
+        .tokens()
+        .tokens(token)
+        .build()
+      mixed.getTokens.size() shouldBe 1
+      mixed.getTokens.get(0).getId.toString shouldBe token.getId.toString
+      mixed.getTokens.get(0).getValue shouldBe token.getValue
+    }
+  }
+
 }
