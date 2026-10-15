@@ -3,7 +3,11 @@ package org.ergoplatform.appkit;
 import org.ergoplatform.sdk.ErgoToken;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +22,9 @@ import javax.annotation.Nonnull;
  * Optionally, you can also use boxes available on mempool to be spent, allowing to make chained tx.
  */
 public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApiWithCheckerLoader {
-    private final List<String> unconfirmedSpentBoxesIds = new ArrayList<>();
+    private static final Logger logger = Logger.getLogger(ExplorerAndPoolUnspentBoxesLoader.class.getName());
+
+    private final Set<String> unconfirmedSpentBoxesIds = new HashSet<>();
     private boolean unconfirmedBoxesFetched;
     private boolean allowChainedTx = false;
 
@@ -58,14 +64,17 @@ public class ExplorerAndPoolUnspentBoxesLoader extends BoxOperations.ExplorerApi
 
             // fetch unconfirmed transactions for this address and add its boxes as last page
             try {
-                inputBoxes.addAll(ctx.getDataSource().getUnconfirmedUnspentBoxesFor(sender, 0, 50));
+                List<InputBox> unconfirmedBoxes = ctx.getDataSource().getUnconfirmedUnspentBoxesFor(sender, 0, 50);
+                // Defensive copy: super.loadBoxesPage() may return an immutable list,
+                // and addAll() on an unmodifiable list throws UnsupportedOperationException.
+                List<InputBox> mutableResult = new ArrayList<>(inputBoxes);
+                mutableResult.addAll(unconfirmedBoxes);
+                return mutableResult;
             } catch (Throwable t) {
-                // something did not work - bad luck but just proceed without chained tx
+                logger.log(Level.WARNING, "Failed to fetch unconfirmed boxes for chained tx", t);
             }
         }
 
         return inputBoxes;
     }
 }
-
-
