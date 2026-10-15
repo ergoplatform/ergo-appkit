@@ -1,0 +1,29 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/appkit/src/main/scala/org/ergoplatform/appkit/cli/Utils.scala)
+
+# `Utils` Object in `ergo-appkit`
+
+The `Utils` object in the `ergo-appkit` project is a collection of utility methods that can be used throughout the project. The purpose of this object is to provide a set of common functions that can be used by other parts of the project to simplify code and reduce duplication.
+
+The `loggedStep` method is one of the utility methods provided by the `Utils` object. This method takes three parameters: a message to print to the console, a `Console` object to use for printing, and a block of code to execute. The method prints the message to the console, executes the block of code, and then prints the status of the step (either "Ok" or "Error") to the console.
+
+Here is an example of how the `loggedStep` method might be used in the larger project:
+
+```scala
+import org.ergoplatform.appkit.cli.Utils
+
+val console = new Console // create a new Console object
+val result = Utils.loggedStep("Performing step 1", console) {
+  // code to execute for step 1
+}
+```
+
+In this example, the `loggedStep` method is used to execute a block of code and print a message to the console. The result of the block of code is stored in the `result` variable.
+
+Overall, the `Utils` object provides a set of common utility methods that can be used throughout the `ergo-appkit` project to simplify code and reduce duplication. The `loggedStep` method is just one example of the many useful functions provided by this object.
+## Questions: 
+ 1. What is the purpose of the `Utils` object?
+   - The `Utils` object contains utility methods.
+2. What does the `loggedStep` method do?
+   - The `loggedStep` method prints a step description to the console, performs the step, and then finishes the description with the step status.
+3. What is the input and output of the `loggedStep` method?
+   - The input of the `loggedStep` method is a message string and a console object, and the output is the result of the step.

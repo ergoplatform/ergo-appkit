@@ -1,0 +1,18 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/common/src/main/java/org/ergoplatform/appkit/scalaapi/Iso.scala)
+
+The `Iso` class and its related classes define an isomorphism between Scala and Java types. An isomorphism is a bi-directional mapping between two types that preserves their structure. The `Iso` class is abstract and has two type parameters, `S` and `J`, which represent the Scala and Java types, respectively. The class has four methods: `scalaType`, `javaType`, `toJava`, and `toScala`. The `scalaType` and `javaType` methods return the type descriptors for the corresponding types. The `toJava` method converts a value of type `S` to a value of type `J`, and the `toScala` method converts a value of type `J` to a value of type `S`.
+
+The `Iso` class has several subclasses that implement specific isomorphisms. The `IdentityIso` class is a subclass that implements an isomorphism between a type and itself. The `PrimIso` class is a subclass that implements an isomorphism between a primitive Scala type and its corresponding Java wrapper type. The `PairIso` class is a subclass that implements an isomorphism between a Scala pair type and a Java pair type. The `CollIso` class is a subclass that implements an isomorphism between a Scala collection type and a Java collection type.
+
+The `Iso` object contains several implicit isomorphisms between Scala and Java types. These isomorphisms are used to convert values between the two languages. For example, the `isoByte` isomorphism converts a Scala `Byte` value to a Java `Byte` value, and the `isoColl` isomorphism converts a Scala collection of type `Coll[S]` to a Java collection of type `Coll[J]`.
+
+The `Iso` class and its related classes are used throughout the `ergo-appkit` project to convert values between Scala and Java types. This is particularly useful when working with the Ergo blockchain, which uses a Java-based scripting language called Sigma. The `Iso` class allows developers to work with Scala types in their code and then convert them to Java types when interacting with the Ergo blockchain.
+## Questions: 
+ 1. What is the purpose of the `Iso` class and its subclasses?
+- The `Iso` class and its subclasses define isomorphisms between Scala and Java types, allowing for conversion between the two.
+
+2. What is the purpose of the `IsoLowPriority` class and its implicit values?
+- The `IsoLowPriority` class and its implicit values provide fallback isomorphisms for types that do not have a more specific isomorphism defined.
+
+3. What is the purpose of the `CollIso` class and its `toJava` and `toScala` methods?
+- The `CollIso` class defines an isomorphism between `Coll` collections of Scala and Java types, and its `toJava` and `toScala` methods allow for conversion between the two.

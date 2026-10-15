@@ -1,0 +1,16 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/InputBox.java)
+
+The `InputBox` interface is part of the `ergo-appkit` project and provides an interface for UTXO boxes that can be accessed in the blockchain node. This interface extends the `TransactionBox` interface and provides additional methods for interacting with input boxes.
+
+The `getId()` method returns the ID of the input box. The `withContextVars()` method extends the given input with context variables and returns a new instance of `InputBox` with the given variables attached. The `toJson()` method returns a JSON representation of the transaction, with the option to pretty-print the ErgoTrees. The `getBytes()` method returns the serialized bytes representing this `InputBox`, including transaction reference data. The `getTransactionId()` method returns the ID of the transaction that created the box, and the `getTransactionIndex()` method returns the 0-based index of this box in the output list of the transaction that created the box. Finally, the `toErgoValue()` method returns this box as an Ergo value to store in a register.
+
+This interface can be used in the larger project to interact with input boxes in the blockchain node. For example, the `getId()` method can be used to retrieve the ID of a specific input box, and the `withContextVars()` method can be used to extend the input box with context variables. The `toJson()` method can be used to obtain a JSON representation of the transaction, which can be useful for debugging and analysis. The `getBytes()` method can be used to obtain the serialized bytes representing the input box, which can be useful for low-level operations. The `getTransactionId()` and `getTransactionIndex()` methods can be used to obtain information about the transaction that created the box. Finally, the `toErgoValue()` method can be used to obtain an Ergo value representing the input box, which can be stored in a register.
+## Questions: 
+ 1. What is the purpose of this code?
+- This code defines an interface for UTXO boxes that can be accessed in a blockchain node, and provides methods for getting the box ID, extending the input with context variables, getting the JSON representation of the transaction, getting the serialized bytes representing the input box, getting the transaction ID, getting the transaction index, and getting the box as an Ergo value to store in a register.
+
+2. What is the relationship between this code and other parts of the ergo-appkit project?
+- This code is part of the ergo-appkit project and can be used in conjunction with other classes and interfaces in the project to interact with the Ergo blockchain.
+
+3. What are some potential use cases for this code?
+- This code could be used to build applications that interact with the Ergo blockchain, such as wallets, exchanges, or other financial applications. It could also be used for research or analysis of the Ergo blockchain.

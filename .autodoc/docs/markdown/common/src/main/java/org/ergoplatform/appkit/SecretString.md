@@ -1,0 +1,24 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/common/src/main/java/org/ergoplatform/appkit/SecretString.java)
+
+The `SecretString` class is a utility class that provides a secure way to store and manipulate secret data in memory. It encapsulates a secret array of characters (`char[]`) and provides methods to create, manipulate, and erase the data. The class is designed to be more secure and safe than using `char[]` directly.
+
+The `SecretString` class has a private final field `_data` that holds the secret data. The class provides a constructor that takes a `char[]` as input and initializes the `_data` field. The class also provides a method to extract the secret characters as an array.
+
+The `SecretString` class provides a method to erase the secret characters stored in the instance so that they are no longer in memory. The `erase()` method fills the `_data` array with spaces (`' '`) to overwrite the secret data. This method is useful when the secret data is no longer needed and should not be leaked to the garbage collector.
+
+The `SecretString` class provides methods to create new instances of `SecretString`. The `create(char[] data)` method creates a new instance wrapping the given characters. The `create(String s)` method creates a new instance by copying characters from the given `String`. The `empty()` method creates a new instance with an empty sequence of characters.
+
+The `SecretString` class provides a method `toStringUnsecure()` that returns an unsecured `String` with secret characters. The secret characters are copied to the new `String` instance and cannot be erased in memory. So they leak to the garbage collector and may remain in memory until overwritten by new data. The usage of this method is discouraged, and the method is provided solely to interact with legacy code that keeps secret characters in `String`.
+
+The `SecretString` class provides an implementation of the `hashCode()` and `equals()` methods. The `equals()` method compares the `_data` field of two `SecretString` instances and returns `true` if they are equal. The `hashCode()` method returns the hash code of the `_data` field.
+
+Overall, the `SecretString` class provides a secure way to store and manipulate secret data in memory. It is useful in situations where sensitive data needs to be protected from unauthorized access or leaks. The class can be used in the larger project to store and manipulate sensitive data such as passwords, private keys, and other secret information.
+## Questions: 
+ 1. What is the purpose of the `SecretString` class?
+- The `SecretString` class encapsulates a secret array of characters with proper equality and provides methods to create new instances, extract secret characters, erase secret characters, and check for equality.
+
+2. How does the `SecretString` class ensure security and safety?
+- The `SecretString` class ensures security and safety by not copying the secret data outside of the instance, erasing secret characters stored in the instance so that they are no longer in memory, and providing a more secure and safe way to handle secret data than using char[] directly.
+
+3. What is the purpose of the `toStringUnsecure()` method?
+- The `toStringUnsecure()` method returns an unsecured String with secret characters, which are copied to the new String instance and cannot be erased in memory, so they may leak to GC and remain in memory until overwritten by new data. The method is provided solely to interact with legacy code which keeps secret characters in String.
