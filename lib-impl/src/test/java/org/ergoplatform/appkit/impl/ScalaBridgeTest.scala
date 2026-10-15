@@ -33,12 +33,48 @@ class ScalaBridgeTest extends AnyPropSpec with Matchers with ScalaCheckDrivenPro
       .proofBytes("000102")
       .extension(
         Map(
-          "2" -> "0e03010203", // note, the order doesn't matter
+          "2" -> "0e03010203",
           "1" -> "0414").asJava
       )
     p shouldBe expected
     val res2 = isoSpendingProof.to(p)
     res2 shouldBe res
+  }
+
+  property("isoSpendingProof.from preserves context extension order") {
+    // Regression test: the context extension is part of the signed message.
+    // The node reparses the extension in the order it arrives on the wire and
+    // computes messageToSign from that order, so `from` must emit the entries
+    // in the same order they were signed in. Ids are the repro from the issue:
+    // a java.util.HashMap orders the decimal-string keys as [0, 2, 64, 65],
+    // permuting the extension and invalidating every real signature.
+    val ids: Seq[Byte] = Seq(0, 64, 65, 2)
+    val ext = ContextExtension(ids.map(id => id -> IntConstant(id.toInt)).toMap)
+    val res = ProverResult(Array[Byte](0, 1, 2), ext)
+    val p = isoSpendingProof.from(res)
+    p.getExtension.keySet().asScala.toSeq shouldBe Seq("0", "64", "65", "2")
+    p.getExtension.values().asScala.toSeq shouldBe
+      ids.map(id => ErgoValue.of(id.toInt).toHex)
+  }
+
+  property("isoSpendingProof.to preserves context extension order") {
+    // Reverse direction of the `from` regression above (review on #257):
+    // a SpendingProof parsed from JSON / a node response carries its
+    // extension in wire order in a LinkedHashMap, and `to` must keep that
+    // order in the ContextExtension — collecting through a HashMap permutes
+    // it (e.g. [3, 1] comes back as [1, 3]), changing the transaction bytes
+    // and id so a later sendTransaction fails the same way as in #256.
+    // Six ids in a shuffled order: more than the small-map special cases
+    // hold, so the order can only survive if it is preserved explicitly.
+    val ids: Seq[Byte] = Seq(65, 3, 0, 64, 1, 2)
+    val extension = new java.util.LinkedHashMap[String, String]()
+    ids.foreach(id => extension.put(id.toString, ErgoValue.of(id.toInt).toHex))
+    val p = new SpendingProof()
+      .proofBytes("000102")
+      .extension(extension)
+    val res = isoSpendingProof.to(p)
+    res.extension.values.toSeq shouldBe
+      ids.map(id => id -> IntConstant(id.toInt))
   }
 
   property("isoSpendingProof identity") {
