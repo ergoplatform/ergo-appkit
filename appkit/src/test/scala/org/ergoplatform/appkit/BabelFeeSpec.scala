@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.babelfee.{BabelFeeBoxContract, BabelFeeBoxState, BabelFeeOperations}
+import org.ergoplatform.appkit.impl.ErgoTreeContract
 import org.ergoplatform.sdk.{ErgoId, ErgoToken, SecretString}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
@@ -101,6 +102,39 @@ class BabelFeeSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenProper
         .withMnemonic(mnemonic, SecretString.empty(), false)
         .build()
         .sign(tx)
+    }
+  }
+
+  property("babel fee box with non-positive price is rejected") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+    ergoClient.execute { ctx: BlockchainContext =>
+      val creator = address
+
+      // builds a babel fee box directly (bypassing BabelFeeBoxStateBuilder, which
+      // validates the price) the way a box created outside appkit appears on chain
+      def babelBoxWithPrice(price: Long): InputBox = {
+        ctx.newTxBuilder.outBoxBuilder
+          .value(Parameters.OneErg)
+          .contract(new ErgoTreeContract(
+            new BabelFeeBoxContract(ErgoId.create(mockTokenId)).getErgoTree, ctx.getNetworkType))
+          .registers(ErgoValue.of(SigmaProp.createFromAddress(creator)), ErgoValue.of(price))
+          .build().convertToInputWith(mockTokenId, 0)
+      }
+
+      // a price of zero divides by zero in getMaxTokenAmountToBuy and
+      // calcTokensToSellForErgAmount, a negative price makes them return nonsense:
+      // both must be rejected when the state is parsed from a box
+      intercept[IllegalStateException] {
+        new BabelFeeBoxState(babelBoxWithPrice(0))
+      }
+      intercept[IllegalStateException] {
+        new BabelFeeBoxState(babelBoxWithPrice(-1))
+      }
+
+      // a regular price still parses and calculates as before
+      val state = new BabelFeeBoxState(babelBoxWithPrice(Parameters.MinFee))
+      state.getPricePerToken shouldBe Parameters.MinFee
+      state.calcTokensToSellForErgAmount(Parameters.MinFee) shouldBe 1
     }
   }
 
