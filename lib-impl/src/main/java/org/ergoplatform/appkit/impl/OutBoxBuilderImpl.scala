@@ -15,6 +15,12 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   private var _creationHeightOpt: Option[Int] = None
 
   override def value(value: Long): OutBoxBuilderImpl = {
+    // A box must carry a positive amount of ERG: a node rejects any box whose
+    // value does not cover the minimum value per byte of its serialized size,
+    // so a zero or negative value is rejected by the node while
+    // minValuePerByte > 0 (360 by default). Fail here, where the bad value
+    // is set, instead of at signing or on submission.
+    require(value > 0, s"Box value should be positive, got $value")
     _value = value
     this
   }
@@ -78,6 +84,10 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
 
   override def build: OutBox = {
     InternalUtil.checkState(_contract != null, "Contract is not defined")
+    // Also checked here: when value() was never called, _value is still the
+    // zero default, which is not a buildable box value either.
+    require(_value > 0, s"Box value should be positive, got ${_value}")
+
     val tree = _contract.getErgoTree
     val ergoBoxCandidate = AppkitHelpers.createBoxCandidate(
       _value, tree, _tokens.toSeq, _registers.toSeq,
