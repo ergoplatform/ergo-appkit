@@ -17,8 +17,9 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
   override def value(value: Long): OutBoxBuilderImpl = {
     // A box must carry a positive amount of ERG: a node rejects any box whose
     // value does not cover the minimum value per byte of its serialized size,
-    // so a zero or negative value can never be accepted. Fail here, where the
-    // bad value is set, instead of at signing or on submission.
+    // so a zero or negative value is rejected by the node while
+    // minValuePerByte > 0 (360 by default). Fail here, where the bad value
+    // is set, instead of at signing or on submission.
     require(value > 0, s"Box value should be positive, got $value")
     _value = value
     this

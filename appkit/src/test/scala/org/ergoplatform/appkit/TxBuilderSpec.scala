@@ -672,10 +672,10 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
   property("OutBoxBuilder rejects non-positive box values") {
     val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
     ergoClient.execute { ctx: BlockchainContext =>
-      // A box with zero (or negative) ERG can never be accepted by a node:
-      // every box must carry at least the minimum value for its size.
-      // Building one must fail here instead of at signing or on submission
-      // (see #221).
+      // A box with zero (or negative) ERG is rejected by the node while
+      // minValuePerByte > 0: every box must carry at least the minimum
+      // value for its size. Building one must fail here instead of at
+      // signing or on submission (see #221).
       intercept[IllegalArgumentException] {
         ctx.newTxBuilder.outBoxBuilder()
           .value(0L)

@@ -14,9 +14,10 @@ import org.ergoplatform.sdk.ErgoToken;
 public interface OutBoxBuilder {
     /**
      * Configure the Erg amount of the output box.
-     * The value must be positive: a box carrying zero or negative ERG can
-     * never be accepted by a node, since every box must cover at least the
-     * minimum value per byte of its serialized size.
+     * The value must be positive: a box carrying zero or negative ERG is
+     * rejected by the node while {@code minValuePerByte > 0} (360 by
+     * default), since every box must cover at least the minimum value
+     * per byte of its serialized size.
      *
      * @param value amount in NanoErg, must be positive
      */
@@ -76,6 +77,10 @@ public interface OutBoxBuilder {
      *
      * @return output box which can be {@link UnsignedTransactionBuilder#outputs(OutBox...) added}
      * to {@link UnsignedTransaction}
+     * @throws IllegalStateException    if the contract is not defined
+     * @throws IllegalArgumentException if the box value is not positive, including
+     *                                  when {@link #value(long)} was never called and
+     *                                  the value is still the zero default
      * @see UnsignedTransaction
      */
     OutBox build();
