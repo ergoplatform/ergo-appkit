@@ -23,6 +23,7 @@ import java.lang.{Byte => JByte}
 import java.util
 import java.util.{List => JList}
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
 object ScalaBridge {
   import org.ergoplatform.sdk.JavaHelpers.StringExtensions
@@ -42,12 +43,17 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      val vars = spendingProof.getExtension.asScala.map { case (k, v) =>
+      // ListMap, not toMap: the extension arrives in wire (signed) order and
+      // the ContextExtension is serialized in iteration order, so `to` must
+      // preserve that order just like `from` does (#256). Collecting through
+      // a HashMap permutes the entries (e.g. [3, 1] comes back as [1, 3]),
+      // which changes the transaction bytes and id.
+      val vars = spendingProof.getExtension.asScala.iterator.map { case (k, v) =>
         val id = JByte.parseByte(k, 10)
         val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
         (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
       }
-      new ProverResult(proof, ContextExtension(vars.toMap))
+      new ProverResult(proof, ContextExtension(ListMap(vars.toSeq: _*)))
     }
 
     override def from(proverResult: ProverResult): SpendingProof = {
