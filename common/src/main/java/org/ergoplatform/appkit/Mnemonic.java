@@ -5,7 +5,6 @@ import org.ergoplatform.sdk.JavaHelpers;
 import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.wallet.mnemonic.WordList;
 
-import java.util.Collections;
 import java.util.List;
 
 import scala.Option;
@@ -120,8 +119,13 @@ public class Mnemonic {
         int wordindex = 0;
         List<String> wordList = AppkitHelpers.toJavaList(WordList.load(languageId).get().words().toList());
         for (String word : words) {
-            // Find the words index in the wordlist.
-            int ndx = Collections.binarySearch(wordList, word);
+            // Find the words index in the wordlist. The BIP39 index of a word is
+            // its position in the wordlist file, and most wordlists are not sorted
+            // in code point order (only english, italian and korean are), so a
+            // binary search fails to find many valid words (e.g. 2036 of 2048
+            // chinese_simplified words). A linear search does not depend on the
+            // list order and returns the file position, as required.
+            int ndx = wordList.indexOf(word);
             if (ndx < 0)
                 throw new MnemonicValidationException.MnemonicWordException(word);
 
