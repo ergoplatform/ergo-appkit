@@ -131,6 +131,10 @@ public class Eip4TokenBuilder {
 
         List<ErgoValue<?>> boxRegisters = ergoBox.getRegisters();
 
+        if (boxRegisters.size() < 3) {
+            throw new IllegalArgumentException("EIP-4 compliant minting box registers must contain at least R4 to R6");
+        }
+
         return new Eip4Token(tokenId, foundToken.getValue(),
             (ErgoValue<Coll<Object>>) boxRegisters.get(0),
             (ErgoValue<Coll<Object>>) boxRegisters.get(1),
