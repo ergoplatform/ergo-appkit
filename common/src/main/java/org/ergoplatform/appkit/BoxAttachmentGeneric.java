@@ -64,7 +64,7 @@ public class BoxAttachmentGeneric implements BoxAttachment {
             throw new IllegalArgumentException(illegalArgumentException + r9.getType().toString());
         }
 
-        byte[] magicBytes = JavaHelpers.collToByteArray((Coll<Object>) attachmentWrapper._1);
+        byte[] magicBytes = collByteArrayChecked((Coll<?>) attachmentWrapper._1, illegalArgumentException);
         if (!Arrays.equals(BoxAttachment.MAGIC_BYTES, magicBytes)) {
             throw new IllegalArgumentException(illegalArgumentException + "Magic bytes not matched.");
         }
@@ -77,10 +77,24 @@ public class BoxAttachmentGeneric implements BoxAttachment {
         return createFromAttachmentTuple((Tuple2<Integer, Coll<Byte>>) attachmentValue);
     }
 
+    /**
+     * Converts a collection that is expected to hold bytes to a byte array. A collection
+     * holding any other element type is rejected with an IllegalArgumentException instead
+     * of failing inside the byte conversion with a ClassCastException. An empty collection
+     * converts to an empty array regardless of its declared element type.
+     */
+    private static byte[] collByteArrayChecked(Coll<?> coll, String illegalArgumentMessage) {
+        if (coll.length() > 0 && coll.tItem() != ErgoType.byteType().getRType()) {
+            throw new IllegalArgumentException(illegalArgumentMessage + coll.tItem());
+        }
+        return JavaHelpers.collToByteArray((Coll<Object>) coll);
+    }
+
     static BoxAttachment createFromAttachmentTuple(Tuple2<Integer, Coll<Byte>> attachmentTuple) {
         Integer typeConstant = attachmentTuple._1;
         BoxAttachmentGeneric.Type attachmentType = BoxAttachmentGeneric.Type.fromTypeRawValue(typeConstant);
-        byte[] attachmentContent = ScalaHelpers.collByteToByteArray(attachmentTuple._2);
+        byte[] attachmentContent = collByteArrayChecked(attachmentTuple._2,
+            "Attachment content must be of type Coll[Byte], actual element type: ");
 
         switch (attachmentType) {
             case PLAIN_TEXT:

@@ -5,6 +5,7 @@ import org.junit.Assert
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 
+import java.nio.charset.StandardCharsets
 import java.util.Collections
 
 class BoxAttachmentSpec extends AnyPropSpec with Matchers {
@@ -44,5 +45,31 @@ class BoxAttachmentSpec extends AnyPropSpec with Matchers {
     val multiBackFromValue = backFromValue.asInstanceOf[BoxAttachmentMulti]
     multiAttachment.getAttachmentCount shouldBe multiBackFromValue.getAttachmentCount
     textAttachmentContent shouldBe multiBackFromValue.getAttachment(0).asInstanceOf[BoxAttachmentPlainText].getText
+  }
+
+  property("malformed attachment values are rejected with IllegalArgumentException") {
+    val validContentPair = ErgoValue.pairOf(
+      ErgoValue.of(BoxAttachment.Type.PLAIN_TEXT.toTypeRawValue),
+      ErgoValue.of(textAttachmentContent.getBytes(StandardCharsets.UTF_8)))
+
+    // valid shape parses as before (pin)
+    val validValue = ErgoValue.pairOf(ErgoValue.of(BoxAttachment.MAGIC_BYTES), validContentPair)
+    BoxAttachment.Type.PLAIN_TEXT shouldBe BoxAttachmentGeneric.createFromErgoValue(validValue).getType
+
+    // magic bytes carried in a Coll[Long] instead of a Coll[Byte]
+    val badMagicValue = ErgoValue.pairOf(
+      ErgoValue.of(Array[Long](0x50, 0x52, 0x50)), validContentPair)
+    assertThrows[IllegalArgumentException] {
+      BoxAttachmentGeneric.createFromErgoValue(badMagicValue)
+    }
+
+    // attachment content carried in a Coll[Long] instead of a Coll[Byte]
+    val badContentPair = ErgoValue.pairOf(
+      ErgoValue.of(BoxAttachment.Type.PLAIN_TEXT.toTypeRawValue),
+      ErgoValue.of(Array[Long](1, 2, 3)))
+    val badContentValue = ErgoValue.pairOf(ErgoValue.of(BoxAttachment.MAGIC_BYTES), badContentPair)
+    assertThrows[IllegalArgumentException] {
+      BoxAttachmentGeneric.createFromErgoValue(badContentValue)
+    }
   }
 }

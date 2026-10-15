@@ -34,7 +34,8 @@ public interface OutBoxBuilder {
      * Configures amounts for one or more tokens (up to {@link SigmaConstants.MaxTokens}).
      * Each Ergo box can store zero or more tokens (aka assets).
      *
-     * @param tokens one or more tokens to be added to the constructed output box.
+     * @param tokens zero or more tokens to be added to the constructed output box.
+     *               An empty call is allowed and adds no tokens.
      * @see ErgoToken
      */
     OutBoxBuilder tokens(ErgoToken... tokens);
