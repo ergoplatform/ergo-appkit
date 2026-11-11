@@ -43,11 +43,7 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      // ListMap, not toMap: the extension arrives in wire (signed) order and
-      // the ContextExtension is serialized in iteration order, so `to` must
-      // preserve that order just like `from` does (#256). Collecting through
-      // a HashMap permutes the entries (e.g. [3, 1] comes back as [1, 3]),
-      // which changes the transaction bytes and id.
+      // ListMap: keep the wire order at any size; it is part of messageToSign (#256)
       val vars = spendingProof.getExtension.asScala.iterator.map { case (k, v) =>
         val id = JByte.parseByte(k, 10)
         val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
