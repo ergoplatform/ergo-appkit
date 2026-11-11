@@ -23,6 +23,7 @@ import java.lang.{Byte => JByte}
 import java.util
 import java.util.{List => JList}
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
 object ScalaBridge {
   import org.ergoplatform.sdk.JavaHelpers.StringExtensions
@@ -42,18 +43,24 @@ object ScalaBridge {
   implicit val isoSpendingProof: Iso[SpendingProof, ProverResult] = new Iso[SpendingProof, ProverResult] {
     override def to(spendingProof: SpendingProof): ProverResult = {
       val proof = ErgoAlgos.decodeUnsafe(spendingProof.getProofBytes)
-      val vars = spendingProof.getExtension.asScala.map { case (k, v) =>
+      // ListMap: keep the wire order at any size; it is part of messageToSign (#256)
+      val vars = spendingProof.getExtension.asScala.iterator.map { case (k, v) =>
         val id = JByte.parseByte(k, 10)
         val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
         (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
       }
-      new ProverResult(proof, ContextExtension(vars.toMap))
+      new ProverResult(proof, ContextExtension(ListMap(vars.toSeq: _*)))
     }
 
     override def from(proverResult: ProverResult): SpendingProof = {
       val proof = ErgoAlgos.encode(proverResult.proof)
       val vars = proverResult.extension.values
-      val extension = new util.HashMap[String, String](vars.size)
+      // LinkedHashMap, not HashMap: the extension is serialized in map
+      // iteration order and is part of the signed message, so the entries
+      // must stay in the order they were signed in (see #256). A HashMap
+      // permutes 2-4 entries by String hash order, which changes
+      // messageToSign on the node and invalidates every real signature.
+      val extension = new util.LinkedHashMap[String, String](vars.size)
       vars.foreach { case (varId, value) =>
         val name = varId.toString
         val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
