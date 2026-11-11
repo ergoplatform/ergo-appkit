@@ -42,12 +42,7 @@ class ScalaBridgeTest extends AnyPropSpec with Matchers with ScalaCheckDrivenPro
   }
 
   property("isoSpendingProof.from preserves context extension order") {
-    // Regression test: the context extension is part of the signed message.
-    // The node reparses the extension in the order it arrives on the wire and
-    // computes messageToSign from that order, so `from` must emit the entries
-    // in the same order they were signed in. Ids are the repro from the issue:
-    // a java.util.HashMap orders the decimal-string keys as [0, 2, 64, 65],
-    // permuting the extension and invalidating every real signature.
+    // #256: the issue's repro ids; a HashMap sent them as [0, 2, 64, 65]
     val ids: Seq[Byte] = Seq(0, 64, 65, 2)
     val ext = ContextExtension(ids.map(id => id -> IntConstant(id.toInt)).toMap)
     val res = ProverResult(Array[Byte](0, 1, 2), ext)
