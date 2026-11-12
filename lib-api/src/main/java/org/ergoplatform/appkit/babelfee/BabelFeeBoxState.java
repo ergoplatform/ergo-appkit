@@ -37,6 +37,13 @@ public class BabelFeeBoxState {
         List<ErgoValue<?>> registers = ergoBox.getRegisters();
         boxCreator = new SigmaProp((sigma.SigmaProp) registers.get(0).getValue());
         pricePerToken = (Long) registers.get(1).getValue();
+        if (pricePerToken <= 0) {
+            // a box can be created outside appkit with any register values, so unlike
+            // BabelFeeBoxStateBuilder this parse path cannot assume a valid price:
+            // zero would divide by zero in getMaxTokenAmountToBuy and
+            // calcTokensToSellForErgAmount, a negative price makes them return nonsense
+            throw new IllegalStateException("Price per token of babel fee box must be greater than 0, but was " + pricePerToken);
+        }
         this.tokenId = new BabelFeeBoxContract(ergoBox.getErgoTree()).getTokenId();
 
         if (!ergoBox.getTokens().isEmpty()) {
@@ -52,6 +59,8 @@ public class BabelFeeBoxState {
     }
 
     BabelFeeBoxState(long pricePerToken, ErgoId tokenId, SigmaProp boxCreator, long value, long tokenAmount) {
+        if (pricePerToken <= 0)
+            throw new IllegalArgumentException("pricePerToken must be greater than 0");
         this.pricePerToken = pricePerToken;
         this.tokenId = tokenId;
         this.boxCreator = boxCreator;
