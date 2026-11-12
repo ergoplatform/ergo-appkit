@@ -2,13 +2,19 @@ package org.ergoplatform.appkit;
 
 import org.ergoplatform.appkit.impl.Eip4TokenBuilder;
 import org.ergoplatform.explorer.client.DefaultApi;
+import org.ergoplatform.sdk.ErgoToken;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import sigma.ast.ErgoTree;
 
 public class Eip4TokenBuilderTest {
 
@@ -172,6 +178,103 @@ public class Eip4TokenBuilderTest {
         Assert.assertNull(collectionToken.getNftContentLink());
 
         Assert.assertNull(collectionToken.getNftCoverImageLink());
+    }
+
+    private static void expectIllegalArgument(Runnable action, String messagePart) {
+        try {
+            action.run();
+            Assert.fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            if (messagePart != null) {
+                Assert.assertTrue("exception message should mention " + messagePart +
+                        ", actual: " + e.getMessage(),
+                    e.getMessage() != null && e.getMessage().contains(messagePart));
+            }
+        }
+    }
+
+    private static TransactionBox stubBox(String tokenId, List<ErgoValue<?>> registers) {
+        return new TransactionBox() {
+            @Override
+            public long getValue() {
+                return 1000000L;
+            }
+
+            @Override
+            public int getCreationHeight() {
+                return 1;
+            }
+
+            @Override
+            public List<ErgoToken> getTokens() {
+                return Collections.singletonList(new ErgoToken(tokenId, 1));
+            }
+
+            @Override
+            public List<ErgoValue<?>> getRegisters() {
+                return registers;
+            }
+
+            @Override
+            public ErgoTree getErgoTree() {
+                return null;
+            }
+
+            @Override
+            public BoxAttachment getAttachment() {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    public void buildFromMalformedRegistersTest() {
+        String tokenId = "03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04";
+        String validR4 = ErgoValue.of("TokenName".getBytes(StandardCharsets.UTF_8)).toHex();
+        String validR5 = ErgoValue.of("Description".getBytes(StandardCharsets.UTF_8)).toHex();
+        String validR6 = ErgoValue.of("2".getBytes(StandardCharsets.UTF_8)).toHex();
+
+        // valid registers build a token as before
+        Eip4Token valid = Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(validR4, validR5, validR6));
+        Assert.assertEquals("TokenName", valid.getTokenName());
+        Assert.assertEquals("Description", valid.getTokenDescription());
+        Assert.assertEquals(2, valid.getDecimals());
+
+        // R4 is not a Coll at all (a single Long constant)
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(ErgoValue.of(42L).toHex(), validR5, validR6)), "R4");
+
+        // R5 is a Coll[Long], not a Coll[Byte]
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(validR4, ErgoValue.of(new long[]{1, 2}).toHex(), validR6)), "R5");
+
+        // R6 does not contain a number string
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(validR4, validR5,
+                ErgoValue.of("abc".getBytes(StandardCharsets.UTF_8)).toHex())), "R6");
+
+        // R6 is empty
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(validR4, validR5, ErgoValue.of(new byte[0]).toHex())), "R6");
+
+        // R6 contains a number string out of int range
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromHexEncodedRegisters(tokenId, 1,
+            Arrays.asList(validR4, validR5,
+                ErgoValue.of("99999999999999999999".getBytes(StandardCharsets.UTF_8)).toHex())), "R6");
+
+        // a box holding the token but only R4 and R5 (R6 missing)
+        TransactionBox boxMissingR6 = stubBox(tokenId, Arrays.asList(
+            ErgoValue.of("TokenName".getBytes(StandardCharsets.UTF_8)),
+            ErgoValue.of("Description".getBytes(StandardCharsets.UTF_8))));
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromErgoBox(tokenId, boxMissingR6), null);
+
+        // a box whose R4 is a Long, not a Coll[Byte]
+        TransactionBox boxWithLongR4 = stubBox(tokenId, Arrays.asList(
+            ErgoValue.of(42L),
+            ErgoValue.of("Description".getBytes(StandardCharsets.UTF_8)),
+            ErgoValue.of("2".getBytes(StandardCharsets.UTF_8))));
+        expectIllegalArgument(() -> Eip4TokenBuilder.buildFromErgoBox(tokenId, boxWithLongR4), "R4");
     }
 
 }
