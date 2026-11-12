@@ -179,11 +179,9 @@ public class Eip4Token extends ErgoToken {
         if (r9 != null && isNftAssetType()) {
             // if r9 ErgoValue is Coll[Byte], we have the direct link here
             if (r9.getValue() instanceof Coll) {
-                return new String(JavaHelpers.collToByteArray((Coll<Object>) r9.getValue()),
-                    StandardCharsets.UTF_8);
+                return collByteValueToStringOrNull(r9.getValue());
             } else if (r9.getValue() instanceof Tuple2) {
-                return new String(JavaHelpers.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._1),
-                    StandardCharsets.UTF_8);
+                return collByteValueToStringOrNull(((Tuple2) r9.getValue())._1);
             }
         }
         return null;
@@ -195,11 +193,32 @@ public class Eip4Token extends ErgoToken {
     @Nullable
     public String getNftCoverImageLink() {
         if (r9 != null && isNftAssetType() && r9.getValue() instanceof Tuple2) {
-            return new String(JavaHelpers.collToByteArray((Coll<Object>) ((Tuple2) r9.getValue())._2),
-                StandardCharsets.UTF_8);
+            return collByteValueToStringOrNull(((Tuple2) r9.getValue())._2);
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return the value as a string if it holds a Coll[Byte], or `null` for any other
+     * shape. R9 of a minting box is arbitrary chain data, so its content (or the
+     * elements of its pair form) is not necessarily a byte collection; converting
+     * it unchecked would crash with a ClassCastException instead of reporting
+     * "no link", which is what these getters promise for unavailable links.
+     * Uses the same element-type check as {@link #getR7ByteArrayOrNull()} for R7.
+     */
+    @Nullable
+    private static String collByteValueToStringOrNull(Object value) {
+        if (value instanceof Coll) {
+            Coll<?> coll = (Coll<?>) value;
+
+            if (coll.tItem() == ErgoType.byteType().getRType()) {
+                return new String(JavaHelpers.collToByteArray((Coll<Object>) coll),
+                    StandardCharsets.UTF_8);
+            }
+        }
+
+        return null;
     }
 
     /**

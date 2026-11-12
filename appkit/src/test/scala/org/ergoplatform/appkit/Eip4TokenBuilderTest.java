@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -148,6 +149,56 @@ public class Eip4TokenBuilderTest {
 
         Assert.assertNotNull(nftWithCover.getNftCoverImageLink());
         Assert.assertNull(nftAudio.getNftCoverImageLink());
+    }
+
+    @Test
+    public void nftLinkWithMalformedR9Test() {
+        String tokenId = "87f5a614e40399c40ad9b2ffe521f9576e34824ddfd29d246f019bb4599866b4";
+        ErgoValue<?> r7 = ErgoValue.of(Eip4Token.AssetType.NFT_PICTURE.getR7ByteArrayForType());
+        ErgoValue<?> r8 = ErgoValue.of(new byte[32]);
+        String contentLink = "https://content.link";
+        String coverLink = "https://cover.link";
+
+        // valid shapes keep working exactly as before (pins, pass pre-fix)
+        Eip4Token directLink = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.of(contentLink.getBytes(StandardCharsets.UTF_8)));
+        Assert.assertEquals(contentLink, directLink.getNftContentLink());
+        Assert.assertNull(directLink.getNftCoverImageLink());
+
+        Eip4Token pairLink = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.pairOf(ErgoValue.of(contentLink.getBytes(StandardCharsets.UTF_8)),
+                ErgoValue.of(coverLink.getBytes(StandardCharsets.UTF_8))));
+        Assert.assertEquals(contentLink, pairLink.getNftContentLink());
+        Assert.assertEquals(coverLink, pairLink.getNftCoverImageLink());
+
+        // R9 as Coll[Long]: not a byte link, both getters must return null
+        Eip4Token collLongR9 = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.of(new long[]{1, 2, 3}));
+        Assert.assertNull(collLongR9.getNftContentLink());
+        Assert.assertNull(collLongR9.getNftCoverImageLink());
+
+        // R9 as (Long, Coll[Byte]): content element is not a byte collection,
+        // cover element still is and must still be returned
+        Eip4Token longContentPair = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.pairOf(ErgoValue.of(42L),
+                ErgoValue.of(coverLink.getBytes(StandardCharsets.UTF_8))));
+        Assert.assertNull(longContentPair.getNftContentLink());
+        Assert.assertEquals(coverLink, longContentPair.getNftCoverImageLink());
+
+        // R9 as (Coll[Byte], Long): cover element is not a byte collection,
+        // content element still is and must still be returned
+        Eip4Token longCoverPair = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.pairOf(ErgoValue.of(contentLink.getBytes(StandardCharsets.UTF_8)),
+                ErgoValue.of(42L)));
+        Assert.assertEquals(contentLink, longCoverPair.getNftContentLink());
+        Assert.assertNull(longCoverPair.getNftCoverImageLink());
+
+        // R9 as (Coll[Long], Coll[Long]): neither element is a byte collection
+        Eip4Token collLongPair = new Eip4Token(tokenId, 1, "Test NFT", "desc", 0, r7, r8,
+            ErgoValue.pairOf(ErgoValue.of(new long[]{1}),
+                ErgoValue.of(new long[]{2})));
+        Assert.assertNull(collLongPair.getNftContentLink());
+        Assert.assertNull(collLongPair.getNftCoverImageLink());
     }
 
     @Test
