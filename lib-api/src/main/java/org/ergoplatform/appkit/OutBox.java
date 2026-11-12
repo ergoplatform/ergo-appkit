@@ -17,6 +17,20 @@ public interface OutBox extends TransactionBox {
     byte[] getBytesWithNoRef();
 
     /**
+     * Computes a safe minimum box value (in NanoErgs) for this output box using the given
+     * {@code minValuePerByte} rate.
+     *
+     * <p>The calculation accounts for the full serialized box size as measured by the
+     * Ergo node (candidate body with the VLQ-encoded minimum value itself, 32-byte
+     * transaction id, and worst-case VLQ output index).
+     *
+     * @param minValuePerByte minimum nanoERGs per serialized byte of the box
+     * @return minimum box value in NanoErgs
+     * @throws IllegalArgumentException if {@code minValuePerByte} is negative
+     */
+    long getMinBoxValue(int minValuePerByte);
+
+    /**
      * Converts this box candidate into a new instance of {@link InputBox} by
      * associating it with the given transaction and output position.
      * This method can be used to create input boxed from scratch, without

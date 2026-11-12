@@ -170,6 +170,35 @@ object AppkitHelpers {
     new ErgoBoxCandidate(value, tree, creationHeight, ts, rs)
   }
 
+  private val ZeroModifierId: scorex.util.ModifierId =
+    scorex.util.ModifierId @@ ("00" * 32)
+
+  def estimateMinBoxValue(candidate: ErgoBoxCandidate, minValuePerByte: Int): Long = {
+    require(minValuePerByte >= 0, s"minValuePerByte must be >= 0, got $minValuePerByte")
+    if (minValuePerByte == 0) {
+      0L
+    } else {
+      val rate = minValuePerByte.toLong
+      def boxSizeWithValue(v: Long): Int = {
+        val c = new ErgoBoxCandidate(
+          v,
+          candidate.ergoTree,
+          candidate.creationHeight,
+          candidate.additionalTokens,
+          candidate.additionalRegisters
+        )
+        c.toBox(ZeroModifierId, Short.MaxValue).bytes.length
+      }
+      var minVal = boxSizeWithValue(1L).toLong * rate
+      var nextVal = boxSizeWithValue(minVal).toLong * rate
+      while (nextVal > minVal) {
+        minVal = nextVal
+        nextVal = boxSizeWithValue(minVal).toLong * rate
+      }
+      minVal
+    }
+  }
+
   def secretStringToOption(secretString: org.ergoplatform.wallet.interface4j.SecretString): Option[org.ergoplatform.wallet.interface4j.SecretString] = {
     if (secretString == null || secretString.isEmpty) None else Some(secretString)
   }

@@ -70,6 +70,33 @@ public interface OutBoxBuilder {
     OutBoxBuilder creationHeight(int height);
 
     /**
+     * Computes a safe minimum box value (in NanoErgs) for the output box currently
+     * configured on this builder, using the {@code minValuePerByte} parameter from the
+     * {@link BlockchainContext} associated with this builder.
+     *
+     * <p>The calculation accounts for the full serialized box size as measured by the
+     * Ergo node (candidate body including the VLQ-encoded value itself, 32-byte
+     * transaction id, and worst-case VLQ output index), so an output built with
+     * {@code .value(builder.getMinBoxValue())} is guaranteed to satisfy the minimum box
+     * value requirement at any output position in the transaction.
+     *
+     * @return minimum box value in NanoErgs
+     * @throws IllegalStateException if the guarding contract has not been configured yet
+     */
+    long getMinBoxValue();
+
+    /**
+     * Computes a safe minimum box value (in NanoErgs) for the output box currently
+     * configured on this builder using the given {@code minValuePerByte} rate.
+     *
+     * @param minValuePerByte minimum nanoERGs per serialized byte of the box
+     * @return minimum box value in NanoErgs
+     * @throws IllegalStateException if the guarding contract has not been configured yet
+     * @throws IllegalArgumentException if {@code minValuePerByte} is negative
+     */
+    long getMinBoxValue(int minValuePerByte);
+
+    /**
      * Creates {@link OutBox} instance using specified parameters.
      *
      * @return output box which can be {@link UnsignedTransactionBuilder#outputs(OutBox...) added}

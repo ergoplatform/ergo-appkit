@@ -76,6 +76,22 @@ class OutBoxBuilderImpl(_txB: UnsignedTransactionBuilderImpl) extends OutBoxBuil
     this
   }
 
+  override def getMinBoxValue(minValuePerByte: Int): Long = {
+    InternalUtil.checkState(_contract != null, "Contract is not defined")
+    val tree = _contract.getErgoTree
+    val candidate = AppkitHelpers.createBoxCandidate(
+      if (_value > 0) _value else 1L,
+      tree,
+      _tokens.toSeq,
+      _registers.toSeq,
+      creationHeight = _creationHeightOpt.getOrElse(_txB.getCtx.getHeight)
+    )
+    AppkitHelpers.estimateMinBoxValue(candidate, minValuePerByte)
+  }
+
+  override def getMinBoxValue: Long =
+    getMinBoxValue(_ctx.getParameters.getMinValuePerByte)
+
   override def build: OutBox = {
     InternalUtil.checkState(_contract != null, "Contract is not defined")
     val tree = _contract.getErgoTree

@@ -24,6 +24,9 @@ class OutBoxImpl(_ergoBoxCandidate: ErgoBoxCandidate) extends OutBox {
 
   override def getBytesWithNoRef: Array[Byte] = _ergoBoxCandidate.bytesWithNoRef
 
+  override def getMinBoxValue(minValuePerByte: Int): Long =
+    AppkitHelpers.estimateMinBoxValue(_ergoBoxCandidate, minValuePerByte)
+
   override def getErgoTree: ErgoTree = _ergoBoxCandidate.ergoTree
 
   /** Returns {@link BoxAttachment} stored in this box of null. */
