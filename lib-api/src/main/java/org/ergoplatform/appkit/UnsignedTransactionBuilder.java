@@ -118,6 +118,8 @@ public interface UnsignedTransactionBuilder {
      * Builds a new unsigned transaction in the {@link BlockchainContext context} inherited from this builder.
      *
      * @return a new instance of {@link UnsignedTransaction}
+     * @throws IllegalArgumentException if any output box (including change and fee outputs) has a value
+     *                                  below its minimum box value ({@code box.bytes.length * minValuePerByte})
      */
     UnsignedTransaction build();
 

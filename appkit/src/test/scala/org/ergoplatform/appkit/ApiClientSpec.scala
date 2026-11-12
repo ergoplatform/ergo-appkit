@@ -35,8 +35,12 @@ class ApiClientSpec
   }
 
   property("BlockchainContext") {
+    // The aggregation example pays MinFee from the aggregated box, so the box
+    // must be worth more than MinFee: response_Box1.json holds exactly
+    // MinFee, which would leave a zero-value output box (rejected since #221).
+    // response_BoxAggregate.json is the same box with a higher value.
     val data = MockData(
-      nodeResponses = Seq(loadNodeResponse("response_Box1.json")),
+      nodeResponses = Seq(loadNodeResponse("response_BoxAggregate.json")),
       explorerResponses = Seq())
 
     val ergoClient = createMockedErgoClient(data)

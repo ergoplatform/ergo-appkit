@@ -4,11 +4,12 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.ergoplatform.appkit.AppkitHelpers._
 import org.ergoplatform.appkit.InputBoxesSelectionException.{InputBoxLimitExceededException, NotEnoughCoinsForChangeException, NotEnoughErgsException}
-import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract}
+import org.ergoplatform.appkit.impl.{Eip4TokenBuilder, ErgoTreeContract, UnsignedTransactionImpl}
 import org.ergoplatform.appkit.testing.AppkitTesting
 import org.ergoplatform.explorer.client.model.{Items, TokenInfo}
 import org.ergoplatform.sdk.JavaHelpers._
 import org.ergoplatform.sdk.{ErgoToken, SecretString}
+import org.ergoplatform.settings.ErgoAlgos
 import org.ergoplatform.{ErgoBox, ErgoTreePredef, appkit}
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
@@ -22,7 +23,7 @@ import sigmastate.interpreter.HintsBag
 import java.io.File
 import java.math.BigInteger
 import java.util
-import java.util.Arrays
+import java.util.{Arrays, Collections}
 import java.util.function.Consumer
 import scala.collection.JavaConverters._
 
@@ -700,6 +701,163 @@ class TxBuilderSpec extends AnyPropSpec with Matchers
       mixed.getTokens.size() shouldBe 1
       mixed.getTokens.get(0).getId.toString shouldBe token.getId.toString
       mixed.getTokens.get(0).getValue shouldBe token.getValue
+    }
+  }
+
+  property("Reject transaction with output below minimum box value") {
+    val ergoClient = createMockedErgoClient(MockData(Nil, Nil))
+
+    ergoClient.execute { ctx: BlockchainContext =>
+      val contract = truePropContract(ctx)
+      val changeAddr = address.getErgoAddress
+      val minValuePerByte = ctx.getDataSource.getParameters.getMinValuePerByte
+
+      // OutBoxBuilder.build() alone still constructs a box below its eventual minimum
+      val standaloneUnderMin = ctx.newTxBuilder.outBoxBuilder()
+        .value(1L)
+        .contract(contract)
+        .build()
+      standaloneUnderMin.getValue.longValue() shouldBe 1L
+
+      val input = ctx.newTxBuilder.outBoxBuilder()
+        .value(Parameters.OneErg)
+        .contract(contract)
+        .build()
+        .convertToInputWith(mockTxId, 0)
+
+      // Determine exact serialized size of output 0 when VLQ value encoding is 3 bytes ([16384, 2097151])
+      val probeTx = ctx.newTxBuilder()
+        .addInputs(input)
+        .addOutputs(ctx.newTxBuilder.outBoxBuilder().value(Parameters.MinFee).contract(contract).build())
+        .fee(Parameters.MinFee)
+        .sendChangeTo(changeAddr)
+        .build()
+      val boxSize = probeTx.asInstanceOf[UnsignedTransactionImpl].getTx.outputs.head.bytes.length
+      val minBoxValue = boxSize.toLong * minValuePerByte.toLong
+
+      // 1 nanoERG below minimum fails and message names index, value, box size, rate, and minimum
+      val underMinValue = minBoxValue - 1L
+      val ex = intercept[IllegalArgumentException] {
+        ctx.newTxBuilder()
+          .addInputs(input)
+          .addOutputs(ctx.newTxBuilder.outBoxBuilder().value(underMinValue).contract(contract).build())
+          .fee(Parameters.MinFee)
+          .sendChangeTo(changeAddr)
+          .build()
+      }
+      ex.getMessage should include("Output 0")
+      ex.getMessage should include(underMinValue.toString)
+      ex.getMessage should include(boxSize.toString)
+      ex.getMessage should include(minValuePerByte.toString)
+      ex.getMessage should include(minBoxValue.toString)
+
+      // Exact minimum box value builds cleanly
+      val exactMinTx = ctx.newTxBuilder()
+        .addInputs(input)
+        .addOutputs(ctx.newTxBuilder.outBoxBuilder().value(minBoxValue).contract(contract).build())
+        .fee(Parameters.MinFee)
+        .sendChangeTo(changeAddr)
+        .build()
+      exactMinTx.getOutputs.get(0).getValue.longValue() shouldBe minBoxValue
+
+      // Large output (100 tokens -> minimum > Parameters.MinChangeValue) fails at Parameters.MinChangeValue
+      val tokens100 = (1 to 100).map(i => new ErgoToken(ErgoAlgos.hash(s"token-$i"), 1L))
+      val tokenInput = ctx.newTxBuilder.outBoxBuilder()
+        .value(Parameters.OneErg)
+        .tokens(tokens100: _*)
+        .contract(contract)
+        .build()
+        .convertToInputWith(mockTxId, 1)
+
+      val largeOutAtMinChange = ctx.newTxBuilder.outBoxBuilder()
+        .value(Parameters.MinChangeValue)
+        .tokens(tokens100: _*)
+        .contract(contract)
+        .build()
+      val largeEx = intercept[IllegalArgumentException] {
+        ctx.newTxBuilder()
+          .addInputs(tokenInput)
+          .addOutputs(largeOutAtMinChange)
+          .fee(Parameters.MinFee)
+          .sendChangeTo(changeAddr)
+          .build()
+      }
+      largeEx.getMessage should include("Output 0")
+      largeEx.getMessage should include(Parameters.MinChangeValue.toString)
+
+      // Large output succeeds at its computed minimum
+      val largeProbeTx = ctx.newTxBuilder()
+        .addInputs(tokenInput)
+        .addOutputs(
+          ctx.newTxBuilder.outBoxBuilder()
+            .value(Parameters.MinChangeValue * 2)
+            .tokens(tokens100: _*)
+            .contract(contract)
+            .build()
+        )
+        .fee(Parameters.MinFee)
+        .sendChangeTo(changeAddr)
+        .build()
+      val largeBoxSize = largeProbeTx.asInstanceOf[UnsignedTransactionImpl].getTx.outputs.head.bytes.length
+      val largeMinBoxValue = largeBoxSize.toLong * minValuePerByte.toLong
+      largeMinBoxValue should be > Parameters.MinChangeValue
+
+      val largeValidTx = ctx.newTxBuilder()
+        .addInputs(tokenInput)
+        .addOutputs(
+          ctx.newTxBuilder.outBoxBuilder()
+            .value(largeMinBoxValue)
+            .tokens(tokens100: _*)
+            .contract(contract)
+            .build()
+        )
+        .fee(Parameters.MinFee)
+        .sendChangeTo(changeAddr)
+        .build()
+      largeValidTx.getOutputs.get(0).getValue.longValue() shouldBe largeMinBoxValue
+
+      // Change box forced below its own minimum (100 tokens routed into change box at Output 2 with only MinChangeValue) fails
+      val changeUnderMinInput = ctx.newTxBuilder.outBoxBuilder()
+        .value(Parameters.MinFee * 2 + Parameters.MinChangeValue)
+        .tokens(tokens100: _*)
+        .contract(contract)
+        .build()
+        .convertToInputWith(mockTxId, 2)
+      val changeEx = intercept[IllegalArgumentException] {
+        ctx.newTxBuilder()
+          .addInputs(changeUnderMinInput)
+          .addOutputs(ctx.newTxBuilder.outBoxBuilder().value(Parameters.MinFee).contract(contract).build())
+          .fee(Parameters.MinFee)
+          .sendChangeTo(changeAddr)
+          .build()
+      }
+      changeEx.getMessage should include("Output 2")
+      changeEx.getMessage should include(Parameters.MinChangeValue.toString)
+    }
+
+    // Context with minValuePerByte == 0 does not crash and allows small box values
+    val zeroRateNodeInfo = loadNodeResponse("response_NodeInfo.json")
+      .replace("\"minValuePerByte\": 360", "\"minValuePerByte\": 0")
+    val zeroRateClient = new FileMockedErgoClient(
+      Arrays.asList(zeroRateNodeInfo, loadNodeResponse("response_LastHeaders.json")),
+      Collections.emptyList[String](),
+      true
+    )
+    zeroRateClient.execute { ctx: BlockchainContext =>
+      ctx.getDataSource.getParameters.getMinValuePerByte shouldBe 0
+      val contract = truePropContract(ctx)
+      val input = ctx.newTxBuilder.outBoxBuilder()
+        .value(Parameters.MinFee + 1L)
+        .contract(contract)
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      val tx = ctx.newTxBuilder()
+        .addInputs(input)
+        .addOutputs(ctx.newTxBuilder.outBoxBuilder().value(1L).contract(contract).build())
+        .fee(Parameters.MinFee)
+        .sendChangeTo(address.getErgoAddress)
+        .build()
+      tx.getOutputs.get(0).getValue.longValue() shouldBe 1L
     }
   }
 

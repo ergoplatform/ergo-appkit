@@ -156,6 +156,15 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       inputs = boxesToSpendSeq.map(_.toUnsignedInput),
       tx.dataInputs, tx.outputCandidates
     )
+    val minValuePerByte = _ctx.getParameters.getMinValuePerByte.toLong
+    txWithExtensions.outputs.foreach { out =>
+      val boxSize = out.bytes.length
+      val minBoxValue = boxSize.toLong * minValuePerByte
+      require(
+        out.value >= minBoxValue,
+        s"Output ${out.index} has value ${out.value} nanoERG, which is below the minimum box value $minBoxValue nanoERG (box size $boxSize bytes * $minValuePerByte nanoERG/byte)"
+      )
+    }
 
     val stateContext = createErgoLikeStateContext
     new UnsignedTransactionImpl(txWithExtensions, boxesToSpend, dataInputBoxes, changeAddress, stateContext, _ctx, requestedToBurn)
