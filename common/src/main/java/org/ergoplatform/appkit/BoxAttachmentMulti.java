@@ -16,7 +16,18 @@ public class BoxAttachmentMulti extends BoxAttachmentGeneric {
     BoxAttachmentMulti(byte[] attachmentContent) {
         super(Type.MULTI_ATTACHMENT.toTypeRawValue(), attachmentContent);
 
-        ErgoValue<?> attachmentTuples = ErgoValue.fromHex(new String(attachmentContent, StandardCharsets.UTF_8));
+        ErgoValue<?> attachmentTuples;
+        try {
+            attachmentTuples = ErgoValue.fromHex(new String(attachmentContent, StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            // the content is untrusted (it comes from a box register): hex decoding and
+            // deserialization failures must surface as the IllegalArgumentException this
+            // constructor already uses for content of the wrong type, not as the
+            // decoding/serialization exception types of the underlying libraries
+            throw new IllegalArgumentException("Multi attachment content needs to be Coll[(Int, Coll[Byte])]", e);
+        }
         if (!attachmentTuples.getType().equals(ErgoType.collType(ErgoType.pairType(ErgoType.integerType(), ErgoType.collType(ErgoType.byteType()))))) {
             throw new IllegalArgumentException("Multi attachment content needs to be Coll[(Int, Coll[Byte])]");
         }
