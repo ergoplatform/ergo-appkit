@@ -1,0 +1,16 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/TransactionBox.java)
+
+The `TransactionBox` interface represents a box on a transaction, which can be either an `InputBox` or an `OutBox`. This interface provides several methods to retrieve information about the box, such as its value, creation height, tokens, registers, ErgoTree, and BoxAttachment.
+
+The `getValue()` method returns the nanoERG value stored in the box, which represents the unspent value in UTXO. The `getCreationHeight()` method returns the height (block number) when the transaction containing this output box was created. The `getTokens()` method returns a list of `ErgoToken` objects stored in the box. The `getRegisters()` method returns a list of `ErgoValue` objects representing the values of the non-mandatory registers which are stored in the box (R4, R5, R6, R7, R8, R9). The index 0 corresponds to R4, 1 corresponds to R5, and so on. The `getErgoTree()` method returns the `ErgoTree` of the script guarding the box. Finally, the `getAttachment()` method returns the `BoxAttachment` stored in this box or null.
+
+This interface is likely to be used extensively in the Ergo platform, which is a blockchain platform for creating decentralized applications. Developers can use this interface to retrieve information about boxes on a transaction, which can be used to implement various features of their applications. For example, a developer might use the `getValue()` method to calculate the total value of a transaction, or the `getTokens()` method to retrieve information about the tokens involved in a transaction. The `getErgoTree()` method can be used to retrieve the script guarding a box, which can be used to verify the validity of a transaction. Overall, the `TransactionBox` interface is an essential component of the Ergo platform, providing developers with a powerful tool for building decentralized applications.
+## Questions: 
+ 1. What is the purpose of this interface and how is it used in the ergo-appkit project?
+- This interface represents a box on a transaction, either an InputBox or an OutBox, and provides methods to retrieve information about the box such as its value, creation height, tokens, registers, ErgoTree, and BoxAttachment. It is likely used throughout the ergo-appkit project to interact with transaction boxes.
+
+2. What is the difference between an InputBox and an OutBox?
+- The code does not provide information on the difference between an InputBox and an OutBox. However, the interface references both types of boxes and provides links to their respective classes, suggesting that they are both used in the ergo-appkit project and have different implementations.
+
+3. What is the purpose of the getRegisters() method and how are the registers used in the ergo-appkit project?
+- The getRegisters() method returns values of the non-mandatory registers which are stored in the box (R4, R5, R6, R7, R8, R9). The purpose of these registers and how they are used in the ergo-appkit project is not clear from the code alone.

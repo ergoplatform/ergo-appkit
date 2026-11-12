@@ -1,0 +1,30 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/restapi/client/TransactionSigningRequest.java)
+
+The `TransactionSigningRequest` class is part of the Ergo Node API and is used to request the signing of a transaction with provided secrets. This class is generated automatically by the Swagger code generator program and should not be edited manually. 
+
+The `TransactionSigningRequest` class has five properties: `tx`, `inputsRaw`, `dataInputsRaw`, `hints`, and `secrets`. 
+
+The `tx` property is of type `UnsignedErgoTransaction` and is required. It represents the unsigned transaction that needs to be signed. 
+
+The `inputsRaw` property is an optional list of inputs to be used in serialized form. 
+
+The `dataInputsRaw` property is also an optional list of inputs to be used in serialized form. 
+
+The `hints` property is of type `TransactionHintsBag` and is optional. It represents a bag of hints that can be used to optimize the signing process. 
+
+The `secrets` property is of type `TransactionSigningRequestSecrets` and is required. It represents the secrets that will be used to sign the transaction. 
+
+The `TransactionSigningRequest` class has methods to set and get the values of its properties. For example, the `tx` property can be set using the `tx(UnsignedErgoTransaction tx)` method and retrieved using the `getTx()` method. 
+
+This class can be used in the larger project to request the signing of a transaction with provided secrets. An example usage of this class would be to create an instance of `TransactionSigningRequest` with the required properties set and then pass it to a method that will sign the transaction. 
+
+Overall, the `TransactionSigningRequest` class is an important part of the Ergo Node API and is used to request the signing of a transaction with provided secrets.
+## Questions: 
+ 1. What is the purpose of this code?
+- This code is a request to sign a transaction with secrets provided.
+
+2. What dependencies does this code have?
+- This code has dependencies on the following libraries: `java.util`, `com.google.gson`, `io.swagger.v3.oas.annotations`, and `org.ergoplatform.restapi.client`.
+
+3. What is the expected input and output of this code?
+- The expected input is an `UnsignedErgoTransaction` object and optional lists of inputs and data inputs in serialized form. The expected output is a signed transaction.

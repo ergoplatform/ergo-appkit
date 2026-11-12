@@ -1,0 +1,28 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/java-client-generated/src/main/java/org/ergoplatform/explorer/client/model/OutputInfo.java)
+
+The `OutputInfo` class is a model class that represents the output of a transaction in the Ergo blockchain. It contains information about the box that was created as a result of the transaction, such as its ID, the ID of the transaction that created it, the ID of the block it was included in, its value in nanoERG, its index in the transaction, the height at which it was created, the height at which it was fixed in the blockchain, the serialized Ergo tree, the address derived from the Ergo tree, the assets associated with the box, the additional registers, the ID of the transaction that spent the output, and a boolean flag indicating whether the box is on the main chain.
+
+This class is used in the Ergo Explorer API to represent the output of a transaction. It can be used to retrieve information about a specific output, such as its value, assets, and address. For example, the following code retrieves the value of an output:
+
+```
+OutputInfo output = ...; // get the output from the API
+Long value = output.getValue();
+```
+
+Similarly, the following code retrieves the assets associated with an output:
+
+```
+OutputInfo output = ...; // get the output from the API
+List<AssetInstanceInfo> assets = output.getAssets();
+```
+
+Overall, the `OutputInfo` class is an important part of the Ergo Explorer API, as it provides a convenient way to retrieve information about the outputs of transactions in the Ergo blockchain.
+## Questions: 
+ 1. What is the purpose of the `OutputInfo` class?
+- The `OutputInfo` class is a model class that represents information about a transaction output in the Ergo Explorer API.
+
+2. What are some of the properties of an `OutputInfo` object?
+- Some of the properties of an `OutputInfo` object include the box ID, transaction ID, block ID, value, index, creation height, settlement height, ergo tree, address, assets, additional registers, spent transaction ID, and main chain.
+
+3. What is the purpose of the `toIndentedString` method?
+- The `toIndentedString` method is a helper method that converts an object to a string with each line indented by 4 spaces, except for the first line. It is used in the `toString` method to format the output of the `OutputInfo` object.

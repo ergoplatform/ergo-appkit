@@ -1,0 +1,30 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-impl/src/main/java/org/ergoplatform/appkit/impl/ErgoProverBuilderImpl.scala)
+
+The `ErgoProverBuilderImpl` class is a builder for creating an `ErgoProver` instance, which is used for generating proofs for spending Ergo transactions. The builder provides methods for setting up the necessary keys and secrets required for generating proofs.
+
+The builder takes in a `BlockchainContextBase` instance in its constructor, which is used to create the `ErgoProver` instance. The `ErgoProver` instance is created by calling the `build` method on the builder.
+
+The builder provides several methods for setting up the keys and secrets required for generating proofs. These methods include:
+
+- `withMnemonic`: This method takes in a `mnemonicPhrase` and a `mnemonicPass` and generates an `ExtendedSecretKey` from them. The `ExtendedSecretKey` is used as the master key for generating other secret keys required for generating proofs. This method can also take in a `usePre1627KeyDerivation` flag to specify whether to use the pre-1627 key derivation scheme or not.
+
+- `withEip3Secret`: This method generates a secret key for a given derivation index using the EIP-3 key derivation scheme. The EIP-3 scheme is used to generate secret keys for spending Ergo transactions.
+
+- `withSecretStorage`: This method takes in a `SecretStorage` instance and sets the master key for generating other secret keys required for generating proofs.
+
+- `withDHTData`: This method takes in the parameters required for generating a Diffie-Hellman tuple and generates a `DiffieHellmanTupleProverInput` instance. The `DiffieHellmanTupleProverInput` instance is used for generating proofs.
+
+- `withDLogSecret`: This method takes in a `BigInteger` and generates a `DLogProtocol.DLogProverInput` instance. The `DLogProtocol.DLogProverInput` instance is used for generating proofs.
+
+The `build` method creates an `ErgoProver` instance using the keys and secrets set up by the builder. The `ErgoProver` instance is created using an `AppkitProvingInterpreter` instance, which takes in the keys and secrets set up by the builder.
+
+Overall, the `ErgoProverBuilderImpl` class provides a convenient way to set up the necessary keys and secrets required for generating proofs for spending Ergo transactions. It abstracts away the complexity of generating these keys and secrets and provides a simple interface for creating an `ErgoProver` instance.
+## Questions: 
+ 1. What is the purpose of the `ErgoProverBuilderImpl` class?
+- The `ErgoProverBuilderImpl` class is used to build an `ErgoProver` object, which is used to create and sign transactions on the Ergo blockchain.
+
+2. What is the difference between `withMnemonic` and `withEip3Secret` methods?
+- The `withMnemonic` methods are used to generate a master key from a mnemonic phrase, while the `withEip3Secret` method is used to generate a secret key from a derivation path index.
+
+3. What is the purpose of the `build` method?
+- The `build` method is used to create an `ErgoProver` object using the parameters and secrets provided to the builder.

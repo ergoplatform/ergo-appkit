@@ -1,0 +1,20 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/common/src/main/java/org/ergoplatform/appkit/scalaapi/Extensions.scala)
+
+The `Extensions` object in the `org.ergoplatform.appkit.scalaapi` package provides a set of extension methods for the `Coll` and `CollBuilder` classes. These methods are used to perform various operations on collections, such as partitioning, grouping, and reducing. 
+
+The `CollOps` extension class provides several methods for partitioning a collection based on a predicate, converting a collection to a map, summing the elements of a collection, and grouping elements of a collection by a discriminator function. The `mapReduce` method applies a mapping function to each element of the collection, groups the elements by key, and reduces each group using a reduction function. The `groupByProjecting` method is similar to `groupBy`, but it also applies a projection function to each element of the collection before grouping. 
+
+The `PairCollOps` extension class provides methods for mapping the first and second components of a collection of pairs, reducing a collection of pairs by key, summing a collection of pairs by key, and grouping a collection of pairs by key. 
+
+The `CollBuilderOps` extension class provides a method for performing an outer join operation between two collections. It also provides a method for constructing a collection of pairs from a map.
+
+These extension methods can be used to simplify the code for working with collections in the Ergo Appkit project. For example, the `groupBy` method can be used to group UTXOs by their ErgoTree, which is useful for building transactions. The `mapReduce` method can be used to compute the total value of a collection of UTXOs. The `outerJoin` method can be used to join two collections of UTXOs based on their ErgoTree and perform some operation on the resulting pairs.
+## Questions: 
+ 1. What is the purpose of the `Extensions` object?
+- The `Extensions` object provides extension methods for the `Coll` type, which is a collection type used in the project. 
+
+2. What does the `sum` method do?
+- The `sum` method calculates the sum of the elements in a collection using the `Numeric` typeclass. If the collection is empty, it returns the zero value of the `Numeric` type.
+
+3. What is the difference between `groupBy` and `groupByProjecting`?
+- `groupBy` partitions a collection into a map of collections according to a discriminator function, where the keys of the map are the results of applying the discriminator function to the elements of the collection. `groupByProjecting` is similar, but it also applies a projection function to each element of the collection before grouping. The resulting map has keys that are the results of applying the discriminator function, and values that are collections of the projected values.

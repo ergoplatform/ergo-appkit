@@ -1,0 +1,35 @@
+[View code on GitHub](https://github.com/ergoplatform/ergo-appkit/lib-api/src/main/java/org/ergoplatform/appkit/BoxOperations.java)
+
+The `BoxOperations` class in the ergo-appkit project provides a collection of utility operations for working with Ergo boxes, tokens, and transactions. It allows users to create, sign, and send transactions, as well as load unspent boxes to cover specified amounts of NanoErgs and tokens.
+
+The class provides several factory methods for creating instances of `BoxOperations` with different configurations, such as a single sender address, a list of sender addresses, or a prover with EIP-3 addresses. It also allows users to set various properties like the amount to spend, tokens to spend, fee amount, attachment, and maximum input boxes to select.
+
+The `send` method sends the specified amount and tokens to a recipient address, while the `loadTop` method loads unspent boxes covering the given amount of NanoErgs, fee, and tokens. The `putToContractTx` and `putToContractTxUnsigned` methods create signed and unsigned transactions, respectively, which send the given amount and tokens to a specified contract.
+
+The `IUnspentBoxesLoader` interface allows users to customize the behavior of unspent box loading. The default implementation, `ExplorerApiUnspentLoader`, loads unspent boxes directly from the Explorer API. Users can extend this class to add custom filtering or loading logic.
+
+Example usage:
+
+```java
+BoxOperations boxOps = BoxOperations.createForSender(senderAddress, blockchainContext)
+    .withAmountToSpend(1000000)
+    .withTokensToSpend(tokenList)
+    .withFeeAmount(150000)
+    .withMessage("Hello, Ergo!");
+
+String txJson = boxOps.send(recipientAddress);
+```
+
+This example creates a `BoxOperations` instance for a sender address, sets the amount to spend, tokens to spend, fee amount, and an optional message. It then sends the transaction to a recipient address and returns the JSON representation of the signed transaction.
+## Questions: 
+ 1. **What is the purpose of the `BoxOperations` class?**
+
+   The `BoxOperations` class is a collection of utility operations implemented in terms of abstract Appkit interfaces. It provides methods for constructing and sending transactions, loading unspent boxes, and working with Ergo tokens.
+
+2. **How does the `IUnspentBoxesLoader` interface work?**
+
+   The `IUnspentBoxesLoader` interface is used to adapt the behavior of unspent boxes loading. It provides methods for preparing the loader with a list of addresses, gross amount, and tokens to spend, preparing for a single address, and loading a page of unspent boxes for a given address.
+
+3. **What is the purpose of the `ExplorerApiUnspentLoader` class?**
+
+   The `ExplorerApiUnspentLoader` class is the default loader for unspent boxes. It loads unspent boxes for an address directly from the Explorer API. It implements the `IUnspentBoxesLoader` interface and provides methods for preparing the loader and loading a page of unspent boxes for a given address.
