@@ -70,6 +70,7 @@ public class ExampleScenarios {
             SecretString seedPhrase) {
         UnsignedTransactionBuilder mockTxB = _ctx.newTxBuilder();
         OutBox out = mockTxB.outBoxBuilder()
+                .value(MinFee)
                 .contract(_ctx.compileContract(constants, ergoScript))
                 .build();
         UnsignedTransactionBuilder spendingTxB = _ctx.newTxBuilder();
@@ -77,6 +78,7 @@ public class ExampleScenarios {
                 .boxesToSpend(Arrays.asList(out.convertToInputWith(mockTxId, outputIndex)))
                 .outputs(
                         spendingTxB.outBoxBuilder()
+                                .value(MinFee)
                                 .contract(_ctx.compileContract(ConstantsBuilder.empty(), "{ false }"))
                                 .registers(ErgoValue.of(10))
                                 .build())
