@@ -174,4 +174,43 @@ public class Eip4TokenBuilderTest {
         Assert.assertNull(collectionToken.getNftCoverImageLink());
     }
 
+    @Test
+    public void nftContentHashWithoutR8Test() {
+        String tokenId = "6d35874826256ba6f41d896663b5ac461a04264142e46192dd3cd42538c5cee4";
+
+        // The artwork collection token built by appkit itself has an NFT asset
+        // type in R7 but no R8 register at all: asking for its content hash
+        // must return null, not throw.
+        Eip4Token collectionToken = Eip4TokenBuilder.buildNftArtworkCollectionToken(
+            tokenId, 1, "Collection Test Token", "Description for Collection Test Token", 0);
+
+        Assert.assertTrue(collectionToken.isNftAssetType());
+        Assert.assertNull(collectionToken.getNftContentHash());
+
+        // An NFT-typed token whose minting box carries no R8 register (minting
+        // boxes are arbitrary on-chain data) must behave the same way.
+        Eip4Token noR8 = new Eip4Token(tokenId, 1, "Test NFT", "Description", 0,
+            ErgoValue.of(Eip4Token.AssetType.NFT_PICTURE.getR7ByteArrayForType()), null, null);
+
+        Assert.assertTrue(noR8.isNftAssetType());
+        Assert.assertNull(noR8.getNftContentHash());
+
+        // An NFT-typed token whose R8 register holds a non-Coll[Byte] value
+        // has no usable content hash either.
+        Eip4Token wrongTypeR8 = new Eip4Token(tokenId, 1, "Test NFT", "Description", 0,
+            ErgoValue.of(Eip4Token.AssetType.NFT_PICTURE.getR7ByteArrayForType()),
+            ErgoValue.of(42L), null);
+
+        Assert.assertTrue(wrongTypeR8.isNftAssetType());
+        Assert.assertNull(wrongTypeR8.getNftContentHash());
+
+        // Pin the valid case: a Coll[Byte] R8 is returned unchanged.
+        byte[] contentHash = new byte[]{1, 2, 3, 4};
+        Eip4Token valid = new Eip4Token(tokenId, 1, "Test NFT", "Description", 0,
+            ErgoValue.of(Eip4Token.AssetType.NFT_PICTURE.getR7ByteArrayForType()),
+            ErgoValue.of(contentHash), null);
+
+        Assert.assertArrayEquals(contentHash, valid.getNftContentHash());
+    }
+
 }

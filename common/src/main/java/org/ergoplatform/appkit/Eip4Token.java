@@ -164,11 +164,18 @@ public class Eip4Token extends ErgoToken {
      */
     @Nullable
     public byte[] getNftContentHash() {
-        if (isNftAssetType()) {
-            return JavaHelpers.collToByteArray((Coll<Object>) r8.getValue());
-        } else {
-            return null;
+        // r8 is optional and can hold any type in an arbitrary minting box (the
+        // artwork collection tokens built by Eip4TokenBuilder have no r8 at all),
+        // so only a Coll[Byte] content can be returned as the hash
+        if (isNftAssetType() && r8 != null && r8.getValue() instanceof Coll) {
+            Coll<?> contentHash = (Coll<?>) r8.getValue();
+
+            if (contentHash.tItem() == ErgoType.byteType().getRType()) {
+                return JavaHelpers.collToByteArray((Coll<Object>) r8.getValue());
+            }
         }
+
+        return null;
     }
 
     /**
