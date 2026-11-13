@@ -1,6 +1,7 @@
 package org.ergoplatform.appkit
 
 import org.ergoplatform.appkit.testing.AppkitTesting
+import org.ergoplatform.sdk.SecretString
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.propspec.AnyPropSpec
 import scorex.crypto.authds.ADDigest
@@ -1151,6 +1152,53 @@ class Sigma60FeaturesSpec extends AnyPropSpec with Matchers
       val tree = contract.getErgoTree
       val version = (tree.header.toByte & 0x07).toByte  // low 3 bits = version
       version shouldBe 3.toByte  // v6 should produce version 3
+    }
+  }
+
+  // =========================================================================
+  // Cold client: reduced transaction with an ErgoTree v3 output
+  // =========================================================================
+
+  property("Cold client parses and signs a reduced transaction with an ErgoTree v3 output") {
+    // hot side (blockVersion=4): spend a P2PK box into a box guarded by a v3 tree, reduce.
+    // The v3 tree is on an OUTPUT on purpose: this test is about parsing the reduced bytes.
+    val reducedTxBytes = createV6MockedErgoClient().execute { ctx: BlockchainContext =>
+      val v3Contract = ctx.compileContract(ConstantsBuilder.empty(),
+        """{
+          |  sigmaProp(1 + 1 == 2)
+          |}""".stripMargin)
+      (v3Contract.getErgoTree.header.toByte & 0x07).toByte shouldBe 3.toByte
+
+      val txB = ctx.newTxBuilder()
+      val input = txB.outBoxBuilder()
+        .value(30000000)
+        .contract(address.toErgoContract)
+        .build()
+        .convertToInputWith(mockTxId, 0)
+      val output = txB.outBoxBuilder()
+        .value(29000000)
+        .contract(v3Contract)
+        .build()
+      val unsigned = txB.boxesToSpend(Arrays.asList(input))
+        .outputs(output)
+        .fee(1000000)
+        .sendChangeTo(address.getErgoAddress)
+        .build()
+      val prover = ctx.newProverBuilder().build() // prover without secrets
+      prover.reduce(unsigned, 0).toBytes
+    }
+
+    // cold side: the default cold client must accept the bytes and sign them
+    val coldClient = new ColdErgoClient(NetworkType.MAINNET,
+      Parameters.ColdClientMaxBlockCost, Parameters.ColdClientBlockVersion)
+    coldClient.execute { ctx: BlockchainContext =>
+      val reduced = ctx.parseReducedTransaction(reducedTxBytes)
+      (reduced.getOutputs.get(0).getErgoTree.header.toByte & 0x07).toByte shouldBe 3.toByte
+      val prover = ctx.newProverBuilder()
+        .withMnemonic(mnemonic, SecretString.empty(), false)
+        .build()
+      val signed = prover.signReduced(reduced, 0)
+      ctx.parseSignedTransaction(signed.toBytes) shouldBe signed
     }
   }
 }
