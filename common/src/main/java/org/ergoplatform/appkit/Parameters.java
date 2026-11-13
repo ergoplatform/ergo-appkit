@@ -34,7 +34,8 @@ public class Parameters {
     public static final int ColdClientMaxBlockCost = 1000000;
 
     /**
-     * Activated version for Cold Client
+     * Block version for Cold Client (4 = the block version of the Sigma 6.0 soft-fork;
+     * the activated script version is one less)
      */
-    public static final byte ColdClientBlockVersion = 3;
+    public static final byte ColdClientBlockVersion = 4;
 }
