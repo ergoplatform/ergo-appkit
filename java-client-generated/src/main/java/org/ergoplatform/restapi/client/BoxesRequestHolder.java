@@ -28,18 +28,21 @@ import java.io.IOException;
 
 public class BoxesRequestHolder {
   @SerializedName("targetAssets")
-  private java.util.List<java.util.List> targetAssets = new java.util.ArrayList<java.util.List>();
+  private java.util.Map<String, Long> targetAssets = new java.util.HashMap<String, Long>();
 
   @SerializedName("targetBalance")
   private Long targetBalance = null;
 
-  public BoxesRequestHolder targetAssets(java.util.List<java.util.List> targetAssets) {
+  public BoxesRequestHolder targetAssets(java.util.Map<String, Long> targetAssets) {
     this.targetAssets = targetAssets;
     return this;
   }
 
-  public BoxesRequestHolder addTargetAssetsItem(java.util.List targetAssetsItem) {
-    this.targetAssets.add(targetAssetsItem);
+  public BoxesRequestHolder putTargetAssetsItem(String key, Long targetAssetsItem) {
+    if (this.targetAssets == null) {
+      this.targetAssets = new java.util.HashMap<String, Long>();
+    }
+    this.targetAssets.put(key, targetAssetsItem);
     return this;
   }
 
@@ -48,11 +51,11 @@ public class BoxesRequestHolder {
    * @return targetAssets
   **/
   @Schema(required = true, description = "Target assets")
-  public java.util.List<java.util.List> getTargetAssets() {
+  public java.util.Map<String, Long> getTargetAssets() {
     return targetAssets;
   }
 
-  public void setTargetAssets(java.util.List<java.util.List> targetAssets) {
+  public void setTargetAssets(java.util.Map<String, Long> targetAssets) {
     this.targetAssets = targetAssets;
   }
 

@@ -17,6 +17,7 @@ import org.ergoplatform.restapi.client.Body3;
 import org.ergoplatform.restapi.client.Body4;
 import org.ergoplatform.restapi.client.Body5;
 import org.ergoplatform.restapi.client.BoxesRequestHolder;
+import org.ergoplatform.restapi.client.CollectedBoxes;
 import org.ergoplatform.restapi.client.ErgoTransaction;
 import org.ergoplatform.restapi.client.GenerateCommitmentsRequest;
 import org.ergoplatform.restapi.client.HintExtractionRequest;
@@ -144,13 +145,13 @@ public interface WalletApi {
    * Get a list of collected boxes.
    * 
    * @param body This API method recieves balance and assets, according to which, it&#x27;s collecting result (required)
-   * @return Call&lt;java.util.List&lt;WalletBox&gt;&gt;
+   * @return Call&lt;CollectedBoxes&gt;
    */
   @Headers({
     "Content-Type:application/json"
   })
-  @GET("wallet/boxes/collect")
-  Call<java.util.List<WalletBox>> walletBoxesCollect(
+  @POST("wallet/boxes/collect")
+  Call<CollectedBoxes> walletBoxesCollect(
                     @retrofit2.http.Body BoxesRequestHolder body    
   );
 
