@@ -88,9 +88,11 @@ object AppkitHelpers {
     *         are replaced and all other remain exactly the same
     */
   def substituteErgoTreeConstants(ergoTreeBytes: Array[Byte], positions: Array[Int], newValues: Array[ErgoValue[_]]): ErgoTree = {
-    val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
-      ergoTreeBytes, positions, newValues.map(v => AppkitIso.isoErgoValueToSValue.to(v).asInstanceOf[Constant[SType]]))
-    ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+    sigma.VersionContext.withVersions(sigma.VersionContext.V6SoftForkVersion, 3.toByte) {
+      val (newBytes, _) = ErgoTreeSerializer.DefaultSerializer.substituteConstants(
+        ergoTreeBytes, positions, newValues.map(v => AppkitIso.isoErgoValueToSValue.to(v).asInstanceOf[Constant[SType]]))
+      ErgoTreeSerializer.DefaultSerializer.deserializeErgoTree(newBytes)
+    }
   }
 
   def toJavaList[T](xs: Seq[T]): util.List[T] = {

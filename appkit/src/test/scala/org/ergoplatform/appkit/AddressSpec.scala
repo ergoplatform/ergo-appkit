@@ -146,4 +146,10 @@ class AddressSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenPropert
     }
   }
 
+  property("isSigmaBoolean returns true for P2PK and false for non-SigmaBoolean P2S/P2SH without throwing") {
+    Address.create(addrStr).isSigmaBoolean shouldBe true
+    Address.create("Ms7smJwLGbUAjuWQ").isSigmaBoolean shouldBe false
+    Address.create("rbcrmKEYduUvADj9Ts3dSVSG27h54pgrq5fPuwB").isSigmaBoolean shouldBe false
+  }
+
 }

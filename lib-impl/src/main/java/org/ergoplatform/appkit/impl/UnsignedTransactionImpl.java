@@ -74,7 +74,7 @@ public class UnsignedTransactionImpl implements UnsignedTransaction {
     public List<InputBox> getInputs() {
         List<InputBox> returnVal = new ArrayList<>(_boxesToSpend.size());
         for (ExtendedInputBox boxToSpend : _boxesToSpend) {
-            returnVal.add(new InputBoxImpl(boxToSpend.box()));
+            returnVal.add(new InputBoxImpl(boxToSpend.box(), boxToSpend.extension()));
         }
         return returnVal;
     }

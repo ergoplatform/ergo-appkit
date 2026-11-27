@@ -65,4 +65,28 @@ class ErgoTreeTemplateSpec extends TestingBase
     ex4.getMessage should include("Invalid parameter position 2")
   }
 
+  property("should apply parameters to trees with SizeFlag (v1 and v3 / Sigma 6.0)") {
+    val prop = BoolToSigmaProp(EQ(IntConstant(10), IntConstant(10)))
+    val expectedProp = BoolToSigmaProp(EQ(IntConstant(1000), IntConstant(10)))
+
+    Seq(1.toByte, 3.toByte).foreach { version =>
+      val header = ErgoTree.headerWithVersion(ErgoTree.ZeroHeader, version)
+      val versionedTree = sigma.VersionContext.withVersions(sigma.VersionContext.V6SoftForkVersion, version) {
+        ErgoTree.fromProposition(header, prop)
+      }
+      ErgoTree.hasSize(versionedTree.header) shouldBe true
+
+      val template = ErgoTreeTemplate.fromErgoTree(versionedTree)
+        .withParameterPositions(Array(0))
+      val newTree = template.applyParameters(ErgoValue.of(1000))
+      val expectedTree = sigma.VersionContext.withVersions(sigma.VersionContext.V6SoftForkVersion, version) {
+        ErgoTree.fromProposition(header, expectedProp)
+      }
+
+      newTree.root.isRight shouldBe true
+      newTree shouldBe expectedTree
+      newTree.bytes shouldEqual expectedTree.bytes
+    }
+  }
+
 }
