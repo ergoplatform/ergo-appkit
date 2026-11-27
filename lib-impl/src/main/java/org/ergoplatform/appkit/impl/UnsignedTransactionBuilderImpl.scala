@@ -131,8 +131,9 @@ class UnsignedTransactionBuilderImpl(val _ctx: BlockchainContextImpl) extends Un
       import scala.collection.mutable.LinkedHashMap
       val lhm = LinkedHashMap.empty[scorex.util.ModifierId, Long]
       requestedToBurn.asScala.foreach { t =>
+        require(t.getValue > 0, s"Token burn amount must be positive, got ${t.getValue} for token ${t.getId}")
         val id = scorex.util.ModifierId @@ t.getId.toString
-        lhm.put(id, t.getValue)
+        lhm.put(id, lhm.get(id).fold(t.getValue)(Math.addExact(_, t.getValue)))
       }
       JavaHelpers.createTokensMap(lhm)
     }

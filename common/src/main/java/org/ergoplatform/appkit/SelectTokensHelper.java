@@ -4,8 +4,10 @@ import org.ergoplatform.sdk.ErgoToken;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Helper class to keep track of amount of tokens to spend and tokens already covered by boxes.
@@ -13,16 +15,33 @@ import java.util.Map;
  */
 public class SelectTokensHelper {
     private final HashMap<String, Long> tokensLeft;
+    private final Set<String> leftoverTokenIds;
     private boolean changeBoxNeeded;
 
     public SelectTokensHelper(Iterable<ErgoToken> tokensToSpent) {
         tokensLeft = new HashMap<>();
+        leftoverTokenIds = new HashSet<>();
 
         for (ErgoToken ergoToken : tokensToSpent) {
-            tokensLeft.put(ergoToken.getId().toString(), ergoToken.getValue());
+            if (ergoToken.getValue() <= 0) {
+                throw new IllegalArgumentException(
+                    "Token amount must be positive, got " + ergoToken.getValue() + " for token " + ergoToken.getId());
+            }
+            String tokenId = ergoToken.getId().toString();
+            Long existing = tokensLeft.get(tokenId);
+            long updated = existing == null
+                ? ergoToken.getValue()
+                : Math.addExact(existing, ergoToken.getValue());
+            tokensLeft.put(tokenId, updated);
         }
 
         changeBoxNeeded = false;
+    }
+
+    public SelectTokensHelper(SelectTokensHelper other) {
+        tokensLeft = new HashMap<>(other.tokensLeft);
+        leftoverTokenIds = new HashSet<>(other.leftoverTokenIds);
+        changeBoxNeeded = other.changeBoxNeeded;
     }
 
     /**
@@ -55,18 +74,37 @@ public class SelectTokensHelper {
     public SelectTokensHelper useTokens(Iterable<ErgoToken> selectedTokens) {
         for (ErgoToken selectedToken : selectedTokens) {
             String tokenId = selectedToken.getId().toString();
+            long used = selectedToken.getValue();
             if (tokensLeft.containsKey(tokenId)) {
-                Long currentValue = tokensLeft.get(tokenId);
-                long newValue = currentValue - selectedToken.getValue();
+                long currentValue = tokensLeft.get(tokenId);
+                long newValue = (used > 0 && currentValue < Long.MIN_VALUE + used)
+                    ? Long.MIN_VALUE
+                    : currentValue - used;
                 tokensLeft.put(tokenId, newValue);
                 if (newValue < 0) {
                     changeBoxNeeded = true;
+                    leftoverTokenIds.add(tokenId);
                 }
-            } else {
+            } else if (used > 0) {
                 changeBoxNeeded = true;
+                leftoverTokenIds.add(tokenId);
             }
         }
         return this;
+    }
+
+    /**
+     * @param maxAssetsPerBox maximum distinct tokens allowed per change box
+     * @return number of change boxes needed to hold all leftover tokens
+     */
+    public int getNeededChangeBoxCount(int maxAssetsPerBox) {
+        if (maxAssetsPerBox <= 0) {
+            throw new IllegalArgumentException("maxAssetsPerBox must be positive, got " + maxAssetsPerBox);
+        }
+        if (leftoverTokenIds.isEmpty()) {
+            return 0;
+        }
+        return (leftoverTokenIds.size() - 1) / maxAssetsPerBox + 1;
     }
 
     /**

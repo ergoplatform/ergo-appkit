@@ -24,6 +24,8 @@ class InputBoxesValidator extends BoxSelector {
                                           externalFilter: T => Boolean,
                                           targetBalance: Long,
                                           targetAssets: TokensMap): Either[BoxSelectionError, BoxSelectionResult[T]] = {
+    require(targetAssets.values.forall(_ > 0L), "Target token amounts must be positive")
+
     //mutable structures to collect results
     val res = mutable.Buffer[T]()
     var currentBalance = 0L
@@ -31,12 +33,12 @@ class InputBoxesValidator extends BoxSelector {
 
     // select all input boxes - we only validate here
     inputBoxes.foreach { box: T =>
-      currentBalance = currentBalance + box.value
+      currentBalance = Math.addExact(currentBalance, box.value)
       AssetUtils.mergeAssetsMut(currentAssets, box.tokens)
       res += box
     }
 
-    if (currentBalance - targetBalance >= 0) {
+    if (currentBalance >= targetBalance) {
       //now check if we found all tokens
       if (targetAssets.forall {
         case (id, targetAmt) => currentAssets.getOrElse(id, 0L) >= targetAmt
@@ -71,11 +73,12 @@ class InputBoxesValidator extends BoxSelector {
                       targetBalance: Long,
                       foundBoxAssets: mutable.Map[ModifierId, Long],
                       targetBoxAssets: TokensMap): Either[BoxSelectionError, Seq[ErgoBoxAssets]] = {
+    require(targetBoxAssets.values.forall(_ > 0L), "Target token amounts must be positive")
     AssetUtils.subtractAssetsMut(foundBoxAssets, targetBoxAssets)
     val changeBoxesAssets: Seq[mutable.Map[ModifierId, Long]] = foundBoxAssets.grouped(MaxAssetsPerBox).toSeq
     val changeBalance = foundBalance - targetBalance
     //at least a minimum amount of ERG should be assigned per a created box
-    if (changeBoxesAssets.size * MinBoxValue > changeBalance) {
+    if (changeBoxesAssets.size.toLong * MinBoxValue > changeBalance) {
       Left(NotEnoughCoinsForChangeBoxesError(
         s"Not enough nanoERGs ($changeBalance nanoERG) to create ${changeBoxesAssets.size} change boxes, \nfor $changeBoxesAssets"
       ))

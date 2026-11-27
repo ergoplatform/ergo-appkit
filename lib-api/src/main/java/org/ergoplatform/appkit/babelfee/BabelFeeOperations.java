@@ -110,6 +110,7 @@ public class BabelFeeOperations {
             new BabelFeeBoxContract(tokenId).getErgoTree(), ctx.getNetworkType());
         Address address = contractForToken.toAddress();
         loader.prepare(ctx, Collections.singletonList(address), feeAmount, new ArrayList<>());
+        loader.prepareForAddress(address);
 
         int page = 0;
         List<InputBox> inputBoxes = null;
@@ -128,9 +129,14 @@ public class BabelFeeOperations {
                 try {
                     BabelFeeBoxState babelFeeBoxState = new BabelFeeBoxState(inputBox);
                     long priceFromBox = babelFeeBoxState.getPricePerToken();
-                    if (babelFeeBoxState.getValueAvailableToBuy() >= feeAmount && priceFromBox > bestPricePerToken) {
-                        returnBox = inputBox;
-                        bestPricePerToken = priceFromBox;
+                    if (priceFromBox > 0 && babelFeeBoxState.getValueAvailableToBuy() >= feeAmount) {
+                        long tokensNeeded = babelFeeBoxState.calcTokensToSellForErgAmount(feeAmount);
+                        if (tokensNeeded > 0
+                            && tokensNeeded <= babelFeeBoxState.getMaxTokenAmountToBuy()
+                            && priceFromBox > bestPricePerToken) {
+                            returnBox = inputBox;
+                            bestPricePerToken = priceFromBox;
+                        }
                     }
                 } catch (Throwable t) {
                     // ignore, check next

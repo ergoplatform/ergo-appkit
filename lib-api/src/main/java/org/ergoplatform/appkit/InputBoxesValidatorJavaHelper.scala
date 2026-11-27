@@ -32,9 +32,13 @@ object InputBoxesValidatorJavaHelper {
                     tokensToSpend: JList[ErgoToken]): Unit = {
     val inputBoxes = unspentBoxes.asScala.toIndexedSeq
       .map(InputBoxWrapper(_))
-    val targetAssets = tokensToSpend.asScala.map { t =>
-      bytesToId(t.getId.getBytes) -> t.getValue
-    }.toMap
+    val targetAssetsMap = mutable.Map[ModifierId, Long]()
+    tokensToSpend.asScala.foreach { t =>
+      require(t.getValue > 0L, s"Target token amount must be positive, got ${t.getValue} for token ${t.getId}")
+      val id = bytesToId(t.getId.getBytes)
+      targetAssetsMap.put(id, targetAssetsMap.get(id).fold(t.getValue)(Math.addExact(_, t.getValue)))
+    }
+    val targetAssets = targetAssetsMap.toMap
     new InputBoxesValidator().select(inputBoxes.toIterator, amountToSpend, targetAssets) match {
       case Left(err: NotEnoughCoinsForChangeBoxesError) =>
         throw new InputBoxesSelectionException.NotEnoughCoinsForChangeException(err.message)
