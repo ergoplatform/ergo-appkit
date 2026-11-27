@@ -10,7 +10,6 @@ import org.ergoplatform.sdk.SecretString;
 import org.ergoplatform.sdk.wallet.secrets.DerivationPath;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedPublicKey;
 import org.ergoplatform.sdk.wallet.secrets.ExtendedSecretKey;
-import scala.MatchError;
 import scala.util.Try;
 import scorex.util.encode.Base58;
 import sigma.ast.ErgoTree;
@@ -142,12 +141,8 @@ public class Address {
      * @return true if this address is a SigmaBoolean
      */
     public boolean isSigmaBoolean() {
-        try {
-            getSigmaBoolean();
-            return true;
-        } catch (MatchError me) {
-            return false;
-        }
+        ErgoTree tree = getErgoAddress().script();
+        return tree.root().isRight() && tree.toSigmaBooleanOpt().isDefined();
     }
 
     /**

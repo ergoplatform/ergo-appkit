@@ -56,6 +56,21 @@ class SecretStorageSpec extends AnyPropSpec with Matchers with ScalaCheckDrivenP
     }
   }
 
+  property("createFromMnemonicIn does not erase mnemonic password or phrase in place") {
+    val phraseChars = "phrase".toCharArray
+    val passChars = "mnemonic pass".toCharArray
+    val freshMnemonic = Mnemonic.create(phraseChars, passChars)
+    val expectedAddr = Address.fromMnemonic(NetworkType.TESTNET, freshMnemonic, false)
+
+    withNewStorageFor(freshMnemonic, encryptionPass) { storage =>
+      storage.unlock(encryptionPass)
+      storage.getAddressFor(NetworkType.TESTNET) shouldBe expectedAddr
+      String.valueOf(phraseChars) shouldBe "phrase"
+      String.valueOf(passChars) shouldBe "mnemonic pass"
+      Address.fromMnemonic(NetworkType.TESTNET, freshMnemonic, false) shouldBe expectedAddr
+    }
+  }
+
   def withNewStorageFor(mnemonic: Mnemonic, encryptionPass: String)(block: SecretStorage => Unit): Unit = {
     withTempDir { dir =>
       val dirPath = dir.getPath

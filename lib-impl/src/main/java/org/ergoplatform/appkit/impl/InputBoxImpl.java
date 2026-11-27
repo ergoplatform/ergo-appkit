@@ -41,10 +41,14 @@ public class InputBoxImpl implements InputBox {
     }
 
     public InputBoxImpl(ErgoBox ergoBox) {
+        this(ergoBox, ContextExtension.empty());
+    }
+
+    public InputBoxImpl(ErgoBox ergoBox, ContextExtension extension) {
         _ergoBox = ergoBox;
         _id = new ErgoId((byte[])ergoBox.id());
         _boxData = ScalaBridge.isoErgoTransactionOutput().from(ergoBox);
-        _extension = ContextExtension.empty();
+        _extension = (extension != null) ? extension : ContextExtension.empty();
     }
 
     @Override

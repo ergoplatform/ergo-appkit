@@ -139,4 +139,25 @@ class ScalaBridgeTest extends AnyPropSpec with Matchers with ScalaCheckDrivenPro
     roundtripOutput.getCreationHeight shouldBe output.getCreationHeight
     roundtripOutput.getIndex shouldBe output.getIndex
   }
+
+  property("isoErgoTransactionUnsignedInput preserves context extension and wire order") {
+    val ids: Seq[Byte] = Seq(65, 3, 0, 64, 1, 2)
+    val extension = new java.util.LinkedHashMap[String, String]()
+    ids.foreach(k => extension.put(k.toString, ErgoValue.of(k.toInt).toHex))
+    val apiInput = new ErgoTransactionUnsignedInput()
+      .boxId(id("01"))
+      .extension(extension)
+
+    val unsigned = ScalaBridge.isoErgoTransactionUnsignedInput.to(apiInput)
+    unsigned.extension.values.toSeq shouldBe ids.map(k => k -> IntConstant(k.toInt))
+
+    val roundtrip = ScalaBridge.isoErgoTransactionUnsignedInput.from(unsigned)
+    roundtrip.getBoxId shouldBe apiInput.getBoxId
+    roundtrip.getExtension.keySet().asScala.toSeq shouldBe ids.map(_.toString)
+    roundtrip.getExtension.values().asScala.toSeq shouldBe ids.map(k => ErgoValue.of(k.toInt).toHex)
+
+    // Null extension on inbound DTO maps cleanly to empty ContextExtension
+    val nullExtInput = new ErgoTransactionUnsignedInput().boxId(id("02"))
+    ScalaBridge.isoErgoTransactionUnsignedInput.to(nullExtInput).extension shouldBe ContextExtension.empty
+  }
 }

@@ -93,13 +93,36 @@ object ScalaBridge {
   }
 
   implicit val isoErgoTransactionUnsignedInput: Iso[ErgoTransactionUnsignedInput, UnsignedInput] = new Iso[ErgoTransactionUnsignedInput, UnsignedInput] {
-    override def to(ergoTransactionInput: ErgoTransactionUnsignedInput) =
+    override def to(ergoTransactionInput: ErgoTransactionUnsignedInput): UnsignedInput = {
+      val extMap = ergoTransactionInput.getExtension
+      val ext = if (extMap == null || extMap.isEmpty) {
+        ContextExtension.empty
+      } else {
+        // ListMap: keep the wire order at any size; it is part of messageToSign (#256)
+        val vars = extMap.asScala.iterator.map { case (k, v) =>
+          val id = JByte.parseByte(k, 10)
+          val value = ValueSerializer.deserialize(ErgoAlgos.decodeUnsafe(v))
+          (id, value.asInstanceOf[EvaluatedValue[_ <: SType]])
+        }
+        ContextExtension(ListMap(vars.toSeq: _*))
+      }
       new UnsignedInput(
-        ADKey @@ ErgoAlgos.decodeUnsafe(ergoTransactionInput.getBoxId))
+        ADKey @@ ErgoAlgos.decodeUnsafe(ergoTransactionInput.getBoxId),
+        ext)
+    }
 
-    override def from(input: UnsignedInput): ErgoTransactionUnsignedInput =
+    override def from(input: UnsignedInput): ErgoTransactionUnsignedInput = {
+      val vars = if (input.extension == null) Map.empty[Byte, EvaluatedValue[_ <: SType]] else input.extension.values
+      val extension = new util.LinkedHashMap[String, String](vars.size)
+      vars.foreach { case (varId, value) =>
+        val name = varId.toString
+        val v = ErgoAlgos.encode(ValueSerializer.serialize(value))
+        extension.put(name, v)
+      }
       new ErgoTransactionUnsignedInput()
           .boxId(ErgoAlgos.encode(input.boxId))
+          .extension(extension)
+    }
   }
 
   implicit val isoAssetToErgoToken: Iso[Asset, ErgoToken] = new Iso[Asset, ErgoToken] {

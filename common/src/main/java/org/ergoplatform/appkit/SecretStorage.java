@@ -74,15 +74,30 @@ public class SecretStorage {
             String secretDir, Mnemonic mnemonic, SecretString encryptionPassword, Boolean usePre1627KeyDerivation) {
         SecretStorageSettings settings = new SecretStorageSettings(secretDir, DEFAULT_SETTINGS);
 
+        SecretString phrase = mnemonic.getPhrase();
+        char[] phraseData = (phrase != null) ? phrase.getData() : null;
+        SecretString phraseCopy = (phraseData != null) ? SecretString.create(phraseData.clone()) : null;
         SecretString password = mnemonic.getPassword();
+        SecretString passwordCopy = (password != null && !password.isEmpty())
+                ? SecretString.create(password.getData().clone())
+                : null;
 
-        JsonSecretStorage jsonStorage = JsonSecretStorage
-            .restore(mnemonic.getPhrase(),
-                (password != null && !password.isEmpty()) ? scala.Option.apply(password) : scala.Option.<org.ergoplatform.sdk.SecretString>empty(),
-                encryptionPassword,
-                settings, usePre1627KeyDerivation);
+        try {
+            JsonSecretStorage jsonStorage = JsonSecretStorage
+                .restore(phraseCopy,
+                    (passwordCopy != null) ? scala.Option.apply(passwordCopy) : scala.Option.<org.ergoplatform.sdk.SecretString>empty(),
+                    encryptionPassword,
+                    settings, usePre1627KeyDerivation);
 
-        return new SecretStorage(jsonStorage);
+            return new SecretStorage(jsonStorage);
+        } finally {
+            if (phraseCopy != null) {
+                phraseCopy.erase();
+            }
+            if (passwordCopy != null) {
+                passwordCopy.erase();
+            }
+        }
     }
 
     public static SecretStorage createFromMnemonicIn(
