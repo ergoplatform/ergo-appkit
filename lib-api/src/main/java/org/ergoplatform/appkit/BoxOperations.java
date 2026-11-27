@@ -29,6 +29,7 @@ public class BoxOperations {
     private int maxInputBoxesToSelect = 0;
 
     private static final long CHANGE_BOX_NANOERG = MinFee;
+    private static final int MAX_ASSETS_PER_BOX = org.ergoplatform.sdk.wallet.Constants.MaxAssetsPerBox();
 
     BoxOperations(BlockchainContext ctx, List<Address> senders, @Nullable ErgoProver senderProver) {
         this.ctx = ctx;
@@ -252,7 +253,7 @@ public class BoxOperations {
         List<InputBox> unspentBoxes = new ArrayList<>();
         long grossAmount = amountToSpend + feeAmount - amountCovered;
         long remainingAmount = grossAmount;
-        boolean changeBoxConsidered = false;
+        int changeBoxesAccountedFor = 0;
         SelectTokensHelper tokensHelper = new SelectTokensHelper(tokensToSpend);
         List<ErgoToken> remainingTokens = tokensToSpend;
 
@@ -261,21 +262,22 @@ public class BoxOperations {
         for (Address sender : senders) {
             inputBoxesLoader.prepareForAddress(sender);
             CoveringBoxes addressUnspentBoxes = getCoveringBoxesFor(remainingAmount, remainingTokens,
-                changeBoxConsidered,
+                new SelectTokensHelper(tokensHelper),
+                changeBoxesAccountedFor,
                 page -> inputBoxesLoader.loadBoxesPage(ctx, sender, page),
                 (maxInputBoxesToSelect <= 0) ? 0 : Math.max(1, maxInputBoxesToSelect - unspentBoxes.size())
             );
-
-            // when a change box needed it needs some extra nanoergs to be sent
-            if (!changeBoxConsidered && addressUnspentBoxes.isChangeBoxNeeded()) {
-                changeBoxConsidered = true;
-                remainingAmount = remainingAmount + CHANGE_BOX_NANOERG;
-            }
 
             for (InputBox b : addressUnspentBoxes.getBoxes()) {
                 unspentBoxes.add(b);
                 tokensHelper.useTokens(b.getTokens());
                 remainingAmount -= b.getValue();
+                int neededChangeBoxes = tokensHelper.getNeededChangeBoxCount(MAX_ASSETS_PER_BOX);
+                if (neededChangeBoxes > changeBoxesAccountedFor) {
+                    long extraChangeErg = Math.multiplyExact((long) (neededChangeBoxes - changeBoxesAccountedFor), CHANGE_BOX_NANOERG);
+                    changeBoxesAccountedFor = neededChangeBoxes;
+                    remainingAmount = Math.addExact(remainingAmount, extraChangeErg);
+                }
                 if (remainingAmount <= 0 && tokensHelper.areTokensCovered()) {
                     // collected enough boxes to cover the amount
                     break;
@@ -422,19 +424,21 @@ public class BoxOperations {
                                                     List<ErgoToken> tokensToSpend,
                                                     boolean changeBoxConsidered,
                                                     Function<Integer, List<InputBox>> inputBoxesLoader) {
-        return getCoveringBoxesFor(amountToSpend, tokensToSpend, changeBoxConsidered, inputBoxesLoader, 0);
+        return getCoveringBoxesFor(amountToSpend, tokensToSpend, new SelectTokensHelper(tokensToSpend),
+            changeBoxConsidered ? 1 : 0, inputBoxesLoader, 0);
     }
 
     private static CoveringBoxes getCoveringBoxesFor(long amountToSpend,
                                                      List<ErgoToken> tokensToSpend,
-                                                     boolean changeBoxConsidered,
+                                                     SelectTokensHelper tokensRemaining,
+                                                     int changeBoxesAccountedFor,
                                                      Function<Integer, List<InputBox>> inputBoxesLoader,
                                                      int maxBoxesToSelect) {
-        SelectTokensHelper tokensRemaining = new SelectTokensHelper(tokensToSpend);
         InternalUtil.checkArgument(amountToSpend > 0 ||
             !tokensRemaining.areTokensCovered(), "amountToSpend or tokens to spend should be > 0");
         ArrayList<InputBox> selectedCoveringBoxes = new ArrayList<>();
         long remainingAmountToCover = amountToSpend;
+        boolean changeBoxConsidered = changeBoxesAccountedFor > 0;
         int page = 0;
         while (true) {
             List<InputBox> chunk = inputBoxesLoader.apply(page);
@@ -448,12 +452,14 @@ public class BoxOperations {
                         remainingAmountToCover -= boxCandidate.getValue();
                         tokensRemaining.useTokens(boxCandidate.getTokens());
 
-                        // if we haven't accounted for a change box so far, but now a change box is
-                        // needed, we have to search for a little more amount to cover the change
-                        if (!changeBoxConsidered && tokensRemaining.isChangeBoxNeeded()) {
+                        // account for every change box required to hold leftover tokens
+                        int neededChangeBoxes = tokensRemaining.getNeededChangeBoxCount(MAX_ASSETS_PER_BOX);
+                        if (neededChangeBoxes > changeBoxesAccountedFor) {
+                            long extraChangeErg = Math.multiplyExact((long) (neededChangeBoxes - changeBoxesAccountedFor), CHANGE_BOX_NANOERG);
+                            changeBoxesAccountedFor = neededChangeBoxes;
                             changeBoxConsidered = true;
-                            remainingAmountToCover = remainingAmountToCover + CHANGE_BOX_NANOERG;
-                            amountToSpend = amountToSpend + CHANGE_BOX_NANOERG;
+                            remainingAmountToCover = Math.addExact(remainingAmountToCover, extraChangeErg);
+                            amountToSpend = Math.addExact(amountToSpend, extraChangeErg);
                         }
                     }
                     if (remainingAmountToCover <= 0 && tokensRemaining.areTokensCovered())

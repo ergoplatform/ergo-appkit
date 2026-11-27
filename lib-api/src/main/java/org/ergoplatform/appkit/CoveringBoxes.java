@@ -31,7 +31,7 @@ public class CoveringBoxes {
     public long getCoveredAmount() {
         long value = 0;
         for (InputBox box : _boxes) {
-            value = value + box.getValue();
+            value = Math.addExact(value, box.getValue());
         }
         return value;
     }
@@ -48,7 +48,7 @@ public class CoveringBoxes {
                     coveredTokens.put(tokenId, token);
                 } else {
                     ErgoToken tokenInMap = coveredTokens.get(tokenId);
-                    coveredTokens.put(tokenId, new ErgoToken(tokenId, token.getValue() + tokenInMap.getValue()));
+                    coveredTokens.put(tokenId, new ErgoToken(tokenId, Math.addExact(token.getValue(), tokenInMap.getValue())));
                 }
             }
 

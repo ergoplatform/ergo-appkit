@@ -114,8 +114,12 @@ public class BabelFeeBoxState {
      * @return the amount of tokens to sell to receive at least this amount of nanoErgs
      */
     public long calcTokensToSellForErgAmount(long nanoErgs) {
+        if (nanoErgs <= 0) {
+            return 0;
+        }
         long floorAmount = nanoErgs / pricePerToken;
-        return (floorAmount * pricePerToken >= nanoErgs) ? floorAmount : floorAmount + 1;
+        long remainder = nanoErgs % pricePerToken;
+        return (remainder == 0) ? floorAmount : Math.addExact(floorAmount, 1L);
     }
 
     /**
@@ -132,8 +136,8 @@ public class BabelFeeBoxState {
             throw new IllegalArgumentException("tokenAmountChange must be less or equal maxAmountToBuy");
 
         return new BabelFeeBoxState(pricePerToken, tokenId, boxCreator,
-            value - tokenAmountChange * pricePerToken,
-            tokenAmountChange + tokenAmount);
+            Math.subtractExact(value, Math.multiplyExact(tokenAmountChange, pricePerToken)),
+            Math.addExact(tokenAmountChange, tokenAmount));
     }
 
     /**
